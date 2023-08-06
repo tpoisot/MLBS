@@ -1,10 +1,2 @@
-pages:
-  stage: deploy
-  environment: production
-  script:
-    - touch _book
-  artifacts:
-    paths:
-      - _book
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+# The Docker image that will be used to build your app
+image: node:lts
