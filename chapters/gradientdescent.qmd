@@ -1,0 +1,3 @@
+# Minimizing error: the gradient descent algorithm
+
+https://www.kaggle.com/datasets/abrambeyer/openintro-possum

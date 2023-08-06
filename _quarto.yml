@@ -1,0 +1,27 @@
+project:
+  type: book
+
+book:
+  title: "Fundamentals of Biodiversity Data Science"
+  author: "Timothée Poisot"
+  date: "8/5/2023"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - chapters/kmeans.qmd
+    - chapters/gradientdescent.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrbook
+    toc: true
+    toc-depth: 2
+
+
+
