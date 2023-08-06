@@ -1,5 +1,6 @@
 project:
   type: book
+  output-dir: public
 
 book:
   title: "Fundamentals of Biodiversity Data Science"
