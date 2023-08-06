@@ -4,7 +4,16 @@ project:
 
 book:
   title: "Fundamentals of Biodiversity Data Science"
-  author: "Timothée Poisot"
+  author:
+    - name: "Timothée Poisot"
+      orcid: 0000-0002-0735-5184
+      email: timothee.poisot@umontreal.ca
+      affiliations:
+        - name: Université de Montréal
+          department: Sciences Biologiques
+          city: Montréal
+          region: QC
+          country: Canada
   date: "8/5/2023"
   chapters:
     - index.qmd
