@@ -1,17 +1,17 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Fundamentals of Biodiversity Data Science",
-    "section": "",
-    "text": "Preface\nThis is a Quarto book.\nTo learn more about Quarto books visit https://quarto.org/docs/books."
-  },
-  {
     "objectID": "intro.html",
     "href": "intro.html",
     "title": "1  Introduction",
     "section": "",
     "text": "Data science is now an established methodology to study biodiversity, and this is a problem. Well, this is an opportunity when it comes to advancing our knowledge of biodiversity (Tuia et al. 2022), but this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field. And as luck would have it, there are easier fields to master than data science.\nBut what do we mean by data science? Most science, after all, relies on data in some capacity. What falls under the umbrella of data science is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered beyond recognition.\nBefore we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret. Data science is a little bit of a misnomer. Science is (or so we like to say) neutral, systematic, and rigorous. Science is baking. Data science? It’s cooking. There might be a recipe, but it’s a recommendation at best,and after all you know better than to follow a list of instructions, don’t you? Data science is craft. It’s art. Data vibes.\n\n\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe, Silvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022. “Perspectives in Machine Learning for Wildlife Conservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Fundamentals of Biodiversity Data Science",
+    "section": "",
+    "text": "Preface\nThis is a Quarto book.\nTo learn more about Quarto books visit https://quarto.org/docs/books."
   },
   {
     "objectID": "chapters/kmeans.html#a-digression-which-birds-are-red",
@@ -61,19 +61,5 @@
     "title": "3  Minimizing error: the gradient descent algorithm",
     "section": "",
     "text": "https://www.kaggle.com/datasets/abrambeyer/openintro-possum"
-  },
-  {
-    "objectID": "summary.html",
-    "href": "summary.html",
-    "title": "4  Summary",
-    "section": "",
-    "text": "In summary, this book has no content whatsoever."
-  },
-  {
-    "objectID": "references.html",
-    "href": "references.html",
-    "title": "References",
-    "section": "",
-    "text": "Cooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri,\nChristopher J. A. Moody, Michael D. Jardine, András Liker, Tamás\nSzékely, and Gavin H. Thomas. 2022. “Latitudinal Gradients in\nAvian Colourfulness.” Nature Ecology & Evolution 6\n(5): 622–29. https://doi.org/10.1038/s41559-022-01714-1.\n\n\nCooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela\nMiguez, Louise Tomsett, and Kristofer M. Helgen. 2019. “Sex Biases\nin Bird and Mammal Natural History Collections.” Proceedings\nof the Royal Society B: Biological Sciences 286 (1913): 20192025.\nhttps://doi.org/10.1098/rspb.2019.2025.\n\n\nLuccioni, Alexandra Sasha, and David Rolnick. 2023. “Bugs in the\nData: How ImageNet Misrepresents Biodiversity.” Proceedings\nof the AAAI Conference on Artificial Intelligence 37 (12):\n14382–90. https://doi.org/10.1609/aaai.v37i12.26682.\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe,\nSilvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022.\n“Perspectives in Machine Learning for Wildlife\nConservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y."
   }
 ]
