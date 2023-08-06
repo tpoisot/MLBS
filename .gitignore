@@ -1,2 +1,4 @@
 /.quarto/
 Manifest.toml
+
+data/kmeans/*.TIF

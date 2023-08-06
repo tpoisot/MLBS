@@ -1,7 +1,9 @@
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
 Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+SpeciesDistributionToolkit = "72b53823-5c0b-4575-ad0e-8e97227ad13b"
