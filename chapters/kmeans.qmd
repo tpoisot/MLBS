@@ -4,7 +4,7 @@ As we mentioned in the introduction, a core idea of data science is that things 
 
 ## A digression: which birds are red?
 
-Before diving in, it is a good idea to ponder a simple case. We can divide everything in just two categories: things with red feathers, and things without red feathers. An example of a thing with red feathers is the Northern Cardinal (*Cardinalis cardinalis*), and an example of things without red feathers are the iMac G3, Haydn's string quartets, and of course the Northern Cardinal (*Cardinalis cardinalis*).
+Before diving in, it is a good idea to ponder a simple case. We can divide everything in just two categories: things with red feathers, and things without red feathers. An example of a thing with red feathers is the Northern Cardinal (*Cardinalis cardinalis*), and things without red feathers are the iMac G3, Haydn's string quartets, and of course the Northern Cardinal (*Cardinalis cardinalis*).
 
 See, biodiversity data science is complicated, because it tends to rely on the assumption that we can categorize the natural world, and the natural world (mostly in response to natural selection) comes up with ways to be, well, diverse. In the Northern Cardinal, this is shown in males having red feathers, and females having mostly brown feathers. Before moving forward, we need to consider ways to solve this issue, as this issue will come up *all the time.*
 
@@ -34,15 +34,25 @@ In fact, we are going to use an image with a lot more dimensions: the data in th
 | 6           | Short wavelength IR (SWIR 1) |
 | 7           | SWIR 2                       |
 
-From these channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).
+From these channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels) -- this information is presented in @fig-visual . Or is it? If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a *lot* of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel.
 
 {{< embed ../notebooks/kmeans.ipynb#fig-visual >}}
 
-The data extracted from the Landsat 8 files are *raw data*. Depending on the question we have in mind, they may not be the *right* data, in that they may not hold information that is relevant to our question.
+But just like we can get more information that Landsat 9, so to can Landsat 9 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape; in @fig-color-veg, we show such a fake color composite, that is particularly efficient at drawing our attention to the location of water in this area.
 
-We can decompose this image to have a look at the relationship between the red and green channels, for example:
+{{< embed ../notebooks/kmeans.ipynb#fig-color-veg >}}
+
+Both @fig-color-veg and @fig-visual represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: what we measure defines what we can see. In order to tell something meaningful about this place, we need to look at it in the "right" way.
+
+So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the *right* data. In fact, they may not hold information that is relevant to our question *at all*; or worse, they can hold more noise than signal. Looking at @fig-visual, we might wonder, "where are the fields?". And based on our knowledge of what plants do, we can start thinking about this question in a different way. Specifically, "is there a series of features of fields that are not shared by non-fields?". But this a complicated question to answer, and so we can simplify this by asking, "how can I combine data from the image to know if there is a plant?".
+
+One way to do this is to calculate the normalized difference vegetation index, or NDVI [@kennedy2020]. NDVI is derived from the band data (we will see how in a minute), and is an adequate heuristic to make a difference between vegetation, barren soil, and water. Because we are specifically thinking about fields, we can also consider the NDWI (water) and NDMI (moisture) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI).
+
+Because there are a few guidelines (educated guesses, in truth, and the jury is still out on the "educated" part) about the values, we can look at the relationship between the NDVI and NDMI data [@fig-hexbin]. For example, NDMI values around -0.1 (note how there is a strong cluster of points here) are [low-canopy cover with low water stress](https://eos.com/make-an-analysis/ndmi/); NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops.
 
 {{< embed ../notebooks/kmeans.ipynb#fig-hexbin >}}
+
+By picking these three values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm see, through the lens of what we know is important about the system.
 
 ## The theory behind *k*-means clustering
 
@@ -55,6 +65,8 @@ In order to understand the theory underlying *k*-means, we will work backwards f
 ## Application: optimal clustering of the satellite image data
 
 {{< embed ../notebooks/kmeans.ipynb#fig-classified-landscape >}}
+
+{{< embed ../notebooks/kmeans.ipynb#fig-barplot-classes >}}
 
 ## Alternatives and improvements
 
