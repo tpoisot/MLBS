@@ -4,14 +4,35 @@
     "href": "index.html",
     "title": "Fundamentals of Biodiversity Data Science",
     "section": "",
-    "text": "Preface\nThis is a Quarto book.\nTo learn more about Quarto books visit https://quarto.org/docs/books."
+    "text": "Preface\nData science is now an established methodology to study biodiversity, and this is a problem.\nThis may be an opportunity when it comes to advancing our knowledge of biodiversity, and in particular when it comes to translating this knowledge into action (Tuia et al. 2022); but make no mistake, this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field. And as luck would have it, there are easier fields to master than data science. The point of this book, therefore, is to provide an introduction to fundamental concepts in data science, from the perspective of a biodiversity scientist, by using examples corresponding to real-world use-cases of these techniques.\nBut what do we mean by data science? Most science, after all, relies on data in some capacity. What falls under the umbrella of data science is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered beyond recognition. This entire process is driven by (or subject to, even) domain knowledge. There is no such thing as data science, at least not in a vacuum: there is data science as a methodology applied to a specific domain.\nBefore we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret: data science is a little bit of a misnomer.\nTo understand why, it helps to think of science (the application of the scientific method, that is) as cooking. There are general techniques one must master, and specific steps and cultural specifics, and there is a final product. When writing this preface, I turned to my shelf of cookbooks, and picked my two favorites: Robuchon’s The Complete Robuchon (a no-nonsense list of hundreds of recipes with no place for improvisation), and Bianco’s Pizza, Pasta, and Other Food I Like (a short volume with very few pizza and pasta, and wonderful discussions about the importance of humility, creativity, and generosity). Data science, if it were cooking, would feel a lot like the second. Deviation from the rules (they are mostly recommendations, in fact) is often justifiable if you feel like it. But this improvisation requires good skills, a clear mental map of the problem, and a library of patterns that you can draw from.\nThis book will not get you here. But it will speed up the process, by framing the practice of data science as a natural way to conduct research on biodiversity.\n\n\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe, Silvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022. “Perspectives in Machine Learning for Wildlife Conservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y."
   },
   {
-    "objectID": "intro.html",
-    "href": "intro.html",
+    "objectID": "intro.html#core-concepts-in-data-science",
+    "href": "intro.html#core-concepts-in-data-science",
     "title": "1  Introduction",
-    "section": "",
-    "text": "Data science is now an established methodology to study biodiversity, and this is a problem. Well, this is an opportunity when it comes to advancing our knowledge of biodiversity (Tuia et al. 2022), but this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field. And as luck would have it, there are easier fields to master than data science.\nBut what do we mean by data science? Most science, after all, relies on data in some capacity. What falls under the umbrella of data science is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered beyond recognition.\nBefore we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret. Data science is a little bit of a misnomer. Science is (or so we like to say) neutral, systematic, and rigorous. Science is baking. Data science? It’s cooking. There might be a recipe, but it’s a recommendation at best,and after all you know better than to follow a list of instructions, don’t you? Data science is craft. It’s art. Data vibes.\n\n\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe, Silvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022. “Perspectives in Machine Learning for Wildlife Conservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y."
+    "section": "1.1 Core concepts in data science",
+    "text": "1.1 Core concepts in data science\n\n1.1.1 EDA\n\n\n1.1.2 Clustering and regression\n\n\n1.1.3 Supervised and unsupervised\n\n\n1.1.4 Training, testing, and validation\n\n\n1.1.5 Transformations and feature engineering"
+  },
+  {
+    "objectID": "intro.html#an-overview-of-the-content",
+    "href": "intro.html#an-overview-of-the-content",
+    "title": "1  Introduction",
+    "section": "1.2 An overview of the content",
+    "text": "1.2 An overview of the content"
+  },
+  {
+    "objectID": "intro.html#how-to-read-this-book",
+    "href": "intro.html#how-to-read-this-book",
+    "title": "1  Introduction",
+    "section": "1.3 How to read this book",
+    "text": "1.3 How to read this book"
+  },
+  {
+    "objectID": "intro.html#some-rules-about-this-book",
+    "href": "intro.html#some-rules-about-this-book",
+    "title": "1  Introduction",
+    "section": "1.4 Some rules about this book",
+    "text": "1.4 Some rules about this book\n\n1.4.1 No code\n\n\n1.4.2 No simulated data"
   },
   {
     "objectID": "chapters/kmeans.html#a-digression-which-birds-are-red",
@@ -74,6 +95,6 @@
     "href": "references.html",
     "title": "References",
     "section": "",
-    "text": "Cooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri,\nChristopher J. A. Moody, Michael D. Jardine, András Liker, Tamás\nSzékely, and Gavin H. Thomas. 2022. “Latitudinal Gradients in\nAvian Colourfulness.” Nature Ecology & Evolution 6\n(5): 622–29. https://doi.org/10.1038/s41559-022-01714-1.\n\n\nCooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela\nMiguez, Louise Tomsett, and Kristofer M. Helgen. 2019. “Sex Biases\nin Bird and Mammal Natural History Collections.” Proceedings\nof the Royal Society B: Biological Sciences 286 (1913): 20192025.\nhttps://doi.org/10.1098/rspb.2019.2025.\n\n\nLuccioni, Alexandra Sasha, and David Rolnick. 2023. “Bugs in the\nData: How ImageNet Misrepresents Biodiversity.” Proceedings\nof the AAAI Conference on Artificial Intelligence 37 (12):\n14382–90. https://doi.org/10.1609/aaai.v37i12.26682.\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe,\nSilvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022.\n“Perspectives in Machine Learning for Wildlife\nConservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y.\n\n\nVermote, Eric, Chris Justice, Martin Claverie, and Belen Franch. 2016.\n“Preliminary Analysis of the Performance of the Landsat 8/OLI Land\nSurface Reflectance Product.” Remote Sensing of\nEnvironment 185 (November): 46–56. https://doi.org/10.1016/j.rse.2016.04.008."
+    "text": "Cooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri,\nChristopher J. A. Moody, Michael D. Jardine, András Liker, Tamás\nSzékely, and Gavin H. Thomas. 2022. “Latitudinal Gradients in\nAvian Colourfulness.” Nature Ecology & Evolution 6\n(5): 622–29. https://doi.org/10.1038/s41559-022-01714-1.\n\n\nCooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela\nMiguez, Louise Tomsett, and Kristofer M. Helgen. 2019. “Sex Biases\nin Bird and Mammal Natural History Collections.” Proceedings\nof the Royal Society B: Biological Sciences 286 (1913): 20192025.\nhttps://doi.org/10.1098/rspb.2019.2025.\n\n\nKennedy, Stephanie, and Mark Burbach. 2020. “Great Plains Ranchers\nManaging for Vegetation Heterogeneity: A Multiple Case Study.”\nGreat Plains Research 30 (2): 137–48. https://doi.org/10.1353/gpr.2020.0016.\n\n\nLuccioni, Alexandra Sasha, and David Rolnick. 2023. “Bugs in the\nData: How ImageNet Misrepresents Biodiversity.” Proceedings\nof the AAAI Conference on Artificial Intelligence 37 (12):\n14382–90. https://doi.org/10.1609/aaai.v37i12.26682.\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe,\nSilvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022.\n“Perspectives in Machine Learning for Wildlife\nConservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y.\n\n\nVermote, Eric, Chris Justice, Martin Claverie, and Belen Franch. 2016.\n“Preliminary Analysis of the Performance of the Landsat 8/OLI Land\nSurface Reflectance Product.” Remote Sensing of\nEnvironment 185 (November): 46–56. https://doi.org/10.1016/j.rse.2016.04.008."
   }
 ]

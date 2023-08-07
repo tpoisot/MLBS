@@ -20,26 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -165,7 +146,27 @@ div.csl-indent {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#core-concepts-in-data-science" id="toc-core-concepts-in-data-science" class="nav-link active" data-scroll-target="#core-concepts-in-data-science"><span class="header-section-number">1.1</span> Core concepts in data science</a>
+  <ul class="collapse">
+  <li><a href="#eda" id="toc-eda" class="nav-link" data-scroll-target="#eda"><span class="header-section-number">1.1.1</span> EDA</a></li>
+  <li><a href="#clustering-and-regression" id="toc-clustering-and-regression" class="nav-link" data-scroll-target="#clustering-and-regression"><span class="header-section-number">1.1.2</span> Clustering and regression</a></li>
+  <li><a href="#supervised-and-unsupervised" id="toc-supervised-and-unsupervised" class="nav-link" data-scroll-target="#supervised-and-unsupervised"><span class="header-section-number">1.1.3</span> Supervised and unsupervised</a></li>
+  <li><a href="#training-testing-and-validation" id="toc-training-testing-and-validation" class="nav-link" data-scroll-target="#training-testing-and-validation"><span class="header-section-number">1.1.4</span> Training, testing, and validation</a></li>
+  <li><a href="#transformations-and-feature-engineering" id="toc-transformations-and-feature-engineering" class="nav-link" data-scroll-target="#transformations-and-feature-engineering"><span class="header-section-number">1.1.5</span> Transformations and feature engineering</a></li>
+  </ul></li>
+  <li><a href="#an-overview-of-the-content" id="toc-an-overview-of-the-content" class="nav-link" data-scroll-target="#an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</a></li>
+  <li><a href="#how-to-read-this-book" id="toc-how-to-read-this-book" class="nav-link" data-scroll-target="#how-to-read-this-book"><span class="header-section-number">1.3</span> How to read this book</a></li>
+  <li><a href="#some-rules-about-this-book" id="toc-some-rules-about-this-book" class="nav-link" data-scroll-target="#some-rules-about-this-book"><span class="header-section-number">1.4</span> Some rules about this book</a>
+  <ul class="collapse">
+  <li><a href="#no-code" id="toc-no-code" class="nav-link" data-scroll-target="#no-code"><span class="header-section-number">1.4.1</span> No code</a></li>
+  <li><a href="#no-simulated-data" id="toc-no-simulated-data" class="nav-link" data-scroll-target="#no-simulated-data"><span class="header-section-number">1.4.2</span> No simulated data</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -188,16 +189,42 @@ div.csl-indent {
 
 </header>
 
-<p>Data science is now an established methodology to study biodiversity, and this is a problem. Well, this is an opportunity when it comes to advancing our knowledge of biodiversity <span class="citation" data-cites="tuia2022">(<a href="references.html#ref-tuia2022" role="doc-biblioref">Tuia et al. 2022</a>)</span>, but this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field. And as luck would have it, there are easier fields to master than data science.</p>
-<p>But what do we mean by <em>data science</em>? Most science, after all, relies on data in some capacity. What falls under the umbrella of data science is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered beyond recognition.</p>
-<p>Before we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret. Data <em>science</em> is a little bit of a misnomer. Science is (or so we like to say) neutral, systematic, and rigorous. Science is baking. Data science? It’s cooking. There might be a recipe, but it’s a recommendation at best,and after all you know better than to follow a list of instructions, don’t you? Data science is craft. It’s art. Data vibes.</p>
+<p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran with the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning <strong>REFS</strong>; there are many good papers giving overviews of some applications of data science to biological problems <strong>REFS</strong>; and there are, of course, thousands of tutorials about how to write code. But one thing that students commonly called for was an attempt to tie concepts together. This is this attempt.</p>
+<section id="core-concepts-in-data-science" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="core-concepts-in-data-science"><span class="header-section-number">1.1</span> Core concepts in data science</h2>
+<section id="eda" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="eda"><span class="header-section-number">1.1.1</span> EDA</h3>
+</section>
+<section id="clustering-and-regression" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="clustering-and-regression"><span class="header-section-number">1.1.2</span> Clustering and regression</h3>
+</section>
+<section id="supervised-and-unsupervised" class="level3" data-number="1.1.3">
+<h3 data-number="1.1.3" class="anchored" data-anchor-id="supervised-and-unsupervised"><span class="header-section-number">1.1.3</span> Supervised and unsupervised</h3>
+</section>
+<section id="training-testing-and-validation" class="level3" data-number="1.1.4">
+<h3 data-number="1.1.4" class="anchored" data-anchor-id="training-testing-and-validation"><span class="header-section-number">1.1.4</span> Training, testing, and validation</h3>
+</section>
+<section id="transformations-and-feature-engineering" class="level3" data-number="1.1.5">
+<h3 data-number="1.1.5" class="anchored" data-anchor-id="transformations-and-feature-engineering"><span class="header-section-number">1.1.5</span> Transformations and feature engineering</h3>
+</section>
+</section>
+<section id="an-overview-of-the-content" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</h2>
+</section>
+<section id="how-to-read-this-book" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="how-to-read-this-book"><span class="header-section-number">1.3</span> How to read this book</h2>
+</section>
+<section id="some-rules-about-this-book" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="some-rules-about-this-book"><span class="header-section-number">1.4</span> Some rules about this book</h2>
+<section id="no-code" class="level3" data-number="1.4.1">
+<h3 data-number="1.4.1" class="anchored" data-anchor-id="no-code"><span class="header-section-number">1.4.1</span> No code</h3>
+</section>
+<section id="no-simulated-data" class="level3" data-number="1.4.2">
+<h3 data-number="1.4.2" class="anchored" data-anchor-id="no-simulated-data"><span class="header-section-number">1.4.2</span> No simulated data</h3>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-tuia2022" class="csl-entry" role="listitem">
-Tuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe, Silvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022. <span>“Perspectives in Machine Learning for Wildlife Conservation.”</span> <em>Nature Communications</em> 13 (1): 792. <a href="https://doi.org/10.1038/s41467-022-27980-y">https://doi.org/10.1038/s41467-022-27980-y</a>.
-</div>
-</div>
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
