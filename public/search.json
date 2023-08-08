@@ -98,6 +98,13 @@
     "text": "3.3 Validating"
   },
   {
+    "objectID": "chapters/splits.html#strategies-to-split-data",
+    "href": "chapters/splits.html#strategies-to-split-data",
+    "title": "3  Testing, training, validating",
+    "section": "3.4 Strategies to split data",
+    "text": "3.4 Strategies to split data"
+  },
+  {
     "objectID": "chapters/splits.html#data-leakage",
     "href": "chapters/splits.html#data-leakage",
     "title": "3  Testing, training, validating",
@@ -124,12 +131,5 @@
     "title": "References",
     "section": "",
     "text": "Cooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri,\nChristopher J. A. Moody, Michael D. Jardine, András Liker, Tamás\nSzékely, and Gavin H. Thomas. 2022. “Latitudinal Gradients in\nAvian Colourfulness.” Nature Ecology & Evolution 6\n(5): 622–29. https://doi.org/10.1038/s41559-022-01714-1.\n\n\nCooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela\nMiguez, Louise Tomsett, and Kristofer M. Helgen. 2019. “Sex Biases\nin Bird and Mammal Natural History Collections.” Proceedings\nof the Royal Society B: Biological Sciences 286 (1913): 20192025.\nhttps://doi.org/10.1098/rspb.2019.2025.\n\n\nKennedy, Stephanie, and Mark Burbach. 2020. “Great Plains Ranchers\nManaging for Vegetation Heterogeneity: A Multiple Case Study.”\nGreat Plains Research 30 (2): 137–48. https://doi.org/10.1353/gpr.2020.0016.\n\n\nLuccioni, Alexandra Sasha, and David Rolnick. 2023. “Bugs in the\nData: How ImageNet Misrepresents Biodiversity.” Proceedings\nof the AAAI Conference on Artificial Intelligence 37 (12):\n14382–90. https://doi.org/10.1609/aaai.v37i12.26682.\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe,\nSilvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022.\n“Perspectives in Machine Learning for Wildlife\nConservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y.\n\n\nVermote, Eric, Chris Justice, Martin Claverie, and Belen Franch. 2016.\n“Preliminary Analysis of the Performance of the Landsat 8/OLI Land\nSurface Reflectance Product.” Remote Sensing of\nEnvironment 185 (November): 46–56. https://doi.org/10.1016/j.rse.2016.04.008."
-  },
-  {
-    "objectID": "chapters/splits.html#strategies-to-split-data",
-    "href": "chapters/splits.html#strategies-to-split-data",
-    "title": "3  Testing, training, validating",
-    "section": "3.4 Strategies to split data",
-    "text": "3.4 Strategies to split data"
   }
 ]
