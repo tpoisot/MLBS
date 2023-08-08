@@ -30,11 +30,17 @@ background = pseudoabsencemask(WithinRadius, presencelayer; distance = 120.0)
 buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 25.0)
 bgmask = background .& (.! buffer)
 
-bgpoints = SpeciesDistributionToolkit.sample(
-    bgmask,
-    cellsize(bgmask),
-    floor(Int, 0.5sum(presencelayer)),
+heatmap(
+    temperature;
+    colormap = :deep,
+    axis = (; aspect = DataAspect()),
+    figure = (; resolution = (800, 500)),
 )
+heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
+scatter!(presences; color = :black)
+current_figure()
+
+bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.25sum(presencelayer)))
 
 replace!(bgpoints, false => nothing)
 
