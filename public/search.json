@@ -77,16 +77,44 @@
     "text": "2.6 Alternatives and improvements\nEM\nk-median\nk-medoids\n\n\n\n\nCooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri, Christopher J. A. Moody, Michael D. Jardine, András Liker, Tamás Székely, and Gavin H. Thomas. 2022. “Latitudinal Gradients in Avian Colourfulness.” Nature Ecology & Evolution 6 (5): 622–29. https://doi.org/10.1038/s41559-022-01714-1.\n\n\nCooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela Miguez, Louise Tomsett, and Kristofer M. Helgen. 2019. “Sex Biases in Bird and Mammal Natural History Collections.” Proceedings of the Royal Society B: Biological Sciences 286 (1913): 20192025. https://doi.org/10.1098/rspb.2019.2025.\n\n\nKennedy, Stephanie, and Mark Burbach. 2020. “Great Plains Ranchers Managing for Vegetation Heterogeneity: A Multiple Case Study.” Great Plains Research 30 (2): 137–48. https://doi.org/10.1353/gpr.2020.0016.\n\n\nLuccioni, Alexandra Sasha, and David Rolnick. 2023. “Bugs in the Data: How ImageNet Misrepresents Biodiversity.” Proceedings of the AAAI Conference on Artificial Intelligence 37 (12): 14382–90. https://doi.org/10.1609/aaai.v37i12.26682.\n\n\nVermote, Eric, Chris Justice, Martin Claverie, and Belen Franch. 2016. “Preliminary Analysis of the Performance of the Landsat 8/OLI Land Surface Reflectance Product.” Remote Sensing of Environment 185 (November): 46–56. https://doi.org/10.1016/j.rse.2016.04.008."
   },
   {
+    "objectID": "chapters/splits.html#training",
+    "href": "chapters/splits.html#training",
+    "title": "3  Testing, training, validating",
+    "section": "3.1 Training",
+    "text": "3.1 Training\nIn data science (in machine learning in particular), we do fit models. We train them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.\nTraining, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In Chapter 4, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.\nTraining a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease.\nIn order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained on the specific problem we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by “training the model”, what we really mean is “change the structure of the parameters until the output looks right”. For example, assuming a simple linear model like \\(c(X) = \\beta_0 + \\beta_1X_1 + \\beta_2X_2\\), training this model would lead to changes in the values of \\(\\beta\\), but not to the consideration of a new model \\(c(X) = \\beta_0 + \\beta_1X_1 + \\beta_2X_2 + \\beta_3X_1X_2\\). Comparing models is the point of validation, which we will address later on.\nneed for instances\nneed for responses"
+  },
+  {
+    "objectID": "chapters/splits.html#testing",
+    "href": "chapters/splits.html#testing",
+    "title": "3  Testing, training, validating",
+    "section": "3.2 Testing",
+    "text": "3.2 Testing"
+  },
+  {
+    "objectID": "chapters/splits.html#validating",
+    "href": "chapters/splits.html#validating",
+    "title": "3  Testing, training, validating",
+    "section": "3.3 Validating",
+    "text": "3.3 Validating"
+  },
+  {
+    "objectID": "chapters/splits.html#data-leakage",
+    "href": "chapters/splits.html#data-leakage",
+    "title": "3  Testing, training, validating",
+    "section": "3.5 Data leakage",
+    "text": "3.5 Data leakage"
+  },
+  {
     "objectID": "chapters/gradientdescent.html",
     "href": "chapters/gradientdescent.html",
-    "title": "3  Minimizing error: the gradient descent algorithm",
+    "title": "4  Minimizing error: the gradient descent algorithm",
     "section": "",
     "text": "https://www.kaggle.com/datasets/abrambeyer/openintro-possum"
   },
   {
     "objectID": "summary.html",
     "href": "summary.html",
-    "title": "4  Summary",
+    "title": "5  Summary",
     "section": "",
     "text": "In summary, this book has no content whatsoever."
   },
@@ -96,5 +124,12 @@
     "title": "References",
     "section": "",
     "text": "Cooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri,\nChristopher J. A. Moody, Michael D. Jardine, András Liker, Tamás\nSzékely, and Gavin H. Thomas. 2022. “Latitudinal Gradients in\nAvian Colourfulness.” Nature Ecology & Evolution 6\n(5): 622–29. https://doi.org/10.1038/s41559-022-01714-1.\n\n\nCooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela\nMiguez, Louise Tomsett, and Kristofer M. Helgen. 2019. “Sex Biases\nin Bird and Mammal Natural History Collections.” Proceedings\nof the Royal Society B: Biological Sciences 286 (1913): 20192025.\nhttps://doi.org/10.1098/rspb.2019.2025.\n\n\nKennedy, Stephanie, and Mark Burbach. 2020. “Great Plains Ranchers\nManaging for Vegetation Heterogeneity: A Multiple Case Study.”\nGreat Plains Research 30 (2): 137–48. https://doi.org/10.1353/gpr.2020.0016.\n\n\nLuccioni, Alexandra Sasha, and David Rolnick. 2023. “Bugs in the\nData: How ImageNet Misrepresents Biodiversity.” Proceedings\nof the AAAI Conference on Artificial Intelligence 37 (12):\n14382–90. https://doi.org/10.1609/aaai.v37i12.26682.\n\n\nTuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe,\nSilvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022.\n“Perspectives in Machine Learning for Wildlife\nConservation.” Nature Communications 13 (1): 792. https://doi.org/10.1038/s41467-022-27980-y.\n\n\nVermote, Eric, Chris Justice, Martin Claverie, and Belen Franch. 2016.\n“Preliminary Analysis of the Performance of the Landsat 8/OLI Land\nSurface Reflectance Product.” Remote Sensing of\nEnvironment 185 (November): 46–56. https://doi.org/10.1016/j.rse.2016.04.008."
+  },
+  {
+    "objectID": "chapters/splits.html#strategies-to-split-data",
+    "href": "chapters/splits.html#strategies-to-split-data",
+    "title": "3  Testing, training, validating",
+    "section": "3.4 Strategies to split data",
+    "text": "3.4 Strategies to split data"
   }
 ]

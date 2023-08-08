@@ -1,4 +1,4 @@
-# Creating groups: the *k*-means algorithm
+# Creating groups: the *k*-means algorithm {#sec-kmeans}
 
 As we mentioned in the introduction, a core idea of data science is that things that look the same (in that, when described with data, they resemble one another) are likely to be the same. Although this sounds like a simplifying assumption, this can provide the basis for a very powerful technique in which we *create* groups in data that have no labels. This task is called unsupervised clustering: we seek to add a *label* to each observation, in order to form groups, and the data we work from do *not* have a label that we can use to train a model.
 
