@@ -1,1 +1,19 @@
-# Minimizing error: the gradient descent algorithm {#sec-gradientdescent}
+# Gradient descent {#sec-gradientdescent}
+
+As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In @sec-kmeans, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
+
+Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
+
+## A digression: what is a trained model?
+
+## The problem: how many interactions in a food web? {#sec-gradientdescent-problem}
+
+One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In
+
+The initial model was proposed by @cohen1984: the number of interactions $L$ scales linearly with the number of species $S$. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as $L \approx b\times S$.
+
+Not so fast, said @martinez1992. When we start looking a food webs with more species, the increase of $L$ with regards to $S$ is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are $S^2$). In this interpretation, $L \approx b\times S^2$.
+
+But the square term can be relaxed; and there is no reason not to assume a power law, with $L\approx b\times S^a$. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes [@brose2004].
+
+The "reality" (*i.e.* the relationship between $S$ and $L$ that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula [@macdonald2020]. But for the purpose of this chapter, figuring out the values of $a$ and $b$ from empirical data is a very instructive exercise.
