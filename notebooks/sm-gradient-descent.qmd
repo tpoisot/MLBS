@@ -1,0 +1,139 @@
+---
+title: "Suppl. Mat. -- gradient descent"
+format: html
+---
+
+```{julia}
+using DataFrames
+import CSV
+using CairoMakie
+using Statistics
+CairoMakie.activate!(; px_per_unit = 2)
+```
+
+We can now load the data -- because they come with a little more information, we will drop the columns we don't need, and remove the rows with obvious issues:
+
+```{julia}
+ls = DataFrame(CSV.File(joinpath(pwd(), "data/gradientdescent/ls.csv")))
+select!(ls, Not(:P))
+select!(ls, Not(:H))
+ls = ls[ls.L .> 0, :]
+describe(ls)
+```
+
+Now we can make a first dataviz:
+
+
+```{julia}
+#| label: fig-gradient-data
+#| fig-cap: >
+#|  Overview of data from ...
+fig = Figure(; resolution=(500, 500))
+axs = Axis(fig[1,1]; xlabel="Nodes", ylabel="Edges", xscale=log2, yscale=log2)
+scatter!(axs, ls.S, ls.L, color=:black, markersize=4)
+current_figure()
+```
+
+The next step is to split the data into a training and testing set:
+
+```{julia}
+training_inclusion = rand(size(ls, 1)) .< 0.8
+training = ls[findall(training_inclusion),:]
+testing = ls[findall(.!training_inclusion),:]
+```
+
+And we need to get the model and the gradients -- this is done using `Zygote`:
+
+```{julia}
+using Zygote
+lm(x, m, b) = m .* x .+ b
+L2(ŷ, x, f, p...) = sum((ŷ .- f(x, p...)) .^ 2.0) / length(x)
+∇L(ŷ, x, f, p...) = gradient((p...) -> L2(ŷ, x, f, p...), p...)
+η = 1e-3
+```
+
+Initial set of values and initial loss:
+
+```{julia}
+p = rand(2)
+
+y = log2.(training.L)
+x = log2.(training.S)
+
+ty = log2.(testing.L)
+tx = log2.(testing.S)
+```
+
+```{julia}
+p = rand(2)
+loss_train = zeros(Float64, 20_000+1)
+loss_test = copy(loss_train)
+loss_train[1] = L2(y, x, lm, p...)
+loss_test[1] = L2(ty, tx, lm, p...)
+epochs = length(loss_train)-1
+for i in 1:epochs
+    p .-= (η .* ∇L(y, x, lm, p...))
+    loss_train[i+1] = L2(y, x, lm, p...)
+    loss_test[i+1] = L2(ty, tx, lm, p...)
+end
+@info "Initial training loss: $(loss_train[begin])"
+@info "Initial testing loss: $(loss_test[begin])"
+
+@info "Final training loss: $(loss_train[end])"
+@info "Final testing loss: $(loss_test[end])"
+```
+
+Now we can plot the training:
+
+
+```{julia}
+#| label: fig-gradient-loss-comparison
+#| fig-cap: >
+#|  Overview of data from ...
+fig = Figure(; resolution=(500, 500))
+
+axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="L₂ loss")
+lines!(axs, 0:epochs, loss_train, color=:black)
+lines!(axs, 0:epochs, loss_test, color=:red)
+
+axs2 = Axis(fig[2,1]; xlabel="Training epoch", ylabel="Excess loss on training data")
+fitdiag = loss_test ./ (loss_test .+ loss_train)
+lines!(axs2, 0:epochs, log.(fitdiag ./ (1.0 .- fitdiag)), color=:black)
+ylims!(axs2, (-0.5, 0.5))
+
+current_figure()
+```
+
+and the residuals
+
+```{julia}
+#| label: fig-gradient-residuals
+#| fig-cap: >
+#|  Overview of the distributions of residuals (note that the residuals are calculated on the $log_2(L)$ and $log_2(S)$) after a large enough
+#|  number of epochs for gradient descent.
+#|  The grey histogram is the residuals on the training data, and the red density line is the residuals on the testing data.
+fig = Figure(; resolution=(500, 300))
+axs = Axis(fig[1,1])
+hist!(axs, lm(x, p...) .- y; normalization=:pdf, color=:lightgrey, bins=20)
+density!(axs, lm(tx, p...) .- ty, color=:transparent, strokewidth=1, strokecolor=:red, npoints=500)
+tightlimits!(axs)
+hidespines!(axs, :l, :r, :t)
+hideydecorations!(axs; grid=true)
+hidexdecorations!(axs; grid=true, label=false, ticks=false, ticklabels=false)
+current_figure()
+```
+
+and the predictions:
+
+
+```{julia}
+#| label: fig-gradient-fitted
+#| fig-cap: >
+#|  Overview of data from ...
+fig = Figure(; resolution=(500, 500))
+axs = Axis(fig[1,1]; xlabel="Nodes", ylabel="Edges", xscale=log2, yscale=log2)
+scatter!(axs, training.S, training.L, color=:black, markersize=4)
+pseudox = 2.0.^LinRange(1, log2.(maximum(training.S)), 20)
+lines!(axs, pseudox, 2.0.^(p[1] .* log2.(pseudox) .+ p[2]), color=:red)
+current_figure()
+```
