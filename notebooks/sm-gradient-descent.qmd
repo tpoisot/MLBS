@@ -1,7 +1,4 @@
----
-title: "Suppl. Mat. -- gradient descent"
-format: html
----
+# Gradient descent and linear regression
 
 ```{julia}
 using DataFrames
@@ -22,7 +19,6 @@ describe(ls)
 ```
 
 Now we can make a first dataviz:
-
 
 ```{julia}
 #| label: fig-gradient-data
@@ -85,7 +81,6 @@ end
 
 Now we can plot the training:
 
-
 ```{julia}
 #| label: fig-gradient-loss-comparison
 #| fig-cap: >
@@ -124,7 +119,6 @@ current_figure()
 ```
 
 and the predictions:
-
 
 ```{julia}
 #| label: fig-gradient-fitted
