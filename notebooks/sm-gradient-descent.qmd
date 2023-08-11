@@ -1,5 +1,9 @@
 # Gradient descent and linear regression
 
+This notebook contains the code used in the chapter on gradient descent and linear regression. Note that this code does *not* rely on a package for gradient descent, instead showcasing the use of `Zygote` to calculate the gradients.
+
+To run everything, we need to get a few data input packages, as well as the Makie plotting suite.
+
 ```{julia}
 using DataFrames
 import CSV
@@ -8,24 +12,25 @@ using Statistics
 CairoMakie.activate!(; px_per_unit = 2)
 ```
 
-We can now load the data -- because they come with a little more information, we will drop the columns we don't need, and remove the rows with obvious issues:
+We can now load the data -- because they come with a little more information than what we use, we will drop the columns we don't need (`:P` are the predation interactions, and `:H` the number of herbivory interactions) , and remove the rows with obvious issues (such as no documented interaction). The data are described in the main chapter.
 
 ```{julia}
 ls = DataFrame(CSV.File(joinpath(pwd(), "data/gradientdescent/ls.csv")))
 select!(ls, Not(:P))
 select!(ls, Not(:H))
 ls = ls[ls.L .> 0, :]
+ls = ls[ls.L .>= (ls.S .- 1), :]
 describe(ls)
 ```
 
-Now we can make a first dataviz:
+We will make an obvious first plot: the relationship between $L$ and $S$ on a log-log scale:
 
 ```{julia}
 #| label: fig-gradient-data
 #| fig-cap: >
 #|  Overview of data from ...
 fig = Figure(; resolution=(500, 500))
-axs = Axis(fig[1,1]; xlabel="Nodes", ylabel="Edges", xscale=log2, yscale=log2)
+axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, ls.S, ls.L, color=:black, markersize=4)
 current_figure()
 ```
@@ -38,35 +43,60 @@ training = ls[findall(training_inclusion),:]
 testing = ls[findall(.!training_inclusion),:]
 ```
 
-And we need to get the model and the gradients -- this is done using `Zygote`:
+We are interested in this relationship as a linear model, so we can write this code:
+
+```{julia}
+lm(x, m, b) = m .* x .+ b
+```
+
+We will use the $L_2$ loss for this dataset, so let's go ahead and write a function for this:
+
+```{julia}
+L2(ŷ, x, f, p...) = sum((ŷ .- f(x, p...)) .^ 2.0) / length(x)
+```
+
+And we need to get the model and the gradients -- this is done using `Zygote`; this code is hardcoding the loss function, which isn't ideal, but is fine. We don't really mind.
 
 ```{julia}
 using Zygote
-lm(x, m, b) = m .* x .+ b
-L2(ŷ, x, f, p...) = sum((ŷ .- f(x, p...)) .^ 2.0) / length(x)
 ∇L(ŷ, x, f, p...) = gradient((p...) -> L2(ŷ, x, f, p...), p...)
+```
+
+Finally, we need a learning rate $\eta$:
+
+```{julia}
 η = 1e-3
 ```
 
-Initial set of values and initial loss:
+We will then create a random set of parameters for the model; we could make a guess based on our knowledge of the system, but this isn't necessary here.
 
 ```{julia}
 p = rand(2)
-
-y = log2.(training.L)
-x = log2.(training.S)
-
-ty = log2.(testing.L)
-tx = log2.(testing.S)
 ```
 
+And now we get the values of $L$ and $S$ in the training/testing dataset. Because we want to model the log-log relationship, we will transform these into their natural logs here:
+
 ```{julia}
-p = rand(2)
+y = log.(training.L)
+x = log.(training.S)
+
+ty = log.(testing.L)
+tx = log.(testing.S)
+```
+
+then
+
+```{julia}
 loss_train = zeros(Float64, 20_000+1)
 loss_test = copy(loss_train)
 loss_train[1] = L2(y, x, lm, p...)
 loss_test[1] = L2(ty, tx, lm, p...)
 epochs = length(loss_train)-1
+```
+
+then
+
+```{julia}
 for i in 1:epochs
     p .-= (η .* ∇L(y, x, lm, p...))
     loss_train[i+1] = L2(y, x, lm, p...)
@@ -85,16 +115,12 @@ Now we can plot the training:
 #| label: fig-gradient-loss-comparison
 #| fig-cap: >
 #|  Overview of data from ...
-fig = Figure(; resolution=(500, 500))
+fig = Figure(; resolution=(500, 300))
 
-axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="L₂ loss")
-lines!(axs, 0:epochs, loss_train, color=:black)
-lines!(axs, 0:epochs, loss_test, color=:red)
-
-axs2 = Axis(fig[2,1]; xlabel="Training epoch", ylabel="Excess loss on training data")
-fitdiag = loss_test ./ (loss_test .+ loss_train)
-lines!(axs2, 0:epochs, log.(fitdiag ./ (1.0 .- fitdiag)), color=:black)
-ylims!(axs2, (-0.5, 0.5))
+axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="L₂ loss", yscale=log10)
+lines!(axs, 0:epochs, loss_train, color=:black, label="Training")
+lines!(axs, 0:epochs, loss_test, color=:red, label="Testing")
+axislegend(axs; position=:rt)
 
 current_figure()
 ```
@@ -125,9 +151,11 @@ and the predictions:
 #| fig-cap: >
 #|  Overview of data from ...
 fig = Figure(; resolution=(500, 500))
-axs = Axis(fig[1,1]; xlabel="Nodes", ylabel="Edges", xscale=log2, yscale=log2)
+axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, training.S, training.L, color=:black, markersize=4)
-pseudox = 2.0.^LinRange(1, log2.(maximum(training.S)), 20)
-lines!(axs, pseudox, 2.0.^(p[1] .* log2.(pseudox) .+ p[2]), color=:red)
+pseudox = exp.(LinRange(1, log.(maximum(training.S)), 20))
+lines!(axs, pseudox, exp.(p[1] .* log.(pseudox) .+ p[2]), color=:red)
+lines!(axs, pseudox, pseudox.^2.0, color=:grey, linestyle=:dash)
+lines!(axs, pseudox, pseudox.-1.0, color=:grey, linestyle=:dash)
 current_figure()
 ```
