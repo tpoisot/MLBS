@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Fundamentals of Biodiversity Data Science - 3&nbsp; Testing, training, validating</title>
+<title>Biodiversity Data Science - 4&nbsp; Testing, training, validating</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../chapters/gradientdescent.html" rel="next">
-<link href="../chapters/kmeans.html" rel="prev">
+<link href="../summary.html" rel="next">
+<link href="../chapters/gradientdescent.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -43,15 +43,13 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
-  "copy-button": false,
+  "copy-button": true,
   "collapse-after": 3,
   "panel-placement": "start",
-  "type": "textbox",
-  "limit": 20,
+  "type": "overlay",
+  "limit": 10,
   "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
+    null
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -81,7 +79,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Working with data</a></li><li class="breadcrumb-item"><a href="../chapters/splits.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -96,14 +94,13 @@ ul.task-list li input[type="checkbox"] {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Fundamentals of Biodiversity Data Science</a> 
+      <a href="../">Biodiversity Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="../Biodiversity-Data-Science.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
+</div>
     </div>
       </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -118,24 +115,46 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Two illustrations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Working with data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../summary.html" class="sidebar-item-text sidebar-link">
@@ -158,20 +177,20 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#training" id="toc-training" class="nav-link active" data-scroll-target="#training"><span class="header-section-number">3.1</span> Training</a></li>
-  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">3.2</span> Testing</a></li>
-  <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">3.3</span> Validating</a></li>
-  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">3.4</span> Strategies to split data</a></li>
-  <li><a href="#data-leakage" id="toc-data-leakage" class="nav-link" data-scroll-target="#data-leakage"><span class="header-section-number">3.5</span> Data leakage</a></li>
+  <li><a href="#training" id="toc-training" class="nav-link active" data-scroll-target="#training"><span class="header-section-number">4.1</span> Training</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">4.2</span> Testing</a></li>
+  <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">4.3</span> Validating</a></li>
+  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">4.4</span> Strategies to split data</a></li>
+  <li><a href="#data-leakage" id="toc-data-leakage" class="nav-link" data-scroll-target="#data-leakage"><span class="header-section-number">4.5</span> Data leakage</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Working with data</a></li><li class="breadcrumb-item"><a href="../chapters/splits.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></h1>
 </div>
 
 
@@ -188,26 +207,26 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we were very lucky. Because we applied an unsupervised method, we didn’t really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.</p>
-<section id="training" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="training"><span class="header-section-number">3.1</span> Training</h2>
+<section id="training" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="training"><span class="header-section-number">4.1</span> Training</h2>
 <p>In data science (in machine learning in particular), we do <em>fit</em> models. We <em>train</em> them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.</p>
-<p>Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.</p>
+<p>Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.</p>
 <p>Training a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease.</p>
 <p>In order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained <em>on the specific problem</em> we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by “training the model”, what we really mean is “change the structure of the parameters until the output looks right”. For example, assuming a simple linear model like <span class="math inline">\(c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2\)</span>, training this model would lead to changes in the values of <span class="math inline">\(\beta\)</span>, but not to the consideration of a new model <span class="math inline">\(c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_1X_2\)</span>. Comparing models is the point of validation, which we will address later on.</p>
 <p>need for instances</p>
 <p>need for responses</p>
 </section>
-<section id="testing" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="testing"><span class="header-section-number">3.2</span> Testing</h2>
+<section id="testing" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="testing"><span class="header-section-number">4.2</span> Testing</h2>
 </section>
-<section id="validating" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="validating"><span class="header-section-number">3.3</span> Validating</h2>
+<section id="validating" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="validating"><span class="header-section-number">4.3</span> Validating</h2>
 </section>
-<section id="strategies-to-split-data" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">3.4</span> Strategies to split data</h2>
+<section id="strategies-to-split-data" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.4</span> Strategies to split data</h2>
 </section>
-<section id="data-leakage" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="data-leakage"><span class="header-section-number">3.5</span> Data leakage</h2>
+<section id="data-leakage" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="data-leakage"><span class="header-section-number">4.5</span> Data leakage</h2>
 
 
 </section>
@@ -532,13 +551,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/kmeans.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span>
+      <a href="../chapters/gradientdescent.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/gradientdescent.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../summary.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

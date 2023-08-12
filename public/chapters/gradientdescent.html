@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Fundamentals of Biodiversity Data Science - 4&nbsp; Gradient descent</title>
+<title>Biodiversity Data Science - 3&nbsp; Gradient descent</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -49,8 +49,8 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../summary.html" rel="next">
-<link href="../chapters/splits.html" rel="prev">
+<link href="../chapters/splits.html" rel="next">
+<link href="../chapters/kmeans.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -62,15 +62,13 @@ div.csl-indent {
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
-  "copy-button": false,
+  "copy-button": true,
   "collapse-after": 3,
   "panel-placement": "start",
-  "type": "textbox",
-  "limit": 20,
+  "type": "overlay",
+  "limit": 10,
   "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
+    null
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -100,7 +98,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/kmeans.html">Getting started</a></li><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -115,14 +113,13 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Fundamentals of Biodiversity Data Science</a> 
+      <a href="../">Biodiversity Data Science</a> 
+        <div class="sidebar-tools-main">
+    <a href="../Biodiversity-Data-Science.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
+</div>
     </div>
       </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -137,24 +134,46 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Data preparation and exploration</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../summary.html" class="sidebar-item-text sidebar-link">
@@ -177,17 +196,17 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#a-digression-what-is-a-trained-model" id="toc-a-digression-what-is-a-trained-model" class="nav-link active" data-scroll-target="#a-digression-what-is-a-trained-model"><span class="header-section-number">4.1</span> A digression: what is a trained model?</a></li>
-  <li><a href="#sec-gradientdescent-problem" id="toc-sec-gradientdescent-problem" class="nav-link" data-scroll-target="#sec-gradientdescent-problem"><span class="header-section-number">4.2</span> The problem: how many interactions in a food web?</a></li>
+  <li><a href="#a-digression-what-is-a-trained-model" id="toc-a-digression-what-is-a-trained-model" class="nav-link active" data-scroll-target="#a-digression-what-is-a-trained-model"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
+  <li><a href="#sec-gradientdescent-problem" id="toc-sec-gradientdescent-problem" class="nav-link" data-scroll-target="#sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/kmeans.html">Getting started</a></li><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-gradientdescent" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></h1>
+<h1 class="title"><span id="sec-gradientdescent" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></h1>
 </div>
 
 
@@ -204,12 +223,12 @@ div.csl-indent {
 </header>
 
 <p>As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.</p>
-<p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;4.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
-<section id="a-digression-what-is-a-trained-model" class="level2" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="a-digression-what-is-a-trained-model"><span class="header-section-number">4.1</span> A digression: what is a trained model?</h2>
+<p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
+<section id="a-digression-what-is-a-trained-model" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="a-digression-what-is-a-trained-model"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
 </section>
-<section id="sec-gradientdescent-problem" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">4.2</span> The problem: how many interactions in a food web?</h2>
+<section id="sec-gradientdescent-problem" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
 <p>One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In</p>
 <p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen and Briand (<a href="../references.html#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
 <p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="../references.html#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
@@ -553,13 +572,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/splits.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span>
+      <a href="../chapters/kmeans.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../summary.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/splits.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
