@@ -4,7 +4,7 @@ As we progress into this book, the process of delivering a trained model is goin
 
 Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
 
-## A digression: what is a trained model?
+## A digression: what is a trained model? {#sec-gradientdescent-trainedmodel}
 
 ## The problem: how many interactions in a food web? {#sec-gradientdescent-problem}
 

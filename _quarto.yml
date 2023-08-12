@@ -3,7 +3,7 @@ project:
   output-dir: public
 
 book:
-  title: "Biodiversity Data Science"
+  title: "Data Science for Biodiversity"
   subtitle: "Fundamentals and Applications"
   page-navigation: true
   language: en-CA

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Biodiversity Data Science - 3&nbsp; Gradient descent</title>
+<title>Data Science for Biodiversity - 3&nbsp; Gradient descent</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -113,9 +113,9 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Biodiversity Data Science</a> 
+      <a href="../">Data Science for Biodiversity</a> 
         <div class="sidebar-tools-main">
-    <a href="../Biodiversity-Data-Science.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <a href="../Data-Science-for-Biodiversity.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -196,7 +196,7 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#a-digression-what-is-a-trained-model" id="toc-a-digression-what-is-a-trained-model" class="nav-link active" data-scroll-target="#a-digression-what-is-a-trained-model"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
+  <li><a href="#sec-gradientdescent-trainedmodel" id="toc-sec-gradientdescent-trainedmodel" class="nav-link active" data-scroll-target="#sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
   <li><a href="#sec-gradientdescent-problem" id="toc-sec-gradientdescent-problem" class="nav-link" data-scroll-target="#sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</a></li>
   </ul>
 </nav>
@@ -224,8 +224,8 @@ div.csl-indent {
 
 <p>As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.</p>
 <p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
-<section id="a-digression-what-is-a-trained-model" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="a-digression-what-is-a-trained-model"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
+<section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
 </section>
 <section id="sec-gradientdescent-problem" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
