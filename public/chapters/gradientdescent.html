@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.294">
+<meta name="generator" content="quarto-1.4.315">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -115,7 +115,7 @@ div.csl-indent {
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Data Science for Biodiversity</a> 
         <div class="sidebar-tools-main">
-    <a href="../Data-Science-for-Biodiversity.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <a href="../Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -160,7 +160,7 @@ div.csl-indent {
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
- <span class="menu-text">Data preparation and exploration</span></a>
+ <span class="menu-text">Exploring and preparing data</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -172,12 +172,18 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../summary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -203,7 +209,7 @@ div.csl-indent {
   <li><a href="#defining-the-loss-function" id="toc-defining-the-loss-function" class="nav-link" data-scroll-target="#defining-the-loss-function"><span class="header-section-number">3.3.1</span> Defining the loss function</a></li>
   <li><a href="#calculating-the-gradient" id="toc-calculating-the-gradient" class="nav-link" data-scroll-target="#calculating-the-gradient"><span class="header-section-number">3.3.2</span> Calculating the gradient</a></li>
   <li><a href="#descending-the-gradient" id="toc-descending-the-gradient" class="nav-link" data-scroll-target="#descending-the-gradient"><span class="header-section-number">3.3.3</span> Descending the gradient</a></li>
-  <li><a href="#gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate" id="toc-gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate" class="nav-link" data-scroll-target="#gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate"><span class="header-section-number">3.3.4</span> A note on the learning rate</a></li>
+  <li><a href="#gradientdescent-seq-gradientdescent-learningrate" id="toc-gradientdescent-seq-gradientdescent-learningrate" class="nav-link" data-scroll-target="#gradientdescent-seq-gradientdescent-learningrate"><span class="header-section-number">3.3.4</span> A note on the learning rate</a></li>
   </ul></li>
   <li><a href="#application-how-many-links-are-in-a-food-web" id="toc-application-how-many-links-are-in-a-food-web" class="nav-link" data-scroll-target="#application-how-many-links-are-in-a-food-web"><span class="header-section-number">3.4</span> Application: how many links are in a food web?</a></li>
   <li><a href="#notes-on-regularization" id="toc-notes-on-regularization" class="nav-link" data-scroll-target="#notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</a></li>
@@ -341,8 +347,8 @@ p := p - \eta\times \nabla f(p) \,.
 \]</span></p>
 <p>This formula can be <em>iterated</em>: with each successive iteration, it will get us closer to the optimal value of <span class="math inline">\(p\)</span>, which is to say the combination of <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> that minimizes the loss.</p>
 </section>
-<section id="gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate" class="level3" data-number="3.3.4">
-<h3 data-number="3.3.4" class="anchored" data-anchor-id="gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate"><span class="header-section-number">3.3.4</span> A note on the learning rate</h3>
+<section id="gradientdescent-seq-gradientdescent-learningrate" class="level3" data-number="3.3.4">
+<h3 data-number="3.3.4" class="anchored" data-anchor-id="gradientdescent-seq-gradientdescent-learningrate"><span class="header-section-number">3.3.4</span> A note on the learning rate</h3>
 <p>The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are <em>way off</em>, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.</p>
 <p>In order to protect against this, in reality, we update the gradient only a little, where the value of “a little” is determined by an hyper-parameter called the <em>learning rate</em>, which we noted <span class="math inline">\(\eta\)</span>. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results <em>at all</em>. The representation of numbers in a computer’s memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.</p>
 <p>The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.</p>
@@ -633,6 +639,33 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        console.log("RESIZE");
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {

@@ -43,7 +43,7 @@ $$ {#eq-loss-mse}
 This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in @tbl-gradientdescent-regressionloss.
 
 | Measure                       | Expression                                               | Remarks                                                                              |
-|------------------------------------|------------------|------------------|
+|------------------------------------|-------------------|-------------------|
 | Mean Squared Error (MSE, L2)  | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$ | Large errors are (proportionally) more penalized because of the squaring             |
 | Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$            | Error measured in the units of the response variable                                 |
 | Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$                                      | Error measured in the units of the response variable                                 |
@@ -107,7 +107,7 @@ $$
 
 This formula can be *iterated*: with each successive iteration, it will get us closer to the optimal value of $p$, which is to say the combination of $m$ and $b$ that minimizes the loss.
 
-### A note on the learning rate {#gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate}
+### A note on the learning rate {#gradientdescent-seq-gradientdescent-learningrate}
 
 The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are *way off*, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.
 

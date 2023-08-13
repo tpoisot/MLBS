@@ -34,9 +34,10 @@ book:
       chapters:
         - chapters/kmeans.qmd
         - chapters/gradientdescent.qmd
-    - part: "Data preparation and exploration"
+    - part: "Exploring and preparing data"
       chapters:
         - chapters/splits.qmd
+        - chapters/leakage.qmd
     - summary.qmd
     - references.qmd
 

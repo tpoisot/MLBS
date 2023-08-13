@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Timothée Poisot">
-<meta name="dcterms.date" content="2023-08-13">
 
-<title>Data Science for Biodiversity</title>
+<title>Data Science for Biodiversity - 5&nbsp; Data leakage</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -44,23 +42,24 @@ div.csl-indent {
 }</style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./intro.html" rel="next">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../summary.html" rel="next">
+<link href="../chapters/splits.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": true,
@@ -97,7 +96,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Preface</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Exploring and preparing data</a></li><li class="breadcrumb-item"><a href="../chapters/leakage.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -112,9 +111,9 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Data Science for Biodiversity</a> 
+      <a href="../">Data Science for Biodiversity</a> 
         <div class="sidebar-tools-main">
-    <a href="./Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <a href="../Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -123,13 +122,13 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
@@ -144,13 +143,13 @@ div.csl-indent {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/kmeans.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
   </div>
 </li>
@@ -167,13 +166,13 @@ div.csl-indent {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/splits.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/leakage.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
   </div>
 </li>
@@ -181,13 +180,13 @@ div.csl-indent {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+  <a href="../summary.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./references.html" class="sidebar-item-text sidebar-link">
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
 </li>
@@ -201,43 +200,25 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a></li>
+  <li><a href="#consequences-of-data-leakage" id="toc-consequences-of-data-leakage" class="nav-link active" data-scroll-target="#consequences-of-data-leakage"><span class="header-section-number">5.1</span> Consequences of data leakage</a></li>
+  <li><a href="#sources-of-data-leakage" id="toc-sources-of-data-leakage" class="nav-link" data-scroll-target="#sources-of-data-leakage"><span class="header-section-number">5.2</span> Sources of data leakage</a></li>
+  <li><a href="#avoiding-data-leakage" id="toc-avoiding-data-leakage" class="nav-link" data-scroll-target="#avoiding-data-leakage"><span class="header-section-number">5.3</span> Avoiding data leakage</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Exploring and preparing data</a></li><li class="breadcrumb-item"><a href="../chapters/leakage.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Data Science for Biodiversity</h1>
-<p class="subtitle lead">Fundamentals and Applications</p>
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></h1>
 </div>
 
 
-<div class="quarto-title-meta-author">
-  <div class="quarto-title-meta-heading">Author</div>
-  <div class="quarto-title-meta-heading">Affiliation</div>
-  
-    <div class="quarto-title-meta-contents">
-    <p class="author">Timothée Poisot <a href="mailto:timothee.poisot@umontreal.ca" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-0735-5184" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
-  </div>
-    <div class="quarto-title-meta-contents">
-        <p class="affiliation">
-            Université de Montréal
-          </p>
-      </div>
-    </div>
 
 <div class="quarto-title-meta">
 
-      
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">August 13, 2023</p>
-    </div>
-  </div>
+    
   
     
   </div>
@@ -246,19 +227,42 @@ div.csl-indent {
 
 </header>
 
-<section id="preface" class="level1 unnumbered">
-<h1 class="unnumbered">Preface</h1>
-<p>Data science is now an established methodology to study biodiversity, and this is a problem.</p>
-<p>This may be an opportunity when it comes to advancing our knowledge of biodiversity, and in particular when it comes to translating this knowledge into action <span class="citation" data-cites="tuia2022">(<a href="references.html#ref-tuia2022" role="doc-biblioref">Tuia et al. 2022</a>)</span>; but make no mistake, this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field. And as luck would have it, there are easier fields to master than data science. The point of this book, therefore, is to provide an introduction to fundamental concepts in data science, from the perspective of a biodiversity scientist, by using examples corresponding to real-world use-cases of these techniques.</p>
-<p>But what do we mean by <em>data science</em>? Most science, after all, relies on data in some capacity. What falls under the umbrella of data science is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered beyond recognition. This entire process is driven by (or subject to, even) domain knowledge. There is no such thing as data science, at least not in a vacuum: there is data science as a methodology applied to a specific domain.</p>
-<p>Before we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret: data <em>science</em> is a little bit of a misnomer.</p>
-<p>To understand why, it helps to think of science (the application of the scientific method, that is) as cooking. There are general techniques one must master, and specific steps and cultural specifics, and there is a final product. When writing this preface, I turned to my shelf of cookbooks, and picked my two favorites: Robuchon’s <em>The Complete Robuchon</em> (a no-nonsense list of hundreds of recipes with no place for improvisation), and Bianco’s <em>Pizza, Pasta, and Other Food I Like</em> (a short volume with very few pizza and pasta, and wonderful discussions about the importance of humility, creativity, and generosity). Data science, if it were cooking, would feel a lot like the second. Deviation from the rules (they are mostly recommendations, in fact) is often justifiable if you feel like it. But this improvisation requires good skills, a clear mental map of the problem, and a library of patterns that you can draw from.</p>
-<p>This book will not get you here. But it will speed up the process, by framing the practice of data science as a natural way to conduct research on biodiversity.</p>
+<p>Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <span class="quarto-unresolved-ref">?sec-gradientdescent-trainedmodel</span>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe et al. 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock, Gregr, and Chan (<a href="../references.html#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
+<section id="consequences-of-data-leakage" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="consequences-of-data-leakage"><span class="header-section-number">5.1</span> Consequences of data leakage</h2>
+<p>We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning <span class="citation" data-cites="nisbet2018">(<a href="../references.html#ref-nisbet2018" role="doc-biblioref">Nisbet et al. 2018</a>)</span>. Data leakage happens information “leaks” from the training conditions to the evaluation conditions. In other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time <span class="citation" data-cites="Peterson2018">(<a href="../references.html#ref-Peterson2018" role="doc-biblioref">Peterson et al. 2018</a>)</span>.</p>
+<p>It is worth stopping for a moment to consider what these “real-life situations” are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are <em>applying</em> a model, we can start from the model <em>only</em>. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data.</p>
+<p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the validation data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="../references.html#ref-dornelas2018" role="doc-biblioref">Dornelas et al. 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to test these models, and a last one for validation.</p>
+<p>Congratulations! We have created data leakage! Because we are splitting our timeseries at random, the model will likely have been trained using data that date from <em>after</em> the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.</p>
+</section>
+<section id="sources-of-data-leakage" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sources-of-data-leakage"><span class="header-section-number">5.2</span> Sources of data leakage</h2>
+<p>instances</p>
+<p>features</p>
+</section>
+<section id="avoiding-data-leakage" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="avoiding-data-leakage"><span class="header-section-number">5.3</span> Avoiding data leakage</h2>
+<p>learn/predict separation <span class="citation" data-cites="kaufman2011">(<a href="../references.html#ref-kaufman2011" role="doc-biblioref">Kaufman, Rosset, and Perlich 2011</a>)</span></p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-tuia2022" class="csl-entry" role="listitem">
-Tuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe, Silvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022. <span>“Perspectives in Machine Learning for Wildlife Conservation.”</span> <em>Nature Communications</em> 13 (1): 792. <a href="https://doi.org/10.1038/s41467-022-27980-y">https://doi.org/10.1038/s41467-022-27980-y</a>.
+<div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
+Amarasinghe, Kasun, Kit T. Rodolfa, Hemank Lamba, and Rayid Ghani. 2023. <span>“Explainable Machine Learning for Public Policy: Use Cases, Gaps, and Research Directions.”</span> <em>Data &amp; Policy</em> 5. <a href="https://doi.org/10.1017/dap.2023.2">https://doi.org/10.1017/dap.2023.2</a>.
+</div>
+<div id="ref-dornelas2018" class="csl-entry" role="listitem">
+Dornelas, Maria, Laura H. Antão, Faye Moyes, Amanda E. Bates, Anne E. Magurran, Dušan Adam, Asem A. Akhmetzhanova, et al. 2018. <span>“BioTIME: A Database of Biodiversity Time Series for the Anthropocene.”</span> <em>Global Ecology and Biogeography</em> 27 (7): 760–86. <a href="https://doi.org/10.1111/geb.12729">https://doi.org/10.1111/geb.12729</a>.
+</div>
+<div id="ref-kaufman2011" class="csl-entry" role="listitem">
+Kaufman, Shachar, Saharon Rosset, and Claudia Perlich. 2011. <span>“Leakage in Data Mining.”</span> <em>Proceedings of the 17th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, August. <a href="https://doi.org/10.1145/2020408.2020496">https://doi.org/10.1145/2020408.2020496</a>.
+</div>
+<div id="ref-nisbet2018" class="csl-entry" role="listitem">
+Nisbet, Robert, Gary Miner, Ken Yale, John F. Elder, and Andrew F. Peterson. 2018. <em>Handbook of Statistical Analysis and Data Mining Applications</em>. Second edition. London: Academic Press.
+</div>
+<div id="ref-Peterson2018" class="csl-entry" role="listitem">
+Peterson, A. Townsend, Alex Asase, Dora Canhos, Sidnei de Souza, and John Wieczorek. 2018. <span>“Data Leakage and Loss in Biodiversity Informatics.”</span> <em>Biodiversity Data Journal</em> 6 (November). <a href="https://doi.org/10.3897/bdj.6.e26826">https://doi.org/10.3897/bdj.6.e26826</a>.
+</div>
+<div id="ref-stock2023" class="csl-entry" role="listitem">
+Stock, Andy, Edward J. Gregr, and Kai M. A. Chan. 2023. <span>“Data Leakage Jeopardizes Ecological Applications of Machine Learning.”</span> <em>Nature Ecology &amp; Evolution</em>, August. <a href="https://doi.org/10.1038/s41559-023-02162-1">https://doi.org/10.1038/s41559-023-02162-1</a>.
 </div>
 </div>
 </section>
@@ -610,10 +614,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
+      <a href="../chapters/splits.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span>
+      </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./intro.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../summary.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
