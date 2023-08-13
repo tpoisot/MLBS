@@ -48,9 +48,7 @@ format:
   pdf:
     documentclass: scrbook
     toc: true
-    lof: true
-    lot: true
-    toc-depth: 2
+    toc-depth: 3
 
 
 
