@@ -1,12 +1,12 @@
-# Gradient descent {#gradientdescent-gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent}
+# Gradient descent {#gradientdescent-sec-gradientdescent}
 
 As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In @sec-kmeans, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
 
 Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
 
-## A digression: what is a trained model? {#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel}
+## A digression: what is a trained model? {#gradientdescent-sec-gradientdescent-trainedmodel}
 
-## The problem: how many interactions in a food web? {#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem}
+## The problem: how many interactions in a food web? {#gradientdescent-sec-gradientdescent-problem}
 
 One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In
 
@@ -24,6 +24,8 @@ Gradient descent is built around a remarkably simple intuition: knowing the form
 
 In this section, we will use linear regression as an example, because it is the model we have decided to use when exploring our ecological problem in @sec-gradientdescent-problem, and because it is suitably simple to keep track of everything when writing down the gradient by hand.
 
+Before we start assembling the different pieces, we need to decide what our model is. We have settled on a linear model, which will have the form $\hat y = m\times x + b$. The little hat on $\hat y$ indicates that this is a prediction. The input of this model is $x$, and its parameters are $m$ (the slope) and $b$ (the intercept). Using the notation we adopted in @sec-gradientdescent-problem, this would be $\hat l = a \times s + b$, with $l = \text{log} L$ and $s = \text{log} S$.
+
 ### Defining the loss function
 
 The loss function is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions *do*.
@@ -40,26 +42,76 @@ $$ {#eq-loss-mse}
 
 This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in @tbl-gradientdescent-regressionloss.
 
-| Measure                       | Expression                                                  | Remarks                                                                              |
-|--------------------------------------|-----------------|-----------------|
-| Mean Squared Error (MSE, L2)  | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$    | Large errors are (proportionally) more penalized because of the squaring             |
-| Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$               |                                                                                      |
-| Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$                                         | Error measured in the units of the response variable                                 |
-| Mean Bias Error               | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)$ | Errors *can* cancel out, but this can be used as a measure of positive/negative bias |
+| Measure                       | Expression                                               | Remarks                                                                              |
+|------------------------------------|------------------|------------------|
+| Mean Squared Error (MSE, L2)  | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$ | Large errors are (proportionally) more penalized because of the squaring             |
+| Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$            | Error measured in the units of the response variable                                 |
+| Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$                                      | Error measured in the units of the response variable                                 |
+| Mean Bias Error               | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)$   | Errors *can* cancel out, but this can be used as a measure of positive/negative bias |
 
-: List of common loss functions for regression problems {#tbl-gradientdescent-regressionloss tbl-colwidths="[25,25,50]"}
+: List of common loss functions for regression problems {#tbl-gradientdescent-regressionloss tbl-colwidths="\[25,25,50\]"}
 
-Throughout this chapter, we will use the L2 loss (@eq-loss-mse), because of **TK** nice properties to demo
+Throughout this chapter, we will use the L2 loss (@eq-loss-mse), because it has *really* nice properties when it comes to taking derivatives, which we will do a lot of. In the case of a linear model, we can rewrite @eq-loss-mse as
+
+$$
+f = \frac{1}{n}\sum\left(y_i - m\times x_i - b\right)^2
+$$ {#eq-loss-withmodel}
+
+There is an important change in @eq-loss-withmodel: we have replaced the prediction $\hat y_i$ with a term that is a function of the predictor $x_i$ and the model parameters: this means that we can calculate the value of the loss as a function of a pair of values $(x_i, y_i)$, and the model parameters.
 
 ### Calculating the gradient
 
-### Updating the parameters
+With the loss function corresponding to our problem in hands (@eq-loss-withmodel), we can calculate the gradient. Given a function that is scalar-valued (it returns a single value), taking several variables, that is differentiable, the gradient of this function is a vector-valued (it returns a vector) function; when evaluated at a specific point, this vectors indicates both the direction and the rate of fastest increase, which is to say the direction in which the function increases away from the point, and how fast it moves.
 
-### A note on the learning rate
+We can re-state this definition using the terms of the problem we want to solve. At a point $p = [m\quad b]^\top$, the gradient $\nabla f$ of $f$ is given by:
+
+$$
+\nabla f\left(
+p
+\right) = 
+\begin{bmatrix}
+\frac{\partial f}{\partial m}(p) \\
+\frac{\partial f}{\partial b}(p)
+\end{bmatrix}\,.
+$$ {#eq-gradientdescent-gradientfull}
+
+This indicates how changes in $m$ and $b$ will *increase* the error. In order to have a more explicit formulation, all we have to do is figure out an expression for both of the partial derivatives. In practice, we can let auto-differentiation software calculate the gradient for us [@innes2018]; these packages are now advanced enough that they can take the gradient of code directly.
+
+Solving $(\partial f / \partial m)(p)$ and $(\partial f / \partial c)(p)$ is easy enough:
+
+$$
+\nabla f\left(
+p
+\right) = 
+\begin{bmatrix}
+-\frac{2}{n}\sum \left[x_i \times (y_i - m\times x_i - b)\right] \\
+-\frac{2}{n}\sum \left(y_i - m\times x_i - b\right)
+\end{bmatrix}\,.
+$$ {#eq-gradientdescent-gradientexplicit}
+
+Note that both of these partial derivatives have a term in $2n^{-1}$. Getting rid of the $2$ in front is very straightforward! We can modify @eq-loss-withmodel to divide by $2n$ instead of $n$. This modified loss function retains the important characteristics: it increases when the prediction gets worse, and it allows comparing the loss with different numbers of points. As with many steps in the model training process, it is important to think about *why* we are doing certain things, as this can enable us to make some slight changes to facilitate the analysis.
+
+With the gradient written down in @eq-gradientdescent-gradientexplicit, we can now think about what it means to *descend* the gradient.
+
+### Descending the gradient
+
+Recall from **TK** that the gradient measures how far we *increase* the function of which we are taking the gradient. Therefore, it measures how much each parameter contributes to the loss value. Our working definition for a trained model is "one that has little loss", and so in an ideal world, we could find a point $p$ for which the gradient is as small as feasible.
+
+Because the gradient measures how far away we increase error, and intuitive way to use it is to take steps in the *opposite* direction. In other words, we can update the value of our parameters using $p := p - \nabla f(p)$, meaning that we substract from the parameter values their contribution to the overall error in the predictions.
+
+But, as we will discuss further in @sec-gradientdescent-learningrate, there is such a thing as "too much learning". For this reason, we will usually not move the entire way, and introduce a term to regulate how much of the way we actually want to descend the gradient. Our actual scheme to update the parameters is
+
+$$
+p := p - \eta\times \nabla f(p) \,.
+$$
+
+This formula can be *iterated*: with each successive iteration, it will get us closer to the optimal value of $p$, which is to say the combination of $m$ and $b$ that minimizes the loss.
+
+### A note on the learning rate {#gradientdescent-gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate}
 
 The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are *way off*, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.
 
-In order to protect against this, in reality, we update the gradient only a little, where the value of "a little" is determined by an hyper-parameter called the *learning rate*, which we will note $\eta$. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results *at all*. The representation of numbers in a computer's memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.
+In order to protect against this, in reality, we update the gradient only a little, where the value of "a little" is determined by an hyper-parameter called the *learning rate*, which we noted $\eta$. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results *at all*. The representation of numbers in a computer's memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.
 
 The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.
 
