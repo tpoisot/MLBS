@@ -196,8 +196,17 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-gradientdescent-trainedmodel" id="toc-sec-gradientdescent-trainedmodel" class="nav-link active" data-scroll-target="#sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
-  <li><a href="#sec-gradientdescent-problem" id="toc-sec-gradientdescent-problem" class="nav-link" data-scroll-target="#sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</a></li>
+  <li><a href="#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel" id="toc-gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel" class="nav-link active" data-scroll-target="#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
+  <li><a href="#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem" id="toc-gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem" class="nav-link" data-scroll-target="#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</a></li>
+  <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent"><span class="header-section-number">3.3</span> Gradient descent</a>
+  <ul class="collapse">
+  <li><a href="#defining-the-loss-function" id="toc-defining-the-loss-function" class="nav-link" data-scroll-target="#defining-the-loss-function"><span class="header-section-number">3.3.1</span> Defining the loss function</a></li>
+  <li><a href="#calculating-the-gradient" id="toc-calculating-the-gradient" class="nav-link" data-scroll-target="#calculating-the-gradient"><span class="header-section-number">3.3.2</span> Calculating the gradient</a></li>
+  <li><a href="#updating-the-parameters" id="toc-updating-the-parameters" class="nav-link" data-scroll-target="#updating-the-parameters"><span class="header-section-number">3.3.3</span> Updating the parameters</a></li>
+  <li><a href="#a-note-on-the-learning-rate" id="toc-a-note-on-the-learning-rate" class="nav-link" data-scroll-target="#a-note-on-the-learning-rate"><span class="header-section-number">3.3.4</span> A note on the learning rate</a></li>
+  </ul></li>
+  <li><a href="#application-how-many-links-are-in-a-food-web" id="toc-application-how-many-links-are-in-a-food-web" class="nav-link" data-scroll-target="#application-how-many-links-are-in-a-food-web"><span class="header-section-number">3.4</span> Application: how many links are in a food web?</a></li>
+  <li><a href="#notes-on-regularization" id="toc-notes-on-regularization" class="nav-link" data-scroll-target="#notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</a></li>
   </ul>
 </nav>
     </div>
@@ -206,7 +215,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/kmeans.html">Getting started</a></li><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-gradientdescent" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></h1>
+<h1 class="title"><span id="gradientdescent-gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></h1>
 </div>
 
 
@@ -223,17 +232,91 @@ div.csl-indent {
 </header>
 
 <p>As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.</p>
-<p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
-<section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
+<p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <span class="quarto-unresolved-ref">?sec-gradientdescent-problem</span>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
+<section id="gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
 </section>
-<section id="sec-gradientdescent-problem" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
+<section id="gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
 <p>One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In</p>
 <p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen and Briand (<a href="../references.html#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
 <p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="../references.html#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
 <p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="../references.html#ref-brose2004" role="doc-biblioref">Brose et al. 2004</a>)</span>.</p>
 <p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="../references.html#ref-macdonald2020" role="doc-biblioref">MacDonald, Banville, and Poisot 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
+</section>
+<section id="gradient-descent" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="gradient-descent"><span class="header-section-number">3.3</span> Gradient descent</h2>
+<p>Gradient descent is built around a remarkably simple intuition: knowing the formula that gives rise to our prediction, and the value of the error we made for each point, we can take the derivative of the error with regards to each parameter, and this tells us how much this parameter contributed to the error. Because we are taking the derivative, we can futher know whether to increase, or decrease, the value of the parameter in order to make a smaller error next time.</p>
+<p>In this section, we will use linear regression as an example, because it is the model we have decided to use when exploring our ecological problem in <span class="quarto-unresolved-ref">?sec-gradientdescent-problem</span>, and because it is suitably simple to keep track of everything when writing down the gradient by hand.</p>
+<section id="defining-the-loss-function" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="defining-the-loss-function"><span class="header-section-number">3.3.1</span> Defining the loss function</h3>
+<p>The loss function is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions <em>do</em>.</p>
+<p>Think of prediction as throwing a series of ten darts on ten different boards. In this case, we know what the correct outcome is (the center of the board, I assume, although I can be mistaken since I have only played darts once, and lost). A cost function would be any mathematical function that compares the position of each dart on each board, the position of the correct event, and returns a score that informs us about how poorly our prediction lines up with the reality.</p>
+<p>In the above example, you may be tempted to say that we can take the Euclidean distance of each dart to the center of each board, in order to know, for each point, how far away we landed. Because there are several boards, and because we may want to vary the number of boards while still retaining the ability to compare our performances, we would then take the average of these measures.</p>
+<p>We will note the position of our dart as being <span class="math inline">\(\hat y\)</span>, the position of the center as being <span class="math inline">\(y\)</span> (we will call this the <em>ground truth</em>), and the number of attempts <span class="math inline">\(n\)</span>, and so we can write our loss function as</p>
+<p><span id="eq-loss-mse"><span class="math display">\[
+\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat y_i)^2
+\tag{3.1}\]</span></span></p>
+<p>This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in <a href="#tbl-gradientdescent-regressionloss" class="quarto-xref">Table&nbsp;<span>3.1</span></a>.</p>
+<div id="tbl-gradientdescent-regressionloss" class="anchored">
+<table class="table">
+<caption>Table&nbsp;3.1: List of common loss functions for regression problems</caption>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Measure</th>
+<th>Expression</th>
+<th>Remarks</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mean Squared Error (MSE, L2)</td>
+<td><span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2\)</span></td>
+<td>Large errors are (proportionally) more penalized because of the squaring</td>
+</tr>
+<tr class="even">
+<td>Mean Absolute Error (MAE, L1)</td>
+<td><span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|\)</span></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Root Mean Square Error (RMSE)</td>
+<td><span class="math inline">\(\sqrt{\text{MSE}}\)</span></td>
+<td>Error measured in the units of the response variable</td>
+</tr>
+<tr class="even">
+<td>Mean Bias Error</td>
+<td><span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)\)</span></td>
+<td>Errors <em>can</em> cancel out, but this can be used as a measure of positive/negative bias</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Throughout this chapter, we will use the L2 loss (<a href="#eq-loss-mse" class="quarto-xref">Equation&nbsp;<span>3.1</span></a>), because of <strong>TK</strong> nice properties to demo</p>
+</section>
+<section id="calculating-the-gradient" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="calculating-the-gradient"><span class="header-section-number">3.3.2</span> Calculating the gradient</h3>
+</section>
+<section id="updating-the-parameters" class="level3" data-number="3.3.3">
+<h3 data-number="3.3.3" class="anchored" data-anchor-id="updating-the-parameters"><span class="header-section-number">3.3.3</span> Updating the parameters</h3>
+</section>
+<section id="a-note-on-the-learning-rate" class="level3" data-number="3.3.4">
+<h3 data-number="3.3.4" class="anchored" data-anchor-id="a-note-on-the-learning-rate"><span class="header-section-number">3.3.4</span> A note on the learning rate</h3>
+<p>The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are <em>way off</em>, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.</p>
+<p>In order to protect against this, in reality, we update the gradient only a little, where the value of “a little” is determined by an hyper-parameter called the <em>learning rate</em>, which we will note <span class="math inline">\(\eta\)</span>. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results <em>at all</em>. The representation of numbers in a computer’s memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.</p>
+<p>The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.</p>
+</section>
+</section>
+<section id="application-how-many-links-are-in-a-food-web" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="application-how-many-links-are-in-a-food-web"><span class="header-section-number">3.4</span> Application: how many links are in a food web?</h2>
+</section>
+<section id="notes-on-regularization" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</h2>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">

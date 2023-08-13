@@ -1,12 +1,12 @@
-# Gradient descent {#sec-gradientdescent}
+# Gradient descent {#gradientdescent-gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent}
 
 As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In @sec-kmeans, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
 
 Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
 
-## A digression: what is a trained model? {#sec-gradientdescent-trainedmodel}
+## A digression: what is a trained model? {#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel}
 
-## The problem: how many interactions in a food web? {#sec-gradientdescent-problem}
+## The problem: how many interactions in a food web? {#gradientdescent-gradientdescent-gradientdescent-sec-gradientdescent-problem}
 
 One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In
 
@@ -17,3 +17,52 @@ Not so fast, said @martinez1992. When we start looking a food webs with more spe
 But the square term can be relaxed; and there is no reason not to assume a power law, with $L\approx b\times S^a$. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes [@brose2004].
 
 The "reality" (*i.e.* the relationship between $S$ and $L$ that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula [@macdonald2020]. But for the purpose of this chapter, figuring out the values of $a$ and $b$ from empirical data is a very instructive exercise.
+
+## Gradient descent
+
+Gradient descent is built around a remarkably simple intuition: knowing the formula that gives rise to our prediction, and the value of the error we made for each point, we can take the derivative of the error with regards to each parameter, and this tells us how much this parameter contributed to the error. Because we are taking the derivative, we can futher know whether to increase, or decrease, the value of the parameter in order to make a smaller error next time.
+
+In this section, we will use linear regression as an example, because it is the model we have decided to use when exploring our ecological problem in @sec-gradientdescent-problem, and because it is suitably simple to keep track of everything when writing down the gradient by hand.
+
+### Defining the loss function
+
+The loss function is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions *do*.
+
+Think of prediction as throwing a series of ten darts on ten different boards. In this case, we know what the correct outcome is (the center of the board, I assume, although I can be mistaken since I have only played darts once, and lost). A cost function would be any mathematical function that compares the position of each dart on each board, the position of the correct event, and returns a score that informs us about how poorly our prediction lines up with the reality.
+
+In the above example, you may be tempted to say that we can take the Euclidean distance of each dart to the center of each board, in order to know, for each point, how far away we landed. Because there are several boards, and because we may want to vary the number of boards while still retaining the ability to compare our performances, we would then take the average of these measures.
+
+We will note the position of our dart as being $\hat y$, the position of the center as being $y$ (we will call this the *ground truth*), and the number of attempts $n$, and so we can write our loss function as
+
+$$
+\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat y_i)^2
+$$ {#eq-loss-mse}
+
+This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in @tbl-gradientdescent-regressionloss.
+
+| Measure                       | Expression                                                  | Remarks                                                                              |
+|--------------------------------------|-----------------|-----------------|
+| Mean Squared Error (MSE, L2)  | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$    | Large errors are (proportionally) more penalized because of the squaring             |
+| Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$               |                                                                                      |
+| Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$                                         | Error measured in the units of the response variable                                 |
+| Mean Bias Error               | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)$ | Errors *can* cancel out, but this can be used as a measure of positive/negative bias |
+
+: List of common loss functions for regression problems {#tbl-gradientdescent-regressionloss tbl-colwidths="[25,25,50]"}
+
+Throughout this chapter, we will use the L2 loss (@eq-loss-mse), because of **TK** nice properties to demo
+
+### Calculating the gradient
+
+### Updating the parameters
+
+### A note on the learning rate
+
+The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are *way off*, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.
+
+In order to protect against this, in reality, we update the gradient only a little, where the value of "a little" is determined by an hyper-parameter called the *learning rate*, which we will note $\eta$. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results *at all*. The representation of numbers in a computer's memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.
+
+The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.
+
+## Application: how many links are in a food web?
+
+## Notes on regularization
