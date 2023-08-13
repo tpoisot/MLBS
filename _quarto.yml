@@ -26,7 +26,7 @@ book:
           city: Montréal
           region: QC
           country: Canada
-  date: "8/5/2023"
+  date: last-modified
   chapters:
     - index.qmd
     - intro.qmd
