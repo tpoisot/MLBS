@@ -1,0 +1,109 @@
+---
+title: An analysis of the sakura phenology dataset
+---
+
+```{julia}
+using DataFrames
+import CSV
+using Dates
+using Statistics
+using GLM
+using CairoMakie
+using StatsBase
+
+# Load the data
+sakura = DataFrame(CSV.File("sakura.csv"))
+allowmissing!(sakura, :temperature)
+replace!(sakura.temperature, -50.0 => missing)
+sort!(sakura, :year)
+describe(sakura)
+dropmissing!(sakura)
+
+scatter(sakura.temperature, sakura.flowering)
+
+average = zeros(Float64, size(sakura, 1))
+for (i, row) in enumerate(eachrow(sakura))
+    year_span = row.year .+ (-10, 10)
+    valid_records = year_span[1] .< sakura.year .< year_span[2]
+    subset = sakura[findall(valid_records), :]
+    average[i] = mean(subset.flowering)
+end
+sakura.flowavg = average
+
+mse(tr, pr) = mean((tr .- pr).^2.0)
+rmse(tr, pr) = sqrt(mse(tr, pr))
+mae(tr, pr) = mean(abs.(tr .- pr))
+mbe(tr, pr) = mean(tr .- pr)
+
+n = size(sakura, 1)
+test_size = ceil.(Int, 0.1n)
+
+sakuratrain = sakura[1:(n-test_size), :]
+sakuratest = sakura[(n-test_size+1):n, :]
+
+folds = ceil.(Int, LinRange(1, size(sakuratrain, 1), 11))
+
+# Illustration figure
+f = Figure()
+s1 = Axis(f[1,1])
+s2 = Axis(f[2,1])
+s3 = Axis(f[3,1])
+s4 = Axis(f[4,1])
+for (i,s) in enumerate([s1, s2, s3, s4])
+    lines!(s, sakuratrain.year, sakuratrain.flowavg, color=:lightgrey)
+    lines!(s, sakuratest.year, sakuratest.flowavg, color=:red, linewidth=4)
+    j = 2i-1
+    valid_idx = folds[j]:folds[j+1]
+    train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
+    valid = sakuratrain[valid_idx, :]
+    train = sakuratrain[train_idx, :]
+    lines!(s, valid.year, valid.flowavg, color=:black, linewidth=2)
+    hidedecorations!(s)
+    hidespines!(s)
+end
+current_figure()
+
+train_mse = zeros(Float64, length(folds)-1)
+valid_mse = zeros(Float64, length(folds)-1)
+train_rmse = zeros(Float64, length(folds)-1)
+valid_rmse = zeros(Float64, length(folds)-1)
+train_mae = zeros(Float64, length(folds)-1)
+valid_mae = zeros(Float64, length(folds)-1)
+train_mbe = zeros(Float64, length(folds)-1)
+valid_mbe = zeros(Float64, length(folds)-1)
+for (i, Ki) in enumerate(folds)
+    if Ki < size(sakuratrain, 1)
+        valid_idx = folds[i]:folds[i+1]
+        train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
+        valid = sakuratrain[valid_idx, :]
+        train = sakuratrain[train_idx, :]
+        model = lm(@formula(flowavg ~ temperature), train)
+        valid_mse[i] = mse(valid.flowavg, predict(model, valid))
+        train_mse[i] = mse(train.flowavg, predict(model, train))
+        valid_rmse[i] = rmse(valid.flowavg, predict(model, valid))
+        train_rmse[i] = rmse(train.flowavg, predict(model, train))
+        valid_mae[i] = mae(valid.flowavg, predict(model, valid))
+        train_mae[i] = mae(train.flowavg, predict(model, train))
+        valid_mbe[i] = mbe(valid.flowavg, predict(model, valid))
+        train_mbe[i] = mbe(train.flowavg, predict(model, train))
+    end
+end
+
+model = lm(@formula(flowavg ~ temperature), sakuratrain)
+
+scatter(sakura.year, sakura.flowavg, color=:lightgrey)
+lines!(sakuratrain.year, predict(model, sakuratrain), color=:black)
+lines!(sakuratest.year, predict(model, sakuratest), color=:red)
+current_figure()
+
+f = Figure()
+ax = Axis(f[1,1]; xgridvisible=false, ygridvisible=false, xlabel="Fold", ylabel="MAE loss")
+scatterlines!(ax, train_mae, color=:grey, label="Training data")
+scatterlines!(ax, valid_mae, color=:black, label="Validation data")
+hlines!(ax, mae(sakuratest.flowavg, predict(model, sakuratest)), color=:red, label="Testing data")
+hidespines!(ax, :l, :r, :t, :b)
+hidexdecorations!(ax; label=false)
+ylims!(ax, (0, 3))
+axislegend(ax)
+current_figure()
+```
