@@ -20,7 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -186,10 +205,18 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#how-can-we-split-a-dataset" id="toc-how-can-we-split-a-dataset" class="nav-link active" data-scroll-target="#how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</a>
   <ul class="collapse">
   <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training"><span class="header-section-number">4.1.1</span> Training</a></li>
-  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">4.1.2</span> Testing</a></li>
-  <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">4.1.3</span> Validating</a></li>
+  <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">4.1.2</span> Validating</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">4.1.3</span> Testing</a></li>
   </ul></li>
-  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">4.2</span> Strategies to split data</a></li>
+  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">4.2</span> Strategies to split data</a>
+  <ul class="collapse">
+  <li><a href="#holdout" id="toc-holdout" class="nav-link" data-scroll-target="#holdout"><span class="header-section-number">4.2.1</span> Holdout</a></li>
+  <li><a href="#leave-p-out" id="toc-leave-p-out" class="nav-link" data-scroll-target="#leave-p-out"><span class="header-section-number">4.2.2</span> Leave-p-out</a></li>
+  <li><a href="#leave-one-out" id="toc-leave-one-out" class="nav-link" data-scroll-target="#leave-one-out"><span class="header-section-number">4.2.3</span> Leave-one-out</a></li>
+  <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">4.2.4</span> k-fold</a></li>
+  <li><a href="#monte-carlo" id="toc-monte-carlo" class="nav-link" data-scroll-target="#monte-carlo"><span class="header-section-number">4.2.5</span> Monte-Carlo</a></li>
+  </ul></li>
+  <li><a href="#a-note-on-balance" id="toc-a-note-on-balance" class="nav-link" data-scroll-target="#a-note-on-balance"><span class="header-section-number">4.3</span> A note on balance</a></li>
   </ul>
 </nav>
     </div>
@@ -218,6 +245,13 @@ ul.task-list li input[type="checkbox"] {
 <p>In a sense, we started thinking about these concepts in <span class="quarto-unresolved-ref">?sec-gradientdescent</span>; specifically, we came up with a way to optimize the parameters of our model (<em>i.e.</em> of <em>training</em> our model) based on a series of empirical observations, and a criteria for what a “good fit” is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.</p>
 <section id="how-can-we-split-a-dataset" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</h2>
+<p>There is a much more important question to ask first: <em>why</em> do we split a dataset? In a sense, answering this question echoes the discussion we started in <strong>TODO REG MOD</strong>, because the purpose of splitting a dataset is to ensure we can train and evaluate it properly, in order to deliver the best possible model.</p>
+<p>When a model is trained, it has learned from the data, we have tuned its hyper-parameters to ensure that it learned with the best possible conditions, and we have applied a measure of performance after the entire process to communicate how well our model works. These three tasks require three different datasets, and this is the purpose of splitting our data into groups.</p>
+<p>One of the issues when reading about splitting data is that the terminology can be muddy. For example, what constitutes a testing and validation set can largely be a matter of perspective. In many instances, testing and validation are used interchangeably, and this book is no exception. Nevertheless, it helps to settle on a few guidelines here, before going into the details of what each dataset constitutes and how to assemble it.</p>
+<p>The training data are examples that are given to the model during the training process. This one has no ambiguities. aside from the fact that it is defined by substraction, in a sense, as whatever is left of the original data after we set aside testing and validation sets.</p>
+<p>The testing data are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in <strong>TODO LEAKAGE</strong>.</p>
+<p>The validation data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.</p>
+<p>The difference between testing and validation is largely a difference of <em>intent</em>. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let’s look at each of these datasets in turn.</p>
 <section id="training" class="level3" data-number="4.1.1">
 <h3 data-number="4.1.1" class="anchored" data-anchor-id="training"><span class="header-section-number">4.1.1</span> Training</h3>
 <p>In data science (in applied machine learning in particular), we do <em>fit</em> models. We <em>train</em> them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.</p>
@@ -227,17 +261,53 @@ ul.task-list li input[type="checkbox"] {
 <p>need for instances</p>
 <p>need for responses</p>
 </section>
-<section id="testing" class="level3" data-number="4.1.2">
-<h3 data-number="4.1.2" class="anchored" data-anchor-id="testing"><span class="header-section-number">4.1.2</span> Testing</h3>
+<section id="validating" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="validating"><span class="header-section-number">4.1.2</span> Validating</h3>
 </section>
-<section id="validating" class="level3" data-number="4.1.3">
-<h3 data-number="4.1.3" class="anchored" data-anchor-id="validating"><span class="header-section-number">4.1.3</span> Validating</h3>
+<section id="testing" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="testing"><span class="header-section-number">4.1.3</span> Testing</h3>
 </section>
 </section>
 <section id="strategies-to-split-data" class="level2" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.2</span> Strategies to split data</h2>
+<p>remove testing first if needed</p>
+<p>exhaustive</p>
+<p>non-exhaustive</p>
+<section id="holdout" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="holdout"><span class="header-section-number">4.2.1</span> Holdout</h3>
+<p>The holdout method is what we used in <strong>TODO REF GRAD</strong>, in which we randomly selected some observations to be part of the validation data (which was, in practice, a testing dataset in this example), and kept the rest to serve as the training data. Holdout cross-validation is possibly the simplest technique, but it suffers from a few drawbacks.</p>
+<p>The model is only trained for one split of the data, and similarly only evaluated for one split of the data. There is, therefore, a chance to sample a particularly bad combination of the data that lead to erroneous results. Attempts to quantify the importance of the predictors are likely to give particularly unstable results, as the noise introduced by picking a single random subset will not be smoothed out by multiple attempts.</p>
+<p>In addition, as <span class="citation" data-cites="hawkins2003">Hawkins, Basak, and Mills (<a href="../references.html#ref-hawkins2003" role="doc-biblioref">2003</a>)</span> point out, holdout validation is particularly wasteful in data-limited settings, where there are fewer than hundreds of observations. The reason is that the holdout dataset will <em>never</em> contribute to training, and assuming the data are split 80/20, one out of five observations will not contribute to the model. Other cross-validation schemes presented in this section will allow observations to be used both for training and validation.</p>
+</section>
+<section id="leave-p-out" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="leave-p-out"><span class="header-section-number">4.2.2</span> Leave-p-out</h3>
+<p>In leave-<em>p</em>-out cross-validation (LpOCV), starting from a dataset on <span class="math inline">\(n\)</span> observation, we pick <span class="math inline">\(p\)</span> at random to serve as validation data, and <span class="math inline">\(n-p\)</span> to serve as the training dataset. This process is then repeated <em>exhaustively</em>, which is to say we split the dataset in every possible way that gives <span class="math inline">\(p\)</span> and <span class="math inline">\(n-p\)</span> observations, for a set value of <span class="math inline">\(p\)</span>. The model is then trained on the <span class="math inline">\(n-p\)</span> observations, and validated on the <span class="math inline">\(p\)</span> observations for validation, and the performance (or loss) is averaged to give the model performance before testing.</p>
+<p><span class="citation" data-cites="celisse2014">Celisse (<a href="../references.html#ref-celisse2014" role="doc-biblioref">2014</a>)</span> points out that <span class="math inline">\(p\)</span> has to be large enough (relative to the sample size <span class="math inline">\(n\)</span>) to overcome the propensity of the model to overfit on a small training dataset. One issue with LpOCV is that the number of combinations is potentially very large. It is, in fact, given by the binomial coefficent <span class="math inline">\(\binom{n}{p}\)</span>, which gets unreasonably large even for small datasets. For example, running LpOCV on <span class="math inline">\(n=150\)</span> observations, leaving out <span class="math inline">\(p=10\)</span> for validation everytime, would require to train the model about <span class="math inline">\(10^{15}\)</span> times. Assuming we can train the model in <span class="math inline">\(10^{-3}\)</span> seconds, the entire process would require 370 centuries.</p>
+<p>Oh well.</p>
+</section>
+<section id="leave-one-out" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="leave-one-out"><span class="header-section-number">4.2.3</span> Leave-one-out</h3>
+<p>The leave-one-out cross-validation (LOCCV) is a special case of LpOCV with <span class="math inline">\(p=1\)</span>. Note that it is a lot faster to run than LpOCV, because <span class="math inline">\(\binom{n}{1}=n\)</span>, and so the validation step runs in <span class="math inline">\(\mathcal{O}(n)\)</span> (LpOCV runs in <span class="math inline">\(\mathcal{O}(n!)\)</span>). LOOCV is also an <em>exhaustive</em> cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.</p>
+</section>
+<section id="k-fold" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.2.4</span> k-fold</h3>
+</section>
+<section id="monte-carlo" class="level3" data-number="4.2.5">
+<h3 data-number="4.2.5" class="anchored" data-anchor-id="monte-carlo"><span class="header-section-number">4.2.5</span> Monte-Carlo</h3>
+</section>
+</section>
+<section id="a-note-on-balance" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="a-note-on-balance"><span class="header-section-number">4.3</span> A note on balance</h2>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-celisse2014" class="csl-entry" role="listitem">
+Celisse, Alain. 2014. <span>“Optimal Cross-Validation in Density Estimation with the <span>$</span>l<span>^</span><span></span>2<span></span><span>$</span>-Loss.”</span> <em>The Annals of Statistics</em> 42 (5). <a href="https://doi.org/10.1214/14-aos1240">https://doi.org/10.1214/14-aos1240</a>.
+</div>
+<div id="ref-hawkins2003" class="csl-entry" role="listitem">
+Hawkins, Douglas M., Subhash C. Basak, and Denise Mills. 2003. <span>“Assessing Model Fit by Cross-Validation.”</span> <em>Journal of Chemical Information and Computer Sciences</em> 43 (2): 579–86. <a href="https://doi.org/10.1021/ci025626i">https://doi.org/10.1021/ci025626i</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
