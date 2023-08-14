@@ -117,4 +117,6 @@ The conservative solution of using the smallest possible learning rate is not re
 
 ## Application: how many links are in a food web?
 
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-data >}}
+
 ## Notes on regularization

@@ -38,6 +38,8 @@ need for responses
 
 ### Testing
 
+## The problem: phenology of cherry blossom
+
 ## Strategies to split data
 
 remove testing first if needed
@@ -68,6 +70,10 @@ The leave-one-out cross-validation (LOCCV) is a special case of LpOCV with $p=1$
 
 ### k-fold
 
+{{< embed ../notebooks/sm-splits.qmd#fig-split-illustration >}}
+
 ### Monte-Carlo
+
+## Application: when do cherry blossom bloom?
 
 ## A note on balance

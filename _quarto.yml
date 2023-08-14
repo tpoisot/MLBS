@@ -1,6 +1,7 @@
 project:
   type: book
   output-dir: public
+  execute-dir: project
 
 book:
   title: "Data Science for Biodiversity"

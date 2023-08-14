@@ -15,7 +15,7 @@ CairoMakie.activate!(; px_per_unit = 2)
 We can now load the data -- because they come with a little more information than what we use, we will drop the columns we don't need (`:P` are the predation interactions, and `:H` the number of herbivory interactions) , and remove the rows with obvious issues (such as no documented interaction). The data are described in the main chapter.
 
 ```{julia}
-ls = DataFrame(CSV.File(joinpath(pwd(), "data/gradientdescent/ls.csv")))
+ls = DataFrame(CSV.File(joinpath(@__DIR__, "../data/gradientdescent/ls.csv")))
 select!(ls, Not(:P))
 select!(ls, Not(:H))
 ls = ls[ls.L .> 0, :]
@@ -27,8 +27,7 @@ We will make an obvious first plot: the relationship between $L$ and $S$ on a lo
 
 ```{julia}
 #| label: fig-gradient-data
-#| fig-cap: >
-#|  Overview of data from ...
+#| fig-cap: Overview of data from ...
 fig = Figure(; resolution=(500, 500))
 axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, ls.S, ls.L, color=:black, markersize=4)
@@ -113,8 +112,7 @@ Now we can plot the training:
 
 ```{julia}
 #| label: fig-gradient-loss-comparison
-#| fig-cap: >
-#|  Overview of data from ...
+#| fig-cap: Overview of data from ...
 fig = Figure(; resolution=(500, 300))
 
 axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="L₂ loss", yscale=log10)
@@ -129,10 +127,7 @@ and the residuals
 
 ```{julia}
 #| label: fig-gradient-residuals
-#| fig-cap: >
-#|  Overview of the distributions of residuals (note that the residuals are calculated on the $log_2(L)$ and $log_2(S)$) after a large enough
-#|  number of epochs for gradient descent.
-#|  The grey histogram is the residuals on the training data, and the red density line is the residuals on the testing data.
+#| fig-cap: Overview of the distributions of residuals (note that the residuals are calculated on the $log_2(L)$ and $log_2(S)$) after a large enough number of epochs for gradient descent. The grey histogram is the residuals on the training data, and the red density line is the residuals on the testing data.
 fig = Figure(; resolution=(500, 300))
 axs = Axis(fig[1,1])
 hist!(axs, lm(x, p...) .- y; normalization=:pdf, color=:lightgrey, bins=20)
@@ -148,8 +143,7 @@ and the predictions:
 
 ```{julia}
 #| label: fig-gradient-fitted
-#| fig-cap: >
-#|  Overview of data from ...
+#| fig-cap: Overview of data from ...
 fig = Figure(; resolution=(500, 500))
 axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, training.S, training.L, color=:black, markersize=4)

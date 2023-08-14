@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.315">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -83,6 +83,9 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -208,15 +211,17 @@ div.csl-indent {
   <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">4.1.2</span> Validating</a></li>
   <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">4.1.3</span> Testing</a></li>
   </ul></li>
-  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">4.2</span> Strategies to split data</a>
+  <li><a href="#the-problem-phenology-of-cherry-blossom" id="toc-the-problem-phenology-of-cherry-blossom" class="nav-link" data-scroll-target="#the-problem-phenology-of-cherry-blossom"><span class="header-section-number">4.2</span> The problem: phenology of cherry blossom</a></li>
+  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">4.3</span> Strategies to split data</a>
   <ul class="collapse">
-  <li><a href="#holdout" id="toc-holdout" class="nav-link" data-scroll-target="#holdout"><span class="header-section-number">4.2.1</span> Holdout</a></li>
-  <li><a href="#leave-p-out" id="toc-leave-p-out" class="nav-link" data-scroll-target="#leave-p-out"><span class="header-section-number">4.2.2</span> Leave-p-out</a></li>
-  <li><a href="#leave-one-out" id="toc-leave-one-out" class="nav-link" data-scroll-target="#leave-one-out"><span class="header-section-number">4.2.3</span> Leave-one-out</a></li>
-  <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">4.2.4</span> k-fold</a></li>
-  <li><a href="#monte-carlo" id="toc-monte-carlo" class="nav-link" data-scroll-target="#monte-carlo"><span class="header-section-number">4.2.5</span> Monte-Carlo</a></li>
+  <li><a href="#holdout" id="toc-holdout" class="nav-link" data-scroll-target="#holdout"><span class="header-section-number">4.3.1</span> Holdout</a></li>
+  <li><a href="#leave-p-out" id="toc-leave-p-out" class="nav-link" data-scroll-target="#leave-p-out"><span class="header-section-number">4.3.2</span> Leave-p-out</a></li>
+  <li><a href="#leave-one-out" id="toc-leave-one-out" class="nav-link" data-scroll-target="#leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</a></li>
+  <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">4.3.4</span> k-fold</a></li>
+  <li><a href="#monte-carlo" id="toc-monte-carlo" class="nav-link" data-scroll-target="#monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</a></li>
   </ul></li>
-  <li><a href="#a-note-on-balance" id="toc-a-note-on-balance" class="nav-link" data-scroll-target="#a-note-on-balance"><span class="header-section-number">4.3</span> A note on balance</a></li>
+  <li><a href="#application-when-do-cherry-blossom-bloom" id="toc-application-when-do-cherry-blossom-bloom" class="nav-link" data-scroll-target="#application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</a></li>
+  <li><a href="#a-note-on-balance" id="toc-a-note-on-balance" class="nav-link" data-scroll-target="#a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</a></li>
   </ul>
 </nav>
     </div>
@@ -268,36 +273,54 @@ div.csl-indent {
 <h3 data-number="4.1.3" class="anchored" data-anchor-id="testing"><span class="header-section-number">4.1.3</span> Testing</h3>
 </section>
 </section>
-<section id="strategies-to-split-data" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.2</span> Strategies to split data</h2>
+<section id="the-problem-phenology-of-cherry-blossom" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="the-problem-phenology-of-cherry-blossom"><span class="header-section-number">4.2</span> The problem: phenology of cherry blossom</h2>
+</section>
+<section id="strategies-to-split-data" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.3</span> Strategies to split data</h2>
 <p>remove testing first if needed</p>
 <p>exhaustive</p>
 <p>non-exhaustive</p>
-<section id="holdout" class="level3" data-number="4.2.1">
-<h3 data-number="4.2.1" class="anchored" data-anchor-id="holdout"><span class="header-section-number">4.2.1</span> Holdout</h3>
+<section id="holdout" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="holdout"><span class="header-section-number">4.3.1</span> Holdout</h3>
 <p>The holdout method is what we used in <strong>TODO REF GRAD</strong>, in which we randomly selected some observations to be part of the validation data (which was, in practice, a testing dataset in this example), and kept the rest to serve as the training data. Holdout cross-validation is possibly the simplest technique, but it suffers from a few drawbacks.</p>
 <p>The model is only trained for one split of the data, and similarly only evaluated for one split of the data. There is, therefore, a chance to sample a particularly bad combination of the data that lead to erroneous results. Attempts to quantify the importance of the predictors are likely to give particularly unstable results, as the noise introduced by picking a single random subset will not be smoothed out by multiple attempts.</p>
 <p>In addition, as <span class="citation" data-cites="hawkins2003">Hawkins, Basak, and Mills (<a href="../references.html#ref-hawkins2003" role="doc-biblioref">2003</a>)</span> point out, holdout validation is particularly wasteful in data-limited settings, where there are fewer than hundreds of observations. The reason is that the holdout dataset will <em>never</em> contribute to training, and assuming the data are split 80/20, one out of five observations will not contribute to the model. Other cross-validation schemes presented in this section will allow observations to be used both for training and validation.</p>
 </section>
-<section id="leave-p-out" class="level3" data-number="4.2.2">
-<h3 data-number="4.2.2" class="anchored" data-anchor-id="leave-p-out"><span class="header-section-number">4.2.2</span> Leave-p-out</h3>
+<section id="leave-p-out" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="leave-p-out"><span class="header-section-number">4.3.2</span> Leave-p-out</h3>
 <p>In leave-<em>p</em>-out cross-validation (LpOCV), starting from a dataset on <span class="math inline">\(n\)</span> observation, we pick <span class="math inline">\(p\)</span> at random to serve as validation data, and <span class="math inline">\(n-p\)</span> to serve as the training dataset. This process is then repeated <em>exhaustively</em>, which is to say we split the dataset in every possible way that gives <span class="math inline">\(p\)</span> and <span class="math inline">\(n-p\)</span> observations, for a set value of <span class="math inline">\(p\)</span>. The model is then trained on the <span class="math inline">\(n-p\)</span> observations, and validated on the <span class="math inline">\(p\)</span> observations for validation, and the performance (or loss) is averaged to give the model performance before testing.</p>
 <p><span class="citation" data-cites="celisse2014">Celisse (<a href="../references.html#ref-celisse2014" role="doc-biblioref">2014</a>)</span> points out that <span class="math inline">\(p\)</span> has to be large enough (relative to the sample size <span class="math inline">\(n\)</span>) to overcome the propensity of the model to overfit on a small training dataset. One issue with LpOCV is that the number of combinations is potentially very large. It is, in fact, given by the binomial coefficent <span class="math inline">\(\binom{n}{p}\)</span>, which gets unreasonably large even for small datasets. For example, running LpOCV on <span class="math inline">\(n=150\)</span> observations, leaving out <span class="math inline">\(p=10\)</span> for validation everytime, would require to train the model about <span class="math inline">\(10^{15}\)</span> times. Assuming we can train the model in <span class="math inline">\(10^{-3}\)</span> seconds, the entire process would require 370 centuries.</p>
 <p>Oh well.</p>
 </section>
-<section id="leave-one-out" class="level3" data-number="4.2.3">
-<h3 data-number="4.2.3" class="anchored" data-anchor-id="leave-one-out"><span class="header-section-number">4.2.3</span> Leave-one-out</h3>
+<section id="leave-one-out" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</h3>
 <p>The leave-one-out cross-validation (LOCCV) is a special case of LpOCV with <span class="math inline">\(p=1\)</span>. Note that it is a lot faster to run than LpOCV, because <span class="math inline">\(\binom{n}{1}=n\)</span>, and so the validation step runs in <span class="math inline">\(\mathcal{O}(n)\)</span> (LpOCV runs in <span class="math inline">\(\mathcal{O}(n!)\)</span>). LOOCV is also an <em>exhaustive</em> cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.</p>
 </section>
-<section id="k-fold" class="level3" data-number="4.2.4">
-<h3 data-number="4.2.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.2.4</span> k-fold</h3>
+<section id="k-fold" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.3.4</span> k-fold</h3>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-split-illustration">
+<div id="cell-fig-split-illustration" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div id="fig-split-illustration" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="splits_files/figure-html/fig-split-illustration-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4.1: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
 </section>
-<section id="monte-carlo" class="level3" data-number="4.2.5">
-<h3 data-number="4.2.5" class="anchored" data-anchor-id="monte-carlo"><span class="header-section-number">4.2.5</span> Monte-Carlo</h3>
+<section id="monte-carlo" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</h3>
 </section>
 </section>
-<section id="a-note-on-balance" class="level2" data-number="4.3">
-<h2 data-number="4.3" class="anchored" data-anchor-id="a-note-on-balance"><span class="header-section-number">4.3</span> A note on balance</h2>
+<section id="application-when-do-cherry-blossom-bloom" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</h2>
+</section>
+<section id="a-note-on-balance" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</h2>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">

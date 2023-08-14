@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.315">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -290,7 +290,7 @@ div.csl-indent {
 </table>
 <p>From these channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels) – this information is presented in <a href="#fig-visual" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> . Or is it? If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a <em>lot</em> of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel.</p>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/kmeans.ipynb" data-notebook-title="k-means" data-notebook-cellid="cell-fig-visual">
-<div id="cell-fig-visual" class="cell" data-execution_count="22">
+<div id="cell-fig-visual" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div id="fig-visual" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -303,7 +303,7 @@ div.csl-indent {
 </div>
 <p>But just like we can get more information that Landsat 9, so to can Landsat 9 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape; in <a href="#fig-color-veg" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>, we show such a fake color composite, that is particularly efficient at drawing our attention to the location of water in this area.</p>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/kmeans.ipynb" data-notebook-title="k-means" data-notebook-cellid="cell-fig-color-veg">
-<div id="cell-fig-color-veg" class="cell" data-execution_count="23">
+<div id="cell-fig-color-veg" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div id="fig-color-veg" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -319,7 +319,7 @@ div.csl-indent {
 <p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="../references.html#ref-kennedy2020" role="doc-biblioref">Kennedy and Burbach 2020</a>)</span>. NDVI is derived from the band data (we will see how in a minute), and is an adequate heuristic to make a difference between vegetation, barren soil, and water. Because we are specifically thinking about fields, we can also consider the NDWI (water) and NDMI (moisture) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI).</p>
 <p>Because there are a few guidelines (educated guesses, in truth, and the jury is still out on the “educated” part) about the values, we can look at the relationship between the NDVI and NDMI data <a href="#fig-hexbin" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>. For example, NDMI values around -0.1 (note how there is a strong cluster of points here) are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops.</p>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/kmeans.ipynb" data-notebook-title="k-means" data-notebook-cellid="cell-fig-hexbin">
-<div id="cell-fig-hexbin" class="cell" data-execution_count="26">
+<div id="cell-fig-hexbin" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div id="fig-hexbin" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -345,7 +345,7 @@ div.csl-indent {
 <section id="application-optimal-clustering-of-the-satellite-image-data" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.5</span> Application: optimal clustering of the satellite image data</h2>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/kmeans.ipynb" data-notebook-title="k-means" data-notebook-cellid="cell-fig-classified-landscape">
-<div id="cell-fig-classified-landscape" class="cell" data-execution_count="30">
+<div id="cell-fig-classified-landscape" class="cell" data-execution_count="10">
 <div class="cell-output cell-output-display">
 <div id="fig-classified-landscape" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -357,7 +357,7 @@ div.csl-indent {
 </div>
 </div>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/kmeans.ipynb" data-notebook-title="k-means" data-notebook-cellid="cell-fig-barplot-classes">
-<div id="cell-fig-barplot-classes" class="cell" data-execution_count="87">
+<div id="cell-fig-barplot-classes" class="cell" data-execution_count="15">
 <div class="cell-output cell-output-display">
 <div id="fig-barplot-classes" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
