@@ -3,6 +3,10 @@ project:
   output-dir: public
   execute-dir: project
 
+execute: 
+  freeze: auto
+  cache: true
+
 book:
   title: "Data Science for Biodiversity"
   subtitle: "Fundamentals and Applications"

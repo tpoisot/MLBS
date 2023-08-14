@@ -27,7 +27,7 @@ We will make an obvious first plot: the relationship between $L$ and $S$ on a lo
 
 ```{julia}
 #| label: fig-gradient-data
-#| fig-cap: Overview of data from ...
+#| fig-cap: ... (todo)
 fig = Figure(; resolution=(500, 500))
 axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, ls.S, ls.L, color=:black, markersize=4)
