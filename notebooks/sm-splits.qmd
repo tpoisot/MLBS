@@ -22,7 +22,11 @@ allowmissing!(sakura, :temperature)
 replace!(sakura.temperature, -50.0 => missing)
 sort!(sakura, :year)
 describe(sakura)
+```
 
+We will use a 14 years running average
+
+```{julia}
 average = zeros(Float64, size(sakura, 1))
 for (i, row) in enumerate(eachrow(sakura))
     year_span = row.year .+ (-8, 8)
