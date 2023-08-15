@@ -25,12 +25,12 @@ describe(sakura)
 
 average = zeros(Float64, size(sakura, 1))
 for (i, row) in enumerate(eachrow(sakura))
-    year_span = row.year .+ (-7, 7)
+    year_span = row.year .+ (-8, 8)
     @info year_span
     valid_records = year_span[1] .< sakura.year .< year_span[2]
     subset = sakura[findall(valid_records), :]
     dropmissing!(subset)
-    if size(subset, 1) >= 5
+    if size(subset, 1) >= 3
         average[i] = mean(subset.flowering)
     end
 end
@@ -61,7 +61,7 @@ We now define a series of folds, in order to do k-folds cross validation. Note t
 
 ```{julia}
 n = size(sakura, 1)
-test_size = ceil.(Int, 0.1n)
+test_size = ceil.(Int, 0.25n)
 
 sakuratrain = sakura[1:(n-test_size), :]
 sakuratest = sakura[(n-test_size+1):n, :]
@@ -97,14 +97,7 @@ current_figure()
 placeholders for validation measures
 
 ```{julia}
-train_mse = zeros(Float64, length(folds)-1)
-valid_mse = zeros(Float64, length(folds)-1)
-train_rmse = zeros(Float64, length(folds)-1)
-valid_rmse = zeros(Float64, length(folds)-1)
-train_mae = zeros(Float64, length(folds)-1)
-valid_mae = zeros(Float64, length(folds)-1)
-train_mbe = zeros(Float64, length(folds)-1)
-valid_mbe = zeros(Float64, length(folds)-1)
+test_results = DataFrame()
 ```
 
 this is the cross validation
@@ -116,17 +109,36 @@ for (i, Ki) in enumerate(folds)
         train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
         valid = sakuratrain[valid_idx, :]
         train = sakuratrain[train_idx, :]
-        model = lm(@formula(flowavg ~ temperature), train)
-        valid_mse[i] = mse(valid.flowavg, predict(model, valid))
-        train_mse[i] = mse(train.flowavg, predict(model, train))
-        valid_rmse[i] = rmse(valid.flowavg, predict(model, valid))
-        train_rmse[i] = rmse(train.flowavg, predict(model, train))
-        valid_mae[i] = mae(valid.flowavg, predict(model, valid))
-        train_mae[i] = mae(train.flowavg, predict(model, train))
-        valid_mbe[i] = mbe(valid.flowavg, predict(model, valid))
-        train_mbe[i] = mbe(train.flowavg, predict(model, train))
+        m1 = lm(@formula(flowavg ~ temperature), train)
+        m2 = lm(@formula(flowavg ~ temperature + temperature^-1), train)
+        for (md, mn) in [(m1, :Simple), (m2, :Inverse)]
+            for (ds, dn) in [(train, :Training), (valid, :Validation)]
+                for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
+                    loss = m(ds.flowavg, predict(md, ds))
+                    push!(test_results,
+                        (
+                            Model = mn,
+                            Dataset = dn,
+                            Measure = p,
+                            Value = loss
+                        )
+                    )
+                end
+            end
+        end
     end
 end
+
+gr_test = groupby(test_results, [:Model, :Dataset, :Measure])
+benchmark_result = combine(gr_test, :Value => mean => Symbol("Loss (avg.)"), :Value => std => Symbol("Loss (std. dev.)"))
+sort!(benchmark_result, [:Measure, :Dataset, :Model, Symbol("Loss (avg.)")])
+```
+
+Based on these results, we can look at the value of the MAE loss to pick our best model:
+
+```{julia}
+choice = benchmark_result[(benchmark_result.Measure .== :MAE),:]
+sort!(choice, :Dataset)
 ```
 
 We now train the model on the full dataset
@@ -147,14 +159,14 @@ current_figure()
 ```{julia}
 #| label: fig-splits-validation
 #| fig-cap: TODO
-f = Figure()
+f = Figure(; resolution=(500, 300))
 ax = Axis(f[1,1]; xgridvisible=false, ygridvisible=false, xlabel="Fold", ylabel="MAE loss")
 scatterlines!(ax, train_mae, color=:grey, label="Training data")
 scatterlines!(ax, valid_mae, color=:black, label="Validation data")
 hlines!(ax, mae(sakuratest.flowavg, predict(model, sakuratest)), color=:red, label="Testing data")
 hidespines!(ax, :l, :r, :t, :b)
 hidexdecorations!(ax; label=false)
-ylims!(ax, (0, 3))
+ylims!(ax, (0, 5))
 axislegend(ax)
 current_figure()
 ```
@@ -178,5 +190,19 @@ output.Validation = [
     mean(valid_mae),
     mean(valid_mbe)
 ]
+output.Testing = [
+    rmse(sakuratest.flowavg, predict(model, sakuratest)),
+    mse(sakuratest.flowavg, predict(model, sakuratest)),
+    mae(sakuratest.flowavg, predict(model, sakuratest)),
+    mbe(sakuratest.flowavg, predict(model, sakuratest))
+]
 print(output)
+```
+
+```{julia}
+#| label: fig-splits-detail
+#| fig-cap: TODO
+scatter(sakuratest.year, sakuratest.flowavg, color=:lightgrey)
+lines!(sakuratest.year, predict(model, sakuratest), color=:red)
+current_figure()
 ```
