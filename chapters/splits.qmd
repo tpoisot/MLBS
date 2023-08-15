@@ -66,14 +66,28 @@ Oh well.
 
 ### Leave-one-out
 
-The leave-one-out cross-validation (LOCCV) is a special case of LpOCV with $p=1$. Note that it is a lot faster to run than LpOCV, because $\binom{n}{1}=n$, and so the validation step runs in $\mathcal{O}(n)$ (LpOCV runs in $\mathcal{O}(n!)$). LOOCV is also an *exhaustive* cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.
+The leave-one-out cross-validation (LOOCV) is a special case of LpOCV with $p=1$. Note that it is a lot faster to run than LpOCV, because $\binom{n}{1}=n$, and so the validation step runs in $\mathcal{O}(n)$ (LpOCV runs in $\mathcal{O}(n!)$). LOOCV is also an *exhaustive* cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.
 
 ### k-fold
 
-{{< embed ../notebooks/sm-splits.qmd#fig-split-illustration >}}
+One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into $k$ equal parts (and so when $k = n$, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used *exactly* one time to evaluate the model , and *exactly* $k-1$ times to train it. But by contrast with the holdout validation approach, *all* observations are used to train the model.
+
+When the data have some specific structure, it can be a good thing to manipulate the splits in order to maintain this structure. For example, @bergmeir2012 use temporal blocks for validation of time series, and retain the last part of the series for testing (we illustrate this in @fig-splits-illustration). For spatial data, @hijmans2012 suggests the use of a null model based on distance to training sites to decide on how to split the data; @valavi2018 have designed specific k-fold cross-validation schemes for species distribution models. These approaches all belong to the family of *stratified* k-fold cross-validation [@zeng2000].
+
+{{< embed ../notebooks/sm-splits.qmd#fig-splits-illustration >}}
+
+The appropriate value of $k$ is often an unknown. It is common to use $k = 10$ as a starting point (tenfold cross-validation), but other values are justifiable based on data volume, complexity of the model training, to name a few.
 
 ### Monte-Carlo
 
+One of the limitations of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.
+
+One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.
+
 ## Application: when do cherry blossom bloom?
+
+{{< embed ../notebooks/sm-splits.qmd#fig-splits-prediction >}}
+
+{{< embed ../notebooks/sm-splits.qmd#tab-splits-results >}}
 
 ## A note on balance

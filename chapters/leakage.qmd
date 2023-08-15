@@ -12,6 +12,8 @@ Because this is the behavior we want to simulate with a validation dataset, it i
 
 Congratulations! We have created data leakage! Because we are splitting our timeseries at random, the model will likely have been trained using data that date from *after* the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.
 
+**TODO** stationary processes @politis1994
+
 ## Sources of data leakage
 
 instances

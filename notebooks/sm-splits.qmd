@@ -10,6 +10,7 @@ import CSV
 using Statistics
 using GLM
 using CairoMakie
+using Markdown
 CairoMakie.activate!(; px_per_unit = 2)
 ```
 
@@ -21,6 +22,23 @@ allowmissing!(sakura, :temperature)
 replace!(sakura.temperature, -50.0 => missing)
 sort!(sakura, :year)
 describe(sakura)
+
+average = zeros(Float64, size(sakura, 1))
+for (i, row) in enumerate(eachrow(sakura))
+    year_span = row.year .+ (-7, 7)
+    @info year_span
+    valid_records = year_span[1] .< sakura.year .< year_span[2]
+    subset = sakura[findall(valid_records), :]
+    dropmissing!(subset)
+    if size(subset, 1) >= 5
+        average[i] = mean(subset.flowering)
+    end
+end
+sakura.flowavg = average
+
+allowmissing!(sakura, :flowavg)
+replace!(sakura.flowavg, 0.0 => missing)
+
 dropmissing!(sakura)
 ```
 
@@ -28,19 +46,6 @@ We can inspect the data to look for a linear relationship between temperature an
 
 ```{julia}
 scatter(sakura.temperature, sakura.flowering)
-```
-
-Because the raw observations are noisy, we calculate a 20 years running average of the day of bloom:
-
-```{julia}
-average = zeros(Float64, size(sakura, 1))
-for (i, row) in enumerate(eachrow(sakura))
-    year_span = row.year .+ (-10, 10)
-    valid_records = year_span[1] .< sakura.year .< year_span[2]
-    subset = sakura[findall(valid_records), :]
-    average[i] = mean(subset.flowering)
-end
-sakura.flowavg = average
 ```
 
 We can now define a few loss functions to compare them later on:
@@ -67,7 +72,7 @@ folds = ceil.(Int, LinRange(1, size(sakuratrain, 1), 11))
 This next figure is purely an illustration of the splits:
 
 ```{julia}
-#| label: fig-split-illustration
+#| label: fig-splits-illustration
 #| fig-cap: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.
 f = Figure()
 s1 = Axis(f[1,1])
@@ -75,14 +80,14 @@ s2 = Axis(f[2,1])
 s3 = Axis(f[3,1])
 s4 = Axis(f[4,1])
 for (i,s) in enumerate([s1, s2, s3, s4])
-    lines!(s, sakuratrain.year, sakuratrain.flowavg, color=:lightgrey)
-    lines!(s, sakuratest.year, sakuratest.flowavg, color=:red, linewidth=4)
+    scatter!(s, sakuratrain.year, sakuratrain.flowavg, color=:lightgrey)
+    scatter!(s, sakuratest.year, sakuratest.flowavg, color=Makie.wong_colors()[4], linewidth=4)
     j = 2i-1
     valid_idx = folds[j]:folds[j+1]
     train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
     valid = sakuratrain[valid_idx, :]
     train = sakuratrain[train_idx, :]
-    lines!(s, valid.year, valid.flowavg, color=:black, linewidth=2)
+    scatter!(s, valid.year, valid.flowavg, color=Makie.wong_colors()[3], linewidth=2)
     hidedecorations!(s)
     hidespines!(s)
 end
@@ -131,6 +136,8 @@ model = lm(@formula(flowavg ~ temperature), sakuratrain)
 ```
 
 ```{julia}
+#| label: fig-splits-prediction
+#| fig-cap: TODO
 scatter(sakura.year, sakura.flowavg, color=:lightgrey)
 lines!(sakuratrain.year, predict(model, sakuratrain), color=:black)
 lines!(sakuratest.year, predict(model, sakuratest), color=:red)
@@ -138,6 +145,8 @@ current_figure()
 ```
 
 ```{julia}
+#| label: fig-splits-validation
+#| fig-cap: TODO
 f = Figure()
 ax = Axis(f[1,1]; xgridvisible=false, ygridvisible=false, xlabel="Fold", ylabel="MAE loss")
 scatterlines!(ax, train_mae, color=:grey, label="Training data")
@@ -148,4 +157,26 @@ hidexdecorations!(ax; label=false)
 ylims!(ax, (0, 3))
 axislegend(ax)
 current_figure()
+```
+
+We can now make a table with the results (by dataset/loss function):
+
+```{julia}
+#| label: tab-splits-results
+#| tbl-cap: blah
+output = DataFrame()
+output.Loss = [:RMSE, :MSE, :MAE, :MBE]
+output.Training = [
+    mean(train_rmse),
+    mean(train_mse),
+    mean(train_mae),
+    mean(train_mbe)
+]
+output.Validation = [
+    mean(valid_rmse),
+    mean(valid_mse),
+    mean(valid_mae),
+    mean(valid_mbe)
+]
+print(output)
 ```

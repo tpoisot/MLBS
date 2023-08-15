@@ -234,6 +234,7 @@ div.csl-indent {
 <p>It is worth stopping for a moment to consider what these “real-life situations” are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are <em>applying</em> a model, we can start from the model <em>only</em>. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data.</p>
 <p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the validation data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="../references.html#ref-dornelas2018" role="doc-biblioref">Dornelas et al. 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to test these models, and a last one for validation.</p>
 <p>Congratulations! We have created data leakage! Because we are splitting our timeseries at random, the model will likely have been trained using data that date from <em>after</em> the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.</p>
+<p><strong>TODO</strong> stationary processes <span class="citation" data-cites="politis1994">Politis and Romano (<a href="../references.html#ref-politis1994" role="doc-biblioref">1994</a>)</span></p>
 </section>
 <section id="sources-of-data-leakage" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="sources-of-data-leakage"><span class="header-section-number">5.2</span> Sources of data leakage</h2>
@@ -260,6 +261,9 @@ Nisbet, Robert, Gary Miner, Ken Yale, John F. Elder, and Andrew F. Peterson. 201
 </div>
 <div id="ref-Peterson2018" class="csl-entry" role="listitem">
 Peterson, A. Townsend, Alex Asase, Dora Canhos, Sidnei de Souza, and John Wieczorek. 2018. <span>“Data Leakage and Loss in Biodiversity Informatics.”</span> <em>Biodiversity Data Journal</em> 6 (November). <a href="https://doi.org/10.3897/bdj.6.e26826">https://doi.org/10.3897/bdj.6.e26826</a>.
+</div>
+<div id="ref-politis1994" class="csl-entry" role="listitem">
+Politis, Dimitris N., and Joseph P. Romano. 1994. <span>“The Stationary Bootstrap.”</span> <em>Journal of the American Statistical Association</em> 89 (428): 1303–13. <a href="https://doi.org/10.1080/01621459.1994.10476870">https://doi.org/10.1080/01621459.1994.10476870</a>.
 </div>
 <div id="ref-stock2023" class="csl-entry" role="listitem">
 Stock, Andy, Edward J. Gregr, and Kai M. A. Chan. 2023. <span>“Data Leakage Jeopardizes Ecological Applications of Machine Learning.”</span> <em>Nature Ecology &amp; Evolution</em>, August. <a href="https://doi.org/10.1038/s41559-023-02162-1">https://doi.org/10.1038/s41559-023-02162-1</a>.

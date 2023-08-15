@@ -295,40 +295,86 @@ div.csl-indent {
 </section>
 <section id="leave-one-out" class="level3" data-number="4.3.3">
 <h3 data-number="4.3.3" class="anchored" data-anchor-id="leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</h3>
-<p>The leave-one-out cross-validation (LOCCV) is a special case of LpOCV with <span class="math inline">\(p=1\)</span>. Note that it is a lot faster to run than LpOCV, because <span class="math inline">\(\binom{n}{1}=n\)</span>, and so the validation step runs in <span class="math inline">\(\mathcal{O}(n)\)</span> (LpOCV runs in <span class="math inline">\(\mathcal{O}(n!)\)</span>). LOOCV is also an <em>exhaustive</em> cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.</p>
+<p>The leave-one-out cross-validation (LOOCV) is a special case of LpOCV with <span class="math inline">\(p=1\)</span>. Note that it is a lot faster to run than LpOCV, because <span class="math inline">\(\binom{n}{1}=n\)</span>, and so the validation step runs in <span class="math inline">\(\mathcal{O}(n)\)</span> (LpOCV runs in <span class="math inline">\(\mathcal{O}(n!)\)</span>). LOOCV is also an <em>exhaustive</em> cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.</p>
 </section>
 <section id="k-fold" class="level3" data-number="4.3.4">
 <h3 data-number="4.3.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.3.4</span> k-fold</h3>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-split-illustration">
-<div id="cell-fig-split-illustration" class="cell" data-execution_count="7">
+<p>One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into <span class="math inline">\(k\)</span> equal parts (and so when <span class="math inline">\(k = n\)</span>, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used <em>exactly</em> one time to evaluate the model , and <em>exactly</em> <span class="math inline">\(k-1\)</span> times to train it. But by contrast with the holdout validation approach, <em>all</em> observations are used to train the model.</p>
+<p>When the data have some specific structure, it can be a good thing to manipulate the splits in order to maintain this structure. For example, <span class="citation" data-cites="bergmeir2012">Bergmeir and Benítez (<a href="../references.html#ref-bergmeir2012" role="doc-biblioref">2012</a>)</span> use temporal blocks for validation of time series, and retain the last part of the series for testing (we illustrate this in <a href="#fig-splits-illustration" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>). For spatial data, <span class="citation" data-cites="hijmans2012">Hijmans (<a href="../references.html#ref-hijmans2012" role="doc-biblioref">2012</a>)</span> suggests the use of a null model based on distance to training sites to decide on how to split the data; <span class="citation" data-cites="valavi2018">Valavi et al. (<a href="../references.html#ref-valavi2018" role="doc-biblioref">2018</a>)</span> have designed specific k-fold cross-validation schemes for species distribution models. These approaches all belong to the family of <em>stratified</em> k-fold cross-validation <span class="citation" data-cites="zeng2000">(<a href="../references.html#ref-zeng2000" role="doc-biblioref">Zeng and Martinez 2000</a>)</span>.</p>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-illustration">
+<div id="cell-fig-splits-illustration" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
-<div id="fig-split-illustration" class="quarto-figure quarto-figure-center anchored">
+<div id="fig-splits-illustration" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="splits_files/figure-html/fig-split-illustration-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="splits_files/figure-html/fig-splits-illustration-output-1.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">Figure&nbsp;4.1: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
+<p>The appropriate value of <span class="math inline">\(k\)</span> is often an unknown. It is common to use <span class="math inline">\(k = 10\)</span> as a starting point (tenfold cross-validation), but other values are justifiable based on data volume, complexity of the model training, to name a few.</p>
 </section>
 <section id="monte-carlo" class="level3" data-number="4.3.5">
 <h3 data-number="4.3.5" class="anchored" data-anchor-id="monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</h3>
+<p>One of the limitations of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.</p>
+<p>One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.</p>
 </section>
 </section>
 <section id="application-when-do-cherry-blossom-bloom" class="level2" data-number="4.4">
 <h2 data-number="4.4" class="anchored" data-anchor-id="application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</h2>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
+<div id="cell-fig-splits-prediction" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div id="fig-splits-prediction" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="splits_files/figure-html/fig-splits-prediction-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4.2: TODO</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tab-splits-results">
+<div id="cell-tab-splits-results" class="cell" data-tbl-cap="blah" data-execution_count="12">
+<div class="cell-output cell-output-stdout">
+<pre><code>4×3 DataFrame
+ Row │ Loss    Training      Validation  
+     │ Symbol  Float64       Float64     
+─────┼───────────────────────────────────
+   1 │ RMSE     2.05218       2.05375
+   2 │ MSE      4.21454       4.47021
+   3 │ MAE      1.56438       1.60805
+   4 │ MBE     -3.01914e-14  -0.00507392</code></pre>
+</div>
+<div id="tab-splits-results" class="cell-output cell-output-display">
+
+</div>
+</div>
+</div>
 </section>
 <section id="a-note-on-balance" class="level2" data-number="4.5">
 <h2 data-number="4.5" class="anchored" data-anchor-id="a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</h2>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-bergmeir2012" class="csl-entry" role="listitem">
+Bergmeir, Christoph, and José M. Benítez. 2012. <span>“On the Use of Cross-Validation for Time Series Predictor Evaluation.”</span> <em>Information Sciences</em> 191 (May): 192–213. <a href="https://doi.org/10.1016/j.ins.2011.12.028">https://doi.org/10.1016/j.ins.2011.12.028</a>.
+</div>
 <div id="ref-celisse2014" class="csl-entry" role="listitem">
 Celisse, Alain. 2014. <span>“Optimal Cross-Validation in Density Estimation with the <span>$</span>l<span>^</span><span></span>2<span></span><span>$</span>-Loss.”</span> <em>The Annals of Statistics</em> 42 (5). <a href="https://doi.org/10.1214/14-aos1240">https://doi.org/10.1214/14-aos1240</a>.
 </div>
 <div id="ref-hawkins2003" class="csl-entry" role="listitem">
 Hawkins, Douglas M., Subhash C. Basak, and Denise Mills. 2003. <span>“Assessing Model Fit by Cross-Validation.”</span> <em>Journal of Chemical Information and Computer Sciences</em> 43 (2): 579–86. <a href="https://doi.org/10.1021/ci025626i">https://doi.org/10.1021/ci025626i</a>.
+</div>
+<div id="ref-hijmans2012" class="csl-entry" role="listitem">
+Hijmans, Robert J. 2012. <span>“Cross-Validation of Species Distribution Models: Removing Spatial Sorting Bias and Calibration with a Null Model.”</span> <em>Ecology</em> 93 (3): 679–88. <a href="https://doi.org/10.1890/11-0826.1">https://doi.org/10.1890/11-0826.1</a>.
+</div>
+<div id="ref-valavi2018" class="csl-entry" role="listitem">
+Valavi, Roozbeh, Jane Elith, José J. Lahoz-Monfort, and Gurutzeta Guillera-Arroita. 2018. <span>“Block CV : An r Package for Generating Spatially or Environmentally Separated Folds for <span><em>k</em></span> <span>-</span>Fold Cross<span>-</span>Validation of Species Distribution Models.”</span> Edited by David Warton. <em>Methods in Ecology and Evolution</em> 10 (2): 225–32. <a href="https://doi.org/10.1111/2041-210x.13107">https://doi.org/10.1111/2041-210x.13107</a>.
+</div>
+<div id="ref-zeng2000" class="csl-entry" role="listitem">
+Zeng, Xinchuan, and Tony R. Martinez. 2000. <span>“Distribution-Balanced Stratified Cross-Validation for Accuracy Estimation.”</span> <em>Journal of Experimental &amp; Theoretical Artificial Intelligence</em> 12 (1): 1–12. <a href="https://doi.org/10.1080/095281300146272">https://doi.org/10.1080/095281300146272</a>.
 </div>
 </div>
 </section>
