@@ -42,7 +42,9 @@ need for responses
 
 The cherry blossom tree (*Prunus*) is ...
 
-Long-term time series of the date of first bloom in Japan reveal that in the last decades, cherry blossom blooms earlier, which has been linked to, possibly, climate change and urbanization. The suspected causal mechanism is as follows: both global warming and urbanization lead to higher temperatures, which means a faster accumulation of degree days over the growing season, leading to an earlier bloom.
+Long-term time series of the date of first bloom in Japan reveal that in the last decades, cherry blossom blooms earlier, which has been linked to, possibly, climate change and urbanization. The suspected causal mechanism is as follows: both global warming and urbanization lead to higher temperatures, which means a faster accumulation of degree days over the growing season, leading to an earlier bloom. Indeed, the raw data presented in @fig-splits-rawdata show that trees bloom early when the temperatures are higher.
+
+{{< embed ../notebooks/sm-splits.qmd#fig-splits-rawdata >}}
 
 With these data in hand (day of year with the first bloom, and smoothed reconstructed temperature in March), we can start thinking about this hypothesis. But by contrast with our simple strategy in **GRADIENT**, this time, we will split our dataset into training, validation, and testing sets, as we discussed in the previous section. Yet there are many ways to split a dataset, and therefore before starting the analysis, we will have a look at a few of them.
 
@@ -91,6 +93,10 @@ One of the limitations of k-fold cross-validation is that the number of splits i
 One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.
 
 ## Application: when do cherry blossom bloom?
+
+The model we will train for this section is really simple: $\text{bloom day} = m \times \text{temperature} + b$. This is a linear model, and one with a nice, direct biological interpretation: the average (baseline) day of bloom is $b$, and each degree adds $m$ days to the bloom date. At this point, we *might* start thinking about the distribution of the response, and what type of GLM we should used, but no. Not today. Today, we want to iterate quickly, and so we will start with a model that is exactly as simple as it needs to be.
+
+This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work rather well.
 
 {{< embed ../notebooks/sm-splits.qmd#fig-splits-prediction >}}
 

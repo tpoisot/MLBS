@@ -24,13 +24,12 @@ sort!(sakura, :year)
 describe(sakura)
 ```
 
-We will use a 14 years running average
+We will use a 14 years running average for the date of bloom; this is a little artificial, but it 
 
 ```{julia}
 average = zeros(Float64, size(sakura, 1))
 for (i, row) in enumerate(eachrow(sakura))
-    year_span = row.year .+ (-8, 8)
-    @info year_span
+    year_span = row.year .+ (-8, 0)
     valid_records = year_span[1] .< sakura.year .< year_span[2]
     subset = sakura[findall(valid_records), :]
     dropmissing!(subset)
@@ -49,7 +48,12 @@ dropmissing!(sakura)
 We can inspect the data to look for a linear relationship between temperature and flowering time:
 
 ```{julia}
-scatter(sakura.temperature, sakura.flowering)
+#| label: fig-splits-rawdata
+#| fig-cap: The raw data show a negative relationship between the temperature in March, and the bloom time. This suggests that when the trees have accumulated enough temperature, they can bloom early. In a context of warming, we should therefore see earlier blooms with rising temperatures.
+f = Figure(; resolution=(500, 300))
+ax = Axis(f[1,1]; xlabel="March temperature (°C)", ylabel="Bloom time (day of year)")
+scatter!(ax, sakura.temperature, sakura.flowering, color=:lightgrey)
+current_figure()
 ```
 
 We can now define a few loss functions to compare them later on:
@@ -145,7 +149,7 @@ choice = benchmark_result[(benchmark_result.Measure .== :MAE),:]
 sort!(choice, :Dataset)
 ```
 
-We now train the model on the full dataset
+It looks like the models with additional terms do not work any better than a simple regression against the temperature, so we will select the simpler model. We now train the model on the full dataset:
 
 ```{julia}
 model = lm(@formula(flowavg ~ temperature), sakuratrain)

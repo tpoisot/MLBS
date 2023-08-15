@@ -35,15 +35,14 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
-    - part: "Getting started"
+    - part: "Two illustrations"
       chapters:
         - chapters/kmeans.qmd
         - chapters/gradientdescent.qmd
-    - part: "Exploring and preparing data"
+    - part: "Data preparation"
       chapters:
         - chapters/splits.qmd
         - chapters/leakage.qmd
-    - summary.qmd
     - references.qmd
 
 bibliography: references.bib
