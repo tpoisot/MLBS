@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity - 1&nbsp; Introduction</title>
+<title>Data Science for Biodiversity - 5&nbsp; Data leakage</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -42,24 +42,24 @@ div.csl-indent {
 }</style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./chapters/kmeans.html" rel="next">
-<link href="./index.html" rel="prev">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../summary.html" rel="next">
+<link href="../chapters/splits.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": true,
@@ -96,7 +96,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Exploring and preparing data</a></li><li class="breadcrumb-item"><a href="../chapters/leakage.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -111,9 +111,9 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Data Science for Biodiversity</a> 
+      <a href="../">Data Science for Biodiversity</a> 
         <div class="sidebar-tools-main">
-    <a href="./Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <a href="../Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -122,13 +122,13 @@ div.csl-indent {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./intro.html" class="sidebar-item-text sidebar-link active">
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
@@ -143,13 +143,13 @@ div.csl-indent {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/kmeans.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
   </div>
 </li>
@@ -166,13 +166,13 @@ div.csl-indent {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/splits.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/leakage.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
   </div>
 </li>
@@ -180,13 +180,13 @@ div.csl-indent {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+  <a href="../summary.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./references.html" class="sidebar-item-text sidebar-link">
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
 </li>
@@ -200,31 +200,18 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#core-concepts-in-data-science" id="toc-core-concepts-in-data-science" class="nav-link active" data-scroll-target="#core-concepts-in-data-science"><span class="header-section-number">1.1</span> Core concepts in data science</a>
-  <ul class="collapse">
-  <li><a href="#eda" id="toc-eda" class="nav-link" data-scroll-target="#eda"><span class="header-section-number">1.1.1</span> EDA</a></li>
-  <li><a href="#clustering-and-regression" id="toc-clustering-and-regression" class="nav-link" data-scroll-target="#clustering-and-regression"><span class="header-section-number">1.1.2</span> Clustering and regression</a></li>
-  <li><a href="#supervised-and-unsupervised" id="toc-supervised-and-unsupervised" class="nav-link" data-scroll-target="#supervised-and-unsupervised"><span class="header-section-number">1.1.3</span> Supervised and unsupervised</a></li>
-  <li><a href="#training-testing-and-validation" id="toc-training-testing-and-validation" class="nav-link" data-scroll-target="#training-testing-and-validation"><span class="header-section-number">1.1.4</span> Training, testing, and validation</a></li>
-  <li><a href="#transformations-and-feature-engineering" id="toc-transformations-and-feature-engineering" class="nav-link" data-scroll-target="#transformations-and-feature-engineering"><span class="header-section-number">1.1.5</span> Transformations and feature engineering</a></li>
-  </ul></li>
-  <li><a href="#an-overview-of-the-content" id="toc-an-overview-of-the-content" class="nav-link" data-scroll-target="#an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</a></li>
-  <li><a href="#how-to-read-this-book" id="toc-how-to-read-this-book" class="nav-link" data-scroll-target="#how-to-read-this-book"><span class="header-section-number">1.3</span> How to read this book</a></li>
-  <li><a href="#some-rules-about-this-book" id="toc-some-rules-about-this-book" class="nav-link" data-scroll-target="#some-rules-about-this-book"><span class="header-section-number">1.4</span> Some rules about this book</a>
-  <ul class="collapse">
-  <li><a href="#no-code" id="toc-no-code" class="nav-link" data-scroll-target="#no-code"><span class="header-section-number">1.4.1</span> No code</a></li>
-  <li><a href="#no-simulated-data" id="toc-no-simulated-data" class="nav-link" data-scroll-target="#no-simulated-data"><span class="header-section-number">1.4.2</span> No simulated data</a></li>
-  <li><a href="#no-iris" id="toc-no-iris" class="nav-link" data-scroll-target="#no-iris"><span class="header-section-number">1.4.3</span> No <code>iris</code></a></li>
-  </ul></li>
+  <li><a href="#consequences-of-data-leakage" id="toc-consequences-of-data-leakage" class="nav-link active" data-scroll-target="#consequences-of-data-leakage"><span class="header-section-number">5.1</span> Consequences of data leakage</a></li>
+  <li><a href="#sources-of-data-leakage" id="toc-sources-of-data-leakage" class="nav-link" data-scroll-target="#sources-of-data-leakage"><span class="header-section-number">5.2</span> Sources of data leakage</a></li>
+  <li><a href="#avoiding-data-leakage" id="toc-avoiding-data-leakage" class="nav-link" data-scroll-target="#avoiding-data-leakage"><span class="header-section-number">5.3</span> Avoiding data leakage</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Exploring and preparing data</a></li><li class="breadcrumb-item"><a href="../chapters/leakage.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></h1>
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></h1>
 </div>
 
 
@@ -240,60 +227,49 @@ div.csl-indent {
 
 </header>
 
-<p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran with the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning <strong>REFS</strong>; there are many good papers giving overviews of some applications of data science to biological problems <strong>REFS</strong>; and there are, of course, thousands of tutorials about how to write code. But one thing that students commonly called for was an attempt to tie concepts together. This is this attempt.</p>
-<section id="core-concepts-in-data-science" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="core-concepts-in-data-science"><span class="header-section-number">1.1</span> Core concepts in data science</h2>
-<section id="eda" class="level3" data-number="1.1.1">
-<h3 data-number="1.1.1" class="anchored" data-anchor-id="eda"><span class="header-section-number">1.1.1</span> EDA</h3>
+<p>Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <span class="quarto-unresolved-ref">?sec-gradientdescent-trainedmodel</span>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe et al. 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock, Gregr, and Chan (<a href="../references.html#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
+<section id="consequences-of-data-leakage" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="consequences-of-data-leakage"><span class="header-section-number">5.1</span> Consequences of data leakage</h2>
+<p>We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning <span class="citation" data-cites="nisbet2018">(<a href="../references.html#ref-nisbet2018" role="doc-biblioref">Nisbet et al. 2018</a>)</span>. Data leakage happens information “leaks” from the training conditions to the evaluation conditions. In other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time <span class="citation" data-cites="Peterson2018">(<a href="../references.html#ref-Peterson2018" role="doc-biblioref">Peterson et al. 2018</a>)</span>.</p>
+<p>It is worth stopping for a moment to consider what these “real-life situations” are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are <em>applying</em> a model, we can start from the model <em>only</em>. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data.</p>
+<p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the validation data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="../references.html#ref-dornelas2018" role="doc-biblioref">Dornelas et al. 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to test these models, and a last one for validation.</p>
+<p>Congratulations! We have created data leakage! Because we are splitting our timeseries at random, the model will likely have been trained using data that date from <em>after</em> the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.</p>
+<p><strong>TODO</strong> stationary processes <span class="citation" data-cites="politis1994">Politis and Romano (<a href="../references.html#ref-politis1994" role="doc-biblioref">1994</a>)</span></p>
 </section>
-<section id="clustering-and-regression" class="level3" data-number="1.1.2">
-<h3 data-number="1.1.2" class="anchored" data-anchor-id="clustering-and-regression"><span class="header-section-number">1.1.2</span> Clustering and regression</h3>
+<section id="sources-of-data-leakage" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sources-of-data-leakage"><span class="header-section-number">5.2</span> Sources of data leakage</h2>
+<p>instances</p>
+<p>features</p>
 </section>
-<section id="supervised-and-unsupervised" class="level3" data-number="1.1.3">
-<h3 data-number="1.1.3" class="anchored" data-anchor-id="supervised-and-unsupervised"><span class="header-section-number">1.1.3</span> Supervised and unsupervised</h3>
-</section>
-<section id="training-testing-and-validation" class="level3" data-number="1.1.4">
-<h3 data-number="1.1.4" class="anchored" data-anchor-id="training-testing-and-validation"><span class="header-section-number">1.1.4</span> Training, testing, and validation</h3>
-</section>
-<section id="transformations-and-feature-engineering" class="level3" data-number="1.1.5">
-<h3 data-number="1.1.5" class="anchored" data-anchor-id="transformations-and-feature-engineering"><span class="header-section-number">1.1.5</span> Transformations and feature engineering</h3>
-</section>
-</section>
-<section id="an-overview-of-the-content" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</h2>
-</section>
-<section id="how-to-read-this-book" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="how-to-read-this-book"><span class="header-section-number">1.3</span> How to read this book</h2>
-</section>
-<section id="some-rules-about-this-book" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="some-rules-about-this-book"><span class="header-section-number">1.4</span> Some rules about this book</h2>
-<p>When I started aggregating these notes, I decided on a series of three rules. No code, no simulated data, and no <code>iris</code>. In this section, I will go through <em>why</em> I decided to adopt these rules, and how it can change the way you interact with the book.</p>
-<section id="no-code" class="level3" data-number="1.4.1">
-<h3 data-number="1.4.1" class="anchored" data-anchor-id="no-code"><span class="header-section-number">1.4.1</span> No code</h3>
-<p>This is, maybe, the most surprising rule, because data science <em>is</em> programming (in a sense). But sometimes there is so much focus on programming that we lose track of the other, important aspects of the practice of data science: abstractions, relationship with data, and domain knowledge.</p>
-<p>This book <em>did</em> involve a lot of code. Specifically, this book was written using <em>Julia</em> <span class="citation" data-cites="bezanson2017">(<a href="references.html#ref-bezanson2017" role="doc-biblioref">Bezanson et al. 2017</a>)</span>, and every figure is generated by a notebook, and they are available online, and used in the classroom. But code is <em>not</em> a universal language, and unless you are familiar with the language, code can obfuscate. I had no intention to write a <em>Julia</em> book (or an <em>R</em> book, or a <em>Python</em> book). The point is to think about data science applied to ecological research, and I felt like it would be more inclusive to do this in a language agnostic way.</p>
-<p>And finally, code rots. Code with more dependencies rots faster. It take a single change in the API of a package to break the examples, and then you are left with a very expensive doorstop<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-</section>
-<section id="no-simulated-data" class="level3" data-number="1.4.2">
-<h3 data-number="1.4.2" class="anchored" data-anchor-id="no-simulated-data"><span class="header-section-number">1.4.2</span> No simulated data</h3>
-</section>
-<section id="no-iris" class="level3" data-number="1.4.3">
-<h3 data-number="1.4.3" class="anchored" data-anchor-id="no-iris"><span class="header-section-number">1.4.3</span> No <code>iris</code></h3>
+<section id="avoiding-data-leakage" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="avoiding-data-leakage"><span class="header-section-number">5.3</span> Avoiding data leakage</h2>
+<p>learn/predict separation <span class="citation" data-cites="kaufman2011">(<a href="../references.html#ref-kaufman2011" role="doc-biblioref">Kaufman, Rosset, and Perlich 2011</a>)</span></p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-bezanson2017" class="csl-entry" role="listitem">
-Bezanson, Jeff, Alan Edelman, Stefan Karpinski, and Viral B. Shah. 2017. <span>“Julia: A Fresh Approach to Numerical Computing.”</span> <em>SIAM Review</em> 59 (1): 65–98. <a href="https://doi.org/10.1137/141000671">https://doi.org/10.1137/141000671</a>.
+<div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
+Amarasinghe, Kasun, Kit T. Rodolfa, Hemank Lamba, and Rayid Ghani. 2023. <span>“Explainable Machine Learning for Public Policy: Use Cases, Gaps, and Research Directions.”</span> <em>Data &amp; Policy</em> 5. <a href="https://doi.org/10.1017/dap.2023.2">https://doi.org/10.1017/dap.2023.2</a>.
+</div>
+<div id="ref-dornelas2018" class="csl-entry" role="listitem">
+Dornelas, Maria, Laura H. Antão, Faye Moyes, Amanda E. Bates, Anne E. Magurran, Dušan Adam, Asem A. Akhmetzhanova, et al. 2018. <span>“BioTIME: A Database of Biodiversity Time Series for the Anthropocene.”</span> <em>Global Ecology and Biogeography</em> 27 (7): 760–86. <a href="https://doi.org/10.1111/geb.12729">https://doi.org/10.1111/geb.12729</a>.
+</div>
+<div id="ref-kaufman2011" class="csl-entry" role="listitem">
+Kaufman, Shachar, Saharon Rosset, and Claudia Perlich. 2011. <span>“Leakage in Data Mining.”</span> <em>Proceedings of the 17th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining</em>, August. <a href="https://doi.org/10.1145/2020408.2020496">https://doi.org/10.1145/2020408.2020496</a>.
+</div>
+<div id="ref-nisbet2018" class="csl-entry" role="listitem">
+Nisbet, Robert, Gary Miner, Ken Yale, John F. Elder, and Andrew F. Peterson. 2018. <em>Handbook of Statistical Analysis and Data Mining Applications</em>. Second edition. London: Academic Press.
+</div>
+<div id="ref-Peterson2018" class="csl-entry" role="listitem">
+Peterson, A. Townsend, Alex Asase, Dora Canhos, Sidnei de Souza, and John Wieczorek. 2018. <span>“Data Leakage and Loss in Biodiversity Informatics.”</span> <em>Biodiversity Data Journal</em> 6 (November). <a href="https://doi.org/10.3897/bdj.6.e26826">https://doi.org/10.3897/bdj.6.e26826</a>.
+</div>
+<div id="ref-politis1994" class="csl-entry" role="listitem">
+Politis, Dimitris N., and Joseph P. Romano. 1994. <span>“The Stationary Bootstrap.”</span> <em>Journal of the American Statistical Association</em> 89 (428): 1303–13. <a href="https://doi.org/10.1080/01621459.1994.10476870">https://doi.org/10.1080/01621459.1994.10476870</a>.
+</div>
+<div id="ref-stock2023" class="csl-entry" role="listitem">
+Stock, Andy, Edward J. Gregr, and Kai M. A. Chan. 2023. <span>“Data Leakage Jeopardizes Ecological Applications of Machine Learning.”</span> <em>Nature Ecology &amp; Evolution</em>, August. <a href="https://doi.org/10.1038/s41559-023-02162-1">https://doi.org/10.1038/s41559-023-02162-1</a>.
 </div>
 </div>
 </section>
-</section>
-<aside id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
-<hr>
-<ol>
-<li id="fn1"><p>Which will not happen with this book! Ever! Not because it will not become obsolete, but because it’s online, and free, two sever impediments to being an expensive doorstop.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</aside>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -642,13 +618,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./index.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Preface</span>
+      <a href="../chapters/splits.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./chapters/kmeans.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../summary.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

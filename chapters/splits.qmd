@@ -2,9 +2,27 @@
 
 In @sec-kmeans, we were very lucky. Because we applied an unsupervised method, we didn't really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.
 
-## Training
+In a sense, we started thinking about these concepts in @sec-gradientdescent; specifically, we came up with a way to optimize the parameters of our model (*i.e.* of *training* our model) based on a series of empirical observations, and a criteria for what a "good fit" is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.
 
-In data science (in machine learning in particular), we do *fit* models. We *train* them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.
+## How can we split a dataset?
+
+There is a much more important question to ask first: *why* do we split a dataset? In a sense, answering this question echoes the discussion we started in **TODO REG MOD**, because the purpose of splitting a dataset is to ensure we can train and evaluate it properly, in order to deliver the best possible model.
+
+When a model is trained, it has learned from the data, we have tuned its hyper-parameters to ensure that it learned with the best possible conditions, and we have applied a measure of performance after the entire process to communicate how well our model works. These three tasks require three different datasets, and this is the purpose of splitting our data into groups.
+
+One of the issues when reading about splitting data is that the terminology can be muddy. For example, what constitutes a testing and validation set can largely be a matter of perspective. In many instances, testing and validation are used interchangeably, and this book is no exception. Nevertheless, it helps to settle on a few guidelines here, before going into the details of what each dataset constitutes and how to assemble it.
+
+The training data are examples that are given to the model during the training process. This one has no ambiguities. aside from the fact that it is defined by substraction, in a sense, as whatever is left of the original data after we set aside testing and validation sets.
+
+The testing data are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in **TODO LEAKAGE**.
+
+The validation data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.
+
+The difference between testing and validation is largely a difference of *intent*. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let's look at each of these datasets in turn.
+
+### Training
+
+In data science (in applied machine learning in particular), we do *fit* models. We *train* them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.
 
 Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In @sec-gradientdescent, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.
 
@@ -16,10 +34,60 @@ need for instances
 
 need for responses
 
-## Testing
+### Validating
 
-## Validating
+### Testing
+
+## The problem: phenology of cherry blossom
 
 ## Strategies to split data
 
-## Data leakage
+remove testing first if needed
+
+exhaustive
+
+non-exhaustive
+
+### Holdout
+
+The holdout method is what we used in **TODO REF GRAD**, in which we randomly selected some observations to be part of the validation data (which was, in practice, a testing dataset in this example), and kept the rest to serve as the training data. Holdout cross-validation is possibly the simplest technique, but it suffers from a few drawbacks.
+
+The model is only trained for one split of the data, and similarly only evaluated for one split of the data. There is, therefore, a chance to sample a particularly bad combination of the data that lead to erroneous results. Attempts to quantify the importance of the predictors are likely to give particularly unstable results, as the noise introduced by picking a single random subset will not be smoothed out by multiple attempts.
+
+In addition, as @hawkins2003 point out, holdout validation is particularly wasteful in data-limited settings, where there are fewer than hundreds of observations. The reason is that the holdout dataset will *never* contribute to training, and assuming the data are split 80/20, one out of five observations will not contribute to the model. Other cross-validation schemes presented in this section will allow observations to be used both for training and validation.
+
+### Leave-p-out
+
+In leave-*p*-out cross-validation (LpOCV), starting from a dataset on $n$ observation, we pick $p$ at random to serve as validation data, and $n-p$ to serve as the training dataset. This process is then repeated *exhaustively*, which is to say we split the dataset in every possible way that gives $p$ and $n-p$ observations, for a set value of $p$. The model is then trained on the $n-p$ observations, and validated on the $p$ observations for validation, and the performance (or loss) is averaged to give the model performance before testing.
+
+@celisse2014 points out that $p$ has to be large enough (relative to the sample size $n$) to overcome the propensity of the model to overfit on a small training dataset. One issue with LpOCV is that the number of combinations is potentially very large. It is, in fact, given by the binomial coefficent $\binom{n}{p}$, which gets unreasonably large even for small datasets. For example, running LpOCV on $n=150$ observations, leaving out $p=10$ for validation everytime, would require to train the model about $10^{15}$ times. Assuming we can train the model in $10^{-3}$ seconds, the entire process would require 370 centuries.
+
+Oh well.
+
+### Leave-one-out
+
+The leave-one-out cross-validation (LOOCV) is a special case of LpOCV with $p=1$. Note that it is a lot faster to run than LpOCV, because $\binom{n}{1}=n$, and so the validation step runs in $\mathcal{O}(n)$ (LpOCV runs in $\mathcal{O}(n!)$). LOOCV is also an *exhaustive* cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.
+
+### k-fold
+
+One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into $k$ equal parts (and so when $k = n$, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used *exactly* one time to evaluate the model , and *exactly* $k-1$ times to train it. But by contrast with the holdout validation approach, *all* observations are used to train the model.
+
+When the data have some specific structure, it can be a good thing to manipulate the splits in order to maintain this structure. For example, @bergmeir2012 use temporal blocks for validation of time series, and retain the last part of the series for testing (we illustrate this in @fig-splits-illustration). For spatial data, @hijmans2012 suggests the use of a null model based on distance to training sites to decide on how to split the data; @valavi2018 have designed specific k-fold cross-validation schemes for species distribution models. These approaches all belong to the family of *stratified* k-fold cross-validation [@zeng2000].
+
+{{< embed ../notebooks/sm-splits.qmd#fig-splits-illustration >}}
+
+The appropriate value of $k$ is often an unknown. It is common to use $k = 10$ as a starting point (tenfold cross-validation), but other values are justifiable based on data volume, complexity of the model training, to name a few.
+
+### Monte-Carlo
+
+One of the limitations of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.
+
+One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.
+
+## Application: when do cherry blossom bloom?
+
+{{< embed ../notebooks/sm-splits.qmd#fig-splits-prediction >}}
+
+{{< embed ../notebooks/sm-splits.qmd#tab-splits-results >}}
+
+## A note on balance

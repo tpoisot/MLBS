@@ -1,0 +1,182 @@
+---
+title: An analysis of the sakura phenology dataset
+---
+
+This notebook is used to support the chapter on data splitting.
+
+```{julia}
+using DataFrames
+import CSV
+using Statistics
+using GLM
+using CairoMakie
+using Markdown
+CairoMakie.activate!(; px_per_unit = 2)
+```
+
+We first load the data. The data as presented here have a column for the temperature in March, which has been smoothed, and for the day of bloom, which is expressed as day of year:
+
+```{julia}
+sakura = DataFrame(CSV.File(joinpath(@__DIR__, "..", "data", "general", "sakura.csv")))
+allowmissing!(sakura, :temperature)
+replace!(sakura.temperature, -50.0 => missing)
+sort!(sakura, :year)
+describe(sakura)
+
+average = zeros(Float64, size(sakura, 1))
+for (i, row) in enumerate(eachrow(sakura))
+    year_span = row.year .+ (-7, 7)
+    @info year_span
+    valid_records = year_span[1] .< sakura.year .< year_span[2]
+    subset = sakura[findall(valid_records), :]
+    dropmissing!(subset)
+    if size(subset, 1) >= 5
+        average[i] = mean(subset.flowering)
+    end
+end
+sakura.flowavg = average
+
+allowmissing!(sakura, :flowavg)
+replace!(sakura.flowavg, 0.0 => missing)
+
+dropmissing!(sakura)
+```
+
+We can inspect the data to look for a linear relationship between temperature and flowering time:
+
+```{julia}
+scatter(sakura.temperature, sakura.flowering)
+```
+
+We can now define a few loss functions to compare them later on:
+
+```{julia}
+mse(tr, pr) = mean((tr .- pr).^2.0)
+rmse(tr, pr) = sqrt(mse(tr, pr))
+mae(tr, pr) = mean(abs.(tr .- pr))
+mbe(tr, pr) = mean(tr .- pr)
+```
+
+We now define a series of folds, in order to do k-folds cross validation. Note that we keep a holdout test dataset corresponding to the end of the time series for model evaluation.
+
+```{julia}
+n = size(sakura, 1)
+test_size = ceil.(Int, 0.1n)
+
+sakuratrain = sakura[1:(n-test_size), :]
+sakuratest = sakura[(n-test_size+1):n, :]
+
+folds = ceil.(Int, LinRange(1, size(sakuratrain, 1), 11))
+```
+
+This next figure is purely an illustration of the splits:
+
+```{julia}
+#| label: fig-splits-illustration
+#| fig-cap: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.
+f = Figure()
+s1 = Axis(f[1,1])
+s2 = Axis(f[2,1])
+s3 = Axis(f[3,1])
+s4 = Axis(f[4,1])
+for (i,s) in enumerate([s1, s2, s3, s4])
+    scatter!(s, sakuratrain.year, sakuratrain.flowavg, color=:lightgrey)
+    scatter!(s, sakuratest.year, sakuratest.flowavg, color=Makie.wong_colors()[4], linewidth=4)
+    j = 2i-1
+    valid_idx = folds[j]:folds[j+1]
+    train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
+    valid = sakuratrain[valid_idx, :]
+    train = sakuratrain[train_idx, :]
+    scatter!(s, valid.year, valid.flowavg, color=Makie.wong_colors()[3], linewidth=2)
+    hidedecorations!(s)
+    hidespines!(s)
+end
+current_figure()
+```
+
+placeholders for validation measures
+
+```{julia}
+train_mse = zeros(Float64, length(folds)-1)
+valid_mse = zeros(Float64, length(folds)-1)
+train_rmse = zeros(Float64, length(folds)-1)
+valid_rmse = zeros(Float64, length(folds)-1)
+train_mae = zeros(Float64, length(folds)-1)
+valid_mae = zeros(Float64, length(folds)-1)
+train_mbe = zeros(Float64, length(folds)-1)
+valid_mbe = zeros(Float64, length(folds)-1)
+```
+
+this is the cross validation
+
+```{julia}
+for (i, Ki) in enumerate(folds)
+    if Ki < size(sakuratrain, 1)
+        valid_idx = folds[i]:folds[i+1]
+        train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
+        valid = sakuratrain[valid_idx, :]
+        train = sakuratrain[train_idx, :]
+        model = lm(@formula(flowavg ~ temperature), train)
+        valid_mse[i] = mse(valid.flowavg, predict(model, valid))
+        train_mse[i] = mse(train.flowavg, predict(model, train))
+        valid_rmse[i] = rmse(valid.flowavg, predict(model, valid))
+        train_rmse[i] = rmse(train.flowavg, predict(model, train))
+        valid_mae[i] = mae(valid.flowavg, predict(model, valid))
+        train_mae[i] = mae(train.flowavg, predict(model, train))
+        valid_mbe[i] = mbe(valid.flowavg, predict(model, valid))
+        train_mbe[i] = mbe(train.flowavg, predict(model, train))
+    end
+end
+```
+
+We now train the model on the full dataset
+
+```{julia}
+model = lm(@formula(flowavg ~ temperature), sakuratrain)
+```
+
+```{julia}
+#| label: fig-splits-prediction
+#| fig-cap: TODO
+scatter(sakura.year, sakura.flowavg, color=:lightgrey)
+lines!(sakuratrain.year, predict(model, sakuratrain), color=:black)
+lines!(sakuratest.year, predict(model, sakuratest), color=:red)
+current_figure()
+```
+
+```{julia}
+#| label: fig-splits-validation
+#| fig-cap: TODO
+f = Figure()
+ax = Axis(f[1,1]; xgridvisible=false, ygridvisible=false, xlabel="Fold", ylabel="MAE loss")
+scatterlines!(ax, train_mae, color=:grey, label="Training data")
+scatterlines!(ax, valid_mae, color=:black, label="Validation data")
+hlines!(ax, mae(sakuratest.flowavg, predict(model, sakuratest)), color=:red, label="Testing data")
+hidespines!(ax, :l, :r, :t, :b)
+hidexdecorations!(ax; label=false)
+ylims!(ax, (0, 3))
+axislegend(ax)
+current_figure()
+```
+
+We can now make a table with the results (by dataset/loss function):
+
+```{julia}
+#| label: tab-splits-results
+#| tbl-cap: blah
+output = DataFrame()
+output.Loss = [:RMSE, :MSE, :MAE, :MBE]
+output.Training = [
+    mean(train_rmse),
+    mean(train_mse),
+    mean(train_mae),
+    mean(train_mbe)
+]
+output.Validation = [
+    mean(valid_rmse),
+    mean(valid_mse),
+    mean(valid_mae),
+    mean(valid_mbe)
+]
+print(output)
+```

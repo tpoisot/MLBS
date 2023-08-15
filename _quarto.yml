@@ -1,9 +1,26 @@
 project:
   type: book
   output-dir: public
+  execute-dir: project
+
+execute: 
+  freeze: auto
+  cache: true
 
 book:
-  title: "Fundamentals of Biodiversity Data Science"
+  title: "Data Science for Biodiversity"
+  subtitle: "Fundamentals and Applications"
+  page-navigation: true
+  language: en-CA
+  license: cc-by
+  search:
+    location: sidebar
+    type: overlay
+    limit: 10
+    copy-button: true
+  sidebar:
+    style: floating
+  downloads: pdf
   author:
     - name: "Timothée Poisot"
       orcid: 0000-0002-0735-5184
@@ -14,13 +31,18 @@ book:
           city: Montréal
           region: QC
           country: Canada
-  date: "8/5/2023"
+  date: last-modified
   chapters:
     - index.qmd
     - intro.qmd
-    - chapters/kmeans.qmd
-    - chapters/splits.qmd
-    - chapters/gradientdescent.qmd
+    - part: "Getting started"
+      chapters:
+        - chapters/kmeans.qmd
+        - chapters/gradientdescent.qmd
+    - part: "Exploring and preparing data"
+      chapters:
+        - chapters/splits.qmd
+        - chapters/leakage.qmd
     - summary.qmd
     - references.qmd
 
@@ -28,11 +50,11 @@ bibliography: references.bib
 
 format:
   html:
-    theme: yeti
+    theme: cosmo
   pdf:
     documentclass: scrbook
     toc: true
-    toc-depth: 2
+    toc-depth: 3
 
 
 

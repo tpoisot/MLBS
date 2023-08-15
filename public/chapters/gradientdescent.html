@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.303">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Fundamentals of Biodiversity Data Science - 4&nbsp; Minimizing error: the gradient descent algorithm</title>
+<title>Data Science for Biodiversity - 3&nbsp; Gradient descent</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -30,8 +49,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../summary.html" rel="next">
-<link href="../chapters/splits.html" rel="prev">
+<link href="../chapters/splits.html" rel="next">
+<link href="../chapters/kmeans.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -43,15 +62,13 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
-  "copy-button": false,
+  "copy-button": true,
   "collapse-after": 3,
   "panel-placement": "start",
-  "type": "textbox",
-  "limit": 20,
+  "type": "overlay",
+  "limit": 10,
   "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
+    null
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -66,7 +83,12 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -79,7 +101,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Minimizing error: the gradient descent algorithm</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/kmeans.html">Getting started</a></li><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -94,14 +116,13 @@ ul.task-list li input[type="checkbox"] {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Fundamentals of Biodiversity Data Science</a> 
+      <a href="../">Data Science for Biodiversity</a> 
+        <div class="sidebar-tools-main">
+    <a href="../Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
+</div>
     </div>
       </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -116,28 +137,56 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating groups: the <em>k</em>-means algorithm</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Minimizing error: the gradient descent algorithm</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Exploring and preparing data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../summary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -152,14 +201,30 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#gradientdescent-sec-gradientdescent-trainedmodel" id="toc-gradientdescent-sec-gradientdescent-trainedmodel" class="nav-link active" data-scroll-target="#gradientdescent-sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
+  <li><a href="#gradientdescent-sec-gradientdescent-problem" id="toc-gradientdescent-sec-gradientdescent-problem" class="nav-link" data-scroll-target="#gradientdescent-sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</a></li>
+  <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent"><span class="header-section-number">3.3</span> Gradient descent</a>
+  <ul class="collapse">
+  <li><a href="#defining-the-loss-function" id="toc-defining-the-loss-function" class="nav-link" data-scroll-target="#defining-the-loss-function"><span class="header-section-number">3.3.1</span> Defining the loss function</a></li>
+  <li><a href="#calculating-the-gradient" id="toc-calculating-the-gradient" class="nav-link" data-scroll-target="#calculating-the-gradient"><span class="header-section-number">3.3.2</span> Calculating the gradient</a></li>
+  <li><a href="#descending-the-gradient" id="toc-descending-the-gradient" class="nav-link" data-scroll-target="#descending-the-gradient"><span class="header-section-number">3.3.3</span> Descending the gradient</a></li>
+  <li><a href="#gradientdescent-seq-gradientdescent-learningrate" id="toc-gradientdescent-seq-gradientdescent-learningrate" class="nav-link" data-scroll-target="#gradientdescent-seq-gradientdescent-learningrate"><span class="header-section-number">3.3.4</span> A note on the learning rate</a></li>
+  </ul></li>
+  <li><a href="#application-how-many-links-are-in-a-food-web" id="toc-application-how-many-links-are-in-a-food-web" class="nav-link" data-scroll-target="#application-how-many-links-are-in-a-food-web"><span class="header-section-number">3.4</span> Application: how many links are in a food web?</a></li>
+  <li><a href="#notes-on-regularization" id="toc-notes-on-regularization" class="nav-link" data-scroll-target="#notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/kmeans.html">Getting started</a></li><li class="breadcrumb-item"><a href="../chapters/gradientdescent.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-gradientdescent" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Minimizing error: the gradient descent algorithm</span></span></h1>
+<h1 class="title"><span id="gradientdescent-sec-gradientdescent" class="quarto-section-identifier"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></h1>
 </div>
 
 
@@ -175,9 +240,160 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<p>https://www.kaggle.com/datasets/abrambeyer/openintro-possum</p>
+<p>As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.</p>
+<p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <span class="quarto-unresolved-ref">?sec-gradientdescent-problem</span>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
+<section id="gradientdescent-sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="gradientdescent-sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
+</section>
+<section id="gradientdescent-sec-gradientdescent-problem" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="gradientdescent-sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
+<p>One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In</p>
+<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen and Briand (<a href="../references.html#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
+<p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="../references.html#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
+<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="../references.html#ref-brose2004" role="doc-biblioref">Brose et al. 2004</a>)</span>.</p>
+<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="../references.html#ref-macdonald2020" role="doc-biblioref">MacDonald, Banville, and Poisot 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
+</section>
+<section id="gradient-descent" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="gradient-descent"><span class="header-section-number">3.3</span> Gradient descent</h2>
+<p>Gradient descent is built around a remarkably simple intuition: knowing the formula that gives rise to our prediction, and the value of the error we made for each point, we can take the derivative of the error with regards to each parameter, and this tells us how much this parameter contributed to the error. Because we are taking the derivative, we can futher know whether to increase, or decrease, the value of the parameter in order to make a smaller error next time.</p>
+<p>In this section, we will use linear regression as an example, because it is the model we have decided to use when exploring our ecological problem in <span class="quarto-unresolved-ref">?sec-gradientdescent-problem</span>, and because it is suitably simple to keep track of everything when writing down the gradient by hand.</p>
+<p>Before we start assembling the different pieces, we need to decide what our model is. We have settled on a linear model, which will have the form <span class="math inline">\(\hat y = m\times x + b\)</span>. The little hat on <span class="math inline">\(\hat y\)</span> indicates that this is a prediction. The input of this model is <span class="math inline">\(x\)</span>, and its parameters are <span class="math inline">\(m\)</span> (the slope) and <span class="math inline">\(b\)</span> (the intercept). Using the notation we adopted in <span class="quarto-unresolved-ref">?sec-gradientdescent-problem</span>, this would be <span class="math inline">\(\hat l = a \times s + b\)</span>, with <span class="math inline">\(l = \text{log} L\)</span> and <span class="math inline">\(s = \text{log} S\)</span>.</p>
+<section id="defining-the-loss-function" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="defining-the-loss-function"><span class="header-section-number">3.3.1</span> Defining the loss function</h3>
+<p>The loss function is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions <em>do</em>.</p>
+<p>Think of prediction as throwing a series of ten darts on ten different boards. In this case, we know what the correct outcome is (the center of the board, I assume, although I can be mistaken since I have only played darts once, and lost). A cost function would be any mathematical function that compares the position of each dart on each board, the position of the correct event, and returns a score that informs us about how poorly our prediction lines up with the reality.</p>
+<p>In the above example, you may be tempted to say that we can take the Euclidean distance of each dart to the center of each board, in order to know, for each point, how far away we landed. Because there are several boards, and because we may want to vary the number of boards while still retaining the ability to compare our performances, we would then take the average of these measures.</p>
+<p>We will note the position of our dart as being <span class="math inline">\(\hat y\)</span>, the position of the center as being <span class="math inline">\(y\)</span> (we will call this the <em>ground truth</em>), and the number of attempts <span class="math inline">\(n\)</span>, and so we can write our loss function as</p>
+<p><span id="eq-loss-mse"><span class="math display">\[
+\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat y_i)^2
+\tag{3.1}\]</span></span></p>
+<p>This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in <a href="#tbl-gradientdescent-regressionloss" class="quarto-xref">Table&nbsp;<span>3.1</span></a>.</p>
+<div id="tbl-gradientdescent-regressionloss" class="anchored">
+<table class="table">
+<caption>Table&nbsp;3.1: List of common loss functions for regression problems</caption>
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Measure</th>
+<th>Expression</th>
+<th>Remarks</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mean Squared Error (MSE, L2)</td>
+<td><span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2\)</span></td>
+<td>Large errors are (proportionally) more penalized because of the squaring</td>
+</tr>
+<tr class="even">
+<td>Mean Absolute Error (MAE, L1)</td>
+<td><span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|\)</span></td>
+<td>Error measured in the units of the response variable</td>
+</tr>
+<tr class="odd">
+<td>Root Mean Square Error (RMSE)</td>
+<td><span class="math inline">\(\sqrt{\text{MSE}}\)</span></td>
+<td>Error measured in the units of the response variable</td>
+</tr>
+<tr class="even">
+<td>Mean Bias Error</td>
+<td><span class="math inline">\(\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)\)</span></td>
+<td>Errors <em>can</em> cancel out, but this can be used as a measure of positive/negative bias</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Throughout this chapter, we will use the L2 loss (<a href="#eq-loss-mse" class="quarto-xref">Equation&nbsp;<span>3.1</span></a>), because it has <em>really</em> nice properties when it comes to taking derivatives, which we will do a lot of. In the case of a linear model, we can rewrite <a href="#eq-loss-mse" class="quarto-xref">Equation&nbsp;<span>3.1</span></a> as</p>
+<p><span id="eq-loss-withmodel"><span class="math display">\[
+f = \frac{1}{n}\sum\left(y_i - m\times x_i - b\right)^2
+\tag{3.2}\]</span></span></p>
+<p>There is an important change in <a href="#eq-loss-withmodel" class="quarto-xref">Equation&nbsp;<span>3.2</span></a>: we have replaced the prediction <span class="math inline">\(\hat y_i\)</span> with a term that is a function of the predictor <span class="math inline">\(x_i\)</span> and the model parameters: this means that we can calculate the value of the loss as a function of a pair of values <span class="math inline">\((x_i, y_i)\)</span>, and the model parameters.</p>
+</section>
+<section id="calculating-the-gradient" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="calculating-the-gradient"><span class="header-section-number">3.3.2</span> Calculating the gradient</h3>
+<p>With the loss function corresponding to our problem in hands (<a href="#eq-loss-withmodel" class="quarto-xref">Equation&nbsp;<span>3.2</span></a>), we can calculate the gradient. Given a function that is scalar-valued (it returns a single value), taking several variables, that is differentiable, the gradient of this function is a vector-valued (it returns a vector) function; when evaluated at a specific point, this vectors indicates both the direction and the rate of fastest increase, which is to say the direction in which the function increases away from the point, and how fast it moves.</p>
+<p>We can re-state this definition using the terms of the problem we want to solve. At a point <span class="math inline">\(p = [m\quad b]^\top\)</span>, the gradient <span class="math inline">\(\nabla f\)</span> of <span class="math inline">\(f\)</span> is given by:</p>
+<p><span id="eq-gradientdescent-gradientfull"><span class="math display">\[
+\nabla f\left(
+p
+\right) =
+\begin{bmatrix}
+\frac{\partial f}{\partial m}(p) \\
+\frac{\partial f}{\partial b}(p)
+\end{bmatrix}\,.
+\tag{3.3}\]</span></span></p>
+<p>This indicates how changes in <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> will <em>increase</em> the error. In order to have a more explicit formulation, all we have to do is figure out an expression for both of the partial derivatives. In practice, we can let auto-differentiation software calculate the gradient for us <span class="citation" data-cites="innes2018">(<a href="../references.html#ref-innes2018" role="doc-biblioref">Innes 2018</a>)</span>; these packages are now advanced enough that they can take the gradient of code directly.</p>
+<p>Solving <span class="math inline">\((\partial f / \partial m)(p)\)</span> and <span class="math inline">\((\partial f / \partial c)(p)\)</span> is easy enough:</p>
+<p><span id="eq-gradientdescent-gradientexplicit"><span class="math display">\[
+\nabla f\left(
+p
+\right) =
+\begin{bmatrix}
+-\frac{2}{n}\sum \left[x_i \times (y_i - m\times x_i - b)\right] \\
+-\frac{2}{n}\sum \left(y_i - m\times x_i - b\right)
+\end{bmatrix}\,.
+\tag{3.4}\]</span></span></p>
+<p>Note that both of these partial derivatives have a term in <span class="math inline">\(2n^{-1}\)</span>. Getting rid of the <span class="math inline">\(2\)</span> in front is very straightforward! We can modify <a href="#eq-loss-withmodel" class="quarto-xref">Equation&nbsp;<span>3.2</span></a> to divide by <span class="math inline">\(2n\)</span> instead of <span class="math inline">\(n\)</span>. This modified loss function retains the important characteristics: it increases when the prediction gets worse, and it allows comparing the loss with different numbers of points. As with many steps in the model training process, it is important to think about <em>why</em> we are doing certain things, as this can enable us to make some slight changes to facilitate the analysis.</p>
+<p>With the gradient written down in <a href="#eq-gradientdescent-gradientexplicit" class="quarto-xref">Equation&nbsp;<span>3.4</span></a>, we can now think about what it means to <em>descend</em> the gradient.</p>
+</section>
+<section id="descending-the-gradient" class="level3" data-number="3.3.3">
+<h3 data-number="3.3.3" class="anchored" data-anchor-id="descending-the-gradient"><span class="header-section-number">3.3.3</span> Descending the gradient</h3>
+<p>Recall from <strong>TK</strong> that the gradient measures how far we <em>increase</em> the function of which we are taking the gradient. Therefore, it measures how much each parameter contributes to the loss value. Our working definition for a trained model is “one that has little loss”, and so in an ideal world, we could find a point <span class="math inline">\(p\)</span> for which the gradient is as small as feasible.</p>
+<p>Because the gradient measures how far away we increase error, and intuitive way to use it is to take steps in the <em>opposite</em> direction. In other words, we can update the value of our parameters using <span class="math inline">\(p := p - \nabla f(p)\)</span>, meaning that we substract from the parameter values their contribution to the overall error in the predictions.</p>
+<p>But, as we will discuss further in <span class="quarto-unresolved-ref">?sec-gradientdescent-learningrate</span>, there is such a thing as “too much learning”. For this reason, we will usually not move the entire way, and introduce a term to regulate how much of the way we actually want to descend the gradient. Our actual scheme to update the parameters is</p>
+<p><span class="math display">\[
+p := p - \eta\times \nabla f(p) \,.
+\]</span></p>
+<p>This formula can be <em>iterated</em>: with each successive iteration, it will get us closer to the optimal value of <span class="math inline">\(p\)</span>, which is to say the combination of <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> that minimizes the loss.</p>
+</section>
+<section id="gradientdescent-seq-gradientdescent-learningrate" class="level3" data-number="3.3.4">
+<h3 data-number="3.3.4" class="anchored" data-anchor-id="gradientdescent-seq-gradientdescent-learningrate"><span class="header-section-number">3.3.4</span> A note on the learning rate</h3>
+<p>The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are <em>way off</em>, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.</p>
+<p>In order to protect against this, in reality, we update the gradient only a little, where the value of “a little” is determined by an hyper-parameter called the <em>learning rate</em>, which we noted <span class="math inline">\(\eta\)</span>. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results <em>at all</em>. The representation of numbers in a computer’s memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.</p>
+<p>The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.</p>
+</section>
+</section>
+<section id="application-how-many-links-are-in-a-food-web" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="application-how-many-links-are-in-a-food-web"><span class="header-section-number">3.4</span> Application: how many links are in a food web?</h2>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-data">
+<div id="cell-fig-gradient-data" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div id="fig-gradient-data" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="gradientdescent_files/figure-html/fig-gradient-data-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;3.1: … (todo)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="notes-on-regularization" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</h2>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-brose2004" class="csl-entry" role="listitem">
+Brose, Ulrich, Annette Ostling, Kateri Harrison, and Neo D. Martinez. 2004. <span>“Unified Spatial Scaling of Species and Their Trophic Interactions.”</span> <em>Nature</em> 428 (6979): 167–71. <a href="https://doi.org/10.1038/nature02297">https://doi.org/10.1038/nature02297</a>.
+</div>
+<div id="ref-cohen1984" class="csl-entry" role="listitem">
+Cohen, J. E., and F. Briand. 1984. <span>“Trophic Links of Community Food Webs.”</span> <em>Proc Natl Acad Sci U S A</em> 81 (13): 4105–9.
+</div>
+<div id="ref-innes2018" class="csl-entry" role="listitem">
+Innes, Michael. 2018. <span>“Don’t Unroll Adjoint: Differentiating SSA-Form Programs.”</span> <a href="https://doi.org/10.48550/ARXIV.1810.07951">https://doi.org/10.48550/ARXIV.1810.07951</a>.
+</div>
+<div id="ref-macdonald2020" class="csl-entry" role="listitem">
+MacDonald, Arthur Andrew Meahan, Francis Banville, and Timothée Poisot. 2020. <span>“Revisiting the Links-Species Scaling Relationship in Food Webs.”</span> <em>Patterns</em> 1 (0). <a href="https://doi.org/10.1016/j.patter.2020.100079">https://doi.org/10.1016/j.patter.2020.100079</a>.
+</div>
+<div id="ref-martinez1992" class="csl-entry" role="listitem">
+Martinez, Néo D. 1992. <span>“Constant Connectance in Community Food Webs.”</span> <em>The American Naturalist</em> 139 (6): 1208–18. <a href="http://www.jstor.org/stable/2462337">http://www.jstor.org/stable/2462337</a>.
+</div>
+</div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -526,13 +742,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/splits.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span>
+      <a href="../chapters/kmeans.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../summary.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/splits.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

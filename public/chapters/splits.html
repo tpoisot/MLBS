@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.303">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Fundamentals of Biodiversity Data Science - 3&nbsp; Testing, training, validating</title>
+<title>Data Science for Biodiversity - 4&nbsp; Testing, training, validating</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -30,8 +49,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../chapters/gradientdescent.html" rel="next">
-<link href="../chapters/kmeans.html" rel="prev">
+<link href="../chapters/leakage.html" rel="next">
+<link href="../chapters/gradientdescent.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -43,15 +62,13 @@ ul.task-list li input[type="checkbox"] {
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
-  "copy-button": false,
+  "copy-button": true,
   "collapse-after": 3,
   "panel-placement": "start",
-  "type": "textbox",
-  "limit": 20,
+  "type": "overlay",
+  "limit": 10,
   "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
+    null
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -66,6 +83,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -81,7 +101,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Exploring and preparing data</a></li><li class="breadcrumb-item"><a href="../chapters/splits.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -96,14 +116,13 @@ ul.task-list li input[type="checkbox"] {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Fundamentals of Biodiversity Data Science</a> 
+      <a href="../">Data Science for Biodiversity</a> 
+        <div class="sidebar-tools-main">
+    <a href="../Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
+</div>
     </div>
       </div>
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -118,28 +137,56 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Getting started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating groups: the <em>k</em>-means algorithm</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Minimizing error: the gradient descent algorithm</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Exploring and preparing data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../summary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -158,20 +205,32 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#training" id="toc-training" class="nav-link active" data-scroll-target="#training"><span class="header-section-number">3.1</span> Training</a></li>
-  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">3.2</span> Testing</a></li>
-  <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">3.3</span> Validating</a></li>
-  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">3.4</span> Strategies to split data</a></li>
-  <li><a href="#data-leakage" id="toc-data-leakage" class="nav-link" data-scroll-target="#data-leakage"><span class="header-section-number">3.5</span> Data leakage</a></li>
+  <li><a href="#how-can-we-split-a-dataset" id="toc-how-can-we-split-a-dataset" class="nav-link active" data-scroll-target="#how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</a>
+  <ul class="collapse">
+  <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training"><span class="header-section-number">4.1.1</span> Training</a></li>
+  <li><a href="#validating" id="toc-validating" class="nav-link" data-scroll-target="#validating"><span class="header-section-number">4.1.2</span> Validating</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">4.1.3</span> Testing</a></li>
+  </ul></li>
+  <li><a href="#the-problem-phenology-of-cherry-blossom" id="toc-the-problem-phenology-of-cherry-blossom" class="nav-link" data-scroll-target="#the-problem-phenology-of-cherry-blossom"><span class="header-section-number">4.2</span> The problem: phenology of cherry blossom</a></li>
+  <li><a href="#strategies-to-split-data" id="toc-strategies-to-split-data" class="nav-link" data-scroll-target="#strategies-to-split-data"><span class="header-section-number">4.3</span> Strategies to split data</a>
+  <ul class="collapse">
+  <li><a href="#holdout" id="toc-holdout" class="nav-link" data-scroll-target="#holdout"><span class="header-section-number">4.3.1</span> Holdout</a></li>
+  <li><a href="#leave-p-out" id="toc-leave-p-out" class="nav-link" data-scroll-target="#leave-p-out"><span class="header-section-number">4.3.2</span> Leave-p-out</a></li>
+  <li><a href="#leave-one-out" id="toc-leave-one-out" class="nav-link" data-scroll-target="#leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</a></li>
+  <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">4.3.4</span> k-fold</a></li>
+  <li><a href="#monte-carlo" id="toc-monte-carlo" class="nav-link" data-scroll-target="#monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</a></li>
+  </ul></li>
+  <li><a href="#application-when-do-cherry-blossom-bloom" id="toc-application-when-do-cherry-blossom-bloom" class="nav-link" data-scroll-target="#application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</a></li>
+  <li><a href="#a-note-on-balance" id="toc-a-note-on-balance" class="nav-link" data-scroll-target="#a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/splits.html">Exploring and preparing data</a></li><li class="breadcrumb-item"><a href="../chapters/splits.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></h1>
 </div>
 
 
@@ -188,28 +247,136 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 <p>In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we were very lucky. Because we applied an unsupervised method, we didn’t really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.</p>
-<section id="training" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="training"><span class="header-section-number">3.1</span> Training</h2>
-<p>In data science (in machine learning in particular), we do <em>fit</em> models. We <em>train</em> them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.</p>
-<p>Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.</p>
+<p>In a sense, we started thinking about these concepts in <span class="quarto-unresolved-ref">?sec-gradientdescent</span>; specifically, we came up with a way to optimize the parameters of our model (<em>i.e.</em> of <em>training</em> our model) based on a series of empirical observations, and a criteria for what a “good fit” is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.</p>
+<section id="how-can-we-split-a-dataset" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</h2>
+<p>There is a much more important question to ask first: <em>why</em> do we split a dataset? In a sense, answering this question echoes the discussion we started in <strong>TODO REG MOD</strong>, because the purpose of splitting a dataset is to ensure we can train and evaluate it properly, in order to deliver the best possible model.</p>
+<p>When a model is trained, it has learned from the data, we have tuned its hyper-parameters to ensure that it learned with the best possible conditions, and we have applied a measure of performance after the entire process to communicate how well our model works. These three tasks require three different datasets, and this is the purpose of splitting our data into groups.</p>
+<p>One of the issues when reading about splitting data is that the terminology can be muddy. For example, what constitutes a testing and validation set can largely be a matter of perspective. In many instances, testing and validation are used interchangeably, and this book is no exception. Nevertheless, it helps to settle on a few guidelines here, before going into the details of what each dataset constitutes and how to assemble it.</p>
+<p>The training data are examples that are given to the model during the training process. This one has no ambiguities. aside from the fact that it is defined by substraction, in a sense, as whatever is left of the original data after we set aside testing and validation sets.</p>
+<p>The testing data are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in <strong>TODO LEAKAGE</strong>.</p>
+<p>The validation data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.</p>
+<p>The difference between testing and validation is largely a difference of <em>intent</em>. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let’s look at each of these datasets in turn.</p>
+<section id="training" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="training"><span class="header-section-number">4.1.1</span> Training</h3>
+<p>In data science (in applied machine learning in particular), we do <em>fit</em> models. We <em>train</em> them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.</p>
+<p>Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In <span class="quarto-unresolved-ref">?sec-gradientdescent</span>, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.</p>
 <p>Training a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease.</p>
 <p>In order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained <em>on the specific problem</em> we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by “training the model”, what we really mean is “change the structure of the parameters until the output looks right”. For example, assuming a simple linear model like <span class="math inline">\(c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2\)</span>, training this model would lead to changes in the values of <span class="math inline">\(\beta\)</span>, but not to the consideration of a new model <span class="math inline">\(c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_1X_2\)</span>. Comparing models is the point of validation, which we will address later on.</p>
 <p>need for instances</p>
 <p>need for responses</p>
 </section>
-<section id="testing" class="level2" data-number="3.2">
-<h2 data-number="3.2" class="anchored" data-anchor-id="testing"><span class="header-section-number">3.2</span> Testing</h2>
+<section id="validating" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="validating"><span class="header-section-number">4.1.2</span> Validating</h3>
 </section>
-<section id="validating" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="validating"><span class="header-section-number">3.3</span> Validating</h2>
+<section id="testing" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="testing"><span class="header-section-number">4.1.3</span> Testing</h3>
 </section>
-<section id="strategies-to-split-data" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">3.4</span> Strategies to split data</h2>
 </section>
-<section id="data-leakage" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="data-leakage"><span class="header-section-number">3.5</span> Data leakage</h2>
+<section id="the-problem-phenology-of-cherry-blossom" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="the-problem-phenology-of-cherry-blossom"><span class="header-section-number">4.2</span> The problem: phenology of cherry blossom</h2>
+</section>
+<section id="strategies-to-split-data" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.3</span> Strategies to split data</h2>
+<p>remove testing first if needed</p>
+<p>exhaustive</p>
+<p>non-exhaustive</p>
+<section id="holdout" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="holdout"><span class="header-section-number">4.3.1</span> Holdout</h3>
+<p>The holdout method is what we used in <strong>TODO REF GRAD</strong>, in which we randomly selected some observations to be part of the validation data (which was, in practice, a testing dataset in this example), and kept the rest to serve as the training data. Holdout cross-validation is possibly the simplest technique, but it suffers from a few drawbacks.</p>
+<p>The model is only trained for one split of the data, and similarly only evaluated for one split of the data. There is, therefore, a chance to sample a particularly bad combination of the data that lead to erroneous results. Attempts to quantify the importance of the predictors are likely to give particularly unstable results, as the noise introduced by picking a single random subset will not be smoothed out by multiple attempts.</p>
+<p>In addition, as <span class="citation" data-cites="hawkins2003">Hawkins, Basak, and Mills (<a href="../references.html#ref-hawkins2003" role="doc-biblioref">2003</a>)</span> point out, holdout validation is particularly wasteful in data-limited settings, where there are fewer than hundreds of observations. The reason is that the holdout dataset will <em>never</em> contribute to training, and assuming the data are split 80/20, one out of five observations will not contribute to the model. Other cross-validation schemes presented in this section will allow observations to be used both for training and validation.</p>
+</section>
+<section id="leave-p-out" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="leave-p-out"><span class="header-section-number">4.3.2</span> Leave-p-out</h3>
+<p>In leave-<em>p</em>-out cross-validation (LpOCV), starting from a dataset on <span class="math inline">\(n\)</span> observation, we pick <span class="math inline">\(p\)</span> at random to serve as validation data, and <span class="math inline">\(n-p\)</span> to serve as the training dataset. This process is then repeated <em>exhaustively</em>, which is to say we split the dataset in every possible way that gives <span class="math inline">\(p\)</span> and <span class="math inline">\(n-p\)</span> observations, for a set value of <span class="math inline">\(p\)</span>. The model is then trained on the <span class="math inline">\(n-p\)</span> observations, and validated on the <span class="math inline">\(p\)</span> observations for validation, and the performance (or loss) is averaged to give the model performance before testing.</p>
+<p><span class="citation" data-cites="celisse2014">Celisse (<a href="../references.html#ref-celisse2014" role="doc-biblioref">2014</a>)</span> points out that <span class="math inline">\(p\)</span> has to be large enough (relative to the sample size <span class="math inline">\(n\)</span>) to overcome the propensity of the model to overfit on a small training dataset. One issue with LpOCV is that the number of combinations is potentially very large. It is, in fact, given by the binomial coefficent <span class="math inline">\(\binom{n}{p}\)</span>, which gets unreasonably large even for small datasets. For example, running LpOCV on <span class="math inline">\(n=150\)</span> observations, leaving out <span class="math inline">\(p=10\)</span> for validation everytime, would require to train the model about <span class="math inline">\(10^{15}\)</span> times. Assuming we can train the model in <span class="math inline">\(10^{-3}\)</span> seconds, the entire process would require 370 centuries.</p>
+<p>Oh well.</p>
+</section>
+<section id="leave-one-out" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</h3>
+<p>The leave-one-out cross-validation (LOOCV) is a special case of LpOCV with <span class="math inline">\(p=1\)</span>. Note that it is a lot faster to run than LpOCV, because <span class="math inline">\(\binom{n}{1}=n\)</span>, and so the validation step runs in <span class="math inline">\(\mathcal{O}(n)\)</span> (LpOCV runs in <span class="math inline">\(\mathcal{O}(n!)\)</span>). LOOCV is also an <em>exhaustive</em> cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.</p>
+</section>
+<section id="k-fold" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.3.4</span> k-fold</h3>
+<p>One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into <span class="math inline">\(k\)</span> equal parts (and so when <span class="math inline">\(k = n\)</span>, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used <em>exactly</em> one time to evaluate the model , and <em>exactly</em> <span class="math inline">\(k-1\)</span> times to train it. But by contrast with the holdout validation approach, <em>all</em> observations are used to train the model.</p>
+<p>When the data have some specific structure, it can be a good thing to manipulate the splits in order to maintain this structure. For example, <span class="citation" data-cites="bergmeir2012">Bergmeir and Benítez (<a href="../references.html#ref-bergmeir2012" role="doc-biblioref">2012</a>)</span> use temporal blocks for validation of time series, and retain the last part of the series for testing (we illustrate this in <a href="#fig-splits-illustration" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>). For spatial data, <span class="citation" data-cites="hijmans2012">Hijmans (<a href="../references.html#ref-hijmans2012" role="doc-biblioref">2012</a>)</span> suggests the use of a null model based on distance to training sites to decide on how to split the data; <span class="citation" data-cites="valavi2018">Valavi et al. (<a href="../references.html#ref-valavi2018" role="doc-biblioref">2018</a>)</span> have designed specific k-fold cross-validation schemes for species distribution models. These approaches all belong to the family of <em>stratified</em> k-fold cross-validation <span class="citation" data-cites="zeng2000">(<a href="../references.html#ref-zeng2000" role="doc-biblioref">Zeng and Martinez 2000</a>)</span>.</p>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-illustration">
+<div id="cell-fig-splits-illustration" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div id="fig-splits-illustration" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="splits_files/figure-html/fig-splits-illustration-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4.1: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>The appropriate value of <span class="math inline">\(k\)</span> is often an unknown. It is common to use <span class="math inline">\(k = 10\)</span> as a starting point (tenfold cross-validation), but other values are justifiable based on data volume, complexity of the model training, to name a few.</p>
+</section>
+<section id="monte-carlo" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</h3>
+<p>One of the limitations of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.</p>
+<p>One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.</p>
+</section>
+</section>
+<section id="application-when-do-cherry-blossom-bloom" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</h2>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
+<div id="cell-fig-splits-prediction" class="cell" data-execution_count="10">
+<div class="cell-output cell-output-display">
+<div id="fig-splits-prediction" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="splits_files/figure-html/fig-splits-prediction-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4.2: TODO</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tab-splits-results">
+<div id="cell-tab-splits-results" class="cell" data-tbl-cap="blah" data-execution_count="12">
+<div class="cell-output cell-output-stdout">
+<pre><code>4×3 DataFrame
+ Row │ Loss    Training      Validation  
+     │ Symbol  Float64       Float64     
+─────┼───────────────────────────────────
+   1 │ RMSE     2.05218       2.05375
+   2 │ MSE      4.21454       4.47021
+   3 │ MAE      1.56438       1.60805
+   4 │ MBE     -3.01914e-14  -0.00507392</code></pre>
+</div>
+<div id="tab-splits-results" class="cell-output cell-output-display">
+
+</div>
+</div>
+</div>
+</section>
+<section id="a-note-on-balance" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</h2>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-bergmeir2012" class="csl-entry" role="listitem">
+Bergmeir, Christoph, and José M. Benítez. 2012. <span>“On the Use of Cross-Validation for Time Series Predictor Evaluation.”</span> <em>Information Sciences</em> 191 (May): 192–213. <a href="https://doi.org/10.1016/j.ins.2011.12.028">https://doi.org/10.1016/j.ins.2011.12.028</a>.
+</div>
+<div id="ref-celisse2014" class="csl-entry" role="listitem">
+Celisse, Alain. 2014. <span>“Optimal Cross-Validation in Density Estimation with the <span>$</span>l<span>^</span><span></span>2<span></span><span>$</span>-Loss.”</span> <em>The Annals of Statistics</em> 42 (5). <a href="https://doi.org/10.1214/14-aos1240">https://doi.org/10.1214/14-aos1240</a>.
+</div>
+<div id="ref-hawkins2003" class="csl-entry" role="listitem">
+Hawkins, Douglas M., Subhash C. Basak, and Denise Mills. 2003. <span>“Assessing Model Fit by Cross-Validation.”</span> <em>Journal of Chemical Information and Computer Sciences</em> 43 (2): 579–86. <a href="https://doi.org/10.1021/ci025626i">https://doi.org/10.1021/ci025626i</a>.
+</div>
+<div id="ref-hijmans2012" class="csl-entry" role="listitem">
+Hijmans, Robert J. 2012. <span>“Cross-Validation of Species Distribution Models: Removing Spatial Sorting Bias and Calibration with a Null Model.”</span> <em>Ecology</em> 93 (3): 679–88. <a href="https://doi.org/10.1890/11-0826.1">https://doi.org/10.1890/11-0826.1</a>.
+</div>
+<div id="ref-valavi2018" class="csl-entry" role="listitem">
+Valavi, Roozbeh, Jane Elith, José J. Lahoz-Monfort, and Gurutzeta Guillera-Arroita. 2018. <span>“Block CV : An r Package for Generating Spatially or Environmentally Separated Folds for <span><em>k</em></span> <span>-</span>Fold Cross<span>-</span>Validation of Species Distribution Models.”</span> Edited by David Warton. <em>Methods in Ecology and Evolution</em> 10 (2): 225–32. <a href="https://doi.org/10.1111/2041-210x.13107">https://doi.org/10.1111/2041-210x.13107</a>.
+</div>
+<div id="ref-zeng2000" class="csl-entry" role="listitem">
+Zeng, Xinchuan, and Tony R. Martinez. 2000. <span>“Distribution-Balanced Stratified Cross-Validation for Accuracy Estimation.”</span> <em>Journal of Experimental &amp; Theoretical Artificial Intelligence</em> 12 (1): 1–12. <a href="https://doi.org/10.1080/095281300146272">https://doi.org/10.1080/095281300146272</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -559,13 +726,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/kmeans.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating groups: the <em>k</em>-means algorithm</span></span>
+      <a href="../chapters/gradientdescent.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../chapters/gradientdescent.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Minimizing error: the gradient descent algorithm</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/leakage.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
