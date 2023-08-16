@@ -383,9 +383,9 @@ div.csl-indent {
 <p>This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work rather well.</p>
 <section id="performance-evaluation" class="level3" data-number="4.4.1">
 <h3 data-number="4.4.1" class="anchored" data-anchor-id="performance-evaluation"><span class="header-section-number">4.4.1</span> Performance evaluation</h3>
-<p>We can visualize the results of our model training and assessment process. These results are presented in <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a>, and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!</p>
+<p>We can visualize the results of our model training and assessment process. These results are presented in <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a> (as well as in <a href="#tbl-splits-performance-summary" class="quarto-xref">Table&nbsp;<span>4.2</span></a>, if you want to see the standard deviation across all splits), and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!</p>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-performance">
-<div id="cell-fig-splits-performance" class="cell" data-execution_count="14">
+<div id="cell-fig-splits-performance" class="cell" data-execution_count="15">
 <div class="cell-output cell-output-display">
 <div id="fig-splits-performance" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -397,6 +397,99 @@ div.csl-indent {
 </div>
 </div>
 <p>Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.</p>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
+<div class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div id="tbl-splits-performance-summary" class="anchored">
+<table class="table table-sm table-striped small">
+<caption>Table&nbsp;4.2: TODO</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Dataset</th>
+<th style="text-align: right;">Measure</th>
+<th style="text-align: right;">Loss (avg.)</th>
+<th style="text-align: right;">Loss (std. dev.)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">Testing</td>
+<td style="text-align: right;">MAE</td>
+<td style="text-align: right;">1.696</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Training</td>
+<td style="text-align: right;">MAE</td>
+<td style="text-align: right;">2.2397</td>
+<td style="text-align: right;">0.0482364</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">Validation</td>
+<td style="text-align: right;">MAE</td>
+<td style="text-align: right;">2.26331</td>
+<td style="text-align: right;">0.421513</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Testing</td>
+<td style="text-align: right;">MBE</td>
+<td style="text-align: right;">0.0971036</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">Training</td>
+<td style="text-align: right;">MBE</td>
+<td style="text-align: right;">9.8278e-15</td>
+<td style="text-align: right;">1.15597e-14</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Validation</td>
+<td style="text-align: right;">MBE</td>
+<td style="text-align: right;">0.000419595</td>
+<td style="text-align: right;">0.910229</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">Testing</td>
+<td style="text-align: right;">MSE</td>
+<td style="text-align: right;">4.49123</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Training</td>
+<td style="text-align: right;">MSE</td>
+<td style="text-align: right;">8.04855</td>
+<td style="text-align: right;">0.32487</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">Validation</td>
+<td style="text-align: right;">MSE</td>
+<td style="text-align: right;">8.24897</td>
+<td style="text-align: right;">2.93094</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Testing</td>
+<td style="text-align: right;">RMSE</td>
+<td style="text-align: right;">2.11925</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">Training</td>
+<td style="text-align: right;">RMSE</td>
+<td style="text-align: right;">2.83648</td>
+<td style="text-align: right;">0.0570941</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">Validation</td>
+<td style="text-align: right;">RMSE</td>
+<td style="text-align: right;">2.82514</td>
+<td style="text-align: right;">0.545232</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
 <p>First, what are we predicting? Our response variable is not <em>really</em> the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.</p>
 <p>Second, what difference <em>does</em> a day make? <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error – a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluations can help us contextualize the predictions.</p>
 </section>

@@ -116,11 +116,13 @@ This approach (start from a model that is suspiciously simple) is a good thing, 
 
 ### Performance evaluation
 
-We can visualize the results of our model training and assessment process. These results are presented in @fig-splits-performance, and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!
+We can visualize the results of our model training and assessment process. These results are presented in @fig-splits-performance (as well as in @tbl-splits-performance-summary, if you want to see the standard deviation across all splits), and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!
 
 {{< embed ../notebooks/sm-splits.qmd#fig-splits-performance >}}
 
 Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.
+
+{{< embed ../notebooks/sm-splits.qmd#tbl-splits-performance-summary >}}
 
 First, what are we predicting? Our response variable is not *really* the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.
 

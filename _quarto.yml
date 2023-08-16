@@ -52,6 +52,8 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrbook
+    fig-pos: 'bt'
+    tbl-pos: 'bt'
     toc: true
     toc-depth: 3
 

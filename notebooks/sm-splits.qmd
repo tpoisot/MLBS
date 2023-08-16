@@ -11,7 +11,7 @@ using Statistics
 using GLM
 using CairoMakie
 using Markdown
-using MarkdownTables
+using PrettyTables
 CairoMakie.activate!(; px_per_unit = 2)
 ```
 
@@ -172,16 +172,26 @@ We can now make a table with the results (by dataset/loss function):
 ```{julia}
 summary_table = benchmark_result[benchmark_result.Model .== :Simple, :]
 select!(summary_table, Not(:Model))
-select!(summary_table, Not(Symbol("Loss (std. dev.)")))
+allowmissing!(summary_table, Symbol("Loss (std. dev.)"))
+#select!(summary_table, Not(Symbol("Loss (std. dev.)")))
 for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
     loss = m(sakuratest.flowavg, predict(model, sakuratest))
     push!(summary_table,
         (
-            :Testing, p, loss,
+            :Testing, p, loss, missing
         )
     )
 end
 sort!(summary_table, [:Measure, :Dataset])
+```
+
+We will add a little cell to output the table in a way we can use in the main document -- if you run this line from the terminal, this will very likely fail.
+
+```{julia}
+#| label: tbl-splits-performance-summary
+#| tbl-cap: TODO
+out = pretty_table(String, summary_table, tf= tf_html_simple, formatters = ft_nomissing, show_subheader = false)
+display("text/html", out)
 ```
 
 We will turn this into a little visualisation, to get a sense of what the measures say:
