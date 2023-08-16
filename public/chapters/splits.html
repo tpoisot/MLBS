@@ -214,8 +214,12 @@ div.csl-indent {
   <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">4.3.4</span> k-fold</a></li>
   <li><a href="#monte-carlo" id="toc-monte-carlo" class="nav-link" data-scroll-target="#monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</a></li>
   </ul></li>
-  <li><a href="#application-when-do-cherry-blossom-bloom" id="toc-application-when-do-cherry-blossom-bloom" class="nav-link" data-scroll-target="#application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</a></li>
-  <li><a href="#a-note-on-balance" id="toc-a-note-on-balance" class="nav-link" data-scroll-target="#a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</a></li>
+  <li><a href="#application-when-do-cherry-blossom-bloom" id="toc-application-when-do-cherry-blossom-bloom" class="nav-link" data-scroll-target="#application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</a>
+  <ul class="collapse">
+  <li><a href="#performance-evaluation" id="toc-performance-evaluation" class="nav-link" data-scroll-target="#performance-evaluation"><span class="header-section-number">4.4.1</span> Performance evaluation</a></li>
+  <li><a href="#model-predictions" id="toc-model-predictions" class="nav-link" data-scroll-target="#model-predictions"><span class="header-section-number">4.4.2</span> Model predictions</a></li>
+  <li><a href="#is-our-model-good-then" id="toc-is-our-model-good-then" class="nav-link" data-scroll-target="#is-our-model-good-then"><span class="header-section-number">4.4.3</span> Is our model good, then?</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -377,33 +381,49 @@ div.csl-indent {
 <h2 data-number="4.4" class="anchored" data-anchor-id="application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</h2>
 <p>The model we will train for this section is really simple: <span class="math inline">\(\text{bloom day} = m \times \text{temperature} + b\)</span>. This is a linear model, and one with a nice, direct biological interpretation: the average (baseline) day of bloom is <span class="math inline">\(b\)</span>, and each degree adds <span class="math inline">\(m\)</span> days to the bloom date. At this point, we <em>might</em> start thinking about the distribution of the response, and what type of GLM we should used, but no. Not today. Today, we want to iterate quickly, and so we will start with a model that is exactly as simple as it needs to be.</p>
 <p>This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work rather well.</p>
+<section id="performance-evaluation" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="performance-evaluation"><span class="header-section-number">4.4.1</span> Performance evaluation</h3>
+<p>We can visualize the results of our model training and assessment process. These results are presented in <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a>, and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!</p>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-performance">
+<div id="cell-fig-splits-performance" class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div id="fig-splits-performance" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="splits_files/figure-html/fig-splits-performance-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4.3: Visualisation of the model performance for …. The colors are the same as in fig-splits-illustration, <em>i.e.</em> grey for the training data, green for the validation data, and purple for the testing data.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.</p>
+<p>First, what are we predicting? Our response variable is not <em>really</em> the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.</p>
+<p>Second, what difference <em>does</em> a day make? <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error – a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluations can help us contextualize the predictions.</p>
+</section>
+<section id="model-predictions" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="model-predictions"><span class="header-section-number">4.4.2</span> Model predictions</h3>
+<p>The predictions of our model are presented in <a href="#fig-splits-prediction" class="quarto-xref">Figure&nbsp;<span>4.4</span></a>; these are the predictions of the <em>final</em> model, that is, the model that we trained on everything <em>except</em> the testing data, and for which we can get the performance by looking at <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a>.</p>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
 <div id="cell-fig-splits-prediction" class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display">
 <div id="fig-splits-prediction" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="splits_files/figure-html/fig-splits-prediction-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;4.3: TODO</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;4.4: TODO</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tab-splits-results">
-<div id="tab-splits-results" class="cell" data-execution_count="13">
-<div class="cell-output cell-output-stdout">
-<pre><code>| Measure | Testing             | Training              | Validation             |
-|---------|---------------------|-----------------------|------------------------|
-|   `MAE` |  1.6959982869325645 |    2.2396963506573813 |      2.263306125222033 |
-|   `MBE` | 0.09710363384401771 | 9.827795116700362e-15 | 0.00041959506666930103 |
-|   `MSE` |   4.491232875795532 |     8.048554416196467 |       8.24897256356115 |
-|  `RMSE` |   2.119252905104894 |     2.836480329237311 |     2.8251411744935995 |</code></pre>
-</div>
-</div>
-</div>
+<p>The question we now need to answer is: is our model doing a good job? We can start thinking about this question in a very qualitative way: yes, it does a goob job at drawing a line that, through time, goes right through the original data. As far as validation goes, it maybe underestimates the drop in the response variable (it predicts the bloom a little later), but maybe there are long-term effects, expressed over the lifetime of the tree (the first bloom usually takes places after 6 or 7 growth seasons), that we do not account for.</p>
+<p>Our model tends to smooth out some of the variation; it does not predict bloom dates before day of year 100, or after day of year 108, although they do happen. This may not be a trivial under-prediction: some of these cycles leading to very early/late bloom can take place over a century, meaning that our model could be consistently wrong (which is to say, wrong with the same bias) for dozens of years in a row.</p>
 </section>
-<section id="a-note-on-balance" class="level2" data-number="4.5">
-<h2 data-number="4.5" class="anchored" data-anchor-id="a-note-on-balance"><span class="header-section-number">4.5</span> A note on balance</h2>
+<section id="is-our-model-good-then" class="level3" data-number="4.4.3">
+<h3 data-number="4.4.3" class="anchored" data-anchor-id="is-our-model-good-then"><span class="header-section-number">4.4.3</span> Is our model good, then?</h3>
+<p>The answer is, it depends. Models are neither good, nor bad. They are either fit, or unfit, for a specific purpose.</p>
+<p>If the purpose is to decide when to schedule a one-day trip to see the cherry blossom bloom, our model is not really fit – looking at the predictions, it gets within a day of the date of bloom (but oh, by the way, this is an average over close to a decade!) about 15% of the time, which jumps up to close to 30% if you accept a two-days window of error.</p>
+<p>If the purpose is to look at long-time trends in the date of bloom, then our model actually works rather well. It does under-estimate the amplitude of the cycles, but not by a large amount. In fact, we could probably stretch the predictions a little, applying a little correction factor, and have a far more interesting model.</p>
+<p>We will often be confronted to this question when working with prediction. There is not really a criteria for “good”, only a series of compromises and judgment calls about “good enough”. This is important. It reinforces the imperative of keeping the practice of data science connected to the domain knowledge, as ultimately, a domain expert will have to settle on whether to use a model or not.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -432,6 +452,7 @@ Valavi, Roozbeh, Jane Elith, José J. Lahoz-Monfort, and Gurutzeta Guillera-Arro
 Zeng, Xinchuan, and Tony R. Martinez. 2000. <span>“Distribution-Balanced Stratified Cross-Validation for Accuracy Estimation.”</span> <em>Journal of Experimental &amp; Theoretical Artificial Intelligence</em> 12 (1): 1–12. <a href="https://doi.org/10.1080/095281300146272">https://doi.org/10.1080/095281300146272</a>.
 </div>
 </div>
+</section>
 </section>
 
 </main> <!-- /main -->

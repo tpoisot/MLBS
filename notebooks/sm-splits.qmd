@@ -25,15 +25,15 @@ sort!(sakura, :year)
 describe(sakura)
 ```
 
-We will use a 14 years running average for the date of bloom; this is a little artificial, but it
+We will use a running average for the date of bloom; this is a little artificial, but it ensures that we smooth out the differences from year to year. The size of the window is, in a sense, a parameter of the model (or at least a parameter of the data preparation process) that we may want to tweak.
 
 ```{julia}
 average = zeros(Float64, size(sakura, 1))
 for (i, row) in enumerate(eachrow(sakura))
-    year_span = row.year .+ (-7, 2)
+    window = sort((-7, 2))
+    year_span = row.year .+ window
     valid_records = year_span[1] .< sakura.year .< year_span[2]
-    subset = sakura[findall(valid_records), :]
-    dropmissing!(subset)
+    subset = dropmissing(sakura[findall(valid_records), :])
     if size(subset, 1) >= 3
         average[i] = mean(subset.flowering)
     end
@@ -159,16 +159,17 @@ model = lm(@formula(flowavg ~ temperature), sakuratrain)
 ```{julia}
 #| label: fig-splits-prediction
 #| fig-cap: TODO
-scatter(sakura.year, sakura.flowavg, color=:lightgrey)
-lines!(sakuratrain.year, predict(model, sakuratrain), color=:black)
-lines!(sakuratest.year, predict(model, sakuratest), color=:red)
+f = Figure(; resolution=(500, 300))
+ax = Axis(f[1,1]; xlabel="Year", ylabel="Day of bloom")
+scatter!(ax, sakura.year, sakura.flowavg, color=:lightgrey, markersize=6)
+lines!(ax, sakuratrain.year, predict(model, sakuratrain), color=:black, linewidth=1)
+lines!(ax, sakuratest.year, predict(model, sakuratest), color=Makie.wong_colors()[4], linewidth=2)
 current_figure()
 ```
 
 We can now make a table with the results (by dataset/loss function):
 
 ```{julia}
-#| label: tab-splits-results
 summary_table = benchmark_result[benchmark_result.Model .== :Simple, :]
 select!(summary_table, Not(:Model))
 select!(summary_table, Not(Symbol("Loss (std. dev.)")))
@@ -181,13 +182,33 @@ for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
     )
 end
 sort!(summary_table, [:Measure, :Dataset])
-
-output = unstack(summary_table, :Dataset, Symbol("Loss (avg.)"))
-
-output |> markdown_table(String) |> println
 ```
 
-\
+We will turn this into a little visualisation, to get a sense of what the measures say:
+
+```{julia}
+#| label: fig-splits-performance
+#| fig-cap: Visualisation of the model performance for .... The colors are the same as in fig-splits-illustration, *i.e.* grey for the training data, green for the validation data, and purple for the testing data.
+f = Figure(; resolution=(500, 300))
+model_results = test_results[test_results.Model .== :Simple, :]
+for (i,m) in enumerate([:MAE, :RMSE, :MBE])
+    ax = Axis(f[i,1]; ylabel=String(m))
+    ylims!(ax, (-0.15, 0.15))
+    hidespines!(ax, :l, :r, :t)
+    hideydecorations!(ax, label=false)
+    hidexdecorations!(ax, grid=true, ticks=false, ticklabels=false)
+    thesedata = model_results[model_results.Measure .== m, :]
+    traindata = thesedata[thesedata.Dataset .== :Training, :]
+    scatter!(ax, traindata.Value, fill(0.1, size(traindata, 1)), color=:lightgrey)
+    validdata = thesedata[thesedata.Dataset .== :Validation, :]
+    scatter!(ax, validdata.Value, fill(-0.1, size(validdata, 1)), color=Makie.wong_colors()[3])
+    testdata = summary_table[(summary_table.Dataset .== :Testing).&(summary_table.Measure .== m), :]
+    rename!(testdata, Symbol("Loss (avg.)") => :Value)
+    scatter!(ax, only(testdata.Value), 0.0, color=Makie.wong_colors()[4], marker=:diamond, markersize=14)
+end
+current_figure()
+```
+
 Finally, we can take a look at the prediction of the model but only looking at the testing dataset:
 
 ```{julia}
@@ -197,5 +218,22 @@ f = Figure()
 ax = Axis(f[1,1])
 scatter!(ax, sakuratest.year, sakuratest.flowavg, color=:lightgrey)
 lines!(ax, sakuratest.year, predict(model, sakuratest), color=:red)
+current_figure()
+```
+
+one-day trip
+
+```{julia}
+(count(sort(abs.(predict(model, sakura) .- sakura.flowavg)) .< 0.5) / size(sakura, 1))*100
+```
+
+stretching for in-class demo
+
+```{julia}
+pred = predict(model, sakura)
+truth = sakura.flowavg
+mpred = (pred .- mean(pred)) .* 1.9 .+ mean(pred)
+scatter(sakura.year, sakura.flowavg)
+scatter!(sakura.year, mpred)
 current_figure()
 ```

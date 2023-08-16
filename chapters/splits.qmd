@@ -114,8 +114,34 @@ The model we will train for this section is really simple: $\text{bloom day} = m
 
 This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work rather well.
 
+### Performance evaluation
+
+We can visualize the results of our model training and assessment process. These results are presented in @fig-splits-performance, and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!
+
+{{< embed ../notebooks/sm-splits.qmd#fig-splits-performance >}}
+
+Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.
+
+First, what are we predicting? Our response variable is not *really* the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.
+
+Second, what difference *does* a day make? @fig-splits-rawdata shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error -- a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluations can help us contextualize the predictions.
+
+### Model predictions
+
+The predictions of our model are presented in @fig-splits-prediction; these are the predictions of the *final* model, that is, the model that we trained on everything *except* the testing data, and for which we can get the performance by looking at @fig-splits-performance.
+
 {{< embed ../notebooks/sm-splits.qmd#fig-splits-prediction >}}
 
-{{< embed ../notebooks/sm-splits.qmd#tab-splits-results >}}
+The question we now need to answer is: is our model doing a good job? We can start thinking about this question in a very qualitative way: yes, it does a goob job at drawing a line that, through time, goes right through the original data. As far as validation goes, it maybe underestimates the drop in the response variable (it predicts the bloom a little later), but maybe there are long-term effects, expressed over the lifetime of the tree (the first bloom usually takes places after 6 or 7 growth seasons), that we do not account for.
 
-## A note on balance
+Our model tends to smooth out some of the variation; it does not predict bloom dates before day of year 100, or after day of year 108, although they do happen. This may not be a trivial under-prediction: some of these cycles leading to very early/late bloom can take place over a century, meaning that our model could be consistently wrong (which is to say, wrong with the same bias) for dozens of years in a row.
+
+### Is our model good, then?
+
+The answer is, it depends. Models are neither good, nor bad. They are either fit, or unfit, for a specific purpose.
+
+If the purpose is to decide when to schedule a one-day trip to see the cherry blossom bloom, our model is not really fit -- looking at the predictions, it gets within a day of the date of bloom (but oh, by the way, this is an average over close to a decade!) about 15% of the time, which jumps up to close to 30% if you accept a two-days window of error.
+
+If the purpose is to look at long-time trends in the date of bloom, then our model actually works rather well. It does under-estimate the amplitude of the cycles, but not by a large amount. In fact, we could probably stretch the predictions a little, applying a little correction factor, and have a far more interesting model.
+
+We will often be confronted to this question when working with prediction. There is not really a criteria for "good", only a series of compromises and judgment calls about "good enough". This is important. It reinforces the imperative of keeping the practice of data science connected to the domain knowledge, as ultimately, a domain expert will have to settle on whether to use a model or not.
