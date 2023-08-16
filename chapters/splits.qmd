@@ -18,7 +18,15 @@ The testing data are used at the end of the process, to measure the performance 
 
 The validation data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.
 
-The difference between testing and validation is largely a difference of *intent*. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let's look at each of these datasets in turn.
+The difference between testing and validation is largely a difference of *intent*. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let's look at each of these datasets in turn. The differences between these three datasets are summarized in @tbl-splits-models.
+
+| Dataset    | Trains | Purpose                         | Data for performance |
+|------------|--------|---------------------------------|----------------------|
+| Training   | yes    | train model                     |                      |
+| Validation |        | validate during training        | training data only   |
+| Testing    |        | estimates of future performance | all except testing   |
+
+: gfkdf jdshgl dsjg d. Information in the "Data used for training" column refer to the data that have been used to train the model when calculating its performance. {#tbl-splits-models}
 
 ### Training
 
@@ -28,15 +36,23 @@ Training, to provide a general definition, is the action of modifying the parame
 
 Training a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease.
 
-In order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained *on the specific problem* we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by "training the model", what we really mean is "change the structure of the parameters until the output looks right". For example, assuming a simple linear model like $c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2$, training this model would lead to changes in the values of $\beta$, but not to the consideration of a new model $c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_1X_2$. Comparing models is the point of validation, which we will address later on.
-
-need for instances
-
-need for responses
+In order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained *on the specific problem* we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by "training the model", what we really mean is "change the structure of the parameters until the output looks right". For example, assuming a simple linear model like $c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2$, training this model would lead to changes in the values of $\beta$, but not to the consideration of a new model $c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_1X_2$. Comparing models is (often) the point of validation, which we will address later on in the book.
 
 ### Validating
 
+The easiest way to think about the validation dataset is by thinking about what it is *not* used for: training the model (this is the training set), and giving a final overview of the model expected performance (this is the testing set). The validation set is used for everything else (model selection, cross-validation, hyper-parameters tuning), albeit in a specific way. With the training set, we communicate the predictors and the labels to the model, and update the weights of the model in response. With the validation set, we communicate the predictors and the labels to the model, but we do *not* update the weights in response. All we care about during validation is the performance of the model on a problem it has not yet encountered during training. If the training set is like attending a lecture, the validation set is like formative feedback.
+
+Of course, one issue with the creation of a validation set is that it needs to resemble the problem the model will have to solve in practice. We will discuss this more in depth in the following sections, but it is worth thinking about an example. Assume a model that classifies a picture as having either a black bear, or no black bear. Now, we can train this model using, for example, images from 10 camera traps that are situated in a forest. And we might want to validate with a camera trap that is in a zoo. In one of the enclosures. The one with a bear. A polar one.
+
+The issue with this dataset as a validation dataset is that is does not matches the problem we try to solve in many different ways. First, we will have an excess of images with bears compared to our problem environment. Second, the data will come from very different environments (forest v. zoo). Finally, we are attempting to validate on something that is an entirely different species of bear. This sounds like an egregious case (it is), but it is easy to commit this type of mistake when our data get more complex than black bear, polar bear, no bear.
+
+Validation is, in particular, very difficult when the dataset we use for training has extreme events [@bellocchi2010]. Similarly, the efficiency of validation datasets can be limited if it reflects the same biases as the training data [@martinez-meyer2005]. Recall that this validation dataset is used to decide on the ideal conditions to train the final model before testing (and eventually, deployment); it is, therefore, extremely important to get it right. A large number of techniques to split data **REF TK** use heuristics to minimize the risk of picking the wrong validation data.
+
 ### Testing
+
+The testing dataset is special. The model has *never* touched it. Not during training, and not for validation. For this reason, we can give it a very unique status: it is an analogue to data that are newly collected, and ready to be passed through the trained model in order to make a prediction. The only difference between the testing set and actual new data is that, for the testing set, we know the labels. In other words, we can compare the model output to these labels, and this gives us an estimate of the model performance on future data.
+
+But this requires a trained model, and we sort of glossed over this step. In order to come up with a trained model, it would be a strange idea not to use the validation data -- they are, after all, holding information about the data we want to model! Once we have evaluated our model on the validation set, we can start the last round of training to produce the final model. We do this by training the model using everything *except* the testing data.
 
 ## The problem: phenology of cherry blossom
 
