@@ -1,0 +1,161 @@
+# Supp. Mat. - classification
+
+```{julia}
+using DataFrames
+import CSV
+using CairoMakie
+using Distributions
+using StatsBase
+using Statistics
+using LinearAlgebra
+```
+
+We load the data
+
+```{julia}
+_path = joinpath(@__DIR__, "..", "data", "general", "climate.csv")
+rangifer = DataFrame(CSV.File(_path))
+select!(rangifer, Not(:latitude))
+select!(rangifer, Not(:longitude))
+```
+
+we take aside a testing set
+
+```{julia}
+n_testing = floor(Int, 0.2 * size(rangifer, 1))
+
+testind_idx = sample(1:size(rangifer, 1), n_testing, replace=false)
+training_idx = filter(i -> !(i in testind_idx), 1:size(rangifer, 1))
+
+train, test = rangifer[training_idx, :], rangifer[testind_idx, :]
+```
+
+we will now normalize things in the dataset, specifically take the z-score
+
+```{julia}
+zzz = (x) -> (x .- mean(x))./std(x)
+train.bio1 = zzz(train.bio1)
+train.bio2 = zzz(train.bio2)
+train.bio3 = zzz(train.bio3)
+train.bio4 = zzz(train.bio4)
+train.bio12 = zzz(train.bio12)
+test.bio1 = zzz(test.bio1)
+test.bio2 = zzz(test.bio2)
+test.bio3 = zzz(test.bio3)
+test.bio4 = zzz(test.bio4)
+test.bio12 = zzz(test.bio12)
+```
+
+little plot for the CLOUT
+
+```{julia}
+density(test.bio1)
+density!(train.bio1)
+current_figure()
+```
+
+we need the distribs for test and train presence/absence
+
+```{julia}
+tonorm = (x) -> Normal(mean(x), std(x))
+
+function getdistr(df)
+    stck = stack(df, Not(:presence))
+    cmb = combine(groupby(stck, [:presence, :variable]), :value => tonorm => :value)
+    return unstack(cmb, :presence, :variable, :value)
+end
+```
+
+We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
+
+```{julia}
+predictions = zeros(Bool, size(train, 1))
+for i in axes(predictions, 1)
+    this_train = getdistr(deleteat!(copy(train), i))
+    if_present = filter(r -> r.presence, this_train)[1,:]
+    if_absent = filter(r -> !r.presence, this_train)[1,:]
+    this_features = train[i, :]
+    truth = this_features.presence
+    vars = [:bio1, :bio2, :bio3, :bio4, :bio12]
+    p_present = prod([pdf(if_present[var], this_features[var]) for var in vars])
+    p_absent = prod([pdf(if_absent[var], this_features[var]) for var in vars])
+    predictions[i] = p_present > p_absent
+end
+```
+
+now we can do the little adjacency table
+
+```{julia}
+tp = sum(predictions .& train.presence)
+tn = sum(.!predictions .& .!train.presence)
+fp = sum(predictions .& .!train.presence)
+fn = sum(.!predictions .& train.presence)
+M = [tp fn; fp tn]
+```
+
+some measures on the table
+
+```{julia}
+accuracy = sum(diag(M))/sum(M)
+```
+
+on the testing data now
+
+```{julia}
+testingpredictions = zeros(Bool, size(test, 1))
+finalmodel = getdistr(train) # full model
+if_present = filter(r -> r.presence, finalmodel)[1,:]
+if_absent = filter(r -> !r.presence, finalmodel)[1,:]
+```
+
+figure
+
+```{julia}
+#| label: fig-classification-separability
+#| fig-cap: show the separability of classes
+f = Figure()
+
+ax1 = Axis(f[1,1])
+c = Makie.wong_colors()[1]
+hist!(ax1, filter(r -> r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+
+ax2 = Axis(f[2,1])
+c = Makie.wong_colors()[2]
+hist!(ax2, filter(r -> !r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+
+for ax in [ax1, ax2]
+    xlims!(ax, (-4, 4))
+    ylims!(ax, (0, 0.65))
+    tightlimits!(ax)
+    hideydecorations!(ax)
+    hidexdecorations!(ax, grid=true, ticklabels=false, ticks=false)
+    hidespines!(ax, :l, :r, :t)
+end
+
+current_figure()
+```
+
+final testing
+
+```{julia}
+for i in axes(testingpredictions, 1)
+    this_features = train[i, :]
+    truth = this_features.presence
+    vars = [:bio1, :bio2, :bio3, :bio4, :bio12]
+    p_present = prod([pdf(if_present[var], this_features[var]) for var in vars])
+    p_absent = prod([pdf(if_absent[var], this_features[var]) for var in vars])
+    testingpredictions[i] = p_present > p_absent
+end
+```
+
+```{julia}
+ttp = sum(testingpredictions .& test.presence)
+ttn = sum(.!testingpredictions .& .!test.presence)
+tfp = sum(testingpredictions .& .!test.presence)
+tfn = sum(.!testingpredictions .& test.presence)
+tM = [ttp tfn; tfp ttn]
+```
+
+```{julia}
+accuracy = sum(diag(tM))/sum(tM)
+```
