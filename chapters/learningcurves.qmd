@@ -1,0 +1,5 @@
+# Learning curves
+
+In **TK GRADIENT**, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to
+
+data from @paulocortez2007

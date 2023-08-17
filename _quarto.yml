@@ -35,14 +35,11 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
-    - part: "Two illustrations"
-      chapters:
-        - chapters/kmeans.qmd
-        - chapters/gradientdescent.qmd
-    - part: "Data preparation"
-      chapters:
-        - chapters/splits.qmd
-        - chapters/leakage.qmd
+    - chapters/kmeans.qmd
+    - chapters/gradientdescent.qmd
+    - chapters/splits.qmd
+    - chapters/leakage.qmd
+    - chapter/learningcurves.md
     - references.qmd
 
 bibliography: references.bib
