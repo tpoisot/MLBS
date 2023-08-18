@@ -39,7 +39,7 @@ book:
     - chapters/gradientdescent.qmd
     - chapters/splits.qmd
     - chapters/leakage.qmd
-    - chapter/learningcurves.md
+    - chapters/learningcurves.qmd
     - references.qmd
 
 bibliography: references.bib
@@ -53,6 +53,7 @@ format:
     tbl-pos: 'bt'
     toc: true
     toc-depth: 3
-
-
-
+    mainfont: TeX Gyre Pagella
+    mathfont: TeX Gyre Pagella Math
+    sansfont: TeX Gyre Heros
+    monofont: TeX Gyre Cursor

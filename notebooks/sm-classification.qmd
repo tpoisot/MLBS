@@ -30,20 +30,24 @@ training_idx = filter(i -> !(i in testind_idx), 1:size(rangifer, 1))
 train, test = rangifer[training_idx, :], rangifer[testind_idx, :]
 ```
 
-we will now normalize things in the dataset, specifically take the z-score
+we will split this a little more to make it easier
 
 ```{julia}
-zzz = (x) -> (x .- mean(x))./std(x)
-train.bio1 = zzz(train.bio1)
-train.bio2 = zzz(train.bio2)
-train.bio3 = zzz(train.bio3)
-train.bio4 = zzz(train.bio4)
-train.bio12 = zzz(train.bio12)
-test.bio1 = zzz(test.bio1)
-test.bio2 = zzz(test.bio2)
-test.bio3 = zzz(test.bio3)
-test.bio4 = zzz(test.bio4)
-test.bio12 = zzz(test.bio12)
+trainlabels = Array(select(train, :presence))[:,1]
+testlabels = Array(select(test, :presence))[:,1]
+trainfeatures = Array(select(train, Not(:presence)))
+testfeatures = Array(select(test, Not(:presence)))
+```
+
+we will use the z-score to standardize, but not now! we want to do the training set FIRST and then use this for the prediction steps, we treat z-score as a trainable parameter (link with data leakage)
+
+```{julia}
+function vnorm(x::Vector{T}, μ::T1, σ::T2) where {T <: Number, T1 <: Number, T2 <: Number}
+    return (x .- μ) ./ σ
+end
+function vnorm(x::Vector{T}) where {T <: Number}
+    return vnorm(x, mean(x), std(x))
+end
 ```
 
 little plot for the CLOUT
@@ -54,58 +58,103 @@ density!(train.bio1)
 current_figure()
 ```
 
-we need the distribs for test and train presence/absence
+we do a whole function here
 
 ```{julia}
-tonorm = (x) -> Normal(mean(x), std(x))
+function NBC(y, X)
+    μ = mapslices(mean, X, dims=1)
+    σ = mapslices(std, X, dims=1)
+    Xpos = (X[findall(y),:] .- μ) ./ σ
+    Xneg = (X[findall(.!y),:] .- μ) ./ σ
+    pred_pos = mapslices(x -> Normal(mean(x), std(x)), Xpos, dims=1)
+    pred_neg = mapslices(x -> Normal(mean(x), std(x)), Xneg, dims=1)
+    function inner_predictor(v)
+        nv = (v' .- μ) ./ σ
+        is_pos = prod(pdf.(pred_pos, nv))
+        is_neg = prod(pdf.(pred_neg, nv))
+        return is_pos > is_neg
+    end
+    return inner_predictor
+end
+```
 
-function getdistr(df)
-    stck = stack(df, Not(:presence))
-    cmb = combine(groupby(stck, [:presence, :variable]), :value => tonorm => :value)
-    return unstack(cmb, :presence, :variable, :value)
+confusion matrix
+
+```{julia}
+function confmat(pred, truth)
+    tp = sum(pred .& truth)
+    tn = sum(.!pred .& .!truth)
+    fp = sum(pred .& .!truth)
+    fn = sum(.!pred .& truth)
+    return [tp fn; fp tn]
 end
 ```
 
 We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
 
 ```{julia}
-predictions = zeros(Bool, size(train, 1))
-for i in axes(predictions, 1)
-    this_train = getdistr(deleteat!(copy(train), i))
-    if_present = filter(r -> r.presence, this_train)[1,:]
-    if_absent = filter(r -> !r.presence, this_train)[1,:]
-    this_features = train[i, :]
-    truth = this_features.presence
-    vars = [:bio1, :bio2, :bio3, :bio4, :bio12]
-    p_present = prod([pdf(if_present[var], this_features[var]) for var in vars])
-    p_absent = prod([pdf(if_absent[var], this_features[var]) for var in vars])
-    predictions[i] = p_present > p_absent
+conftrain = zeros(Float64, (2, 2, 200))
+confvalid = similar(conftrain)
+n_valid = floor.(Int, 0.2*length(trainlabels))
+
+for mcfold in axes(conftrain, 3)
+    validx = sample(axes(trainlabels, 1), n_valid, replace=false)
+    trnidx = filter!(i -> !(i in validx), collect(axes(trainlabels, 1)))
+    predictor = NBC(trainlabels[trnidx], trainfeatures[trnidx,:])
+    # Training conf mat
+    trnpred = vec(mapslices(predictor, trainfeatures[trnidx,:], dims=2))
+    conftrain[:,:,mcfold] = confmat(trnpred, trainlabels[trnidx,:])
+    # Validation conf mat
+    valpred = vec(mapslices(predictor, trainfeatures[validx,:], dims=2))
+    confvalid[:,:,mcfold] = confmat(valpred, trainlabels[validx,:])
 end
-```
-
-now we can do the little adjacency table
-
-```{julia}
-tp = sum(predictions .& train.presence)
-tn = sum(.!predictions .& .!train.presence)
-fp = sum(predictions .& .!train.presence)
-fn = sum(.!predictions .& train.presence)
-M = [tp fn; fp tn]
 ```
 
 some measures on the table
 
 ```{julia}
-accuracy = sum(diag(M))/sum(M)
+acc(m) = tr(m)/sum(m)
+tpr(m) = m[1,1]/(m[1,1]+m[1,2])
+tnr(m) = m[2,2]/(m[2,2]+m[2,1])
+fpr(m) = m[2,1]/(m[2,1]+m[2,2])
+fnr(m) = m[1,2]/(m[1,2]+m[1,1])
+ppv(m) = m[1,1]/(m[1,1]+m[2,1])
+npv(m) = m[2,2]/(m[2,2]+m[1,2])
+fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
+inform(m) = tpr(m) + tnr(m) - 1.0
+```
+
+how good are our folds
+
+```{julia}
+#| label: fig-classification-crossvalidation
+#| fig-cap: WAH NEVER CHANGES
+fmat = [(ppv, "PPV") (npv, "NPV"); (ppv, "PPV") (npv, "NPV")]
+f = Figure()
+
+for ci in CartesianIndices(fmat)
+    ax = Axis(f[ci.I...])
+    fm, lab = fmat[ci]
+    trv = dropdims(mapslices(fm, conftrain, dims=(1,2)), dims=(1,2))
+    vav = dropdims(mapslices(fm, confvalid, dims=(1,2)), dims=(1,2))
+    density!(ax, trv, color=(:lightgrey, 0.1), strokecolor=:lightgrey, strokewidth=2)
+    c = Makie.wong_colors()[3]
+    density!(ax, vav, color=(c, 0.3), strokecolor=c, strokewidth=2)
+    tightlimits!(ax)
+end
+current_figure()
 ```
 
 on the testing data now
 
 ```{julia}
-testingpredictions = zeros(Bool, size(test, 1))
-finalmodel = getdistr(train) # full model
-if_present = filter(r -> r.presence, finalmodel)[1,:]
-if_absent = filter(r -> !r.presence, finalmodel)[1,:]
+predictor = NBC(trainlabels, trainfeatures)
+prediction = vec(mapslices(predictor, testfeatures, dims=2))
+conf = confmat(prediction, testlabels)
+@info ppv(conf)
+@info npv(conf)
+@info fone(conf)
+@info inform(conf)
 ```
 
 figure
@@ -117,15 +166,15 @@ f = Figure()
 
 ax1 = Axis(f[1,1])
 c = Makie.wong_colors()[1]
-hist!(ax1, filter(r -> r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+hist!(ax1, 0.1filter(r -> r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 ax2 = Axis(f[2,1])
 c = Makie.wong_colors()[2]
-hist!(ax2, filter(r -> !r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+hist!(ax2, 0.1filter(r -> !r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 for ax in [ax1, ax2]
-    xlims!(ax, (-4, 4))
-    ylims!(ax, (0, 0.65))
+    xlims!(ax, (-5, 10))
+    ylims!(ax, (0, 0.3))
     tightlimits!(ax)
     hideydecorations!(ax)
     hidexdecorations!(ax, grid=true, ticklabels=false, ticks=false)
