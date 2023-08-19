@@ -39,6 +39,7 @@ book:
     - chapters/gradientdescent.qmd
     - chapters/splits.qmd
     - chapters/leakage.qmd
+    - chapters/classification.qmd
     - chapters/learningcurves.qmd
     - references.qmd
 

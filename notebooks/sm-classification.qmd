@@ -93,7 +93,7 @@ end
 We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
 
 ```{julia}
-conftrain = zeros(Float64, (2, 2, 200))
+conftrain = zeros(Float64, (2, 2, 2000))
 confvalid = similar(conftrain)
 n_valid = floor.(Int, 0.2*length(trainlabels))
 
@@ -182,29 +182,4 @@ for ax in [ax1, ax2]
 end
 
 current_figure()
-```
-
-final testing
-
-```{julia}
-for i in axes(testingpredictions, 1)
-    this_features = train[i, :]
-    truth = this_features.presence
-    vars = [:bio1, :bio2, :bio3, :bio4, :bio12]
-    p_present = prod([pdf(if_present[var], this_features[var]) for var in vars])
-    p_absent = prod([pdf(if_absent[var], this_features[var]) for var in vars])
-    testingpredictions[i] = p_present > p_absent
-end
-```
-
-```{julia}
-ttp = sum(testingpredictions .& test.presence)
-ttn = sum(.!testingpredictions .& .!test.presence)
-tfp = sum(testingpredictions .& .!test.presence)
-tfn = sum(.!testingpredictions .& test.presence)
-tM = [ttp tfn; tfp ttn]
-```
-
-```{julia}
-accuracy = sum(diag(tM))/sum(tM)
 ```

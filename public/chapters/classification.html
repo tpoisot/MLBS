@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity - 7&nbsp; Learning curves</title>
+<title>Data Science for Biodiversity - 6&nbsp; Supervised classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -49,8 +49,8 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../references.html" rel="next">
-<link href="../chapters/classification.html" rel="prev">
+<link href="../chapters/learningcurves.html" rel="next">
+<link href="../chapters/leakage.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -83,7 +83,12 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -96,7 +101,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/learningcurves.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/classification.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Classification</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -158,13 +163,13 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Classification</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link active">
+  <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves</span></span></a>
   </div>
 </li>
@@ -180,14 +185,32 @@ div.csl-indent {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#the-problem-reindeer-distribution" id="toc-the-problem-reindeer-distribution" class="nav-link active" data-scroll-target="#the-problem-reindeer-distribution"><span class="header-section-number">6.1</span> The problem: reindeer distribution</a></li>
+  <li><a href="#what-is-classification" id="toc-what-is-classification" class="nav-link" data-scroll-target="#what-is-classification"><span class="header-section-number">6.2</span> What is classification?</a>
+  <ul class="collapse">
+  <li><a href="#separability-and-the-curse-of-dimensionality" id="toc-separability-and-the-curse-of-dimensionality" class="nav-link" data-scroll-target="#separability-and-the-curse-of-dimensionality"><span class="header-section-number">6.2.1</span> Separability and the curse of dimensionality</a></li>
+  <li><a href="#the-confusion-table" id="toc-the-confusion-table" class="nav-link" data-scroll-target="#the-confusion-table"><span class="header-section-number">6.2.2</span> The confusion table</a></li>
+  </ul></li>
+  <li><a href="#the-naive-bayes-classifier" id="toc-the-naive-bayes-classifier" class="nav-link" data-scroll-target="#the-naive-bayes-classifier"><span class="header-section-number">6.3</span> The Naive Bayes Classifier</a>
+  <ul class="collapse">
+  <li><a href="#assumptions-of-the-nbc" id="toc-assumptions-of-the-nbc" class="nav-link" data-scroll-target="#assumptions-of-the-nbc"><span class="header-section-number">6.3.1</span> Assumptions of the NBC</a></li>
+  <li><a href="#how-to-train-the-nbc" id="toc-how-to-train-the-nbc" class="nav-link" data-scroll-target="#how-to-train-the-nbc"><span class="header-section-number">6.3.2</span> How to train the NBC</a></li>
+  <li><a href="#decision-rule-for-prediction" id="toc-decision-rule-for-prediction" class="nav-link" data-scroll-target="#decision-rule-for-prediction"><span class="header-section-number">6.3.3</span> Decision rule for prediction</a></li>
+  </ul></li>
+  <li><a href="#application-a-baseline-model-of-reindeer-presence" id="toc-application-a-baseline-model-of-reindeer-presence" class="nav-link" data-scroll-target="#application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves</span></h1>
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></h1>
 </div>
 
 
@@ -203,15 +226,96 @@ div.csl-indent {
 
 </header>
 
-<p>In <strong>TK GRADIENT</strong>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to</p>
-<p>data from <span class="citation" data-cites="paulocortez2007">Paulo Cortez (<a href="../references.html#ref-paulocortez2007" role="doc-biblioref">2007</a>)</span></p>
+<p>In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <strong>TODO</strong>, we will think about predictions of classes as probabilities; in <strong>TODO</strong>, we will generalize these ideas and think about learning curves; finally, in <strong>TODO</strong>, we will finally think about variables a lot more, and introduce elements of model interpretation</p>
+<section id="the-problem-reindeer-distribution" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="the-problem-reindeer-distribution"><span class="header-section-number">6.1</span> The problem: reindeer distribution</h2>
+<p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, <em>Rangifer tarandus tarandus</em>. Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith and Leathwick (<a href="../references.html#ref-elith2009" role="doc-biblioref">2009</a>)</span>), or Ecological Niche Modeling (ENM), is an excellent instance of ecologist essentially doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery et al. (<a href="../references.html#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters, has been covered in the SDM <span class="citation" data-cites="guillera-arroita2015">(<a href="../references.html#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita et al. 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem.</p>
+</section>
+<section id="what-is-classification" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="what-is-classification"><span class="header-section-number">6.2</span> What is classification?</h2>
+<p>Classification is the prediction of a qualitative response. In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, for example, we predicted the class of a pixel, which is a qualitative variable with levels <span class="math inline">\(\{1, 2, \dots, k\}\)</span>. This represented an instance of <em>unsupervised</em> learning, as we had no <em>a priori</em> notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate “background points”, that represent assumptions about where the species are not <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="../references.html#ref-hanberry2012" role="doc-biblioref">Hanberry, He, and Palik 2012</a>; <a href="../references.html#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin et al. 2012</a>)</span>.</p>
+<p>In short, our response variable has levels <span class="math inline">\(\{0, 1\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do.</p>
+<section id="separability-and-the-curse-of-dimensionality" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="separability-and-the-curse-of-dimensionality"><span class="header-section-number">6.2.1</span> Separability and the curse of dimensionality</h3>
+<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth).</p>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of reindeers (top), and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (but maybe there is a different projection of the data that would change this), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 0°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become more likely. The locations with a temperature between 0°C and 5°C can go either way.</p>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-separability">
+<div id="cell-fig-classification-separability" class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div id="fig-classification-separability" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="classification_files/figure-html/fig-classification-separability-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;6.1: show the separability of classes</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!</p>
+<p>curse of dimensionality</p>
+</section>
+<section id="the-confusion-table" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="the-confusion-table"><span class="header-section-number">6.2.2</span> The confusion table</h3>
+<p>The most important element we need in order to evaluate the performance of a classification model is the confusion table.</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+\text{TP} &amp; \text{FP}\\
+\text{FN} &amp; \text{TN}
+\end{pmatrix}
+\]</span></p>
+</section>
+</section>
+<section id="the-naive-bayes-classifier" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="the-naive-bayes-classifier"><span class="header-section-number">6.3</span> The Naive Bayes Classifier</h2>
+<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand and Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions.</p>
+<section id="assumptions-of-the-nbc" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="assumptions-of-the-nbc"><span class="header-section-number">6.3.1</span> Assumptions of the NBC</h3>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 2°C?</p>
+</section>
+<section id="how-to-train-the-nbc" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="how-to-train-the-nbc"><span class="header-section-number">6.3.2</span> How to train the NBC</h3>
+</section>
+<section id="decision-rule-for-prediction" class="level3" data-number="6.3.3">
+<h3 data-number="6.3.3" class="anchored" data-anchor-id="decision-rule-for-prediction"><span class="header-section-number">6.3.3</span> Decision rule for prediction</h3>
+</section>
+</section>
+<section id="application-a-baseline-model-of-reindeer-presence" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</h2>
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-crossvalidation">
+<div id="cell-fig-classification-crossvalidation" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div id="fig-classification-crossvalidation" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;6.2: WAH NEVER CHANGES</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
-<div id="ref-paulocortez2007" class="csl-entry" role="listitem">
-Paulo Cortez, Anbal Morais. 2007. <span>“Forest Fires.”</span> UCI Machine Learning Repository. <a href="https://doi.org/10.24432/C5D88D">https://doi.org/10.24432/C5D88D</a>.
+<div id="ref-barbet-massin2012" class="csl-entry" role="listitem">
+Barbet-Massin, Morgane, Frédéric Jiguet, Cécile Hélène Albert, and Wilfried Thuiller. 2012. <span>“Selecting Pseudo-Absences for Species Distribution Models: How, Where and How Many?”</span> <em>Methods in Ecology and Evolution</em> 3 (2): 327–38. <a href="https://doi.org/10.1111/j.2041-210x.2011.00172.x">https://doi.org/10.1111/j.2041-210x.2011.00172.x</a>.
+</div>
+<div id="ref-beery2021" class="csl-entry" role="listitem">
+Beery, Sara, Elijah Cole, Joseph Parker, Pietro Perona, and Kevin Winner. 2021. <span>“Species Distribution Modeling for Machine Learning Practitioners: A Review.”</span> <em>ACM SIGCAS Conference on Computing and Sustainable Societies (COMPASS)</em>, June. <a href="https://doi.org/10.1145/3460112.3471966">https://doi.org/10.1145/3460112.3471966</a>.
+</div>
+<div id="ref-elith2009" class="csl-entry" role="listitem">
+Elith, Jane, and John R. Leathwick. 2009. <span>“Species Distribution Models: Ecological Explanation and Prediction Across Space and Time.”</span> <em>Annual Review of Ecology, Evolution, and Systematics</em> 40 (1): 677–97. <a href="https://doi.org/10.1146/annurev.ecolsys.110308.120159">https://doi.org/10.1146/annurev.ecolsys.110308.120159</a>.
+</div>
+<div id="ref-guillera-arroita2015" class="csl-entry" role="listitem">
+Guillera-Arroita, Gurutzeta, José J. Lahoz-Monfort, Jane Elith, Ascelin Gordon, Heini Kujala, Pia E. Lentini, Michael A. McCarthy, Reid Tingley, and Brendan A. Wintle. 2015. <span>“Is My Species Distribution Model Fit for Purpose? Matching Data and Models to Applications.”</span> <em>Global Ecology and Biogeography</em> 24 (3): 276–92. <a href="https://doi.org/10.1111/geb.12268">https://doi.org/10.1111/geb.12268</a>.
+</div>
+<div id="ref-hanberry2012" class="csl-entry" role="listitem">
+Hanberry, Brice B., Hong S. He, and Brian J. Palik. 2012. <span>“Pseudoabsence Generation Strategies for Species Distribution Models.”</span> Edited by Robert Planque. <em>PLoS ONE</em> 7 (8): e44486. <a href="https://doi.org/10.1371/journal.pone.0044486">https://doi.org/10.1371/journal.pone.0044486</a>.
+</div>
+<div id="ref-hand2001" class="csl-entry" role="listitem">
+Hand, David J., and Keming Yu. 2001. <span>“Idiot’s Bayes: Not so Stupid After All?”</span> <em>International Statistical Review / Revue Internationale de Statistique</em> 69 (3): 385. <a href="https://doi.org/10.2307/1403452">https://doi.org/10.2307/1403452</a>.
 </div>
 </div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -560,13 +664,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/classification.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Classification</span></span>
+      <a href="../chapters/leakage.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../references.html" class="pagination-link">
-        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../chapters/learningcurves.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
