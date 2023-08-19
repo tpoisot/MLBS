@@ -47,8 +47,7 @@ heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.25sum(presencelayer)))
-
+bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.4sum(presencelayer)))
 replace!(bgpoints, false => nothing)
 
 heatmap(
