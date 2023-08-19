@@ -2,7 +2,7 @@ using DelimitedFiles
 using SpeciesDistributionToolkit
 using CairoMakie
 
-spatial_extent = (left = 3.0, bottom = 55.2, right = 19.7, top = 64.9)
+spatial_extent = (left = 3.0, bottom = 54.0, right = 21.0, top = 67.0)
 
 rangifer = taxon("Rangifer tarandus tarandus"; strict = false)
 query = [
@@ -13,7 +13,7 @@ query = [
     "limit" => 300,
 ]
 presences = occurrences(rangifer, query...)
-for i in 1:3
+for i in 1:10
     occurrences!(presences)
 end
 
@@ -26,8 +26,8 @@ presencelayer = mask(temperature, presences, Bool)
 
 heatmap(presencelayer)
 
-background = pseudoabsencemask(WithinRadius, presencelayer; distance = 120.0)
-buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 25.0)
+background = pseudoabsencemask(WithinRadius, presencelayer; distance = 200.0)
+buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 30.0)
 bgmask = background .& (.! buffer)
 
 heatmap(
@@ -65,11 +65,7 @@ lat = vcat([p[2] for p in pr], [p[2] for p in ab])
 pre = vcat([true for p in pr], [false for p in ab])
 
 # Data
-BIO1 = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
-BIO2 = SimpleSDMPredictor(dataprovider; layer = "BIO2", spatial_extent...)
-BIO3 = SimpleSDMPredictor(dataprovider; layer = "BIO3", spatial_extent...)
-BIO4 = SimpleSDMPredictor(dataprovider; layer = "BIO4", spatial_extent...)
-BIO12 = SimpleSDMPredictor(dataprovider; layer = "BIO12", spatial_extent...)
+BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
 
 # data
 bio1 = vcat([BIO1[p] for p in pr], [BIO1[p] for p in ab])
