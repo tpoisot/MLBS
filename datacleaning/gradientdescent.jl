@@ -1,8 +1,14 @@
 using DelimitedFiles
+using DataFrames
+import CSV
 using SpeciesDistributionToolkit
 using CairoMakie
 
 spatial_extent = (left = 3.0, bottom = 54.0, right = 21.0, top = 67.0)
+
+# Data
+BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
+SpeciesDistributionToolkit._write_geotiff("data/general/rangifer-layers.tiff", BIOX)
 
 rangifer = taxon("Rangifer tarandus tarandus"; strict = false)
 query = [
@@ -64,19 +70,14 @@ lon = vcat([p[1] for p in pr], [p[1] for p in ab])
 lat = vcat([p[2] for p in pr], [p[2] for p in ab])
 pre = vcat([true for p in pr], [false for p in ab])
 
-# Data
-BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
-
 # data
-bio1 = vcat([BIO1[p] for p in pr], [BIO1[p] for p in ab])
-bio2 = vcat([BIO2[p] for p in pr], [BIO2[p] for p in ab])
-bio3 = vcat([BIO3[p] for p in pr], [BIO3[p] for p in ab])
-bio4 = vcat([BIO4[p] for p in pr], [BIO4[p] for p in ab])
-bio12 = vcat([BIO12[p] for p in pr], [BIO12[p] for p in ab])
+biox = [vcat([bx[p] for p in pr], [bx[p] for p in ab]) for bx in BIOX]
 
 using DataFrames
 import CSV
 
-df = DataFrame(latitude=lat, longitude=lon, presence=pre, bio1=bio1, bio2=bio2, bio3=bio3, bio4=bio4, bio12=bio12)
-mkdir("data/gradientdescent")
-CSV.write("data/gradientdescent/climate.csv", df)
+df = DataFrame(latitude=lat, longitude=lon, presence=pre)
+for (i, l) in enumerate(layers(dataprovider))
+    df[!,l] = biox[i]
+end
+CSV.write("data/general/rangifer-observations.csv", df)

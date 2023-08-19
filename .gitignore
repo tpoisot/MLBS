@@ -3,3 +3,4 @@ Manifest.toml
 
 data/**/raw/*
 /.luarc.json
+data/**/*.tiff
