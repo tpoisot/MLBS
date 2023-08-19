@@ -1,0 +1,286 @@
+# Supp. Mat. - variable selection
+
+Again, this is largely the same code as the classification notebook
+
+```{julia}
+using DataFrames
+import CSV
+using CairoMakie
+using Distributions
+using StatsBase
+using Statistics
+using LinearAlgebra
+CairoMakie.activate!(; px_per_unit = 2)
+```
+
+We load the data
+
+```{julia}
+_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-observations.csv")
+rangifer = DataFrame(CSV.File(_path))
+select!(rangifer, Not(:latitude))
+select!(rangifer, Not(:longitude))
+```
+
+we take aside a testing set
+
+```{julia}
+n_testing = floor(Int, 0.2 * size(rangifer, 1))
+
+testind_idx = sample(1:size(rangifer, 1), n_testing, replace=false)
+training_idx = filter(i -> !(i in testind_idx), 1:size(rangifer, 1))
+
+train, test = rangifer[training_idx, :], rangifer[testind_idx, :]
+```
+
+we will split this a little more to make it easier
+
+```{julia}
+trainlabels = Array(select(train, :presence))[:,1]
+testlabels = Array(select(test, :presence))[:,1]
+trainfeatures = Array(select(train, Not(:presence)))
+testfeatures = Array(select(test, Not(:presence)))
+```
+
+we will use the z-score to standardize, but not now! we want to do the training set FIRST and then use this for the prediction steps, we treat z-score as a trainable parameter (link with data leakage)
+
+```{julia}
+function vnorm(x::Vector{T}, μ::T1, σ::T2) where {T <: Number, T1 <: Number, T2 <: Number}
+    return (x .- μ) ./ σ
+end
+function vnorm(x::Vector{T}) where {T <: Number}
+    return vnorm(x, mean(x), std(x))
+end
+```
+
+we do a whole function here
+
+```{julia}
+function NBC(y, X)
+    μ = mapslices(mean, X, dims=1)
+    σ = mapslices(std, X, dims=1)
+    Xpos = (X[findall(y),:] .- μ) ./ σ
+    Xneg = (X[findall(.!y),:] .- μ) ./ σ
+    pred_pos = mapslices(x -> Normal(mean(x), std(x)), Xpos, dims=1)
+    pred_neg = mapslices(x -> Normal(mean(x), std(x)), Xneg, dims=1)
+    function inner_predictor(v; vars=1:19)
+        nv = (v' .- μ) ./ σ
+        is_pos = prod(pdf.(pred_pos[vars], nv[vars]))
+        is_neg = prod(pdf.(pred_neg[vars], nv[vars]))
+        return is_pos > is_neg
+    end
+    return inner_predictor
+end
+```
+
+confusion matrix
+
+```{julia}
+function confmat(pred, truth)
+    tp = sum(pred .& truth)
+    tn = sum(.!pred .& .!truth)
+    fp = sum(pred .& .!truth)
+    fn = sum(.!pred .& truth)
+    return [tp fn; fp tn]
+end
+
+acc(m) = tr(m)/sum(m)
+tpr(m) = m[1,1]/(m[1,1]+m[1,2])
+tnr(m) = m[2,2]/(m[2,2]+m[2,1])
+fpr(m) = m[2,1]/(m[2,1]+m[2,2])
+fnr(m) = m[1,2]/(m[1,2]+m[1,1])
+ppv(m) = m[1,1]/(m[1,1]+m[2,1])
+npv(m) = m[2,2]/(m[2,2]+m[1,2])
+fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
+inform(m) = tpr(m) + tnr(m) - 1.0
+mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
+```
+
+We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
+
+```{julia}
+function runfolds!(conftrain, confvalid; vars=1:19)
+    n_valid = floor.(Int, 0.2*length(trainlabels))
+    for mcfold in axes(conftrain, 3)
+        validx = sample(axes(trainlabels, 1), n_valid, replace=false)
+        trnidx = filter!(i -> !(i in validx), collect(axes(trainlabels, 1)))
+        predictor = NBC(trainlabels[trnidx], trainfeatures[trnidx, :])
+        # Training conf mat
+        predvar = (x) -> predictor(x; vars=vars)
+        trnpred = vec(mapslices(predvar, trainfeatures[trnidx, :], dims=2))
+        conftrain[:, :, mcfold] = confmat(trnpred, trainlabels[trnidx, :])
+        # Validation conf mat
+        valpred = vec(mapslices(predvar, trainfeatures[validx, :], dims=2))
+        confvalid[:, :, mcfold] = confmat(valpred, trainlabels[validx, :])
+    end
+end
+```
+
+we prepare a dataframe to put the values in
+
+```{julia}
+varsel = DataFrame()
+```
+
+we run it bois
+
+```{julia}
+conftrain = zeros(Float64, (2, 2, 20))
+confvalid = similar(conftrain)
+
+possiblevariables = collect(axes(trainfeatures, 2))
+variableset = eltype(possiblevariables)[]
+
+current_best = -Inf
+
+while (!isempty(possiblevariables))
+    scores = zeros(Float64, length(possiblevariables))
+    for (i,pv) in enumerate(possiblevariables)
+        tv = push!(copy(variableset), pv)
+        runfolds!(conftrain, confvalid; vars=tv)
+        tss = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
+        scores[i] = tss
+    end
+    bs, bi = findmax(scores)
+    if bs > current_best
+        current_best = bs
+        push!(variableset, possiblevariables[bi])
+        deleteat!(possiblevariables, bi)
+    else
+        break
+    end
+    @info "Current set: $(variableset)"
+end
+
+fwvar = copy(variableset)
+
+# Retrain
+runfolds!(conftrain, confvalid; vars=variableset)
+_tss = mean(dropdims(mapslices(inform, confvalid, dims=(1,2)), dims=(1,2)))
+_acc = mean(dropdims(mapslices(acc, confvalid, dims=(1,2)), dims=(1,2)))
+_fone = mean(dropdims(mapslices(fone, confvalid, dims=(1,2)), dims=(1,2)))
+_ppv = mean(dropdims(mapslices(ppv, confvalid, dims=(1,2)), dims=(1,2)))
+_npv = mean(dropdims(mapslices(npv, confvalid, dims=(1,2)), dims=(1,2)))
+_mcc = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
+push!(varsel, 
+    (Method = :Forwards, N = length(variableset), Accuracy = _acc, TSS = tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
+)
+
+@info variableset
+```
+
+same but now we we run the thing on a set that forces temperature and precipitation
+
+```{julia}
+conftrain = zeros(Float64, (2, 2, 20))
+confvalid = similar(conftrain)
+
+variableset = [1, 12]
+possiblevariables = filter(i -> !(i in variableset), collect(axes(trainfeatures, 2)))
+
+current_best = -Inf
+
+while (!isempty(possiblevariables))
+    scores = zeros(Float64, length(possiblevariables))
+    for (i,pv) in enumerate(possiblevariables)
+        tv = push!(copy(variableset), pv)
+        runfolds!(conftrain, confvalid; vars=tv)
+        tss = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
+        scores[i] = tss
+    end
+    bs, bi = findmax(scores)
+    if bs > current_best
+        current_best = bs
+        push!(variableset, possiblevariables[bi])
+        deleteat!(possiblevariables, bi)
+    else
+        break
+    end
+    @info "Current set: $(variableset)"
+end
+
+crvar = copy(variableset)
+
+# Retrain
+runfolds!(conftrain, confvalid; vars=variableset)
+_tss = mean(dropdims(mapslices(inform, confvalid, dims=(1,2)), dims=(1,2)))
+_acc = mean(dropdims(mapslices(acc, confvalid, dims=(1,2)), dims=(1,2)))
+_fone = mean(dropdims(mapslices(fone, confvalid, dims=(1,2)), dims=(1,2)))
+_ppv = mean(dropdims(mapslices(ppv, confvalid, dims=(1,2)), dims=(1,2)))
+_npv = mean(dropdims(mapslices(npv, confvalid, dims=(1,2)), dims=(1,2)))
+_mcc = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
+push!(varsel, 
+    (Method = :Constrained, N = length(variableset), Accuracy = _acc, TSS = tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
+)
+
+@info variableset
+```
+
+now we run variable elimination
+
+```{julia}
+conftrain = zeros(Float64, (2, 2, 20))
+confvalid = similar(conftrain)
+
+variableset = collect(axes(trainfeatures, 2))
+
+current_best = -Inf
+
+while (!isempty(variableset))
+    scores = zeros(Float64, length(variableset))
+    for (i,pv) in enumerate(variableset)
+        tv = deleteat!(copy(variableset), i)
+        runfolds!(conftrain, confvalid; vars=tv)
+        tss = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
+        scores[i] = tss
+    end
+    bs, bi = findmax(scores)
+    if bs > current_best
+        current_best = bs
+        deleteat!(variableset, bi)
+    else
+        break
+    end
+    @info "Current set: $(variableset)"
+end
+
+bwvar = copy(variableset)
+
+# Retrain
+runfolds!(conftrain, confvalid; vars=variableset)
+_tss = mean(dropdims(mapslices(inform, confvalid, dims=(1,2)), dims=(1,2)))
+_acc = mean(dropdims(mapslices(acc, confvalid, dims=(1,2)), dims=(1,2)))
+_fone = mean(dropdims(mapslices(fone, confvalid, dims=(1,2)), dims=(1,2)))
+_ppv = mean(dropdims(mapslices(ppv, confvalid, dims=(1,2)), dims=(1,2)))
+_npv = mean(dropdims(mapslices(npv, confvalid, dims=(1,2)), dims=(1,2)))
+_mcc = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
+push!(varsel, 
+    (Method = :Backwards, N = length(variableset), Accuracy = _acc, TSS = tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
+)
+
+@info variableset
+```
+
+look at method
+
+```{julia}
+varsel
+```
+
+run with final variables
+
+
+retrain the model with the best possible set
+
+```{julia}
+allvarpred = NBC(trainlabels, trainfeatures)
+predictor = (x) -> allvarpred(x, ; vars=fwvar)
+prediction = vec(mapslices(predictor, testfeatures, dims=2))
+conf = confmat(prediction, testlabels)
+@info tpr(conf)
+@info tnr(conf)
+@info fpr(conf)
+@info fnr(conf)
+@info inform(conf)
+@info mcc(conf)
+```

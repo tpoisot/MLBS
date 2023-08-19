@@ -1,0 +1,5 @@
+# Variable selection
+
+we will use MCC [@chicco2020] rather than $F_1$ or accuracy to decide on the best model
+
+is the Pearson product-moment correlation on a contingency table [@powers2020]

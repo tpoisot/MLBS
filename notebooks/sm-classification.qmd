@@ -155,27 +155,24 @@ figure
 
 ```{julia}
 #| label: fig-classification-separability
-#| fig-cap: show the separability of classes
+#| fig-cap: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.
 f = Figure(; resolution=(500, 500))
 
-axtemp = Axis(f[1,1])
+gl = f[1,1] = GridLayout()
+
+axtemp = Axis(gl[1,1])
 c = Makie.wong_colors()[1]
 density!(axtemp, 0.1filter(r -> r.presence, train).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 c = Makie.wong_colors()[2]
 density!(axtemp, 0.1filter(r -> !r.presence, train).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
-axprec = Axis(f[2,2])
+axprec = Axis(gl[2,2])
 c = Makie.wong_colors()[1]
 density!(axprec, 0.1filter(r -> r.presence, train).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 c = Makie.wong_colors()[2]
 density!(axprec, 0.1filter(r -> !r.presence, train).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 
-
-for ax in [axprec, axtemp]
-    hidespines!(ax, :l, :r, :t)
-end
-
-axboth = Axis(f[2,1])
+axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
 xp = 0.1filter(r -> r.presence, train).BIO1
 xn = 0.1filter(r -> !r.presence, train).BIO1
 yp = filter(r -> r.presence, train).BIO12
@@ -185,5 +182,43 @@ scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
 c = Makie.wong_colors()[2]
 scatter!(axboth, xn, yn, color=c, markersize=4, label="Pseudo-absence")
 
+hidespines!(axtemp, :l, :r, :t)
+hidespines!(axprec, :b, :r, :t)
+hidedecorations!(axtemp, grid = true)
+hidedecorations!(axprec, grid = true)
+ylims!(axtemp, low = 0)
+xlims!(axprec, low = 0)
+colgap!(gl, 0)
+rowgap!(gl, 0)
+
+colsize!(gl, 1, Relative(4/5))
+rowsize!(gl, 2, Relative(4/5))
+
+current_figure()
+```
+
+prediction diagram
+
+```{julia}
+air = LinRange(extrema(rangifer.BIO1)..., 50)
+prc = LinRange(extrema(rangifer.BIO12)..., 50)
+X = zeros(Bool, (length(air), length(prc)))
+for i in axes(air, 1)
+    for j in axes(prc, 1)
+        p = [air[i], prc[j]]
+        X[i,j] = predictor(p)
+    end
+end
+```
+
+and now we plot
+
+```{julia}
+#| label: fig-classification-decision
+#| fig-cap: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
+f = Figure(; resolution=(500, 500))
+ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
+pal = Makie.wong_colors()[[2,1]]
+heatmap!(ax, 0.1air, 0.1prc, X, colormap=pal, alpha=0.3)
 current_figure()
 ```

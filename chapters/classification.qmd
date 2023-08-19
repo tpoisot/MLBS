@@ -6,7 +6,7 @@ In the previous chapters, we have focused on efforts on regression models, which
 
 Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, *Rangifer tarandus tarandus*. Species Distribution Modeling (SDM; @elith2009), or Ecological Niche Modeling (ENM), is an excellent instance of ecologist essentially doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters, has been covered in the SDM [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem.
 
-These two predictors are important **ECOZONES**, and see *e.g.* [@berteaux2014]
+These two predictors are important for plants [@clapham1935] or animals [@whittaker1962] **ECOZONES**, and see *e.g.* climate change [@berteaux2014]
 
 ## What is classification?
 
@@ -53,8 +53,21 @@ In @fig-classification-separability, what is the most likely class if the temper
 
 ### Training and validation strategy
 
+
 ### Performance evaluation of the model
 
 {{< embed ../notebooks/sm-classification.qmd#fig-classification-crossvalidation >}}
+
+### The decision boundary
+
+Now that the model is trained, we can take a break in our discussion of its performance, and think about *why* it makes a specific classification in the first place. Because we are using a model with only two input features, we can generate a grid of variables, and the ask, for every point on this grid, the classification made by our trained model. This will reveal the regions in the space of parameters where the model will conclude that the species is present.
+
+The output of this simulation is given in @fig-classification-decision. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.
+
+{{< embed ../notebooks/sm-classification.qmd#fig-classification-decision >}}
+
+The line that separates the two classes is usually refered to as the "decision boundary" of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.
+
+It is interesting to compare @fig-classification-decision with, for example, the distribution of the raw data presented in @fig-classification-separability. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that reindeers enjoy cold and dry climates.
 
 ### What is an acceptable model?

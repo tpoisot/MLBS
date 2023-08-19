@@ -40,6 +40,7 @@ book:
     - chapters/splits.qmd
     - chapters/leakage.qmd
     - chapters/classification.qmd
+    - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
     - references.qmd
 
