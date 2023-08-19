@@ -8,8 +8,8 @@ execute:
   cache: true
 
 book:
-  title: "Data Science for Biodiversity"
-  subtitle: "Fundamentals and Applications"
+  title: "Data Science for Biodiversity Scientists"
+  subtitle: "An introduction to concepts and practices"
   page-navigation: true
   language: en-CA
   license: cc-by
