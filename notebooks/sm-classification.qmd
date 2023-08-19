@@ -116,6 +116,7 @@ ppv(m) = m[1,1]/(m[1,1]+m[2,1])
 npv(m) = m[2,2]/(m[2,2]+m[1,2])
 fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
 inform(m) = tpr(m) + tnr(m) - 1.0
+mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
 ```
 
 how good are our folds
