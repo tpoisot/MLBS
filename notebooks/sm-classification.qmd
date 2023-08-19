@@ -8,15 +8,17 @@ using Distributions
 using StatsBase
 using Statistics
 using LinearAlgebra
+CairoMakie.activate!(; px_per_unit = 2)
 ```
 
 We load the data
 
 ```{julia}
-_path = joinpath(@__DIR__, "..", "data", "general", "climate.csv")
+_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-observations.csv")
 rangifer = DataFrame(CSV.File(_path))
 select!(rangifer, Not(:latitude))
 select!(rangifer, Not(:longitude))
+select!(rangifer, [:presence, :BIO1, :BIO12])
 ```
 
 we take aside a testing set
@@ -48,14 +50,6 @@ end
 function vnorm(x::Vector{T}) where {T <: Number}
     return vnorm(x, mean(x), std(x))
 end
-```
-
-little plot for the CLOUT
-
-```{julia}
-density(test.bio1)
-density!(train.bio1)
-current_figure()
 ```
 
 we do a whole function here
@@ -162,24 +156,34 @@ figure
 ```{julia}
 #| label: fig-classification-separability
 #| fig-cap: show the separability of classes
-f = Figure()
+f = Figure(; resolution=(500, 500))
 
-ax1 = Axis(f[1,1])
+axtemp = Axis(f[1,1])
 c = Makie.wong_colors()[1]
-hist!(ax1, 0.1filter(r -> r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
-
-ax2 = Axis(f[2,1])
+density!(axtemp, 0.1filter(r -> r.presence, train).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 c = Makie.wong_colors()[2]
-hist!(ax2, 0.1filter(r -> !r.presence, train).bio1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> !r.presence, train).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
-for ax in [ax1, ax2]
-    xlims!(ax, (-5, 10))
-    ylims!(ax, (0, 0.3))
-    tightlimits!(ax)
-    hideydecorations!(ax)
-    hidexdecorations!(ax, grid=true, ticklabels=false, ticks=false)
+axprec = Axis(f[2,2])
+c = Makie.wong_colors()[1]
+density!(axprec, 0.1filter(r -> r.presence, train).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+c = Makie.wong_colors()[2]
+density!(axprec, 0.1filter(r -> !r.presence, train).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+
+
+for ax in [axprec, axtemp]
     hidespines!(ax, :l, :r, :t)
 end
+
+axboth = Axis(f[2,1])
+xp = 0.1filter(r -> r.presence, train).BIO1
+xn = 0.1filter(r -> !r.presence, train).BIO1
+yp = filter(r -> r.presence, train).BIO12
+yn = filter(r -> !r.presence, train).BIO12
+c = Makie.wong_colors()[1]
+scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
+c = Makie.wong_colors()[2]
+scatter!(axboth, xn, yn, color=c, markersize=4, label="Pseudo-absence")
 
 current_figure()
 ```
