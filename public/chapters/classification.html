@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity - 6&nbsp; Supervised classification</title>
+<title>Data Science for Biodiversity Scientists - 6&nbsp; Supervised classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -101,7 +101,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/classification.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Classification</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/classification.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -116,9 +116,9 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Data Science for Biodiversity</a> 
+      <a href="../">Data Science for Biodiversity Scientists</a> 
         <div class="sidebar-tools-main">
-    <a href="../Data-Science-for-Biodiversity.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <a href="../Data-Science-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -164,13 +164,13 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -201,7 +201,12 @@ div.csl-indent {
   <li><a href="#how-to-train-the-nbc" id="toc-how-to-train-the-nbc" class="nav-link" data-scroll-target="#how-to-train-the-nbc"><span class="header-section-number">6.3.2</span> How to train the NBC</a></li>
   <li><a href="#decision-rule-for-prediction" id="toc-decision-rule-for-prediction" class="nav-link" data-scroll-target="#decision-rule-for-prediction"><span class="header-section-number">6.3.3</span> Decision rule for prediction</a></li>
   </ul></li>
-  <li><a href="#application-a-baseline-model-of-reindeer-presence" id="toc-application-a-baseline-model-of-reindeer-presence" class="nav-link" data-scroll-target="#application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</a></li>
+  <li><a href="#application-a-baseline-model-of-reindeer-presence" id="toc-application-a-baseline-model-of-reindeer-presence" class="nav-link" data-scroll-target="#application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</a>
+  <ul class="collapse">
+  <li><a href="#training-and-validation-strategy" id="toc-training-and-validation-strategy" class="nav-link" data-scroll-target="#training-and-validation-strategy"><span class="header-section-number">6.4.1</span> Training and validation strategy</a></li>
+  <li><a href="#performance-evaluation-of-the-model" id="toc-performance-evaluation-of-the-model" class="nav-link" data-scroll-target="#performance-evaluation-of-the-model"><span class="header-section-number">6.4.2</span> Performance evaluation of the model</a></li>
+  <li><a href="#what-is-an-acceptable-model" id="toc-what-is-an-acceptable-model" class="nav-link" data-scroll-target="#what-is-an-acceptable-model"><span class="header-section-number">6.4.3</span> What is an acceptable model?</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -267,7 +272,7 @@ div.csl-indent {
 </section>
 <section id="the-naive-bayes-classifier" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="the-naive-bayes-classifier"><span class="header-section-number">6.3</span> The Naive Bayes Classifier</h2>
-<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand and Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions.</p>
+<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand and Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case.</p>
 <section id="assumptions-of-the-nbc" class="level3" data-number="6.3.1">
 <h3 data-number="6.3.1" class="anchored" data-anchor-id="assumptions-of-the-nbc"><span class="header-section-number">6.3.1</span> Assumptions of the NBC</h3>
 <p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 2°C?</p>
@@ -281,6 +286,11 @@ div.csl-indent {
 </section>
 <section id="application-a-baseline-model-of-reindeer-presence" class="level2" data-number="6.4">
 <h2 data-number="6.4" class="anchored" data-anchor-id="application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</h2>
+<section id="training-and-validation-strategy" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="training-and-validation-strategy"><span class="header-section-number">6.4.1</span> Training and validation strategy</h3>
+</section>
+<section id="performance-evaluation-of-the-model" class="level3" data-number="6.4.2">
+<h3 data-number="6.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">6.4.2</span> Performance evaluation of the model</h3>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-crossvalidation">
 <div id="cell-fig-classification-crossvalidation" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
@@ -293,6 +303,9 @@ div.csl-indent {
 </div>
 </div>
 </div>
+</section>
+<section id="what-is-an-acceptable-model" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="what-is-an-acceptable-model"><span class="header-section-number">6.4.3</span> What is an acceptable model?</h3>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -315,6 +328,7 @@ Hanberry, Brice B., Hong S. He, and Brian J. Palik. 2012. <span>“Pseudoabsence
 Hand, David J., and Keming Yu. 2001. <span>“Idiot’s Bayes: Not so Stupid After All?”</span> <em>International Statistical Review / Revue Internationale de Statistique</em> 69 (3): 385. <a href="https://doi.org/10.2307/1403452">https://doi.org/10.2307/1403452</a>.
 </div>
 </div>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -670,7 +684,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   </div>
   <div class="nav-page nav-page-next">
       <a href="../chapters/learningcurves.html" class="pagination-link">
-        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -1,0 +1,186 @@
+# Supp. Mat. - moving threshold
+
+This follows the Naive Bayes module, and expands it to have a little more depth to it with priors and a probabilistic output; most of the setup code is shared with the NBC notebook, but duplication is fine as it makes the two notebooks independent.
+
+```{julia}
+using DataFrames
+import CSV
+using CairoMakie
+using Distributions
+using StatsBase
+using Statistics
+using LinearAlgebra
+using PrettyTables, Latexify
+```
+
+We load the data
+
+```{julia}
+_path = joinpath(@__DIR__, "..", "data", "general", "climate.csv")
+rangifer = DataFrame(CSV.File(_path))
+select!(rangifer, Not(:latitude))
+select!(rangifer, Not(:longitude))
+```
+
+we take aside a testing set
+
+```{julia}
+n_testing = floor(Int, 0.2 * size(rangifer, 1))
+
+testind_idx = sample(1:size(rangifer, 1), n_testing, replace=false)
+training_idx = filter(i -> !(i in testind_idx), 1:size(rangifer, 1))
+
+train, test = rangifer[training_idx, :], rangifer[testind_idx, :]
+```
+
+we will split this a little more to make it easier
+
+```{julia}
+trainlabels = Array(select(train, :presence))[:,1]
+testlabels = Array(select(test, :presence))[:,1]
+trainfeatures = Array(select(train, Not(:presence)))
+testfeatures = Array(select(test, Not(:presence)))
+```
+
+we will use the z-score to standardize, but not now! we want to do the training set FIRST and then use this for the prediction steps, we treat z-score as a trainable parameter (link with data leakage)
+
+```{julia}
+function vnorm(x::Vector{T}, μ::T1, σ::T2) where {T <: Number, T1 <: Number, T2 <: Number}
+    return (x .- μ) ./ σ
+end
+function vnorm(x::Vector{T}) where {T <: Number}
+    return vnorm(x, mean(x), std(x))
+end
+```
+
+we do a whole function here
+
+```{julia}
+function pNBC(y, X)
+    μ = mapslices(mean, X, dims=1)
+    σ = mapslices(std, X, dims=1)
+    Xpos = (X[findall(y),:] .- μ) ./ σ
+    Xneg = (X[findall(.!y),:] .- μ) ./ σ
+    pred_pos = mapslices(x -> Normal(mean(x), std(x)), Xpos, dims=1)
+    pred_neg = mapslices(x -> Normal(mean(x), std(x)), Xneg, dims=1)
+    function inner_predictor(v; p=0.5)
+        nv = (v' .- μ) ./ σ
+        is_pos = prod(pdf.(pred_pos, nv))
+        is_neg = prod(pdf.(pred_neg, nv))
+        evid = p * is_pos + (1 - p) * is_neg
+        return (p * is_pos)/evid
+    end
+    return inner_predictor
+end
+```
+
+confusion matrix
+
+```{julia}
+function confmat(pred, truth)
+    tp = sum(pred .& truth)
+    tn = sum(.!pred .& .!truth)
+    fp = sum(pred .& .!truth)
+    fn = sum(.!pred .& truth)
+    return [tp fn; fp tn]
+end
+```
+
+We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
+
+```{julia}
+thresholds = collect(LinRange(0.0, 1.0, 300))
+conftrain = zeros(Float64, (2, 2, 200, length(thresholds)))
+confvalid = similar(conftrain)
+n_valid = floor.(Int, 0.2*length(trainlabels))
+
+for mcfold in axes(conftrain, 3)
+    validx = sample(axes(trainlabels, 1), n_valid, replace=false)
+    trnidx = filter!(i -> !(i in validx), collect(axes(trainlabels, 1)))
+    predictor = pNBC(trainlabels[trnidx], trainfeatures[trnidx,:])
+    # Probability predictions
+    trnpred = vec(mapslices(predictor, trainfeatures[trnidx,:], dims=2))
+    valpred = vec(mapslices(predictor, trainfeatures[validx,:], dims=2))
+    # Thresholds
+    for (i,t) in enumerate(thresholds)
+        conftrain[:,:,mcfold,i] = confmat(trnpred .>= t, trainlabels[trnidx,:])
+        confvalid[:,:,mcfold,i] = confmat(valpred .>= t, trainlabels[validx,:])
+    end
+end
+```
+
+some measures on the table
+
+```{julia}
+acc(m) = tr(m)/sum(m)
+tpr(m) = m[1,1]/(m[1,1]+m[1,2])
+tnr(m) = m[2,2]/(m[2,2]+m[2,1])
+fpr(m) = m[2,1]/(m[2,1]+m[2,2])
+fnr(m) = m[1,2]/(m[1,2]+m[1,1])
+ppv(m) = m[1,1]/(m[1,1]+m[2,1])
+npv(m) = m[2,2]/(m[2,2]+m[1,2])
+fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
+inform(m) = tpr(m) + tnr(m) - 1.0
+```
+
+how good are our folds
+
+```{julia}
+raw_tpr = dropdims(mapslices(tpr, confvalid; dims=(1,2)), dims=(1,2))
+raw_fpr = dropdims(mapslices(fpr, confvalid; dims=(1,2)), dims=(1,2))
+raw_ppv = dropdims(mapslices(ppv, confvalid; dims=(1,2)), dims=(1,2))
+f = Figure()
+roc = Axis(f[1,1])
+pr = Axis(f[1,2])
+for i in axes(confvalid, 3)
+    lines!(roc, raw_fpr[i,:], raw_tpr[i,:], color=(:black, 0.2))
+    lines!(pr, raw_tpr[i,:], raw_ppv[i,:], color=(:black, 0.2))
+end
+for ax in [roc, pr]
+    xlims!(ax, (0., 1.0))
+    ylims!(ax, (0., 1.0))
+    tightlimits!(ax)
+end
+hlines!(pr, [0.5], color=:black, linestyle=:dash)
+ablines!(roc, [0.0], [1.0], color=:black, linestyle=:dash)
+current_figure()
+```
+
+pretty good -- now we need to pick an optimal value for the threshold
+
+```{julia}
+raw_inf = dropdims(mapslices(inform, confvalid; dims=(1,2)), dims=(1,2))
+f = Figure()
+ax = Axis(f[1,1])
+for i in axes(confvalid, 3)
+    lines!(ax, thresholds, raw_inf[i,:], color=:lightgrey)
+end
+mean_inf = vec(mapslices(mean, raw_inf, dims=1))
+lines!(ax, thresholds, mean_inf, color=:black)
+current_figure()
+```
+
+train the final model
+
+```{julia}
+τ = thresholds[last(findmax(mean_inf))]
+predictor = pNBC(trainlabels, trainfeatures)
+```
+
+and test on the testing data
+
+```{julia}
+#| label: tbl-moving-confusion
+#| tbl-cap: confusion table after tuning the value of $\tau$ etc etc 
+prediction = vec(mapslices(predictor, testfeatures, dims=2))
+conf = confmat(prediction .>= τ, testlabels)
+out = pretty_table(String, conf, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = false)
+display("text/html", out)
+```
+
+```{julia}
+@info ppv(conf)
+@info npv(conf)
+@info fone(conf)
+@info inform(conf)
+```
