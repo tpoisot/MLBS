@@ -8,6 +8,8 @@ Throughout these chapters, we will be working on a single problem, which is to p
 
 These two predictors are important for plants [@clapham1935] or animals [@whittaker1962] **ECOZONES**, and see *e.g.* climate change [@berteaux2014]
 
+data from [@fick2017], an alternative is [@karger2017] which is higher resolution, so for iteration we work with a smaller data product
+
 ## What is classification?
 
 Classification is the prediction of a qualitative response. In @sec-kmeans, for example, we predicted the class of a pixel, which is a qualitative variable with levels $\{1, 2, \dots, k\}$. This represented an instance of *unsupervised* learning, as we had no *a priori* notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate "background points", that represent assumptions about where the species are not [@hanberry2012; @barbet-massin2012].
@@ -52,7 +54,6 @@ In @fig-classification-separability, what is the most likely class if the temper
 ## Application: a baseline model of reindeer presence
 
 ### Training and validation strategy
-
 
 ### Performance evaluation of the model
 

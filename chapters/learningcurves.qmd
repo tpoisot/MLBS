@@ -20,13 +20,19 @@ We have just described the Receiver Operating Characteristic (ROC; @fawcett2006)
 
 ### The PR curve
 
-One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions .[@poisot2023]. For this reason, it is always advised to ...
+One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions [@poisot2023]. For this reason, it is always advised to ...
 
 ### Cross-entropy loss and other classification loss functions
 
 ## How to optimize the threshold?
 
 In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.
+
+As we have discussed in **TODO previous**, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
+
+Some authors have used the MCC as a measure of optimality [@zhou2013], as it is maximized *only* when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, @chicco2023 recommend that MCC should be used to pick the optimal threshold *regardless of the question*, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at *everything*, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss [@Jurman2012].
+
+For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.
 
 ## The problem: building a probabilistic NBC model
 

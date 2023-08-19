@@ -4,7 +4,13 @@ import CSV
 using SpeciesDistributionToolkit
 using CairoMakie
 
-spatial_extent = (left = 3.0, bottom = 54.0, right = 21.0, top = 67.0)
+#spatial_extent = (left = 3.0, bottom = 54.0, right = 21.0, top = 67.0)
+
+spatial_extent = (left = 3.0, bottom = 56.0, right = 20.0, top = 65.0)
+dataprovider = RasterData(CHELSA1, BioClim)
+
+temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
+heatmap(temperature, colormap=:lajolla)
 
 # Data
 BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
@@ -19,21 +25,16 @@ query = [
     "limit" => 300,
 ]
 presences = occurrences(rangifer, query...)
-for i in 1:10
+for i in 1:20
+    @info i
     occurrences!(presences)
 end
 
-dataprovider = RasterData(CHELSA1, BioClim)
-temperature = 0.1SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
-
-heatmap(temperature)
-
 presencelayer = mask(temperature, presences, Bool)
-
 heatmap(presencelayer)
 
 background = pseudoabsencemask(WithinRadius, presencelayer; distance = 200.0)
-buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 30.0)
+buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 25.0)
 bgmask = background .& (.! buffer)
 
 heatmap(

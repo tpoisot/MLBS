@@ -11,6 +11,7 @@ using StatsBase
 using Statistics
 using LinearAlgebra
 using PrettyTables, Latexify
+CairoMakie.activate!(; px_per_unit = 2)
 ```
 
 We load the data
@@ -18,8 +19,10 @@ We load the data
 ```{julia}
 _path = joinpath(@__DIR__, "..", "data", "general", "rangifer-observations.csv")
 rangifer = DataFrame(CSV.File(_path))
+presabs = select(rangifer, [:longitude, :latitude, :presence])
 select!(rangifer, Not(:latitude))
 select!(rangifer, Not(:longitude))
+select!(rangifer, [:presence, :BIO11, :BIO2, :BIO8])
 ```
 
 we take aside a testing set
@@ -121,6 +124,7 @@ ppv(m) = m[1,1]/(m[1,1]+m[2,1])
 npv(m) = m[2,2]/(m[2,2]+m[1,2])
 fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
 inform(m) = tpr(m) + tnr(m) - 1.0
+mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
 ```
 
 how good are our folds
@@ -149,21 +153,22 @@ current_figure()
 pretty good -- now we need to pick an optimal value for the threshold
 
 ```{julia}
-raw_inf = dropdims(mapslices(inform, confvalid; dims=(1,2)), dims=(1,2))
+raw_perf = dropdims(mapslices(inform, confvalid; dims=(1,2)), dims=(1,2))
 f = Figure()
 ax = Axis(f[1,1])
 for i in axes(confvalid, 3)
-    lines!(ax, thresholds, raw_inf[i,:], color=:lightgrey)
+    lines!(ax, thresholds, raw_perf[i,:], color=:lightgrey)
 end
-mean_inf = vec(mapslices(mean, raw_inf, dims=1))
-lines!(ax, thresholds, mean_inf, color=:black)
+mean_perf = vec(mapslices(mean, raw_perf, dims=1))
+lines!(ax, thresholds, mean_perf, color=:black)
 current_figure()
 ```
 
 train the final model
 
 ```{julia}
-τ = thresholds[last(findmax(mean_inf))]
+τ = thresholds[last(findmax(mean_perf))]
+@info τ
 predictor = pNBC(trainlabels, trainfeatures)
 ```
 
@@ -179,8 +184,41 @@ display("text/html", out)
 ```
 
 ```{julia}
+hist(prediction)
+```
+
+```{julia}
 @info ppv(conf)
 @info npv(conf)
 @info fone(conf)
 @info inform(conf)
+```
+
+get the data
+
+```{julia}
+using SpeciesDistributionToolkit
+bio11 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=11)
+bio2 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=2)
+bio8 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=8)
+```
+
+make the predictions for every pixel
+
+```{julia}
+pr = convert(Float64, similar(bio11))
+for k in keys(pr)
+    x = [bio11[k], bio2[k], bio8[k]]
+    pr[k] = predictor(x)
+end
+```
+
+show the results on a map
+
+```{julia}
+heatmap(pr, colormap=[:lightgrey, :lightgrey])
+heatmap!(mask(pr .> τ,  pr), colormap=:davos)
+presences = filter(r -> r.presence, presabs)
+scatter!(presences.longitude, presences.latitude, color=:black, markersize=2)
+current_figure()
 ```

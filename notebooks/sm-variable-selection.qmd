@@ -138,8 +138,7 @@ while (!isempty(possiblevariables))
     for (i,pv) in enumerate(possiblevariables)
         tv = push!(copy(variableset), pv)
         runfolds!(conftrain, confvalid; vars=tv)
-        tss = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
-        scores[i] = tss
+        scores[i] = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
     end
     bs, bi = findmax(scores)
     if bs > current_best
@@ -163,7 +162,7 @@ _ppv = mean(dropdims(mapslices(ppv, confvalid, dims=(1,2)), dims=(1,2)))
 _npv = mean(dropdims(mapslices(npv, confvalid, dims=(1,2)), dims=(1,2)))
 _mcc = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
 push!(varsel, 
-    (Method = :Forwards, N = length(variableset), Accuracy = _acc, TSS = tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
+    (Method = :Forwards, N = length(variableset), Accuracy = _acc, TSS = _tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
 )
 
 @info variableset
@@ -185,8 +184,7 @@ while (!isempty(possiblevariables))
     for (i,pv) in enumerate(possiblevariables)
         tv = push!(copy(variableset), pv)
         runfolds!(conftrain, confvalid; vars=tv)
-        tss = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
-        scores[i] = tss
+        scores[i] = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
     end
     bs, bi = findmax(scores)
     if bs > current_best
@@ -210,7 +208,7 @@ _ppv = mean(dropdims(mapslices(ppv, confvalid, dims=(1,2)), dims=(1,2)))
 _npv = mean(dropdims(mapslices(npv, confvalid, dims=(1,2)), dims=(1,2)))
 _mcc = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
 push!(varsel, 
-    (Method = :Constrained, N = length(variableset), Accuracy = _acc, TSS = tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
+    (Method = :Constrained, N = length(variableset), Accuracy = _acc, TSS = _tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
 )
 
 @info variableset
@@ -231,8 +229,7 @@ while (!isempty(variableset))
     for (i,pv) in enumerate(variableset)
         tv = deleteat!(copy(variableset), i)
         runfolds!(conftrain, confvalid; vars=tv)
-        tss = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
-        scores[i] = tss
+        scores[i] = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
     end
     bs, bi = findmax(scores)
     if bs > current_best
@@ -255,7 +252,7 @@ _ppv = mean(dropdims(mapslices(ppv, confvalid, dims=(1,2)), dims=(1,2)))
 _npv = mean(dropdims(mapslices(npv, confvalid, dims=(1,2)), dims=(1,2)))
 _mcc = mean(dropdims(mapslices(mcc, confvalid, dims=(1,2)), dims=(1,2)))
 push!(varsel, 
-    (Method = :Backwards, N = length(variableset), Accuracy = _acc, TSS = tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
+    (Method = :Backwards, N = length(variableset), Accuracy = _acc, TSS = _tss, F1 = _fone, NPV = _npv, PPV = _ppv, MCC = _mcc)
 )
 
 @info variableset
@@ -264,17 +261,14 @@ push!(varsel,
 look at method
 
 ```{julia}
-varsel
+sort!(varsel, :MCC)
 ```
-
-run with final variables
-
 
 retrain the model with the best possible set
 
 ```{julia}
 allvarpred = NBC(trainlabels, trainfeatures)
-predictor = (x) -> allvarpred(x, ; vars=fwvar)
+predictor = (x) -> allvarpred(x; vars=fwvar)
 prediction = vec(mapslices(predictor, testfeatures, dims=2))
 conf = confmat(prediction, testlabels)
 @info tpr(conf)
