@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 7&nbsp; Learning curves and moving thresholds</title>
+<title>Data Science for Biodiversity Scientists - 8&nbsp; Learning curves and moving thresholds</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -50,7 +50,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../references.html" rel="next">
-<link href="../chapters/classification.html" rel="prev">
+<link href="../chapters/variableselection.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -101,7 +101,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/learningcurves.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/learningcurves.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -140,7 +140,7 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/kmeans.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">The <em>k</em>-means algorithm</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -169,8 +169,14 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -189,15 +195,15 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#classification-based-on-probabilities" id="toc-classification-based-on-probabilities" class="nav-link active" data-scroll-target="#classification-based-on-probabilities"><span class="header-section-number">7.1</span> Classification based on probabilities</a>
+  <li><a href="#classification-based-on-probabilities" id="toc-classification-based-on-probabilities" class="nav-link active" data-scroll-target="#classification-based-on-probabilities"><span class="header-section-number">8.1</span> Classification based on probabilities</a>
   <ul class="collapse">
-  <li><a href="#the-roc-curve" id="toc-the-roc-curve" class="nav-link" data-scroll-target="#the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</a></li>
-  <li><a href="#the-pr-curve" id="toc-the-pr-curve" class="nav-link" data-scroll-target="#the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</a></li>
-  <li><a href="#cross-entropy-loss-and-other-classification-loss-functions" id="toc-cross-entropy-loss-and-other-classification-loss-functions" class="nav-link" data-scroll-target="#cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">7.1.3</span> Cross-entropy loss and other classification loss functions</a></li>
+  <li><a href="#the-roc-curve" id="toc-the-roc-curve" class="nav-link" data-scroll-target="#the-roc-curve"><span class="header-section-number">8.1.1</span> The ROC curve</a></li>
+  <li><a href="#the-pr-curve" id="toc-the-pr-curve" class="nav-link" data-scroll-target="#the-pr-curve"><span class="header-section-number">8.1.2</span> The PR curve</a></li>
+  <li><a href="#cross-entropy-loss-and-other-classification-loss-functions" id="toc-cross-entropy-loss-and-other-classification-loss-functions" class="nav-link" data-scroll-target="#cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">8.1.3</span> Cross-entropy loss and other classification loss functions</a></li>
   </ul></li>
-  <li><a href="#how-to-optimize-the-threshold" id="toc-how-to-optimize-the-threshold" class="nav-link" data-scroll-target="#how-to-optimize-the-threshold"><span class="header-section-number">7.2</span> How to optimize the threshold?</a></li>
-  <li><a href="#the-problem-building-a-probabilistic-nbc-model" id="toc-the-problem-building-a-probabilistic-nbc-model" class="nav-link" data-scroll-target="#the-problem-building-a-probabilistic-nbc-model"><span class="header-section-number">7.3</span> The problem: building a probabilistic NBC model</a></li>
-  <li><a href="#application-improved-reindeer-distribution-model" id="toc-application-improved-reindeer-distribution-model" class="nav-link" data-scroll-target="#application-improved-reindeer-distribution-model"><span class="header-section-number">7.4</span> Application: improved reindeer distribution model</a></li>
+  <li><a href="#how-to-optimize-the-threshold" id="toc-how-to-optimize-the-threshold" class="nav-link" data-scroll-target="#how-to-optimize-the-threshold"><span class="header-section-number">8.2</span> How to optimize the threshold?</a></li>
+  <li><a href="#the-problem-building-a-probabilistic-nbc-model" id="toc-the-problem-building-a-probabilistic-nbc-model" class="nav-link" data-scroll-target="#the-problem-building-a-probabilistic-nbc-model"><span class="header-section-number">8.3</span> The problem: building a probabilistic NBC model</a></li>
+  <li><a href="#application-improved-reindeer-distribution-model" id="toc-application-improved-reindeer-distribution-model" class="nav-link" data-scroll-target="#application-improved-reindeer-distribution-model"><span class="header-section-number">8.4</span> Application: improved reindeer distribution model</a></li>
   </ul>
 </nav>
     </div>
@@ -206,7 +212,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></h1>
+<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></h1>
 </div>
 
 
@@ -223,40 +229,40 @@ div.csl-indent {
 </header>
 
 <p>In <strong>TK GRADIENT</strong>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of our model. We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct grid searches to tune several hyper-parameters at once.</p>
-<section id="classification-based-on-probabilities" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="classification-based-on-probabilities"><span class="header-section-number">7.1</span> Classification based on probabilities</h2>
+<section id="classification-based-on-probabilities" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="classification-based-on-probabilities"><span class="header-section-number">8.1</span> Classification based on probabilities</h2>
 <p>When first introducing classification, in <strong>TODO CHAPTER</strong>, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either “present” or “absent”). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interesting in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.</p>
 <p>The idea behind the use of thresholds is simple: if the classifier output <span class="math inline">\(\hat y\)</span> is larger than (or equal to) the threshold value <span class="math inline">\(\tau\)</span>, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value <span class="math inline">\(\hat y\)</span> returned by the classifier be a probability. We can simply decide to pick <span class="math inline">\(\tau\)</span> somewhere in the support of the distribution of <span class="math inline">\(\hat y\)</span>.</p>
 <p>The threshold to decide on a positive event is an hyper-parameter of the model. In the NBC we built in <strong>TODO</strong>, our decision rule was that <span class="math inline">\(p(+) &gt; p(-)\)</span>, which when all is said and done (but we will convince ourselves of this in <strong>TODO</strong>), means that we used <span class="math inline">\(\tau = 0.5\)</span>. But there is no reason to assume that the threshold needs to be one half. Maybe the model is overly sensitive to negatives. Maybe there is a slight issue with our training data that bias the model predictions. And for this reason, we have to look for the optimal value of <span class="math inline">\(\tau\)</span>.</p>
 <p>There are two important values for the threshold, at which we know the behavior of our model. The first is <span class="math inline">\(\tau = \text{min}(\hat y)\)</span>, for which the model <em>always</em> returns a negative answer; the second is, unsurprisingly, <span class="math inline">\(\tau = \text{max}(\hat y)\)</span>, where the model <em>always</em> returns a positive answer. Thinking of this behavior in terms of the measures on the confusion matrix, as we have introduced them in <strong>TODO</strong>, the smallest possible threshold gives only negatives, and the largest possible one gives only positives: they respectively maximize the false negatives and false positives rates.</p>
-<section id="the-roc-curve" class="level3" data-number="7.1.1">
-<h3 data-number="7.1.1" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</h3>
+<section id="the-roc-curve" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">8.1.1</span> The ROC curve</h3>
 <p>This is a behavior we can exploit, as increasing the threshold away from the minimum will lower the false negatives rate and increase the true positive rate, while decreasing the threshold away from the maximum will lower the false positives rate and increase the true negative rate. If we cross our fingers and knock on wood, there will be a point where the false events rates have decreased as much as possible, and the true events rates have increased as much as possible, and this corresponds to the optimal value of <span class="math inline">\(\tau\)</span> for our problem.</p>
 <p>We have just described the Receiver Operating Characteristic (ROC; <span class="citation" data-cites="fawcett2006">Fawcett (<a href="../references.html#ref-fawcett2006" role="doc-biblioref">2006</a>)</span>) curve! The ROC curve visualizes the false positive rate on the <span class="math inline">\(x\)</span> axis, and the true positive rate on the <span class="math inline">\(y\)</span> axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier <span class="citation" data-cites="hanley1982">(<a href="../references.html#ref-hanley1982" role="doc-biblioref">Hanley and McNeil 1982</a>)</span>; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance.The ROC curve is a description of the model performance across all of the possible threshold values we investigated!</p>
 </section>
-<section id="the-pr-curve" class="level3" data-number="7.1.2">
-<h3 data-number="7.1.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</h3>
+<section id="the-pr-curve" class="level3" data-number="8.1.2">
+<h3 data-number="8.1.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">8.1.2</span> The PR curve</h3>
 <p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions .<span class="citation" data-cites="poisot2023">(<a href="../references.html#ref-poisot2023" role="doc-biblioref">Poisot et al. 2023</a>)</span>. For this reason, it is always advised to …</p>
 </section>
-<section id="cross-entropy-loss-and-other-classification-loss-functions" class="level3" data-number="7.1.3">
-<h3 data-number="7.1.3" class="anchored" data-anchor-id="cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">7.1.3</span> Cross-entropy loss and other classification loss functions</h3>
+<section id="cross-entropy-loss-and-other-classification-loss-functions" class="level3" data-number="8.1.3">
+<h3 data-number="8.1.3" class="anchored" data-anchor-id="cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">8.1.3</span> Cross-entropy loss and other classification loss functions</h3>
 </section>
 </section>
-<section id="how-to-optimize-the-threshold" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">7.2</span> How to optimize the threshold?</h2>
+<section id="how-to-optimize-the-threshold" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">8.2</span> How to optimize the threshold?</h2>
 <p>In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example <span class="math inline">\([0.2, 0.8, 0.1, 0.5, 1.0]\)</span>. We then compare all of these values to an initial threshold, for example <span class="math inline">\(\tau = 0.05\)</span>, giving us a vector of Boolean values, in this case <span class="math inline">\([+, +, +, +, +]\)</span>. We can then compare this classified output to a series of validation labels, <em>e.g.</em> <span class="math inline">\([-, +, -, -, +]\)</span>, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.</p>
 </section>
-<section id="the-problem-building-a-probabilistic-nbc-model" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="the-problem-building-a-probabilistic-nbc-model"><span class="header-section-number">7.3</span> The problem: building a probabilistic NBC model</h2>
+<section id="the-problem-building-a-probabilistic-nbc-model" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="the-problem-building-a-probabilistic-nbc-model"><span class="header-section-number">8.3</span> The problem: building a probabilistic NBC model</h2>
 </section>
-<section id="application-improved-reindeer-distribution-model" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="application-improved-reindeer-distribution-model"><span class="header-section-number">7.4</span> Application: improved reindeer distribution model</h2>
+<section id="application-improved-reindeer-distribution-model" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="application-improved-reindeer-distribution-model"><span class="header-section-number">8.4</span> Application: improved reindeer distribution model</h2>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-moving-threshold.qmd" data-notebook-title="Supp. Mat. - moving threshold" data-notebook-cellid="cell-tbl-moving-confusion">
 <div class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div id="tbl-moving-confusion" class="anchored">
 <table class="table table-sm table-striped small">
-<caption>Table&nbsp;7.1: confusion table after tuning the value of <span class="math inline">\(\tau\)</span> etc etc</caption>
+<caption>Table&nbsp;8.1: confusion table after tuning the value of <span class="math inline">\(\tau\)</span> etc etc</caption>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">456</td>
@@ -634,8 +640,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../chapters/classification.html" class="pagination-link">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span>
+      <a href="../chapters/variableselection.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
