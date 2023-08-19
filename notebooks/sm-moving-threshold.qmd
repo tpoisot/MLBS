@@ -16,7 +16,7 @@ using PrettyTables, Latexify
 We load the data
 
 ```{julia}
-_path = joinpath(@__DIR__, "..", "data", "general", "climate.csv")
+_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-observations.csv")
 rangifer = DataFrame(CSV.File(_path))
 select!(rangifer, Not(:latitude))
 select!(rangifer, Not(:longitude))
@@ -90,9 +90,9 @@ We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
 
 ```{julia}
 thresholds = collect(LinRange(0.0, 1.0, 300))
-conftrain = zeros(Float64, (2, 2, 200, length(thresholds)))
+conftrain = zeros(Float64, (2, 2, 50, length(thresholds)))
 confvalid = similar(conftrain)
-n_valid = floor.(Int, 0.2*length(trainlabels))
+n_valid = floor.(Int, 0.1*length(trainlabels))
 
 for mcfold in axes(conftrain, 3)
     validx = sample(axes(trainlabels, 1), n_valid, replace=false)
