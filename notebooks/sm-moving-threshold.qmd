@@ -125,6 +125,8 @@ end
 how good are our folds
 
 ```{julia}
+#| label: fig-moving-roc-pr
+#| fig-cap: roc and pr curves
 raw_tpr = dropdims(mapslices(tpr, confvalid; dims=(1,2)), dims=(1,2))
 raw_fpr = dropdims(mapslices(fpr, confvalid; dims=(1,2)), dims=(1,2))
 raw_ppv = dropdims(mapslices(ppv, confvalid; dims=(1,2)), dims=(1,2))
@@ -148,6 +150,8 @@ current_figure()
 pretty good -- now we need to pick an optimal value for the threshold
 
 ```{julia}
+#| label: fig-moving-thresholding
+#| fig-cap: performance tuning curve
 raw_perf = dropdims(mapslices(mcc, confvalid; dims=(1,2)), dims=(1,2))
 raw_perf[findall(isnan, raw_perf)] .= 0.0
 f = Figure()
