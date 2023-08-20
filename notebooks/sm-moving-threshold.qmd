@@ -134,7 +134,7 @@ f = Figure()
 roc = Axis(f[1,1])
 pr = Axis(f[1,2])
 for i in axes(confvalid, 3)
-    lines!(roc, raw_fpr[i,:], raw_tpr[i,:], color=(:black, 0.1ylims!(ax, low=0.0, high=1.0)))
+    lines!(roc, raw_fpr[i,:], raw_tpr[i,:], color=(:black, 0.1))
     lines!(pr, raw_tpr[i,:], raw_ppv[i,:], color=(:black, 0.1))
 end
 for ax in [roc, pr]
@@ -292,9 +292,10 @@ get the data
 
 ```{julia}
 using SpeciesDistributionToolkit
-bio1 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=1)
-bio2 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=2)
-bio15 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=15)
+_layer_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-layers.tiff")
+bio1 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=1)
+bio2 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=2)
+bio15 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=15)
 ```
 
 make the predictions for every pixel

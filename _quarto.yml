@@ -45,17 +45,18 @@ book:
     - references.qmd
 
 bibliography: references.bib
+csl: https://www.zotero.org/styles/ecology-letters
 
 format:
   html:
-    theme: cosmo
+    theme: litera
   pdf:
     documentclass: scrbook
     fig-pos: 'bt'
     tbl-pos: 'bt'
     toc: true
     toc-depth: 3
-    mainfont: TeX Gyre Pagella
-    mathfont: TeX Gyre Pagella Math
+    mainfont: TeX Gyre Schola
+    mathfont: TeX Gyre Schola Math
     sansfont: TeX Gyre Heros
     monofont: TeX Gyre Cursor

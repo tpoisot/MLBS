@@ -242,7 +242,7 @@ div.csl-indent {
 </section>
 <section id="the-pr-curve" class="level3" data-number="8.1.2">
 <h3 data-number="8.1.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">8.1.2</span> The PR curve</h3>
-<p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions .<span class="citation" data-cites="poisot2023">(<a href="../references.html#ref-poisot2023" role="doc-biblioref">Poisot et al. 2023</a>)</span>. For this reason, it is always advised to …</p>
+<p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions <span class="citation" data-cites="poisot2023">(<a href="../references.html#ref-poisot2023" role="doc-biblioref">Poisot et al. 2023</a>)</span>. For this reason, it is always advised to …</p>
 </section>
 <section id="cross-entropy-loss-and-other-classification-loss-functions" class="level3" data-number="8.1.3">
 <h3 data-number="8.1.3" class="anchored" data-anchor-id="cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">8.1.3</span> Cross-entropy loss and other classification loss functions</h3>
@@ -251,6 +251,9 @@ div.csl-indent {
 <section id="how-to-optimize-the-threshold" class="level2" data-number="8.2">
 <h2 data-number="8.2" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">8.2</span> How to optimize the threshold?</h2>
 <p>In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example <span class="math inline">\([0.2, 0.8, 0.1, 0.5, 1.0]\)</span>. We then compare all of these values to an initial threshold, for example <span class="math inline">\(\tau = 0.05\)</span>, giving us a vector of Boolean values, in this case <span class="math inline">\([+, +, +, +, +]\)</span>. We can then compare this classified output to a series of validation labels, <em>e.g.</em> <span class="math inline">\([-, +, -, -, +]\)</span>, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.</p>
+<p>As we have discussed in <strong>TODO previous</strong>, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be <span class="citation" data-cites="Perkins2006 Unal2017">(<a href="../references.html#ref-Perkins2006" role="doc-biblioref">Perkins and Schisterman 2006</a>; <a href="../references.html#ref-Unal2017" role="doc-biblioref">Unal 2017</a>)</span>. The usual recommendation is to use the True Skill Statistic, also known as Youden’s <span class="math inline">\(J\)</span> <span class="citation" data-cites="youden1950">(<a href="../references.html#ref-youden1950" role="doc-biblioref">Youden 1950</a>)</span>. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier <span class="citation" data-cites="perkins2005">(<a href="../references.html#ref-perkins2005" role="doc-biblioref">Perkins and Schisterman 2005</a>)</span>. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions <span class="citation" data-cites="poisot2023a">(<a href="../references.html#ref-poisot2023a" role="doc-biblioref">Poisot 2023</a>)</span>.</p>
+<p>Some authors have used the MCC as a measure of optimality <span class="citation" data-cites="zhou2013">(<a href="../references.html#ref-zhou2013" role="doc-biblioref">Zhou and Jakobsson 2013</a>)</span>, as it is maximized <em>only</em> when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, <span class="citation" data-cites="chicco2023">Chicco and Jurman (<a href="../references.html#ref-chicco2023" role="doc-biblioref">2023</a>)</span> recommend that MCC should be used to pick the optimal threshold <em>regardless of the question</em>, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at <em>everything</em>, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss <span class="citation" data-cites="Jurman2012">(<a href="../references.html#ref-Jurman2012" role="doc-biblioref">Jurman, Riccadonna, and Furlanello 2012</a>)</span>.</p>
+<p>For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.</p>
 </section>
 <section id="the-problem-building-a-probabilistic-nbc-model" class="level2" data-number="8.3">
 <h2 data-number="8.3" class="anchored" data-anchor-id="the-problem-building-a-probabilistic-nbc-model"><span class="header-section-number">8.3</span> The problem: building a probabilistic NBC model</h2>
@@ -258,19 +261,19 @@ div.csl-indent {
 <section id="application-improved-reindeer-distribution-model" class="level2" data-number="8.4">
 <h2 data-number="8.4" class="anchored" data-anchor-id="application-improved-reindeer-distribution-model"><span class="header-section-number">8.4</span> Application: improved reindeer distribution model</h2>
 <div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-moving-threshold.qmd" data-notebook-title="Supp. Mat. - moving threshold" data-notebook-cellid="cell-tbl-moving-confusion">
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="12">
 <div class="cell-output cell-output-display">
 <div id="tbl-moving-confusion" class="anchored">
 <table class="table table-sm table-striped small">
 <caption>Table&nbsp;8.1: confusion table after tuning the value of <span class="math inline">\(\tau\)</span> etc etc</caption>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">456</td>
-<td style="text-align: right;">71</td>
+<td style="text-align: right;">910</td>
+<td style="text-align: right;">18</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">14</td>
-<td style="text-align: right;">114</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">209</td>
 </tr>
 </tbody>
 </table>
@@ -281,14 +284,38 @@ div.csl-indent {
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-chicco2023" class="csl-entry" role="listitem">
+Chicco, Davide, and Giuseppe Jurman. 2023. <span>“The Matthews Correlation Coefficient&nbsp;(MCC) Should Replace the ROC&nbsp;AUC as the Standard Metric for Assessing Binary Classification.”</span> <em>BioData Mining</em> 16 (1). <a href="https://doi.org/10.1186/s13040-023-00322-4">https://doi.org/10.1186/s13040-023-00322-4</a>.
+</div>
 <div id="ref-fawcett2006" class="csl-entry" role="listitem">
 Fawcett, Tom. 2006. <span>“An Introduction to ROC Analysis.”</span> <em>Pattern Recognition Letters</em> 27 (8): 861–74. <a href="https://doi.org/10.1016/j.patrec.2005.10.010">https://doi.org/10.1016/j.patrec.2005.10.010</a>.
 </div>
 <div id="ref-hanley1982" class="csl-entry" role="listitem">
 Hanley, J A, and B J McNeil. 1982. <span>“The Meaning and Use of the Area Under a Receiver Operating Characteristic (ROC) Curve.”</span> <em>Radiology</em> 143 (1): 29–36. <a href="https://doi.org/10.1148/radiology.143.1.7063747">https://doi.org/10.1148/radiology.143.1.7063747</a>.
 </div>
+<div id="ref-Jurman2012" class="csl-entry" role="listitem">
+Jurman, Giuseppe, Samantha Riccadonna, and Cesare Furlanello. 2012. <span>“A Comparison of MCC and CEN Error Measures in Multi-Class Prediction.”</span> Edited by Giuseppe Biondi-Zoccai. <em>PLoS ONE</em> 7 (8): e41882. <a href="https://doi.org/10.1371/journal.pone.0041882">https://doi.org/10.1371/journal.pone.0041882</a>.
+</div>
+<div id="ref-perkins2005" class="csl-entry" role="listitem">
+Perkins, Neil J., and Enrique F. Schisterman. 2005. <span>“The Youden Index and the Optimal Cut-Point Corrected for Measurement Error.”</span> <em>Biometrical Journal</em> 47 (4): 428–41. <a href="https://doi.org/10.1002/bimj.200410133">https://doi.org/10.1002/bimj.200410133</a>.
+</div>
+<div id="ref-Perkins2006" class="csl-entry" role="listitem">
+———. 2006. <span>“The Inconsistency of <span>“</span>Optimal<span>”</span> Cutpoints Obtained Using Two Criteria Based on the Receiver Operating Characteristic Curve.”</span> <em>American Journal of Epidemiology</em> 163 (7): 670–75. <a href="https://doi.org/10.1093/aje/kwj063">https://doi.org/10.1093/aje/kwj063</a>.
+</div>
+<div id="ref-poisot2023a" class="csl-entry" role="listitem">
+Poisot, Timothée. 2023. <span>“Guidelines for the Prediction of Species Interactions Through Binary Classification.”</span> <em>Methods in Ecology and Evolution</em> 14 (5): 1333–45. <a href="https://doi.org/10.1111/2041-210x.14071">https://doi.org/10.1111/2041-210x.14071</a>.
+</div>
 <div id="ref-poisot2023" class="csl-entry" role="listitem">
 Poisot, Timothée, Marie-Andrée Ouellet, Nardus Mollentze, Maxwell J. Farrell, Daniel J. Becker, Liam Brierley, Gregory F. Albery, Rory J. Gibb, Stephanie N. Seifert, and Colin J. Carlson. 2023. <span>“Network Embedding Unveils the Hidden Interactions in the Mammalian Virome.”</span> <em>Patterns</em> 4 (6): 100738. <a href="https://doi.org/10.1016/j.patter.2023.100738">https://doi.org/10.1016/j.patter.2023.100738</a>.
+</div>
+<div id="ref-Unal2017" class="csl-entry" role="listitem">
+Unal, Ilker. 2017. <span>“Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach.”</span> <em>Computational and Mathematical Methods in Medicine</em> 2017: 1–14. <a href="https://doi.org/10.1155/2017/3762651">https://doi.org/10.1155/2017/3762651</a>.
+</div>
+<div id="ref-youden1950" class="csl-entry" role="listitem">
+Youden, W. J. 1950. <span>“Index for Rating Diagnostic Tests.”</span> <em>Cancer</em> 3 (1): 32–35. <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3">https://doi.org/10.1002/1097-0142(1950)3:1&lt;32::aid-cncr2820030106&gt;3.0.co;2-3</a>.
+</div>
+<div id="ref-zhou2013" class="csl-entry" role="listitem">
+Zhou, Hua, and Eric Jakobsson. 2013. <span>“Predicting Protein-Protein Interaction by the Mirrortree Method: Possibilities and Limitations.”</span> Edited by Raja Jothi. <em>PLoS ONE</em> 8 (12): e81100. <a href="https://doi.org/10.1371/journal.pone.0081100">https://doi.org/10.1371/journal.pone.0081100</a>.
 </div>
 </div>
 </section>
