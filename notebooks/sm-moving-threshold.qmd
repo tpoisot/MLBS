@@ -132,8 +132,8 @@ f = Figure()
 roc = Axis(f[1,1])
 pr = Axis(f[1,2])
 for i in axes(confvalid, 3)
-    lines!(roc, raw_fpr[i,:], raw_tpr[i,:], color=(:black, 0.2))
-    lines!(pr, raw_tpr[i,:], raw_ppv[i,:], color=(:black, 0.2))
+    lines!(roc, raw_fpr[i,:], raw_tpr[i,:], color=(:black, 0.1ylims!(ax, low=0.0, high=1.0)))
+    lines!(pr, raw_tpr[i,:], raw_ppv[i,:], color=(:black, 0.1))
 end
 for ax in [roc, pr]
     xlims!(ax, (0., 1.0))
@@ -151,12 +151,14 @@ pretty good -- now we need to pick an optimal value for the threshold
 raw_perf = dropdims(mapslices(mcc, confvalid; dims=(1,2)), dims=(1,2))
 raw_perf[findall(isnan, raw_perf)] .= 0.0
 f = Figure()
-ax = Axis(f[1,1])
+ax = Axis(f[1,1]; xlabel="Threshold", ylabel="MCC")
+ylims!(ax, low=0.0, high=1.0)
+xlims!(ax, low=0.0, high=1.0)
 for i in axes(confvalid, 3)
     lines!(ax, thresholds, raw_perf[i,:], color=:lightgrey)
 end
 mean_perf = vec(mapslices(mean, raw_perf, dims=1))
-lines!(ax, thresholds, mean_perf, color=:black)
+lines!(ax, thresholds, mean_perf, color=:black, linewidth=4, linestyle=:dash)
 current_figure()
 ```
 
@@ -243,10 +245,34 @@ out = pretty_table(String, conf, tf = tf_html_simple, formatters = ft_nomissing,
 display("text/html", out)
 ```
 
-look at probas
+look at probas - this explains why the thresholding curve was essentially flat, the model is *really* good at picking 0/1 probabilities
 
 ```{julia}
-hist(prediction)
+#| label: fig-moving-explanation
+#| fig-cap: probas etc etc
+f = Figure()
+gl = f[1,1] = GridLayout()
+
+axp = Axis(gl[1,1])
+hist!(axp, prediction, normalization=:probability, bins=10, color=:lightgrey)
+xlims!(axp, low=0.0, high=1.0)
+ylims!(axp, low=0.0)
+hidespines!(axp)
+hidedecorations!(axp)
+
+axr = Axis(gl[2,1]; xlabel="Predicted probability for the presence class")
+colpos = Makie.wong_colors()[6]
+cl = [(p ? colpos : :grey) for p in ((prediction .>= τ).==testlabels)]
+rainclouds!(axr, testlabels, prediction, plot_boxplots=false, clouds=nothing, side_nudge=0.0, orientation=:horizontal, jitter_width=0.5, markersize=8, color=cl)
+xlims!(axr, low=0.0, high=1.0)
+ylims!(axr, low=-0.5, high=1.5)
+
+vlines!(axr, τ, color=:black, linestyle=:dash)
+
+rowgap!(gl, 0)
+rowsize!(gl, 1, Relative(1/7))
+
+current_figure()
 ```
 
 ```{julia}
@@ -287,5 +313,24 @@ ax = Axis(f[1,1]; xlabel="Longitude", ylabel="Latitude", xgridvisible=false, ygr
 heatmap!(ax, pr .> τ, colormap=[:lightgrey, :grey])
 presences = filter(r -> r.presence, presabs)
 scatter!(ax, presences.longitude, presences.latitude, color=:black, markersize=2)
+current_figure()
+```
+
+finally show the uncertainty, which is useful as a way to setup the rest of the modules
+
+```{julia}
+entropy = similar(pr)
+for k in keys(pr)
+    p = [pr[k], 1.0 - pr[k]]
+    entropy[k] = -sum(p .* log2.(p))
+end
+```
+
+```{julia}
+#| label: fig-moving-uncertainty
+#| fig-cap: Uncertainty (in bits) of the prediction made by the fully trained NBC. As we have seen in fig **TODO**, the model is really good at producing probabilities that are close to 0 and close to 1, and therefore the areas of high uncertainty are rather narrow in space. Note that the areas of higher uncertainty correspond, largely, to the areas of transition from predicted presence to predicted absence.
+f = Figure(; resolution=(500, 300))
+ax = Axis(f[1,1]; xlabel="Longitude", ylabel="Latitude", xgridvisible=false, ygridvisible=false)
+heatmap!(ax, entropy, colormap=:lapaz)
 current_figure()
 ```
