@@ -22,7 +22,7 @@ rangifer = DataFrame(CSV.File(_path))
 presabs = select(rangifer, [:longitude, :latitude, :presence])
 select!(rangifer, Not(:latitude))
 select!(rangifer, Not(:longitude))
-select!(rangifer, [:presence, :BIO11, :BIO2, :BIO8])
+select!(rangifer, [:presence, :BIO1, :BIO2, :BIO15])
 ```
 
 we take aside a testing set
@@ -87,6 +87,16 @@ function confmat(pred, truth)
     fn = sum(.!pred .& truth)
     return [tp fn; fp tn]
 end
+acc(m) = tr(m)/sum(m)
+tpr(m) = m[1,1]/(m[1,1]+m[1,2])
+tnr(m) = m[2,2]/(m[2,2]+m[2,1])
+fpr(m) = m[2,1]/(m[2,1]+m[2,2])
+fnr(m) = m[1,2]/(m[1,2]+m[1,1])
+ppv(m) = m[1,1]/(m[1,1]+m[2,1])
+npv(m) = m[2,2]/(m[2,2]+m[1,2])
+fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
+inform(m) = tpr(m) + tnr(m) - 1.0
+mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
 ```
 
 We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
@@ -110,21 +120,6 @@ for mcfold in axes(conftrain, 3)
         confvalid[:,:,mcfold,i] = confmat(valpred .>= t, trainlabels[validx,:])
     end
 end
-```
-
-some measures on the table
-
-```{julia}
-acc(m) = tr(m)/sum(m)
-tpr(m) = m[1,1]/(m[1,1]+m[1,2])
-tnr(m) = m[2,2]/(m[2,2]+m[2,1])
-fpr(m) = m[2,1]/(m[2,1]+m[2,2])
-fnr(m) = m[1,2]/(m[1,2]+m[1,1])
-ppv(m) = m[1,1]/(m[1,1]+m[2,1])
-npv(m) = m[2,2]/(m[2,2]+m[1,2])
-fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
-inform(m) = tpr(m) + tnr(m) - 1.0
-mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
 ```
 
 how good are our folds
@@ -153,7 +148,8 @@ current_figure()
 pretty good -- now we need to pick an optimal value for the threshold
 
 ```{julia}
-raw_perf = dropdims(mapslices(inform, confvalid; dims=(1,2)), dims=(1,2))
+raw_perf = dropdims(mapslices(mcc, confvalid; dims=(1,2)), dims=(1,2))
+raw_perf[findall(isnan, raw_perf)] .= 0.0
 f = Figure()
 ax = Axis(f[1,1])
 for i in axes(confvalid, 3)
@@ -183,32 +179,100 @@ out = pretty_table(String, conf, tf = tf_html_simple, formatters = ft_nomissing,
 display("text/html", out)
 ```
 
+but we can add an extra step! optimize the prior and the threshold at the same time using grid search using two loops, first the prior and then the thresholding  -- this is rather long to run, so we actually do the search only for a relevant range of parameters
+
+```{julia}
+thresholds = collect(LinRange(0.0, 1.0, 20))
+priors = collect(LinRange(0.0, 1.0, 10))
+scores = zeros(Float64, (length(thresholds), length(priors)))
+
+for (pri, pr) in enumerate(priors)
+    @info pri
+    conftrain = zeros(Float64, (2, 2, 10, length(thresholds)))
+    confvalid = similar(conftrain)
+    n_valid = floor.(Int, 0.1*length(trainlabels))
+    for mcfold in axes(conftrain, 3)
+        validx = sample(axes(trainlabels, 1), n_valid, replace=false)
+        trnidx = filter!(i -> !(i in validx), collect(axes(trainlabels, 1)))
+        predictor = (v) -> pNBC(trainlabels[trnidx], trainfeatures[trnidx,:])(v; p=pr)
+        trnpred = vec(mapslices(predictor, trainfeatures[trnidx,:], dims=2))
+        valpred = vec(mapslices(predictor, trainfeatures[validx,:], dims=2))
+        # Thresholds
+        for (i,t) in enumerate(thresholds)
+            conftrain[:,:,mcfold,i] = confmat(trnpred .>= t, trainlabels[trnidx,:])
+            confvalid[:,:,mcfold,i] = confmat(valpred .>= t, trainlabels[validx,:])
+        end
+    end
+    raw_perf = dropdims(mapslices(mcc, confvalid; dims=(1,2)), dims=(1,2))
+    raw_perf[findall(isnan, raw_perf)] .= 0.0
+    mean_perf = vec(mapslices(mean, raw_perf, dims=1))
+    scores[:,pri] .= mean_perf
+    @info findmax(scores)
+end
+```
+
+look at the grid at the end of the tuning process
+
+```{julia}
+heatmap(scores)
+```
+
+we get the best parameters
+
+```{julia}
+best_pos = last(findmax(scores))
+prior = priors[best_pos[2]]
+τ = thresholds[best_pos[1]]
+@info prior, τ
+```
+
+now we run the prediction on the model with both parameters tuned
+
+```{julia}
+predictor = (v) -> pNBC(trainlabels, trainfeatures)(v; p=prior)
+```
+
+output the table
+
+```{julia}
+#| label: tbl-moving-confusion-grid
+#| tbl-cap: confusion table after tuning the value of $\tau$ and the prior etc etc 
+prediction = vec(mapslices(predictor, testfeatures, dims=2))
+conf = confmat(prediction .>= τ, testlabels)
+out = pretty_table(String, conf, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = false)
+display("text/html", out)
+```
+
+look at probas
+
 ```{julia}
 hist(prediction)
 ```
 
 ```{julia}
-@info ppv(conf)
-@info npv(conf)
-@info fone(conf)
+@info tpr(conf)
+@info tnr(conf)
+@info fpr(conf)
+@info fnr(conf)
 @info inform(conf)
+@info mcc(conf)
 ```
 
 get the data
 
 ```{julia}
 using SpeciesDistributionToolkit
-bio11 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=11)
+bio1 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=1)
 bio2 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=2)
-bio8 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=8)
+bio15 = SpeciesDistributionToolkit._read_geotiff("data/general/rangifer-layers.tiff", SimpleSDMResponse; bandnumber=15)
 ```
 
 make the predictions for every pixel
 
 ```{julia}
-pr = convert(Float64, similar(bio11))
+pr = convert(Float64, similar(bio1))
 for k in keys(pr)
-    x = [bio11[k], bio2[k], bio8[k]]
+    x = [bio1[k], bio2[k], bio15[k]]
     pr[k] = predictor(x)
 end
 ```
@@ -216,9 +280,12 @@ end
 show the results on a map
 
 ```{julia}
-heatmap(pr, colormap=[:lightgrey, :lightgrey])
-heatmap!(mask(pr .> τ,  pr), colormap=:davos)
+#| label: fig-moving-rangemap
+#| fig-cap: Range map of *Rangifer tarandus tarandus* as ...
+f = Figure(; resolution=(500, 300))
+ax = Axis(f[1,1]; xlabel="Longitude", ylabel="Latitude", xgridvisible=false, ygridvisible=false)
+heatmap!(ax, pr .> τ, colormap=[:lightgrey, :grey])
 presences = filter(r -> r.presence, presabs)
-scatter!(presences.longitude, presences.latitude, color=:black, markersize=2)
+scatter!(ax, presences.longitude, presences.latitude, color=:black, markersize=2)
 current_figure()
 ```

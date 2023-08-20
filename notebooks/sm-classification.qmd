@@ -82,12 +82,22 @@ function confmat(pred, truth)
     fn = sum(.!pred .& truth)
     return [tp fn; fp tn]
 end
+acc(m) = tr(m)/sum(m)
+tpr(m) = m[1,1]/(m[1,1]+m[1,2])
+tnr(m) = m[2,2]/(m[2,2]+m[2,1])
+fpr(m) = m[2,1]/(m[2,1]+m[2,2])
+fnr(m) = m[1,2]/(m[1,2]+m[1,1])
+ppv(m) = m[1,1]/(m[1,1]+m[2,1])
+npv(m) = m[2,2]/(m[2,2]+m[1,2])
+fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
+inform(m) = tpr(m) + tnr(m) - 1.0
+mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
 ```
 
 We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
 
 ```{julia}
-conftrain = zeros(Float64, (2, 2, 2000))
+conftrain = zeros(Float64, (2, 2, 200))
 confvalid = similar(conftrain)
 n_valid = floor.(Int, 0.2*length(trainlabels))
 
@@ -104,39 +114,27 @@ for mcfold in axes(conftrain, 3)
 end
 ```
 
-some measures on the table
-
-```{julia}
-acc(m) = tr(m)/sum(m)
-tpr(m) = m[1,1]/(m[1,1]+m[1,2])
-tnr(m) = m[2,2]/(m[2,2]+m[2,1])
-fpr(m) = m[2,1]/(m[2,1]+m[2,2])
-fnr(m) = m[1,2]/(m[1,2]+m[1,1])
-ppv(m) = m[1,1]/(m[1,1]+m[2,1])
-npv(m) = m[2,2]/(m[2,2]+m[1,2])
-fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
-inform(m) = tpr(m) + tnr(m) - 1.0
-mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
-```
-
 how good are our folds
 
 ```{julia}
 #| label: fig-classification-crossvalidation
 #| fig-cap: WAH NEVER CHANGES
-fmat = [(ppv, "PPV") (npv, "NPV"); (ppv, "PPV") (npv, "NPV")]
+fmat = [(tpr, "Sensitivity") (ppv, "PPV") (inform, "TSS"); (tnr, "Specificity") (npv, "NPV") (mcc, "MCC")]
 f = Figure()
 
 for ci in CartesianIndices(fmat)
-    ax = Axis(f[ci.I...])
     fm, lab = fmat[ci]
+    ax = Axis(f[ci.I...]; xlabel=lab)
     trv = dropdims(mapslices(fm, conftrain, dims=(1,2)), dims=(1,2))
     vav = dropdims(mapslices(fm, confvalid, dims=(1,2)), dims=(1,2))
-    density!(ax, trv, color=(:lightgrey, 0.1), strokecolor=:lightgrey, strokewidth=2)
-    c = Makie.wong_colors()[3]
-    density!(ax, vav, color=(c, 0.3), strokecolor=c, strokewidth=2)
-    tightlimits!(ax)
+    x = vcat(fill(0, length(trv)), fill(1, length(vav)))
+    y = vcat(trv, vav)
+    trc = Makie.wong_colors()[3]
+    vac = :lightgrey
+    boxplot!(ax, x, y; orientation=:vertical, color = map(d->d==1 ? vac : trc, x))
+    hidexdecorations!(ax, label=false)
 end
+
 current_figure()
 ```
 
@@ -146,10 +144,13 @@ on the testing data now
 predictor = NBC(trainlabels, trainfeatures)
 prediction = vec(mapslices(predictor, testfeatures, dims=2))
 conf = confmat(prediction, testlabels)
+@info tpr(conf)
+@info tnr(conf)
 @info ppv(conf)
 @info npv(conf)
 @info fone(conf)
 @info inform(conf)
+@info mcc(conf)
 ```
 
 figure
@@ -201,8 +202,8 @@ current_figure()
 prediction diagram
 
 ```{julia}
-air = LinRange(extrema(rangifer.BIO1)..., 50)
-prc = LinRange(extrema(rangifer.BIO12)..., 50)
+air = LinRange(extrema(rangifer.BIO1)..., 150)
+prc = LinRange(extrema(rangifer.BIO12)..., 150)
 X = zeros(Bool, (length(air), length(prc)))
 for i in axes(air, 1)
     for j in axes(prc, 1)
