@@ -1,14 +1,11 @@
 # Supp. Mat. - classification
 
 ```{julia}
-using DataFrames
-import CSV
-using CairoMakie
-using Distributions
-using StatsBase
-using Statistics
-using LinearAlgebra
-CairoMakie.activate!(; px_per_unit = 2)
+_code_path = joinpath(@__DIR__, "..", "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "confusiontable.jl"))
+include(joinpath(_code_path, "nbc.jl"))
+include(joinpath(_code_path, "splitters.jl"))
 ```
 
 We load the data
@@ -24,93 +21,37 @@ select!(rangifer, [:presence, :BIO1, :BIO12])
 we take aside a testing set
 
 ```{julia}
-n_testing = floor(Int, 0.2 * size(rangifer, 1))
-
-testind_idx = sample(1:size(rangifer, 1), n_testing, replace=false)
-training_idx = filter(i -> !(i in testind_idx), 1:size(rangifer, 1))
-
-train, test = rangifer[training_idx, :], rangifer[testind_idx, :]
+labels = rangifer.presence
+features = Matrix(select(rangifer, Not(:presence)))
+training_idx, testing_idx = holdout(labels, features)
 ```
 
 we will split this a little more to make it easier
 
 ```{julia}
-trainlabels = Array(select(train, :presence))[:,1]
-testlabels = Array(select(test, :presence))[:,1]
-trainfeatures = Array(select(train, Not(:presence)))
-testfeatures = Array(select(test, Not(:presence)))
+trainlabels = labels[training_idx]
+testlabels = labels[testing_idx]
+trainfeatures = features[training_idx,:]
+testfeatures = features[testing_idx,:]
 ```
 
 we will use the z-score to standardize, but not now! we want to do the training set FIRST and then use this for the prediction steps, we treat z-score as a trainable parameter (link with data leakage)
 
-```{julia}
-function vnorm(x::Vector{T}, μ::T1, σ::T2) where {T <: Number, T1 <: Number, T2 <: Number}
-    return (x .- μ) ./ σ
-end
-function vnorm(x::Vector{T}) where {T <: Number}
-    return vnorm(x, mean(x), std(x))
-end
-```
-
-we do a whole function here
-
-```{julia}
-function NBC(y, X)
-    μ = mapslices(mean, X, dims=1)
-    σ = mapslices(std, X, dims=1)
-    Xpos = (X[findall(y),:] .- μ) ./ σ
-    Xneg = (X[findall(.!y),:] .- μ) ./ σ
-    pred_pos = mapslices(x -> Normal(mean(x), std(x)), Xpos, dims=1)
-    pred_neg = mapslices(x -> Normal(mean(x), std(x)), Xneg, dims=1)
-    function inner_predictor(v)
-        nv = (v' .- μ) ./ σ
-        is_pos = prod(pdf.(pred_pos, nv))
-        is_neg = prod(pdf.(pred_neg, nv))
-        return is_pos > is_neg
-    end
-    return inner_predictor
-end
-```
-
-confusion matrix
-
-```{julia}
-function confmat(pred, truth)
-    tp = sum(pred .& truth)
-    tn = sum(.!pred .& .!truth)
-    fp = sum(pred .& .!truth)
-    fn = sum(.!pred .& truth)
-    return [tp fn; fp tn]
-end
-acc(m) = tr(m)/sum(m)
-tpr(m) = m[1,1]/(m[1,1]+m[1,2])
-tnr(m) = m[2,2]/(m[2,2]+m[2,1])
-fpr(m) = m[2,1]/(m[2,1]+m[2,2])
-fnr(m) = m[1,2]/(m[1,2]+m[1,1])
-ppv(m) = m[1,1]/(m[1,1]+m[2,1])
-npv(m) = m[2,2]/(m[2,2]+m[1,2])
-fone(m) = 2.0*(ppv(m)*tpr(m))/(ppv(m)+tpr(m))
-inform(m) = tpr(m) + tnr(m) - 1.0
-mcc(m) = ((m[1,1]*m[2,2])-(m[1,2]*m[2,1]))/sqrt((m[1,1]+m[2,1])*(m[1,1]+m[1,2])*(m[2,2]+m[2,1])*(m[2,2]+m[1,2]))
-```
-
 We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
 
 ```{julia}
-conftrain = zeros(Float64, (2, 2, 200))
-confvalid = similar(conftrain)
-n_valid = floor.(Int, 0.2*length(trainlabels))
+conftrain = zeros(ConfusionMatrix, 100)
+confvalid = zeros(ConfusionMatrix, length(conftrain))
 
-for mcfold in axes(conftrain, 3)
-    validx = sample(axes(trainlabels, 1), n_valid, replace=false)
-    trnidx = filter!(i -> !(i in validx), collect(axes(trainlabels, 1)))
-    predictor = NBC(trainlabels[trnidx], trainfeatures[trnidx,:])
+for fold in axes(conftrain, 1)
+    t_idx, v_idx = holdout(trainlabels, trainfeatures)
+    predictor = naivebayes(trainlabels[t_idx], trainfeatures[t_idx,:])
     # Training conf mat
-    trnpred = vec(mapslices(predictor, trainfeatures[trnidx,:], dims=2))
-    conftrain[:,:,mcfold] = confmat(trnpred, trainlabels[trnidx,:])
+    prediction = vec(mapslices(predictor, trainfeatures[t_idx,:], dims=2))
+    conftrain[fold] = ConfusionMatrix(prediction, vec(trainlabels[t_idx,:]))
     # Validation conf mat
-    valpred = vec(mapslices(predictor, trainfeatures[validx,:], dims=2))
-    confvalid[:,:,mcfold] = confmat(valpred, trainlabels[validx,:])
+    validation = vec(mapslices(predictor, trainfeatures[v_idx,:], dims=2))
+    confvalid[fold] = ConfusionMatrix(validation, vec(trainlabels[v_idx,:]))
 end
 ```
 
@@ -119,14 +60,14 @@ how good are our folds
 ```{julia}
 #| label: fig-classification-crossvalidation
 #| fig-cap: WAH NEVER CHANGES
-fmat = [(tpr, "Sensitivity") (ppv, "PPV") (inform, "TSS"); (tnr, "Specificity") (npv, "NPV") (mcc, "MCC")]
+fmat = [(tpr, "Sensitivity") (ppv, "PPV") (trueskill, "TSS"); (tnr, "Specificity") (npv, "NPV") (mcc, "MCC")]
 f = Figure()
 
 for ci in CartesianIndices(fmat)
-    fm, lab = fmat[ci]
+    cfunc, lab = fmat[ci]
     ax = Axis(f[ci.I...]; xlabel=lab)
-    trv = dropdims(mapslices(fm, conftrain, dims=(1,2)), dims=(1,2))
-    vav = dropdims(mapslices(fm, confvalid, dims=(1,2)), dims=(1,2))
+    trv = cfunc.(conftrain)
+    vav = cfunc.(confvalid)
     x = vcat(fill(0, length(trv)), fill(1, length(vav)))
     y = vcat(trv, vav)
     trc = Makie.wong_colors()[3]
@@ -141,15 +82,15 @@ current_figure()
 on the testing data now
 
 ```{julia}
-predictor = NBC(trainlabels, trainfeatures)
+predictor = naivebayes(trainlabels, trainfeatures)
 prediction = vec(mapslices(predictor, testfeatures, dims=2))
-conf = confmat(prediction, testlabels)
+conf = ConfusionMatrix(prediction, testlabels)
 @info tpr(conf)
 @info tnr(conf)
 @info ppv(conf)
 @info npv(conf)
-@info fone(conf)
-@info inform(conf)
+@info f1(conf)
+@info trueskill(conf)
 @info mcc(conf)
 ```
 
@@ -164,21 +105,21 @@ gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
 c = Makie.wong_colors()[1]
-density!(axtemp, 0.1filter(r -> r.presence, train).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> r.presence, rangifer).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 c = Makie.wong_colors()[2]
-density!(axtemp, 0.1filter(r -> !r.presence, train).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> !r.presence, rangifer).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 axprec = Axis(gl[2,2])
 c = Makie.wong_colors()[1]
-density!(axprec, 0.1filter(r -> r.presence, train).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+density!(axprec, 0.1filter(r -> r.presence, rangifer).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 c = Makie.wong_colors()[2]
-density!(axprec, 0.1filter(r -> !r.presence, train).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+density!(axprec, 0.1filter(r -> !r.presence, rangifer).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-xp = 0.1filter(r -> r.presence, train).BIO1
-xn = 0.1filter(r -> !r.presence, train).BIO1
-yp = filter(r -> r.presence, train).BIO12
-yn = filter(r -> !r.presence, train).BIO12
+xp = 0.1filter(r -> r.presence, rangifer).BIO1
+xn = 0.1filter(r -> !r.presence, rangifer).BIO1
+yp = filter(r -> r.presence, rangifer).BIO12
+yn = filter(r -> !r.presence, rangifertrain).BIO12
 c = Makie.wong_colors()[1]
 scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
 c = Makie.wong_colors()[2]
@@ -204,11 +145,10 @@ prediction diagram
 ```{julia}
 air = LinRange(extrema(rangifer.BIO1)..., 150)
 prc = LinRange(extrema(rangifer.BIO12)..., 150)
-X = zeros(Bool, (length(air), length(prc)))
+X = zeros(Float64, (length(air), length(prc)))
 for i in axes(air, 1)
     for j in axes(prc, 1)
-        p = [air[i], prc[j]]
-        X[i,j] = predictor(p)
+        X[i,j] = predictor([air[i], prc[j]]) > 0.5
     end
 end
 ```
