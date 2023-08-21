@@ -119,7 +119,7 @@ axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual pre
 xp = 0.1filter(r -> r.presence, rangifer).BIO1
 xn = 0.1filter(r -> !r.presence, rangifer).BIO1
 yp = filter(r -> r.presence, rangifer).BIO12
-yn = filter(r -> !r.presence, rangifertrain).BIO12
+yn = filter(r -> !r.presence, rangifer).BIO12
 c = Makie.wong_colors()[1]
 scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
 c = Makie.wong_colors()[2]

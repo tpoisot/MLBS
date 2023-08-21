@@ -238,10 +238,10 @@ div.csl-indent {
 <section id="gradientdescent-sec-gradientdescent-problem" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="gradientdescent-sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
 <p>One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In</p>
-<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen and Briand (<a href="../references.html#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
+<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen &amp; Briand (<a href="../references.html#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
 <p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="../references.html#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
-<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="../references.html#ref-brose2004" role="doc-biblioref">Brose et al. 2004</a>)</span>.</p>
-<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="../references.html#ref-macdonald2020" role="doc-biblioref">MacDonald, Banville, and Poisot 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
+<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="../references.html#ref-brose2004" role="doc-biblioref">Brose <em>et al.</em> 2004</a>)</span>.</p>
+<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="../references.html#ref-macdonald2020" role="doc-biblioref">MacDonald <em>et al.</em> 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
 </section>
 <section id="gradient-descent" class="level2" data-number="3.3">
 <h2 data-number="3.3" class="anchored" data-anchor-id="gradient-descent"><span class="header-section-number">3.3</span> Gradient descent</h2>
@@ -368,19 +368,19 @@ p := p - \eta\times \nabla f(p) \,.
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
 <div id="ref-brose2004" class="csl-entry" role="listitem">
-Brose, Ulrich, Annette Ostling, Kateri Harrison, and Neo D. Martinez. 2004. <span>“Unified Spatial Scaling of Species and Their Trophic Interactions.”</span> <em>Nature</em> 428 (6979): 167–71. <a href="https://doi.org/10.1038/nature02297">https://doi.org/10.1038/nature02297</a>.
+Brose, U., Ostling, A., Harrison, K. &amp; Martinez, N.D. (2004). <a href="https://doi.org/10.1038/nature02297">Unified spatial scaling of species and their trophic interactions</a>. <em>Nature</em>, 428, 167–171.
 </div>
 <div id="ref-cohen1984" class="csl-entry" role="listitem">
-Cohen, J. E., and F. Briand. 1984. <span>“Trophic Links of Community Food Webs.”</span> <em>Proc Natl Acad Sci U S A</em> 81 (13): 4105–9.
+Cohen, J.E. &amp; Briand, F. (1984). Trophic links of community food webs. <em>Proc Natl Acad Sci U S A</em>, 81, 4105–4109.
 </div>
 <div id="ref-innes2018" class="csl-entry" role="listitem">
-Innes, Michael. 2018. <span>“Don’t Unroll Adjoint: Differentiating SSA-Form Programs.”</span> <a href="https://doi.org/10.48550/ARXIV.1810.07951">https://doi.org/10.48550/ARXIV.1810.07951</a>.
+Innes, M. (2018). <a href="https://doi.org/10.48550/ARXIV.1810.07951">Don’t unroll adjoint: Differentiating SSA-form programs</a>.
 </div>
 <div id="ref-macdonald2020" class="csl-entry" role="listitem">
-MacDonald, Arthur Andrew Meahan, Francis Banville, and Timothée Poisot. 2020. <span>“Revisiting the Links-Species Scaling Relationship in Food Webs.”</span> <em>Patterns</em> 1 (0). <a href="https://doi.org/10.1016/j.patter.2020.100079">https://doi.org/10.1016/j.patter.2020.100079</a>.
+MacDonald, A.A.M., Banville, F. &amp; Poisot, T. (2020). <a href="https://doi.org/10.1016/j.patter.2020.100079">Revisiting the links-species scaling relationship in food webs</a>. <em>Patterns</em>, 1.
 </div>
 <div id="ref-martinez1992" class="csl-entry" role="listitem">
-Martinez, Néo D. 1992. <span>“Constant Connectance in Community Food Webs.”</span> <em>The American Naturalist</em> 139 (6): 1208–18. <a href="http://www.jstor.org/stable/2462337">http://www.jstor.org/stable/2462337</a>.
+Martinez, N.D. (1992). <a href="http://www.jstor.org/stable/2462337">Constant connectance in community food webs</a>. <em>The American Naturalist</em>, 139, 1208–1218.
 </div>
 </div>
 </section>
