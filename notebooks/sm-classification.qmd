@@ -37,7 +37,7 @@ testfeatures = features[testing_idx,:]
 
 we will use the z-score to standardize, but not now! we want to do the training set FIRST and then use this for the prediction steps, we treat z-score as a trainable parameter (link with data leakage)
 
-We'll do LOOCV here, so it's easier **TODO** monte carlo CV instead
+We will use Monte-Carlo cross-validations, which is simply the repetition of holdout validation a large enough number of times.
 
 ```{julia}
 conftrain = zeros(ConfusionMatrix, 100)
