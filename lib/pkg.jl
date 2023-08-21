@@ -1,5 +1,6 @@
 using DataFrames
 import CSV
+using PrettyTables
 
 using Statistics
 

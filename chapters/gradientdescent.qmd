@@ -1,12 +1,12 @@
-# Gradient descent {#gradientdescent-sec-gradientdescent}
+# Gradient descent {#gradientdescent-gradientdescent-sec-gradientdescent}
 
 As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In @sec-kmeans, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
 
 Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
 
-## A digression: what is a trained model? {#gradientdescent-sec-gradientdescent-trainedmodel}
+## A digression: what is a trained model? {#gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel}
 
-## The problem: how many interactions in a food web? {#gradientdescent-sec-gradientdescent-problem}
+## The problem: how many interactions in a food web? {#gradientdescent-gradientdescent-sec-gradientdescent-problem}
 
 One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In
 
@@ -17,6 +17,10 @@ Not so fast, said @martinez1992. When we start looking a food webs with more spe
 But the square term can be relaxed; and there is no reason not to assume a power law, with $L\approx b\times S^a$. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes [@brose2004].
 
 The "reality" (*i.e.* the relationship between $S$ and $L$ that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula [@macdonald2020]. But for the purpose of this chapter, figuring out the values of $a$ and $b$ from empirical data is a very instructive exercise.
+
+In @fig-gradient-data, we can check that there is a linear relationship between the natural log of the number of species and the natural log of the number of links. This is not surprising! If we assume that $L \approx b\times S^a$, then we can take the log of both sides, and we get $\text{log}\, L \approx a \times \text{log}\, S + \text{log}\,b$. This is linear model, and so we can estimate its parameters using linear regression!
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-data >}}
 
 ## Gradient descent
 
@@ -43,7 +47,7 @@ $$ {#eq-loss-mse}
 This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in @tbl-gradientdescent-regressionloss.
 
 | Measure                       | Expression                                               | Remarks                                                                              |
-|------------------------------------|-------------------|-------------------|
+|----------------------------------|-------------------|-------------------|
 | Mean Squared Error (MSE, L2)  | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$ | Large errors are (proportionally) more penalized because of the squaring             |
 | Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$            | Error measured in the units of the response variable                                 |
 | Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$                                      | Error measured in the units of the response variable                                 |
@@ -107,7 +111,7 @@ $$
 
 This formula can be *iterated*: with each successive iteration, it will get us closer to the optimal value of $p$, which is to say the combination of $m$ and $b$ that minimizes the loss.
 
-### A note on the learning rate {#gradientdescent-seq-gradientdescent-learningrate}
+### A note on the learning rate {#gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate}
 
 The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are *way off*, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.
 
@@ -117,6 +121,54 @@ The conservative solution of using the smallest possible learning rate is not re
 
 ## Application: how many links are in a food web?
 
-{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-data >}}
+We will not get back to the problem exposed in @fig-gradient-data, and use gradient descent to fit the parameters of the model defined as $\hat y \approx \beta_0  + \beta_1 \times x$, where, using the notation introduced in **eq todo**, $\hat y$ is the natural log of the number of interactions (what we want to predict), $x$ is the natural log of the species richness (our predictor), and $\beta_0$ and $\beta_1$ are the parameters of the model.
+
+### The things we won't do
+
+At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the context of **eq todo**. In addition, as we will see in **chapt leak**, applying a transformation to the data too soon can be a dangerous thing. We will have to live with un-transformed features for a few more chapters.
+
+In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these datapoints. We will get back to this practice (cross-validation) in a lot more details in **chapter split**, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.
+
+### Starting the learning process
+
+In order to start the gradient descent process, we need to decide on an initial value of the parameters. There are many ways to do it. We could work our way from our knowledge of the system; for example $b < 1$ and $a = 2$ would fit relatively well with early results in the food web literature. Or we could draw a pair of values $(a, b)$ at random. Looking at @fig-gradientdescent-data, it is clear that our problem is remarkably simple, and so presumably either solution would work.
+
+### Stopping the learning process
+
+The gradient descent algorithm is entirely contained in **TODO EQ**, and so we only need to iterate several times to optimize the parameters. How long we need to run the algorithm for depends on a variety of factors, including our learning rate (slow learning requires more time!), our constraints in terms of computing time, but also how good we need to model to be.
+
+::: {.column-margin}
+
+The number of iterations over which we train the model is called the number of epochs, and is an hyper-parameter of the model.
+
+:::
+
+One usual approach is to decide on a number of iterations, and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning *too much* from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In @tbl-gradient-attempt-one, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#tbl-gradient-attempt-one >}}
+
+### Detecting over-fitting
+
+As we mentioned in **todo previous section**, one risk with training that runs for too long is to start seeing over-fitting. The usual diagnosis for over-fitting is an increase in the testing loss, which is to say, in the loss measured on the data that were not used for training. In @fig-gradient-loss-comparison, we can see that the RMSE loss decreases at the same rate on both datasets, which indicates that the model is learning from the data, but not to a point where its ability to generalize suffers.
+
+::: {.column-margin}
+
+Underfitting is also a possible scenario, where the model is *not* learning from the data, and can be detected by seeing the loss measures remain high or even increase.
+
+:::
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-loss-comparison >}}
+
+### Visualizing the learning process
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-param-change >}}
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-landscape >}}
+
+### Outcome of the model
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-fitted >}}
+
+{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-residuals >}}
 
 ## Notes on regularization

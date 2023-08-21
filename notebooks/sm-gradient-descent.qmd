@@ -1,15 +1,13 @@
-# Gradient descent and linear regression
+# Suppl Mat. - Gradient descent and linear regression
 
 This notebook contains the code used in the chapter on gradient descent and linear regression. Note that this code does *not* rely on a package for gradient descent, instead showcasing the use of `Zygote` to calculate the gradients.
 
 To run everything, we need to get a few data input packages, as well as the Makie plotting suite.
 
 ```{julia}
-using DataFrames
-import CSV
-using CairoMakie
-using Statistics
-CairoMakie.activate!(; px_per_unit = 2)
+_code_path = joinpath(@__DIR__, "..", "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "splitters.jl"))
 ```
 
 We can now load the data -- because they come with a little more information than what we use, we will drop the columns we don't need (`:P` are the predation interactions, and `:H` the number of herbivory interactions) , and remove the rows with obvious issues (such as no documented interaction). The data are described in the main chapter.
@@ -37,9 +35,9 @@ current_figure()
 The next step is to split the data into a training and testing set:
 
 ```{julia}
-training_inclusion = rand(size(ls, 1)) .< 0.8
-training = ls[findall(training_inclusion),:]
-testing = ls[findall(.!training_inclusion),:]
+train_idx, test_idx = holdout(ls.S, ls.L)
+training = ls[train_idx,:]
+testing = ls[test_idx,:]
 ```
 
 We are interested in this relationship as a linear model, so we can write this code:
@@ -70,7 +68,7 @@ Finally, we need a learning rate $\eta$:
 We will then create a random set of parameters for the model; we could make a guess based on our knowledge of the system, but this isn't necessary here.
 
 ```{julia}
-p = rand(2)
+p = [0.4, 0.2]
 ```
 
 And now we get the values of $L$ and $S$ in the training/testing dataset. Because we want to model the log-log relationship, we will transform these into their natural logs here:
@@ -91,6 +89,10 @@ loss_test = copy(loss_train)
 loss_train[1] = L2(y, x, lm, p...)
 loss_test[1] = L2(ty, tx, lm, p...)
 epochs = length(loss_train)-1
+track_p1 = copy(loss_train)
+track_p1[1] = p[1]
+track_p2 = copy(loss_train)
+track_p2[1] = p[2]
 ```
 
 then
@@ -100,12 +102,29 @@ for i in 1:epochs
     p .-= (η .* ∇L(y, x, lm, p...))
     loss_train[i+1] = L2(y, x, lm, p...)
     loss_test[i+1] = L2(ty, tx, lm, p...)
+    track_p1[i+1] = p[1]
+    track_p2[i+1] = p[2]
 end
 @info "Initial training loss: $(loss_train[begin])"
 @info "Initial testing loss: $(loss_test[begin])"
 
 @info "Final training loss: $(loss_train[end])"
 @info "Final testing loss: $(loss_test[end])"
+```
+
+```{julia}
+#| label: tbl-gradient-attempt-one
+#| tbl-cap: confusion table after tuning the value of $\tau$ etc etc 
+df = DataFrame()
+for i in [1, 500, 1000, 2000, 5000, 10000, 15000, 20000]
+    push!(df, (Step = i, LossTrain = loss_train[i] , LossTest = loss_test[i], b0 = track_p1[i], b1 = track_p2[i]))
+end
+rename!(df, :LossTrain => "Loss (training)")
+rename!(df, :LossTest => "Loss (testing)")
+rename!(df, :b0 => "β₀")
+rename!(df, :b1 => "β₁")
+out = pretty_table(String, df, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = true)
+display("text/html", out)
 ```
 
 Now we can plot the training:
@@ -122,6 +141,24 @@ axislegend(axs; position=:rt)
 
 current_figure()
 ```
+
+see parameter values
+
+
+```{julia}
+#| label: fig-gradient-param-change
+#| fig-cap: Overview of data from ...
+fig = Figure(; resolution=(500, 300))
+
+axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="β₀")
+lines!(axs, 0:epochs, track_p1, color=:black, label="Training")
+
+axs = Axis(fig[2,1]; xlabel="Training epoch", ylabel="β₁")
+lines!(axs, 0:epochs, track_p2, color=:black, label="Testing")
+
+current_figure()
+```
+
 
 and the residuals
 
@@ -151,5 +188,30 @@ pseudox = exp.(LinRange(1, log.(maximum(training.S)), 20))
 lines!(axs, pseudox, exp.(p[1] .* log.(pseudox) .+ p[2]), color=:red)
 lines!(axs, pseudox, pseudox.^2.0, color=:grey, linestyle=:dash)
 lines!(axs, pseudox, pseudox.-1.0, color=:grey, linestyle=:dash)
+current_figure()
+```
+
+model for the parameters
+
+```{julia}
+#| label: fig-gradient-landscape
+#| fig-cap: blah blah
+f = Figure()
+
+p0 = LinRange(0.0, 2.0, 50)
+p1 = LinRange(-2.0, 1.0, 50)
+S = zeros(Float64, (length(p0), length(p1)))
+
+for i in axes(S, 1)
+    for j in axes(S, 2)
+        S[i,j] = L2(y, x, lm, p0[i], p1[j])
+    end
+end
+
+ax = Axis(f[1,1,], xlabel="β₀", ylabel="β₁")
+
+contourf!(ax, p0, p1, log.(S), colormap=[:white, :darkblue], levels=12)
+lines!(ax, track_p1, track_p2, color=:black)
+
 current_figure()
 ```
