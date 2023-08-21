@@ -55,8 +55,8 @@ format:
     fig-pos: 'bt'
     tbl-pos: 'bt'
     toc: true
-    toc-depth: 3
-    mainfont: TeX Gyre Schola
-    mathfont: TeX Gyre Schola Math
+    toc-depth: 2
+    mainfont: TeX Gyre Pagella
+    mathfont: TeX Gyre Pagella Math
     sansfont: TeX Gyre Heros
     monofont: TeX Gyre Cursor
