@@ -1,8 +1,8 @@
-# Data leakage
+# Data leakage {#leakage-sec-leakage}
 
 Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models, which is to say (as we discussed in @sec-gradientdescent-trainedmodel), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
 
-## Consequences of data leakage
+## Consequences of data leakage {#leakage-sec-leakage-consequences}
 
 We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning [@nisbet2018]. Data leakage happens information "leaks" from the training conditions to the evaluation conditions. In other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time [@Peterson2018].
 
@@ -14,12 +14,32 @@ Congratulations! We have created data leakage! Because we are splitting our time
 
 **TODO** stationary processes @politis1994
 
-## Sources of data leakage
+## Sources of data leakage {#leakage-sec-leakage-sources}
 
-instances
+### Leakage between instances
 
-features
+### Leakage between features
 
-## Avoiding data leakage
+### Leakage during transformations
 
-learn/predict separation [@kaufman2011]
+## Avoiding data leakage {#leakage-sec-leakage-avoid}
+
+The most common advice given in order to prevent data leakage is the "learn/predict separation" [@kaufman2011]. Simply put, this means that whatever happens to the data used for training cannot be *simultaneously* applied to the data used for testing (or validation).
+
+### An example using PCA
+
+Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
+
+If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation.
+
+The second way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$.
+
+### How to generalize this approach?
+
+Although avoiding data leakage is a tricky problem, there is a very specific mindset we can adopt that goes a long way towards not introducing it in our analyses, and it is as follows: *every data transformation step is a modeling step that is part of the learning process*.
+
+Everything is a model that can be trained. If you want to transform a variable using the z-score, this is a model! It has two parameters that you can learn from the data, $\mu$ (the average of the variable) and $\sigma$ (its standard deviation). You can apply it to a data point $y$ with $\hat y = (y - \mu)\sigma^{-1}$ Because this is a model, we need a dataset to learn these parameters from, and because we want to maintain the learn/predict separation, we will use the train dataset to get the values of $\mu_0$ and $\sigma_0$. This way, when we want to get the z-score of a new observation, for example from the testing dataset, we can get it using $\hat y_1 = (y_1 - \mu_0)\sigma_0^{-1}$. The data transformation is entirely coming from information that was part of the training set.
+
+One way to get the learn/predict transformation stupendously wrong is to transform our validation, testing, or prediction data using $\hat y_1 = (y_1 - \mu_1)\sigma_1^{-1}$. This can be easily understood with an example. Assume that the variable $y_0$ is the temperature in our training dataset. We are interested in making a prediction in a world that is 2 degrees hotter, uniformly, which is to say that for whatever value of $y_0$, the corresponding data point we use for prediction is $y_1 = y_0 + 2$. If we take the z-score of this new value based on its own average and standard deviation, a temperature two degrees warmer in the prediction data will have the same z-score as its original value, or in other words, we have hidden the fact that there is a change in our predictors! Although this would not make a difference if we are reasonably confident that our predictors are stationary processes, there is no good reason to make this assumption.
+
+Treating the data preparation step as a part of the learning process, which is to say that we learn every transformation on the training set, and retain this transformation as part of the prediction process, we are protecting ourselves against both data leakage and the hiding of relevant changes in our predictors.
