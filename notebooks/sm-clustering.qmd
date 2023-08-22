@@ -1,0 +1,175 @@
+# Supp. Mat. - Clustering
+
+This notebook uses data from the USGS Landsat 9 products. They are *not* distributed with the notebook because they are pretty large. We work from the `.dat` files that have been extracted from the raw data instead.
+
+```{julia}
+_code_path = joinpath(@__DIR__, "..", "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "colorcube.jl"))
+include(joinpath(_code_path, "daviesbouldin.jl"))
+```
+
+```{julia}
+using DelimitedFiles
+```
+
+Read the different datafiles
+
+```{julia}
+_data_path = joinpath(@__DIR__, "..", "data", "kmeans", "cooked")
+R = readdlm(joinpath(_data_path, "red.dat"));
+G = readdlm(joinpath(_data_path, "green.dat"));
+B = readdlm(joinpath(_data_path, "blue.dat"));
+S = readdlm(joinpath(_data_path, "swir.dat"));
+N = readdlm(joinpath(_data_path, "nir.dat"));
+```
+
+RGB composite
+
+```{julia}
+#| label: fig-kmeans-composites
+#| fig-cap: The Landsat 9 data are combined into the "Natural Color" image, in which the red, green, and blue bands are mapped to their respective channels (left). The two other composites are the false color infrared, and the composite for vegetation analysis.
+rgb_cube = colorcube(R, G, B)
+cir_cube = colorcube(N, R, G)
+veg_cube = colorcube(S, N, R)
+
+fig = Figure(resolution=(500, 300))
+ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
+ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
+ax_cir = Makie.Axis(fig[1,3], aspect=DataAspect())
+
+image!(ax_rgb, load(assetpath(rgb_cube)))
+image!(ax_veg, load(assetpath(veg_cube)))
+image!(ax_cir, load(assetpath(cir_cube)))
+
+hidedecorations!(ax_rgb)
+hidedecorations!(ax_veg)
+hidedecorations!(ax_cir)
+
+current_figure()
+```
+
+Now we can do the NDVI
+
+```{julia}
+ndvi = @. (N - R) / (N + R)
+ndwi = @. (G - N) / (G + N)
+ndmi = @. (N - S) / (N + S)
+```
+
+and combine in a single matrix
+
+```{julia}
+X = zeros(Float32, (3, prod(size(ndvi))...))
+X[1,:] .= vec(ndvi)
+X[2,:] .= vec(ndwi)
+X[3,:] .= vec(ndmi)
+size(X)
+```
+
+plot
+
+```{julia}
+#| label: fig-kmeans-hexbin
+#| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water/vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent an instance of feature engineering: we have derived these values from the raw data.
+fig = Figure(resolution=(500,500))
+ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
+hexbin!(ax, vec(ndvi), vec(ndmi), colormap=:delta, bins=120)
+tightlimits!(ax)
+current_figure()
+```
+
+initial split
+
+```{julia}
+using Clustering
+clusters = kmeans(X, 4)
+```
+
+initial classification
+
+```{julia}
+#| label: fig-kmeans-initial-landscape
+#| fig-cap: >
+#|  After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape.
+#|  This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis.
+#|  This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into five categories. 
+C = reshape(assignments(clusters), size(ndvi))
+fig = Figure(resolution=(500,500))
+ax = Makie.Axis(fig[1,1]; aspect=DataAspect())
+heatmap!(ax, C; colormap=Makie.wong_colors())
+current_figure()
+```
+
+cluster score
+
+```{julia}
+DaviesBouldin(X, clusters)
+```
+
+now we optimize -- this runs on multiple threads, but it's still not super fast
+
+```{julia}
+k_trial = repeat(3:15, 5)
+score = zeros(Float64, length(k_trial))
+Threads.@threads for i in 1:length(k_trial)
+    k = k_trial[i]
+    score[i] = DaviesBouldin(X, kmeans(X, k))
+    @info maximum(score)
+end
+```
+
+figure with the number of clusters v. cost
+
+```{julia}
+scatter(k_trial, score)
+```
+
+now we can pick the best number of clusters and search for a solution
+
+```{julia}
+bscore, imax = findmax(score)
+k = k_trial[imax]
+clusters = kmeans(X, k)
+@info DaviesBouldin(X, clusters)
+```
+
+now plot
+
+```{julia}
+#| label: fig-kmeans-optimal-landscape
+#| fig-cap: blah
+C = reshape(assignments(clusters), size(ndvi))
+fig = Figure(resolution=(500,500))
+ax = Makie.Axis(fig[1,1]; aspect=DataAspect())
+heatmap!(ax, C; colormap=Makie.wong_colors())
+current_figure()
+```
+
+number of pixels per class
+
+```{julia}
+#| label: fig-kmeans-barplot-classes
+#| fig-cap: >
+#|  Number of pixels assigned to each class in the final landscape classification.
+#|  In most cases, *k*-means will create clusters with the same number of points in them.
+#|  This may be an issue, or this may be a way to ensure that whatever classes are produced will be balanced in terms of their representation.
+assigns = clusters.assignments
+clust = unique(assigns)
+counts = [count(isequal(k), assigns) for k in clust]
+
+fig = Figure(resolution=(500,300))
+ax = Makie.Axis(fig[1,1]; xlabel="Cluster", xgridvisible=false)
+ylims!(ax, (0, maximum(counts)*1.1))
+scatter!(ax, sort(counts), color=:slategrey)
+hidespines!(ax)
+#hideydecorations!(ax)
+current_figure()
+```
+
+```{julia}
+#| label: fig-kmeans-clustering
+#| fig-cap: Visualisation of the clustering output using ...
+col = Makie.wong_colors()[clusters.assignments]
+scatter(vec(ndvi), vec(ndmi), color=col)
+```

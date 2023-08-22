@@ -13,7 +13,12 @@ function readLS9band(files, pattern; kwargs...)
     return SpeciesDistributionToolkit._read_geotiff(band_file, SimpleSDMResponse; kwargs...)
 end
 
-bbox = (left=-116.8, right=-116.5, bottom=43.4, top=43.8)
+#b5 = readLS9band(img_files, "B5")
+#heatmap(b5)
+
+bbox = (left=-72.8, right=-72.6, bottom=19.4, top=19.5)
+#b5 = readLS9band(img_files, "B2"; bbox...)
+#heatmap(b5)
 
 nir = readLS9band(img_files, "B5"; bbox...)
 swir = readLS9band(img_files, "B6"; bbox...)
