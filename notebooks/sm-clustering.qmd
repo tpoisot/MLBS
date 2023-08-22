@@ -139,10 +139,26 @@ now plot
 ```{julia}
 #| label: fig-kmeans-optimal-landscape
 #| fig-cap: blah
+
+rgb_cube = colorcube(R, G, B)
+cir_cube = colorcube(N, R, G)
+veg_cube = colorcube(S, N, R)
+
+fig = Figure(resolution=(500, 300))
+ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
+ax_sat = Makie.Axis(fig[1,2], aspect=DataAspect())
+ax_veg = Makie.Axis(fig[1,3], aspect=DataAspect())
+
+image!(ax_rgb, load(assetpath(rgb_cube)))
+image!(ax_veg, load(assetpath(veg_cube)))
+
 C = reshape(assignments(clusters), size(ndvi))
-fig = Figure(resolution=(500,500))
-ax = Makie.Axis(fig[1,1]; aspect=DataAspect())
-heatmap!(ax, C; colormap=Makie.wong_colors())
+heatmap!(ax_sat, C; colormap=Makie.wong_colors())
+
+hidedecorations!(ax_rgb)
+hidedecorations!(ax_veg)
+hidedecorations!(ax_sat)
+
 current_figure()
 ```
 
