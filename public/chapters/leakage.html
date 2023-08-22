@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-99.9.9">
+<meta name="generator" content="quarto-1.4.330">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -192,7 +192,7 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#leakage-sec-leakage-consequences" id="toc-leakage-sec-leakage-consequences" class="nav-link active" data-scroll-target="#leakage-sec-leakage-consequences"><span class="header-section-number">5.1</span> Consequences of data leakage</a></li>
+  <li><a href="#sec-leakage-consequences" id="toc-sec-leakage-consequences" class="nav-link active" data-scroll-target="#sec-leakage-consequences"><span class="header-section-number">5.1</span> Consequences of data leakage</a></li>
   <li><a href="#leakage-sec-leakage-sources" id="toc-leakage-sec-leakage-sources" class="nav-link" data-scroll-target="#leakage-sec-leakage-sources"><span class="header-section-number">5.2</span> Sources of data leakage</a>
   <ul class="collapse">
   <li><a href="#leakage-between-instances" id="toc-leakage-between-instances" class="nav-link" data-scroll-target="#leakage-between-instances"><span class="header-section-number">5.2.1</span> Leakage between instances</a></li>
@@ -212,7 +212,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="leakage-sec-leakage" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></h1>
+<h1 class="title"><span id="sec-leakage" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></h1>
 </div>
 
 
@@ -228,9 +228,9 @@ div.csl-indent {
 
 </header>
 
-<p>Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <span class="quarto-unresolved-ref">?sec-gradientdescent-trainedmodel</span>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe <em>et al.</em> 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock <em>et al.</em> (<a href="../references.html#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
-<section id="leakage-sec-leakage-consequences" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="leakage-sec-leakage-consequences"><span class="header-section-number">5.1</span> Consequences of data leakage</h2>
+<p>Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <a href="gradientdescent.html#sec-gradientdescent-trainedmodel" class="quarto-xref"><span>Section&nbsp;3.1</span></a>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe <em>et al.</em> 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock <em>et al.</em> (<a href="../references.html#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
+<section id="sec-leakage-consequences" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="sec-leakage-consequences"><span class="header-section-number">5.1</span> Consequences of data leakage</h2>
 <p>We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning <span class="citation" data-cites="nisbet2018">(<a href="../references.html#ref-nisbet2018" role="doc-biblioref">Nisbet <em>et al.</em> 2018</a>)</span>. Data leakage happens information “leaks” from the training conditions to the evaluation conditions. In other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time <span class="citation" data-cites="Peterson2018">(<a href="../references.html#ref-Peterson2018" role="doc-biblioref">Peterson <em>et al.</em> 2018</a>)</span>.</p>
 <p>It is worth stopping for a moment to consider what these “real-life situations” are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are <em>applying</em> a model, we can start from the model <em>only</em>. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data.</p>
 <p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the validation data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="../references.html#ref-dornelas2018" role="doc-biblioref">Dornelas <em>et al.</em> 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to test these models, and a last one for validation.</p>

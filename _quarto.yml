@@ -46,10 +46,14 @@ book:
 
 bibliography: references.bib
 csl: https://www.zotero.org/styles/ecology-letters
+cap-location: margin
+
+preview:
+  port: 4200
 
 format:
   html:
-    theme: litera
+    theme: cosmo
   pdf:
     documentclass: scrbook
     fig-pos: 'bt'

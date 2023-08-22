@@ -25,7 +25,7 @@ We will make an obvious first plot: the relationship between $L$ and $S$ on a lo
 
 ```{julia}
 #| label: fig-gradient-data
-#| fig-cap: ... (todo)
+#| fig-cap: We have assumed that the relationship between $L$ and $S$ could be represented by $L \approx b\times S^a$, which gave us a reason to take the natural log of both variables. On this figure, we see that the relationship between the logs look linear, which means that linear regression has a good chance of estimating the values of the parameters.
 fig = Figure(; resolution=(500, 500))
 axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, ls.S, ls.L, color=:black, markersize=4)
@@ -114,9 +114,9 @@ end
 
 ```{julia}
 #| label: tbl-gradient-attempt-one
-#| tbl-cap: confusion table after tuning the value of $\tau$ etc etc 
+#| tbl-cap: This table shows the change in the model, as measured by the loss and by the estimates of the parameters, after an increasing amount of training epochs. The loss drops sharply in the first 500 iterations, but even after 20000 iterations, there are still some changes in the values of the parameters.
 df = DataFrame()
-for i in [1, 500, 1000, 2000, 5000, 10000, 15000, 20000]
+for i in [1, 10, 30, 100, 300, 1000, 3000, 10000, 20000]
     push!(df, (Step = i, LossTrain = loss_train[i] , LossTest = loss_test[i], b0 = track_p1[i], b1 = track_p2[i]))
 end
 rename!(df, :LossTrain => "Loss (training)")
@@ -131,7 +131,7 @@ Now we can plot the training:
 
 ```{julia}
 #| label: fig-gradient-loss-comparison
-#| fig-cap: Overview of data from ...
+#| fig-cap: This figures shows the change in the loss for the training and testing dataset. As the two curves converge on low values at the same rate, this suggests that the model is not over-fitting, and is therefore suitable for use.
 fig = Figure(; resolution=(500, 300))
 
 axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="L₂ loss", yscale=log10)
@@ -147,7 +147,7 @@ see parameter values
 
 ```{julia}
 #| label: fig-gradient-param-change
-#| fig-cap: Overview of data from ...
+#| fig-cap: This figure shows the change in the parameters values over time. Note that the change is very large initially, because we make large steps when the gradient is strong. The rate of change gets much lower as we get nearer to the "correct" value.
 fig = Figure(; resolution=(500, 300))
 
 axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="β₀")
@@ -195,7 +195,7 @@ model for the parameters
 
 ```{julia}
 #| label: fig-gradient-landscape
-#| fig-cap: blah blah
+#| fig-cap: Alternative representation of the data from @fig-gradient-param-change, where the change in parameter values (solid line) is plotted on top of the surface giving the log-loss for all pairs of parameters. We can intuit this figure as showing the movement of a ball (the parameters) rolling down a bowl, at the bottom of which is the correct model parameterization.
 f = Figure()
 
 p0 = LinRange(0.0, 2.0, 50)

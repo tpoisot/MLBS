@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-99.9.9">
+<meta name="generator" content="quarto-1.4.330">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -92,7 +92,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -220,11 +220,11 @@ div.csl-indent {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></h1>
+<h1 class="title"><span id="sec-splits" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></h1>
 </div>
 
 
@@ -241,8 +241,8 @@ div.csl-indent {
 </header>
 
 <p>In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we were very lucky. Because we applied an unsupervised method, we didn’t really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.</p>
-<p>In a sense, we started thinking about these concepts in <span class="quarto-unresolved-ref">?sec-gradientdescent</span>; specifically, we came up with a way to optimize the parameters of our model (<em>i.e.</em> of <em>training</em> our model) based on a series of empirical observations, and a criteria for what a “good fit” is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.</p>
-<section id="how-can-we-split-a-dataset" class="level2" data-number="4.1">
+<p>In a sense, we started thinking about these concepts in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>; specifically, we came up with a way to optimize the parameters of our model (<em>i.e.</em> of <em>training</em> our model) based on a series of empirical observations, and a criteria for what a “good fit” is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.</p>
+<section id="how-can-we-split-a-dataset" class="level2 page-columns page-full" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</h2>
 <p>There is a much more important question to ask first: <em>why</em> do we split a dataset? In a sense, answering this question echoes the discussion we started in <strong>TODO REG MOD</strong>, because the purpose of splitting a dataset is to ensure we can train and evaluate it properly, in order to deliver the best possible model.</p>
 <p>When a model is trained, it has learned from the data, we have tuned its hyper-parameters to ensure that it learned with the best possible conditions, and we have applied a measure of performance after the entire process to communicate how well our model works. These three tasks require three different datasets, and this is the purpose of splitting our data into groups.</p>
@@ -251,9 +251,9 @@ div.csl-indent {
 <p>The testing data are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in <strong>TODO LEAKAGE</strong>.</p>
 <p>The validation data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.</p>
 <p>The difference between testing and validation is largely a difference of <em>intent</em>. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let’s look at each of these datasets in turn. The differences between these three datasets are summarized in <a href="#tbl-splits-models" class="quarto-xref">Table&nbsp;<span>4.1</span></a>.</p>
-<div id="tbl-splits-models" class="anchored">
+<div id="tbl-splits-models" class="anchored page-columns page-full">
 <table class="table">
-<caption>Table&nbsp;4.1: gfkdf jdshgl dsjg d.&nbsp;Information in the “Data used for training” column refer to the data that have been used to train the model when calculating its performance.</caption>
+
 <colgroup>
 <col style="width: 16%">
 <col style="width: 10%">
@@ -289,11 +289,11 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
-</div>
+<div class="quarto-table-caption margin-caption">Table&nbsp;4.1: gfkdf jdshgl dsjg d.&nbsp;Information in the “Data used for training” column refer to the data that have been used to train the model when calculating its performance.</div></div>
 <section id="training" class="level3" data-number="4.1.1">
 <h3 data-number="4.1.1" class="anchored" data-anchor-id="training"><span class="header-section-number">4.1.1</span> Training</h3>
 <p>In data science (in applied machine learning in particular), we do <em>fit</em> models. We <em>train</em> them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.</p>
-<p>Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In <span class="quarto-unresolved-ref">?sec-gradientdescent</span>, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.</p>
+<p>Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, for example, we will see how to train a linear model using the technique of gradient descent. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.</p>
 <p>Training a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease.</p>
 <p>In order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained <em>on the specific problem</em> we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by “training the model”, what we really mean is “change the structure of the parameters until the output looks right”. For example, assuming a simple linear model like <span class="math inline">\(c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2\)</span>, training this model would lead to changes in the values of <span class="math inline">\(\beta\)</span>, but not to the consideration of a new model <span class="math inline">\(c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_1X_2\)</span>. Comparing models is (often) the point of validation, which we will address later on in the book.</p>
 </section>
@@ -310,17 +310,17 @@ div.csl-indent {
 <p>But this requires a trained model, and we sort of glossed over this step. In order to come up with a trained model, it would be a strange idea not to use the validation data – they are, after all, holding information about the data we want to model! Once we have evaluated our model on the validation set, we can start the last round of training to produce the final model. We do this by training the model using everything <em>except</em> the testing data.</p>
 </section>
 </section>
-<section id="the-problem-phenology-of-cherry-blossom" class="level2" data-number="4.2">
+<section id="the-problem-phenology-of-cherry-blossom" class="level2 page-columns page-full" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="the-problem-phenology-of-cherry-blossom"><span class="header-section-number">4.2</span> The problem: phenology of cherry blossom</h2>
 <p>The cherry blossom tree (<em>Prunus</em>) is …</p>
 <p>Long-term time series of the date of first bloom in Japan reveal that in the last decades, cherry blossom blooms earlier, which has been linked to, possibly, climate change and urbanization. The suspected causal mechanism is as follows: both global warming and urbanization lead to higher temperatures, which means a faster accumulation of degree days over the growing season, leading to an earlier bloom. Indeed, the raw data presented in <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> show that trees bloom early when the temperatures are higher.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-rawdata">
-<div id="cell-fig-splits-rawdata" class="cell" data-execution_count="4">
-<div class="cell-output cell-output-display">
-<div id="fig-splits-rawdata" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-rawdata">
+<div id="cell-fig-splits-rawdata" class="cell page-columns page-full" data-execution_count="4">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-splits-rawdata" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="splits_files/figure-html/fig-splits-rawdata-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;4.1: The raw data show a negative relationship between the temperature in March, and the bloom time. This suggests that when the trees have accumulated enough temperature, they can bloom early. In a context of warming, we should therefore see earlier blooms with rising temperatures.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;4.1: The raw data show a negative relationship between the temperature in March, and the bloom time. This suggests that when the trees have accumulated enough temperature, they can bloom early. In a context of warming, we should therefore see earlier blooms with rising temperatures.</figcaption>
 </figure>
 </div>
 </div>
@@ -328,7 +328,7 @@ div.csl-indent {
 </div>
 <p>With these data in hand (day of year with the first bloom, and smoothed reconstructed temperature in March), we can start thinking about this hypothesis. But by contrast with our simple strategy in <strong>GRADIENT</strong>, this time, we will split our dataset into training, validation, and testing sets, as we discussed in the previous section. Yet there are many ways to split a dataset, and therefore before starting the analysis, we will have a look at a few of them.</p>
 </section>
-<section id="strategies-to-split-data" class="level2" data-number="4.3">
+<section id="strategies-to-split-data" class="level2 page-columns page-full" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.3</span> Strategies to split data</h2>
 <p>remove testing first if needed</p>
 <p>exhaustive</p>
@@ -349,17 +349,17 @@ div.csl-indent {
 <h3 data-number="4.3.3" class="anchored" data-anchor-id="leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</h3>
 <p>The leave-one-out cross-validation (LOOCV) is a special case of LpOCV with <span class="math inline">\(p=1\)</span>. Note that it is a lot faster to run than LpOCV, because <span class="math inline">\(\binom{n}{1}=n\)</span>, and so the validation step runs in <span class="math inline">\(\mathcal{O}(n)\)</span> (LpOCV runs in <span class="math inline">\(\mathcal{O}(n!)\)</span>). LOOCV is also an <em>exhaustive</em> cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.</p>
 </section>
-<section id="k-fold" class="level3" data-number="4.3.4">
+<section id="k-fold" class="level3 page-columns page-full" data-number="4.3.4">
 <h3 data-number="4.3.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.3.4</span> k-fold</h3>
 <p>One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into <span class="math inline">\(k\)</span> equal parts (and so when <span class="math inline">\(k = n\)</span>, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used <em>exactly</em> one time to evaluate the model , and <em>exactly</em> <span class="math inline">\(k-1\)</span> times to train it. But by contrast with the holdout validation approach, <em>all</em> observations are used to train the model.</p>
 <p>When the data have some specific structure, it can be a good thing to manipulate the splits in order to maintain this structure. For example, <span class="citation" data-cites="bergmeir2012">Bergmeir &amp; Benítez (<a href="../references.html#ref-bergmeir2012" role="doc-biblioref">2012</a>)</span> use temporal blocks for validation of time series, and retain the last part of the series for testing (we illustrate this in <a href="#fig-splits-illustration" class="quarto-xref">Figure&nbsp;<span>4.2</span></a>). For spatial data, <span class="citation" data-cites="hijmans2012">Hijmans (<a href="../references.html#ref-hijmans2012" role="doc-biblioref">2012</a>)</span> suggests the use of a null model based on distance to training sites to decide on how to split the data; <span class="citation" data-cites="valavi2018">Valavi <em>et al.</em> (<a href="../references.html#ref-valavi2018" role="doc-biblioref">2018</a>)</span> have designed specific k-fold cross-validation schemes for species distribution models. These approaches all belong to the family of <em>stratified</em> k-fold cross-validation <span class="citation" data-cites="zeng2000">(<a href="../references.html#ref-zeng2000" role="doc-biblioref">Zeng &amp; Martinez 2000</a>)</span>.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-illustration">
-<div id="cell-fig-splits-illustration" class="cell" data-execution_count="7">
-<div class="cell-output cell-output-display">
-<div id="fig-splits-illustration" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-illustration">
+<div id="cell-fig-splits-illustration" class="cell page-columns page-full" data-execution_count="7">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-splits-illustration" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="splits_files/figure-html/fig-splits-illustration-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;4.2: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;4.2: An illustration of a series of folds on a timeseries. The grey aata are used for training, the black data for validation, and the red data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.</figcaption>
 </figure>
 </div>
 </div>
@@ -373,32 +373,32 @@ div.csl-indent {
 <p>One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.</p>
 </section>
 </section>
-<section id="application-when-do-cherry-blossom-bloom" class="level2" data-number="4.4">
+<section id="application-when-do-cherry-blossom-bloom" class="level2 page-columns page-full" data-number="4.4">
 <h2 data-number="4.4" class="anchored" data-anchor-id="application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</h2>
 <p>The model we will train for this section is really simple: <span class="math inline">\(\text{bloom day} = m \times \text{temperature} + b\)</span>. This is a linear model, and one with a nice, direct biological interpretation: the average (baseline) day of bloom is <span class="math inline">\(b\)</span>, and each degree adds <span class="math inline">\(m\)</span> days to the bloom date. At this point, we <em>might</em> start thinking about the distribution of the response, and what type of GLM we should used, but no. Not today. Today, we want to iterate quickly, and so we will start with a model that is exactly as simple as it needs to be.</p>
 <p>This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work rather well.</p>
-<section id="performance-evaluation" class="level3" data-number="4.4.1">
+<section id="performance-evaluation" class="level3 page-columns page-full" data-number="4.4.1">
 <h3 data-number="4.4.1" class="anchored" data-anchor-id="performance-evaluation"><span class="header-section-number">4.4.1</span> Performance evaluation</h3>
 <p>We can visualize the results of our model training and assessment process. These results are presented in <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a> (as well as in <a href="#tbl-splits-performance-summary" class="quarto-xref">Table&nbsp;<span>4.2</span></a>, if you want to see the standard deviation across all splits), and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-performance">
-<div id="cell-fig-splits-performance" class="cell" data-execution_count="15">
-<div class="cell-output cell-output-display">
-<div id="fig-splits-performance" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-performance">
+<div id="cell-fig-splits-performance" class="cell page-columns page-full" data-execution_count="15">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-splits-performance" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="splits_files/figure-html/fig-splits-performance-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;4.3: Visualisation of the model performance for …. The colors are the same as in fig-splits-illustration, <em>i.e.</em> grey for the training data, green for the validation data, and purple for the testing data.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;4.3: Visualisation of the model performance for …. The colors are the same as in fig-splits-illustration, <em>i.e.</em> grey for the training data, green for the validation data, and purple for the testing data.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
 <p>Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
-<div class="cell" data-execution_count="14">
-<div class="cell-output cell-output-display">
-<div id="tbl-splits-performance-summary" class="anchored">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
+<div class="cell page-columns page-full" data-execution_count="14">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="tbl-splits-performance-summary" class="anchored page-columns page-full">
 <table class="table table-sm table-striped small">
-<caption>Table&nbsp;4.2: TODO</caption>
+
 <thead>
 <tr class="header">
 <th style="text-align: right;">Dataset</th>
@@ -482,23 +482,23 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
-</div>
+<div class="quarto-table-caption margin-caption">Table&nbsp;4.2: TODO</div></div>
 </div>
 </div>
 </div>
 <p>First, what are we predicting? Our response variable is not <em>really</em> the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.</p>
 <p>Second, what difference <em>does</em> a day make? <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error – a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluations can help us contextualize the predictions.</p>
 </section>
-<section id="model-predictions" class="level3" data-number="4.4.2">
+<section id="model-predictions" class="level3 page-columns page-full" data-number="4.4.2">
 <h3 data-number="4.4.2" class="anchored" data-anchor-id="model-predictions"><span class="header-section-number">4.4.2</span> Model predictions</h3>
 <p>The predictions of our model are presented in <a href="#fig-splits-prediction" class="quarto-xref">Figure&nbsp;<span>4.4</span></a>; these are the predictions of the <em>final</em> model, that is, the model that we trained on everything <em>except</em> the testing data, and for which we can get the performance by looking at <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a>.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
-<div id="cell-fig-splits-prediction" class="cell" data-execution_count="12">
-<div class="cell-output cell-output-display">
-<div id="fig-splits-prediction" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
+<div id="cell-fig-splits-prediction" class="cell page-columns page-full" data-execution_count="12">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-splits-prediction" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="splits_files/figure-html/fig-splits-prediction-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;4.4: TODO</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;4.4: TODO</figcaption>
 </figure>
 </div>
 </div>

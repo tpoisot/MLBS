@@ -18,6 +18,10 @@ This book started as a collection of notes from several classes I gave in the De
 
 ## How to read this book
 
+order of the chapters is important (one thing at a time, chapters follow one another)
+
+note on the meaning of colors
+
 ## Some rules about this book
 
 When I started aggregating these notes, I decided on a series of four rules. No code, no simulated data, no long list of model, and no `iris`. In this section, I will go through *why* I decided to adopt these rules, and how it should change the way you interact with the book.

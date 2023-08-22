@@ -1,12 +1,12 @@
-# Gradient descent {#gradientdescent-gradientdescent-sec-gradientdescent}
+# Gradient descent {#sec-gradientdescent}
 
 As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In @sec-kmeans, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
 
 Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
 
-## A digression: what is a trained model? {#gradientdescent-gradientdescent-sec-gradientdescent-trainedmodel}
+## A digression: what is a trained model? {#sec-gradientdescent-trainedmodel}
 
-## The problem: how many interactions in a food web? {#gradientdescent-gradientdescent-sec-gradientdescent-problem}
+## The problem: how many interactions in a food web? {#sec-gradientdescent-problem}
 
 One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In
 
@@ -22,7 +22,7 @@ In @fig-gradient-data, we can check that there is a linear relationship between 
 
 {{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-data >}}
 
-## Gradient descent
+## Gradient descent {#sec-gradientdescent-explanation}
 
 Gradient descent is built around a remarkably simple intuition: knowing the formula that gives rise to our prediction, and the value of the error we made for each point, we can take the derivative of the error with regards to each parameter, and this tells us how much this parameter contributed to the error. Because we are taking the derivative, we can futher know whether to increase, or decrease, the value of the parameter in order to make a smaller error next time.
 
@@ -30,7 +30,7 @@ In this section, we will use linear regression as an example, because it is the 
 
 Before we start assembling the different pieces, we need to decide what our model is. We have settled on a linear model, which will have the form $\hat y = m\times x + b$. The little hat on $\hat y$ indicates that this is a prediction. The input of this model is $x$, and its parameters are $m$ (the slope) and $b$ (the intercept). Using the notation we adopted in @sec-gradientdescent-problem, this would be $\hat l = a \times s + b$, with $l = \text{log} L$ and $s = \text{log} S$.
 
-### Defining the loss function
+### Defining the loss function {#sec-gradientdescent-lossfunctions}
 
 The loss function is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions *do*.
 
@@ -43,6 +43,10 @@ We will note the position of our dart as being $\hat y$, the position of the cen
 $$
 \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat y_i)^2
 $$ {#eq-loss-mse}
+
+::: column-margin
+In data science, things often have multiple names. This is true of loss functions, and this will be even more true on other things later.
+:::
 
 This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in @tbl-gradientdescent-regressionloss.
 
@@ -63,7 +67,7 @@ $$ {#eq-loss-withmodel}
 
 There is an important change in @eq-loss-withmodel: we have replaced the prediction $\hat y_i$ with a term that is a function of the predictor $x_i$ and the model parameters: this means that we can calculate the value of the loss as a function of a pair of values $(x_i, y_i)$, and the model parameters.
 
-### Calculating the gradient
+### Calculating the gradient {#sec-gradientdescent-gradient}
 
 With the loss function corresponding to our problem in hands (@eq-loss-withmodel), we can calculate the gradient. Given a function that is scalar-valued (it returns a single value), taking several variables, that is differentiable, the gradient of this function is a vector-valued (it returns a vector) function; when evaluated at a specific point, this vectors indicates both the direction and the rate of fastest increase, which is to say the direction in which the function increases away from the point, and how fast it moves.
 
@@ -99,19 +103,19 @@ With the gradient written down in @eq-gradientdescent-gradientexplicit, we can n
 
 ### Descending the gradient
 
-Recall from **TK** that the gradient measures how far we *increase* the function of which we are taking the gradient. Therefore, it measures how much each parameter contributes to the loss value. Our working definition for a trained model is "one that has little loss", and so in an ideal world, we could find a point $p$ for which the gradient is as small as feasible.
+Recall from @sec-gradientdescent-gradient that the gradient measures how far we *increase* the function of which we are taking the gradient. Therefore, it measures how much each parameter contributes to the loss value. Our working definition for a trained model is "one that has little loss", and so in an ideal world, we could find a point $p$ for which the gradient is as small as feasible.
 
-Because the gradient measures how far away we increase error, and intuitive way to use it is to take steps in the *opposite* direction. In other words, we can update the value of our parameters using $p := p - \nabla f(p)$, meaning that we substract from the parameter values their contribution to the overall error in the predictions.
+Because the gradient measures how far away we increase error, and intuitive way to use it is to take steps in the *opposite* direction. In other words, we can update the value of our parameters using $p := p - \nabla f(p)$, meaning that we subtract from the parameter values their contribution to the overall error in the predictions.
 
 But, as we will discuss further in @sec-gradientdescent-learningrate, there is such a thing as "too much learning". For this reason, we will usually not move the entire way, and introduce a term to regulate how much of the way we actually want to descend the gradient. Our actual scheme to update the parameters is
 
 $$
 p := p - \eta\times \nabla f(p) \,.
-$$
+$$ {#eq-gradientdescent-loop}
 
 This formula can be *iterated*: with each successive iteration, it will get us closer to the optimal value of $p$, which is to say the combination of $m$ and $b$ that minimizes the loss.
 
-### A note on the learning rate {#gradientdescent-gradientdescent-gradientdescent-seq-gradientdescent-learningrate}
+### A note on the learning rate {#sec-gradientdescent-learningrate}
 
 The error we can make on the first iteration will depend on the value of our initial pick of parameters. If we are *way off*, especially if we did not re-scale our predictors and responses, this error can get very large. And if we make a very large error, we will have a very large gradient, and we will end up making very big steps when we update the parameter values. There is a real risk to end up over-compensating, and correcting the parameters too much.
 
@@ -119,15 +123,15 @@ In order to protect against this, in reality, we update the gradient only a litt
 
 The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.
 
-## Application: how many links are in a food web?
+## Application: how many links are in a food web? {#sec-gradientdescent-application}
 
-We will not get back to the problem exposed in @fig-gradient-data, and use gradient descent to fit the parameters of the model defined as $\hat y \approx \beta_0  + \beta_1 \times x$, where, using the notation introduced in **eq todo**, $\hat y$ is the natural log of the number of interactions (what we want to predict), $x$ is the natural log of the species richness (our predictor), and $\beta_0$ and $\beta_1$ are the parameters of the model.
+We will not get back to the problem exposed in @fig-gradient-data, and use gradient descent to fit the parameters of the model defined as $\hat y \approx \beta_0 + \beta_1 \times x$, where, using the notation introduced in @sec-gradientdescent-problem, $\hat y$ is the natural log of the number of interactions (what we want to predict), $x$ is the natural log of the species richness (our predictor), and $\beta_0$ and $\beta_1$ are the parameters of the model.
 
 ### The things we won't do
 
-At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the context of **eq todo**. In addition, as we will see in **chapt leak**, applying a transformation to the data too soon can be a dangerous thing. We will have to live with un-transformed features for a few more chapters.
+At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the units of species and interactions (after dealing with the natural log, of course). In addition, as we will see in @sec-leakage, applying a transformation to the data too soon can be a dangerous thing. We will have to live with raw features for a few more chapters.
 
-In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these datapoints. We will get back to this practice (cross-validation) in a lot more details in **chapter split**, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.
+In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these data points. We will get back to this practice (cross-validation) in a lot more details in @sec-splits, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.
 
 ### Starting the learning process
 
@@ -137,27 +141,27 @@ In order to start the gradient descent process, we need to decide on an initial 
 
 The gradient descent algorithm is entirely contained in **TODO EQ**, and so we only need to iterate several times to optimize the parameters. How long we need to run the algorithm for depends on a variety of factors, including our learning rate (slow learning requires more time!), our constraints in terms of computing time, but also how good we need to model to be.
 
-::: {.column-margin}
-
+::: column-margin
 The number of iterations over which we train the model is called the number of epochs, and is an hyper-parameter of the model.
-
 :::
 
 One usual approach is to decide on a number of iterations, and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning *too much* from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In @tbl-gradient-attempt-one, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.
 
 {{< embed ../notebooks/sm-gradient-descent.qmd#tbl-gradient-attempt-one >}}
 
+In order to protect against over-fitting, it is common to add a check to the training loop, to say that after a minimum number of iterations has been done, we stop the training when the loss on the testing data starts increasing. In order to protect against very long training steps, it is also common to set a tolerance (absolute or relative) under which we decide that improvements to the loss are not meaningful, and which serves as a stopping criterion for the training.
+
 ### Detecting over-fitting
 
-As we mentioned in **todo previous section**, one risk with training that runs for too long is to start seeing over-fitting. The usual diagnosis for over-fitting is an increase in the testing loss, which is to say, in the loss measured on the data that were not used for training. In @fig-gradient-loss-comparison, we can see that the RMSE loss decreases at the same rate on both datasets, which indicates that the model is learning from the data, but not to a point where its ability to generalize suffers.
+As we mentioned in the previous section, one risk with training that runs for too long is to start seeing over-fitting. The usual diagnosis for over-fitting is an increase in the testing loss, which is to say, in the loss measured on the data that were not used for training. In @fig-gradient-loss-comparison, we can see that the RMSE loss decreases at the same rate on both datasets, which indicates that the model is learning from the data, but not to a point where its ability to generalize suffers.
 
-::: {.column-margin}
-
+::: column-margin
 Underfitting is also a possible scenario, where the model is *not* learning from the data, and can be detected by seeing the loss measures remain high or even increase.
-
 :::
 
 {{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-loss-comparison >}}
+
+We are producting the loss over time figure after the training, as it is good practice -- but as we mentionned in the previous section, it is very common to have the training code look at the dynamics of these two values in order to decide whether to stop the training early.
 
 ### Visualizing the learning process
 

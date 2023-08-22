@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-99.9.9">
+<meta name="generator" content="quarto-1.4.330">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -92,7 +92,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -218,7 +218,7 @@ div.csl-indent {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -245,21 +245,21 @@ div.csl-indent {
 <p>These two predictors are important for plants <span class="citation" data-cites="clapham1935">(<a href="../references.html#ref-clapham1935" role="doc-biblioref">Clapham <em>et al.</em> 1935</a>)</span> or animals <span class="citation" data-cites="whittaker1962">(<a href="../references.html#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span> <strong>ECOZONES</strong>, and see <em>e.g.</em> climate change <span class="citation" data-cites="berteaux2014">(<a href="../references.html#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span></p>
 <p>data from <span class="citation" data-cites="fick2017">(<a href="../references.html#ref-fick2017" role="doc-biblioref">Fick &amp; Hijmans 2017</a>)</span>, an alternative is <span class="citation" data-cites="karger2017">(<a href="../references.html#ref-karger2017" role="doc-biblioref">Karger <em>et al.</em> 2017</a>)</span> which is higher resolution, so for iteration we work with a smaller data product</p>
 </section>
-<section id="what-is-classification" class="level2" data-number="6.2">
+<section id="what-is-classification" class="level2 page-columns page-full" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="what-is-classification"><span class="header-section-number">6.2</span> What is classification?</h2>
 <p>Classification is the prediction of a qualitative response. In <a href="kmeans.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, for example, we predicted the class of a pixel, which is a qualitative variable with levels <span class="math inline">\(\{1, 2, \dots, k\}\)</span>. This represented an instance of <em>unsupervised</em> learning, as we had no <em>a priori</em> notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate “background points”, that represent assumptions about where the species are not <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="../references.html#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin <em>et al.</em> 2012</a>; <a href="../references.html#ref-hanberry2012" role="doc-biblioref">Hanberry <em>et al.</em> 2012</a>)</span>.</p>
 <p>In short, our response variable has levels <span class="math inline">\(\{0, 1\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do.</p>
-<section id="separability-and-the-curse-of-dimensionality" class="level3" data-number="6.2.1">
+<section id="separability-and-the-curse-of-dimensionality" class="level3 page-columns page-full" data-number="6.2.1">
 <h3 data-number="6.2.1" class="anchored" data-anchor-id="separability-and-the-curse-of-dimensionality"><span class="header-section-number">6.2.1</span> Separability and the curse of dimensionality</h3>
 <p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth).</p>
 <p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of reindeers (top), and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (but maybe there is a different projection of the data that would change this), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 0°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become more likely. The locations with a temperature between 0°C and 5°C can go either way.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-separability">
-<div id="cell-fig-classification-separability" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-display">
-<div id="fig-classification-separability" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-separability">
+<div id="cell-fig-classification-separability" class="cell page-columns page-full" data-execution_count="8">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-classification-separability" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-separability-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;6.1: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;6.1: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.</figcaption>
 </figure>
 </div>
 </div>
@@ -293,37 +293,37 @@ div.csl-indent {
 <h3 data-number="6.3.3" class="anchored" data-anchor-id="decision-rule-for-prediction"><span class="header-section-number">6.3.3</span> Decision rule for prediction</h3>
 </section>
 </section>
-<section id="application-a-baseline-model-of-reindeer-presence" class="level2" data-number="6.4">
+<section id="application-a-baseline-model-of-reindeer-presence" class="level2 page-columns page-full" data-number="6.4">
 <h2 data-number="6.4" class="anchored" data-anchor-id="application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</h2>
 <section id="training-and-validation-strategy" class="level3" data-number="6.4.1">
 <h3 data-number="6.4.1" class="anchored" data-anchor-id="training-and-validation-strategy"><span class="header-section-number">6.4.1</span> Training and validation strategy</h3>
 </section>
-<section id="performance-evaluation-of-the-model" class="level3" data-number="6.4.2">
+<section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="6.4.2">
 <h3 data-number="6.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">6.4.2</span> Performance evaluation of the model</h3>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-crossvalidation">
-<div id="cell-fig-classification-crossvalidation" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-display">
-<div id="fig-classification-crossvalidation" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-crossvalidation">
+<div id="cell-fig-classification-crossvalidation" class="cell page-columns page-full" data-execution_count="6">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-classification-crossvalidation" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;6.2: WAH NEVER CHANGES</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;6.2: WAH NEVER CHANGES</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
 </section>
-<section id="the-decision-boundary" class="level3" data-number="6.4.3">
+<section id="the-decision-boundary" class="level3 page-columns page-full" data-number="6.4.3">
 <h3 data-number="6.4.3" class="anchored" data-anchor-id="the-decision-boundary"><span class="header-section-number">6.4.3</span> The decision boundary</h3>
 <p>Now that the model is trained, we can take a break in our discussion of its performance, and think about <em>why</em> it makes a specific classification in the first place. Because we are using a model with only two input features, we can generate a grid of variables, and the ask, for every point on this grid, the classification made by our trained model. This will reveal the regions in the space of parameters where the model will conclude that the species is present.</p>
 <p>The output of this simulation is given in <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a>. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-decision">
-<div id="cell-fig-classification-decision" class="cell" data-execution_count="10">
-<div class="cell-output cell-output-display">
-<div id="fig-classification-decision" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-decision">
+<div id="cell-fig-classification-decision" class="cell page-columns page-full" data-execution_count="10">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="fig-classification-decision" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-decision-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;6.3: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;6.3: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.</figcaption>
 </figure>
 </div>
 </div>
