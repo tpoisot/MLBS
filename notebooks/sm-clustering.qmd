@@ -143,7 +143,6 @@ now plot
 #| fig-cap: blah
 
 rgb_cube = colorcube(R, G, B)
-cir_cube = colorcube(N, R, G)
 veg_cube = colorcube(S, N, R)
 
 fig = Figure(resolution=(500, 300))

@@ -196,17 +196,20 @@ div.csl-indent {
   <li><a href="#the-problem-classifying-pixels-from-an-image" id="toc-the-problem-classifying-pixels-from-an-image" class="nav-link" data-scroll-target="#the-problem-classifying-pixels-from-an-image"><span class="header-section-number">2.2</span> The problem: classifying pixels from an image</a></li>
   <li><a href="#the-theory-behind-k-means-clustering" id="toc-the-theory-behind-k-means-clustering" class="nav-link" data-scroll-target="#the-theory-behind-k-means-clustering"><span class="header-section-number">2.3</span> The theory behind <em>k</em>-means clustering</a>
   <ul class="collapse">
-  <li><a href="#overview-of-the-algorithm" id="toc-overview-of-the-algorithm" class="nav-link" data-scroll-target="#overview-of-the-algorithm"><span class="header-section-number">2.3.1</span> Overview of the algorithm</a></li>
+  <li><a href="#inputs-and-parameters" id="toc-inputs-and-parameters" class="nav-link" data-scroll-target="#inputs-and-parameters"><span class="header-section-number">2.3.1</span> Inputs and parameters</a></li>
+  <li><a href="#assigning-instances-to-classes" id="toc-assigning-instances-to-classes" class="nav-link" data-scroll-target="#assigning-instances-to-classes"><span class="header-section-number">2.3.2</span> Assigning instances to classes</a></li>
+  <li><a href="#optimizing-the-centroids" id="toc-optimizing-the-centroids" class="nav-link" data-scroll-target="#optimizing-the-centroids"><span class="header-section-number">2.3.3</span> Optimizing the centroids</a></li>
+  <li><a href="#updating-the-classes" id="toc-updating-the-classes" class="nav-link" data-scroll-target="#updating-the-classes"><span class="header-section-number">2.3.4</span> Updating the classes</a></li>
+  <li><a href="#identification-of-the-optimal-number-of-clusters" id="toc-identification-of-the-optimal-number-of-clusters" class="nav-link" data-scroll-target="#identification-of-the-optimal-number-of-clusters"><span class="header-section-number">2.3.5</span> Identification of the optimal number of clusters</a></li>
   </ul></li>
-  <li><a href="#identification-of-the-optimal-number-of-clusters" id="toc-identification-of-the-optimal-number-of-clusters" class="nav-link" data-scroll-target="#identification-of-the-optimal-number-of-clusters"><span class="header-section-number">2.4</span> Identification of the optimal number of clusters</a></li>
-  <li><a href="#application-optimal-clustering-of-the-satellite-image-data" id="toc-application-optimal-clustering-of-the-satellite-image-data" class="nav-link" data-scroll-target="#application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.5</span> Application: optimal clustering of the satellite image data</a>
+  <li><a href="#application-optimal-clustering-of-the-satellite-image-data" id="toc-application-optimal-clustering-of-the-satellite-image-data" class="nav-link" data-scroll-target="#application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.4</span> Application: optimal clustering of the satellite image data</a>
   <ul class="collapse">
-  <li><a href="#initial-run" id="toc-initial-run" class="nav-link" data-scroll-target="#initial-run"><span class="header-section-number">2.5.1</span> Initial run</a></li>
-  <li><a href="#optimal-number-of-pixels" id="toc-optimal-number-of-pixels" class="nav-link" data-scroll-target="#optimal-number-of-pixels"><span class="header-section-number">2.5.2</span> Optimal number of pixels</a></li>
-  <li><a href="#clustering-with-optimal-number-of-classes" id="toc-clustering-with-optimal-number-of-classes" class="nav-link" data-scroll-target="#clustering-with-optimal-number-of-classes"><span class="header-section-number">2.5.3</span> Clustering with optimal number of classes</a></li>
-  <li><a href="#partition-of-the-pixels" id="toc-partition-of-the-pixels" class="nav-link" data-scroll-target="#partition-of-the-pixels"><span class="header-section-number">2.5.4</span> Partition of the pixels</a></li>
+  <li><a href="#initial-run" id="toc-initial-run" class="nav-link" data-scroll-target="#initial-run"><span class="header-section-number">2.4.1</span> Initial run</a></li>
+  <li><a href="#optimal-number-of-pixels" id="toc-optimal-number-of-pixels" class="nav-link" data-scroll-target="#optimal-number-of-pixels"><span class="header-section-number">2.4.2</span> Optimal number of pixels</a></li>
+  <li><a href="#clustering-with-optimal-number-of-classes" id="toc-clustering-with-optimal-number-of-classes" class="nav-link" data-scroll-target="#clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</a></li>
+  <li><a href="#partition-of-the-pixels" id="toc-partition-of-the-pixels" class="nav-link" data-scroll-target="#partition-of-the-pixels"><span class="header-section-number">2.4.4</span> Partition of the pixels</a></li>
   </ul></li>
-  <li><a href="#alternatives-and-improvements" id="toc-alternatives-and-improvements" class="nav-link" data-scroll-target="#alternatives-and-improvements"><span class="header-section-number">2.6</span> Alternatives and improvements</a></li>
+  <li><a href="#alternatives-and-improvements" id="toc-alternatives-and-improvements" class="nav-link" data-scroll-target="#alternatives-and-improvements"><span class="header-section-number">2.5</span> Alternatives and improvements</a></li>
   </ul>
 </nav>
     </div>
@@ -319,20 +322,60 @@ div.csl-indent {
 </div>
 <p>By picking these three values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm see, through the lens of what we know is important about the system.</p>
 </section>
-<section id="the-theory-behind-k-means-clustering" class="level2" data-number="2.3">
+<section id="the-theory-behind-k-means-clustering" class="level2 page-columns page-full" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="the-theory-behind-k-means-clustering"><span class="header-section-number">2.3</span> The theory behind <em>k</em>-means clustering</h2>
 <p>In order to understand the theory underlying <em>k</em>-means, we will work backwards from its output. As a method for unsupervised clustering, <em>k</em>-means will return a vector of <em>class memberships</em>, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that <em>k</em>-means is a transformation, taking as its input a vector with three dimensions (red, green, blue), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. These are the input and output of our blackbox, and now we can start figuring out its internals.</p>
-<section id="overview-of-the-algorithm" class="level3" data-number="2.3.1">
-<h3 data-number="2.3.1" class="anchored" data-anchor-id="overview-of-the-algorithm"><span class="header-section-number">2.3.1</span> Overview of the algorithm</h3>
+<section id="inputs-and-parameters" class="level3 page-columns page-full" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="inputs-and-parameters"><span class="header-section-number">2.3.1</span> Inputs and parameters</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Throughout this book, we will use <span class="math inline">\(\mathbf{X}\)</span> to note the matrix of features, and <span class="math inline">\(\mathbf{y}\)</span> to note the vector of labels. Instances are columns of the features matrix.</p>
+</div></div><p>In <em>k</em>-means, a set of observations <span class="math inline">\(\mathbf{x}_i\)</span> are assigned to a set of classes <span class="math inline">\(\mathbf{C}\)</span>, also called the clusters. All <span class="math inline">\(\mathbf{x}_i\)</span> are vectors with the same dimension (we will call it <span class="math inline">\(f\)</span>, for <em>features</em>), and we can think of our observations as a matrix of features <span class="math inline">\(\mathbf{X}\)</span> of size <span class="math inline">\((f, n)\)</span>, with <span class="math inline">\(f\)</span> features and <span class="math inline">\(n\)</span> observations (the columns of this matrix).</p>
+<p>The number of classes of <span class="math inline">\(\mathbf{C}\)</span> is <span class="math inline">\(|\mathbf{C}| = k\)</span>, and <span class="math inline">\(k\)</span> is an hyper-parameter of the model, as it needs to bet fixed before we start running the algorithm. Each class is defined by its centroid, a vector <span class="math inline">\(\mathbf{c}\)</span> with <span class="math inline">\(f\)</span> dimensions (<em>i.e.</em> the centroid corresponds to a potential “idealized” observation of this class in the space of the features).</p>
+</section>
+<section id="assigning-instances-to-classes" class="level3 page-columns page-full" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="assigning-instances-to-classes"><span class="header-section-number">2.3.2</span> Assigning instances to classes</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Of course, the correct distance measure to use depends on what is appropriate for the data!</p>
+</div></div><p>Instances are assigned to the class when the distance between themselves and the centroid of this class is lower than the distance between themselves and any other class. To phrase it differently, the class membership of an instance <span class="math inline">\(\mathbf{x}_i\)</span> is given by</p>
+<p><span id="eq-clustering-onepoint"><span class="math display">\[
+\text{argmin}_j \left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2 \,,
+\tag{2.1}\]</span></span></p>
+<p>which is the value of <span class="math inline">\(j\)</span> that minimizes the <span class="math inline">\(L^2\)</span> norm (the Euclidean distance) between the instance and the centroid, and <span class="math inline">\(\text{argmin}_j\)</span> is the function returning the value of <span class="math inline">\(j\)</span> that minimizes its argument.</p>
+</section>
+<section id="optimizing-the-centroids" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="optimizing-the-centroids"><span class="header-section-number">2.3.3</span> Optimizing the centroids</h3>
+<p>Of course, what we really care about is the assignment of <em>all</em> instances to the classes. For this reason, the configuration (the disposition of the centroid) that solves our specific problem is the one that leads to the lowest possible variance within the clusters. As it turns out, it is not that difficult to go from <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a> to a solution for the entire problem: we simply have to sum over all points!</p>
+<p>This leads to a measure of the variance, which we want to minimize.</p>
+<p><span id="eq-clustering-variance"><span class="math display">\[
+\sum_{i=1}^k \sum_{\mathbf{x}\in \mathbf{C}_i} \|\mathbf{x} - \mathbf{c}_i\|_2 \,.
+\tag{2.2}\]</span></span></p>
+<p>The part that is non-trivial is now to decide on the value of <span class="math inline">\(\mathbf{c}\)</span> for each class. This is the heart of the <em>k</em>-means algorithm. From <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>, we have a criteria to decide to which class each instance belongs. Of course, there is nothing that prevents us from using this in the opposite direction, to define the instance by the points that form it! In this approach, the membership of class <span class="math inline">\(\mathbf{C}_j\)</span> is the list of points that satisfy the condition in <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>. But there is no guarantee that the <em>current</em> position of <span class="math inline">\(\mathbf{c}_j\)</span> in the middle of all of these points is optimal, <em>i.e.</em> that it minimizes the within-class variance.</p>
+<p>To ensure that this is the case, we can re-define the value of <span class="math inline">\(\mathbf{c}_j\)</span> as</p>
+<p><span id="eq-clustering-centroid-update"><span class="math display">\[
+\mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j&nbsp;\,,
+\tag{2.3}\]</span></span></p>
+<p>where <span class="math inline">\(|\cdot|\)</span> is the cardinality of (number of istances in) <span class="math inline">\(\mathbf{C}_j\)</span>, and <span class="math inline">\(\sum \mathbf{C}_j\)</span> is the sum of each feature in <span class="math inline">\(\mathbf{C}_j\)</span>. To put it plainly: we update the centroid of <span class="math inline">\(\mathbf{C}_j\)</span> so that it takes, for each feature, the average value of all the points that form <span class="math inline">\(\mathbf{C}_j\)</span>.</p>
+</section>
+<section id="updating-the-classes" class="level3 page-columns page-full" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="updating-the-classes"><span class="header-section-number">2.3.4</span> Updating the classes</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Repeating a step multiple times in a row is called an iterative process, and we will see a <em>lot</em> of them.</p>
+</div></div><p>Once we have applied <a href="#eq-clustering-centroid-update" class="quarto-xref">Equation&nbsp;<span>2.3</span></a> to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.</p>
+<p>But until when? Finding the optimal solution for a set of points is an NP-hard problem <span class="citation" data-cites="aloise2009">(<a href="../references.html#ref-aloise2009" role="doc-biblioref">Aloise <em>et al.</em> 2009</a>)</span>, which means that we will need to rely on a little bit of luck. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is <em>global</em> and not <em>local</em>.</p>
+<p>A global optimum is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is <em>greedy</em>, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum.</p>
+<p>In order to get the best possible solution, it is common to run <em>k</em>-means multiple times for a given <span class="math inline">\(k\)</span>, and to pick the positions of the centroids that give the best overall fit.</p>
+</section>
+<section id="identification-of-the-optimal-number-of-clusters" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="identification-of-the-optimal-number-of-clusters"><span class="header-section-number">2.3.5</span> Identification of the optimal number of clusters</h3>
 </section>
 </section>
-<section id="identification-of-the-optimal-number-of-clusters" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="identification-of-the-optimal-number-of-clusters"><span class="header-section-number">2.4</span> Identification of the optimal number of clusters</h2>
-</section>
-<section id="application-optimal-clustering-of-the-satellite-image-data" class="level2 page-columns page-full" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.5</span> Application: optimal clustering of the satellite image data</h2>
-<section id="initial-run" class="level3 page-columns page-full" data-number="2.5.1">
-<h3 data-number="2.5.1" class="anchored" data-anchor-id="initial-run"><span class="header-section-number">2.5.1</span> Initial run</h3>
+<section id="application-optimal-clustering-of-the-satellite-image-data" class="level2 page-columns page-full" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.4</span> Application: optimal clustering of the satellite image data</h2>
+<section id="initial-run" class="level3 page-columns page-full" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="initial-run"><span class="header-section-number">2.4.1</span> Initial run</h3>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-initial-landscape">
 <div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="9">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -346,8 +389,8 @@ div.csl-indent {
 </div>
 </div>
 </section>
-<section id="optimal-number-of-pixels" class="level3 page-columns page-full" data-number="2.5.2">
-<h3 data-number="2.5.2" class="anchored" data-anchor-id="optimal-number-of-pixels"><span class="header-section-number">2.5.2</span> Optimal number of pixels</h3>
+<section id="optimal-number-of-pixels" class="level3 page-columns page-full" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="optimal-number-of-pixels"><span class="header-section-number">2.4.2</span> Optimal number of pixels</h3>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
@@ -366,8 +409,8 @@ div.csl-indent {
 </div>
 </div>
 </section>
-<section id="clustering-with-optimal-number-of-classes" class="level3 page-columns page-full" data-number="2.5.3">
-<h3 data-number="2.5.3" class="anchored" data-anchor-id="clustering-with-optimal-number-of-classes"><span class="header-section-number">2.5.3</span> Clustering with optimal number of classes</h3>
+<section id="clustering-with-optimal-number-of-classes" class="level3 page-columns page-full" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</h3>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-optimal-landscape">
 <div id="cell-fig-kmeans-optimal-landscape" class="cell page-columns page-full" data-execution_count="14">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -381,8 +424,8 @@ div.csl-indent {
 </div>
 </div>
 </section>
-<section id="partition-of-the-pixels" class="level3 page-columns page-full" data-number="2.5.4">
-<h3 data-number="2.5.4" class="anchored" data-anchor-id="partition-of-the-pixels"><span class="header-section-number">2.5.4</span> Partition of the pixels</h3>
+<section id="partition-of-the-pixels" class="level3 page-columns page-full" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="partition-of-the-pixels"><span class="header-section-number">2.4.4</span> Partition of the pixels</h3>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-barplot-classes">
 <div id="cell-fig-kmeans-barplot-classes" class="cell page-columns page-full" data-execution_count="15">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -407,17 +450,23 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>The result in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.7</span></a> is not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with sharp boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for vector quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>In fact, this behavior makes <em>k</em>-means excellent at creating color palettes from images! Cases in point, <a href="https://github.com/karthik/wesanderson">Karthik Ram’s Wes Anderson palettes</a>, and <a href="https://github.com/dill/beyonce">David Lawrence Miller’s Beyoncé palettes</a>. Let it never again be said that ecologists should not be trusted with machine learning methods.</p>
+</div></div><p>The result in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.7</span></a> is not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with sharp boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for vector quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
 </section>
 </section>
-<section id="alternatives-and-improvements" class="level2" data-number="2.6">
-<h2 data-number="2.6" class="anchored" data-anchor-id="alternatives-and-improvements"><span class="header-section-number">2.6</span> Alternatives and improvements</h2>
+<section id="alternatives-and-improvements" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="alternatives-and-improvements"><span class="header-section-number">2.5</span> Alternatives and improvements</h2>
 <p>EM</p>
 <p>k-median</p>
 <p>k-medoids</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-aloise2009" class="csl-entry" role="listitem">
+Aloise, D., Deshpande, A., Hansen, P. &amp; Popat, P. (2009). <a href="https://doi.org/10.1007/s10994-009-5103-0">NP-hardness of Euclidean sum-of-squares clustering</a>. <em>Machine Learning</em>, 75, 245–248.
+</div>
 <div id="ref-cooney2022" class="csl-entry" role="listitem">
 Cooney, C.R., He, Y., Varley, Z.K., Nouri, L.O., Moody, C.J.A., Jardine, M.D., <em>et al.</em> (2022). <a href="https://doi.org/10.1038/s41559-022-01714-1">Latitudinal gradients in avian colourfulness</a>. <em>Nature Ecology &amp; Evolution</em>, 6, 622–629.
 </div>

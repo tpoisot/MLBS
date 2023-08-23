@@ -60,9 +60,65 @@ By picking these three values, instead of simply looking at the clustering of al
 
 In order to understand the theory underlying *k*-means, we will work backwards from its output. As a method for unsupervised clustering, *k*-means will return a vector of *class memberships*, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that *k*-means is a transformation, taking as its input a vector with three dimensions (red, green, blue), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. These are the input and output of our blackbox, and now we can start figuring out its internals.
 
-### Overview of the algorithm
+### Inputs and parameters
 
-## Identification of the optimal number of clusters
+::: column-margin
+Throughout this book, we will use $\mathbf{X}$ to note the matrix of features, and $\mathbf{y}$ to note the vector of labels. Instances are columns of the features matrix.
+:::
+
+In *k*-means, a set of observations $\mathbf{x}_i$ are assigned to a set of classes $\mathbf{C}$, also called the clusters. All $\mathbf{x}_i$ are vectors with the same dimension (we will call it $f$, for *features*), and we can think of our observations as a matrix of features $\mathbf{X}$ of size $(f, n)$, with $f$ features and $n$ observations (the columns of this matrix).
+
+The number of classes of $\mathbf{C}$ is $|\mathbf{C}| = k$, and $k$ is an hyper-parameter of the model, as it needs to bet fixed before we start running the algorithm. Each class is defined by its centroid, a vector $\mathbf{c}$ with $f$ dimensions (*i.e.* the centroid corresponds to a potential "idealized" observation of this class in the space of the features).
+
+### Assigning instances to classes
+
+::: column-margin
+Of course, the correct distance measure to use depends on what is appropriate for the data!
+:::
+
+Instances are assigned to the class when the distance between themselves and the centroid of this class is lower than the distance between themselves and any other class. To phrase it differently, the class membership of an instance $\mathbf{x}_i$ is given by
+
+$$
+\text{argmin}_j \left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2 \,,
+$$ {#eq-clustering-onepoint}
+
+which is the value of $j$ that minimizes the $L^2$ norm (the Euclidean distance) between the instance and the centroid, and $\text{argmin}_j$ is the function returning the value of $j$ that minimizes its argument.
+
+### Optimizing the centroids
+
+Of course, what we really care about is the assignment of *all* instances to the classes. For this reason, the configuration (the disposition of the centroid) that solves our specific problem is the one that leads to the lowest possible variance within the clusters. As it turns out, it is not that difficult to go from @eq-clustering-onepoint to a solution for the entire problem: we simply have to sum over all points!
+
+This leads to a measure of the variance, which we want to minimize.
+
+$$
+\sum_{i=1}^k \sum_{\mathbf{x}\in \mathbf{C}_i} \|\mathbf{x} - \mathbf{c}_i\|_2 \,.
+$$ {#eq-clustering-variance}
+
+The part that is non-trivial is now to decide on the value of $\mathbf{c}$ for each class. This is the heart of the *k*-means algorithm. From @eq-clustering-onepoint, we have a criteria to decide to which class each instance belongs. Of course, there is nothing that prevents us from using this in the opposite direction, to define the instance by the points that form it! In this approach, the membership of class $\mathbf{C}_j$ is the list of points that satisfy the condition in @eq-clustering-onepoint. But there is no guarantee that the *current* position of $\mathbf{c}_j$ in the middle of all of these points is optimal, *i.e.* that it minimizes the within-class variance.
+
+To ensure that this is the case, we can re-define the value of $\mathbf{c}_j$ as
+
+$$
+\mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j \,,
+$$ {#eq-clustering-centroid-update}
+
+where $|\cdot|$ is the cardinality of (number of istances in) $\mathbf{C}_j$, and $\sum \mathbf{C}_j$ is the sum of each feature in $\mathbf{C}_j$. To put it plainly: we update the centroid of $\mathbf{C}_j$ so that it takes, for each feature, the average value of all the points that form $\mathbf{C}_j$.
+
+### Updating the classes
+
+::: column-margin
+Repeating a step multiple times in a row is called an iterative process, and we will see a *lot* of them.
+:::
+
+Once we have applied @eq-clustering-centroid-update to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.
+
+But until when? Finding the optimal solution for a set of points is an NP-hard problem [@aloise2009], which means that we will need to rely on a little bit of luck. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is *global* and not *local*.
+
+A global optimum is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is *greedy*, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum.
+
+In order to get the best possible solution, it is common to run *k*-means multiple times for a given $k$, and to pick the positions of the centroids that give the best overall fit.
+
+### Identification of the optimal number of clusters
 
 ## Application: optimal clustering of the satellite image data
 
@@ -91,6 +147,10 @@ We will use the method from @davies1979, which ... .
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-barplot-classes >}}
 
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-clustering >}}
+
+::: column-margin
+In fact, this behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes](https://github.com/karthik/wesanderson), and [David Lawrence Miller's Beyoncé palettes](https://github.com/dill/beyonce). Let it never again be said that ecologists should not be trusted with machine learning methods.
+:::
 
 The result in @fig-kmeans-clustering is not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with sharp boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in *k*-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes *k*-means closer to (or at least most efficient as) a method for vector quantization [@gray1984].
 
