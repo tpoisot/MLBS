@@ -10,17 +10,21 @@ execute:
 book:
   title: "Data Science for Biodiversity Scientists"
   subtitle: "An introduction to concepts and practices"
-  page-navigation: true
+  page-navigation: false
+  back-to-top-navigation: true
+  page-footer: "This work is licensed under the [CC BY-NC 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/)" 
   language: en-CA
-  license: cc-by
+  license: cc-by-nc
   search:
     location: sidebar
     type: overlay
+    collapse-after: 1
     limit: 10
     copy-button: true
   sidebar:
     style: floating
-  downloads: pdf
+    border: false
+  downloads: [pdf, epub]
   author:
     - name: "Timothée Poisot"
       orcid: 0000-0002-0735-5184
@@ -46,14 +50,22 @@ book:
 
 bibliography: references.bib
 csl: https://www.zotero.org/styles/ecology-letters
+
 cap-location: margin
+tbl-cap-location: top
 
 preview:
   port: 4200
 
 format:
   html:
-    theme: cosmo
+    theme: litera
+    linestretch: 1.5
+    grid:
+      sidebar-width: 350px
+      body-width: 800px
+      margin-width: 350px
+      gutter-width: 2rem
   pdf:
     documentclass: scrbook
     fig-pos: 'bt'
