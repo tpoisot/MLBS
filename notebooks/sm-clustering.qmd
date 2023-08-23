@@ -71,7 +71,7 @@ plot
 
 ```{julia}
 #| label: fig-kmeans-hexbin
-#| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water/vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent an instance of feature engineering: we have derived these values from the raw data.
+#| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data.
 fig = Figure(resolution=(500,500))
 ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
 hexbin!(ax, vec(ndvi), vec(ndmi), colormap=:delta, bins=120)
@@ -83,17 +83,14 @@ initial split
 
 ```{julia}
 using Clustering
-clusters = kmeans(X, 4)
+clusters = kmeans(X, 3)
 ```
 
 initial classification
 
 ```{julia}
 #| label: fig-kmeans-initial-landscape
-#| fig-cap: >
-#|  After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape.
-#|  This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis.
-#|  This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into five categories. 
+#| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis. This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into five categories. 
 C = reshape(assignments(clusters), size(ndvi))
 fig = Figure(resolution=(500,500))
 ax = Makie.Axis(fig[1,1]; aspect=DataAspect())
@@ -110,7 +107,7 @@ DaviesBouldin(X, clusters)
 now we optimize -- this runs on multiple threads, but it's still not super fast
 
 ```{julia}
-k_trial = repeat(3:15, 5)
+k_trial = repeat(2:15, 8)
 score = zeros(Float64, length(k_trial))
 Threads.@threads for i in 1:length(k_trial)
     k = k_trial[i]
@@ -122,7 +119,12 @@ end
 figure with the number of clusters v. cost
 
 ```{julia}
-scatter(k_trial, score)
+#| label: fig-kmeans-tuning
+#| fig-cap: tuning of k
+f = Figure()
+ax = CairoMakie.Axis(f[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index")
+scatter!(ax, k_trial, score)
+current_figure()
 ```
 
 now we can pick the best number of clusters and search for a solution
@@ -166,10 +168,7 @@ number of pixels per class
 
 ```{julia}
 #| label: fig-kmeans-barplot-classes
-#| fig-cap: >
-#|  Number of pixels assigned to each class in the final landscape classification.
-#|  In most cases, *k*-means will create clusters with the same number of points in them.
-#|  This may be an issue, or this may be a way to ensure that whatever classes are produced will be balanced in terms of their representation.
+#| fig-cap: Number of pixels assigned to each class in the final landscape classification. In most cases, *k*-means will create clusters with the same number of points in them. This may be an issue, or this may be a way to ensure that whatever classes are produced will be balanced in terms of their representation.
 assigns = clusters.assignments
 clust = unique(assigns)
 counts = [count(isequal(k), assigns) for k in clust]
@@ -186,6 +185,5 @@ current_figure()
 ```{julia}
 #| label: fig-kmeans-clustering
 #| fig-cap: Visualisation of the clustering output using ...
-col = Makie.wong_colors()[clusters.assignments]
-scatter(vec(ndvi), vec(ndmi), color=col)
+scatter(vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=:Dark2)
 ```

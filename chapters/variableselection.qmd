@@ -1,4 +1,4 @@
-# Variable selection
+# Variable selection {#sec-variable-selection}
 
 we will use MCC [@chicco2020] rather than $F_1$ or accuracy to decide on the best model
 
