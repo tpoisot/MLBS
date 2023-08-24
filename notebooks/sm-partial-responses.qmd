@@ -2,3 +2,65 @@
 
 In this chapter, we will --- variable importance
 
+```{julia}
+_code_path = joinpath(@__DIR__, "..", "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "confusiontable.jl"))
+include(joinpath(_code_path, "nbc.jl"))
+include(joinpath(_code_path, "shapley.jl"))
+```
+
+load the model
+
+```{julia}
+_ptm_path = joinpath(@__DIR__, "..", "ptm")
+modelpath = joinpath(_ptm_path, "reindeer.jld")
+ptm = JLD.load(modelpath)
+```
+
+re-train
+
+```{julia}
+τ = ptm["threshold"]
+predictor = naivebayes(ptm["training"]...; presence=ptm["prior"])
+y, X = ptm["testing"]
+# ConfusionMatrix(vec(mapslices(predictor, X; dims=2)), y, τ)
+```
+
+shapley values monte carlo
+
+```{julia}
+S = [shapleyvalues(predictor, X, i, j) for i in axes(X, 1), j in axes(X, 2)]
+P = [predictor(X[i,:]) for i in axes(X, 1)]
+```
+
+```{julia}
+heatmap(S)
+```
+
+make some plots of the shapley values per points
+
+and now for the variables, this is the prp
+
+```{julia}
+using SpeciesDistributionToolkit
+_layer_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-layers.tiff")
+bio1 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=1)
+bio2 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=2)
+bio15 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=15)
+```
+
+map shapley values -- this takes a long time
+
+```{julia}
+S1 = convert(Float64, similar(bio1))
+S2 = convert(Float64, similar(bio2))
+S15 = convert(Float64, similar(bio15))
+Threads.@threads for k in keys(S1)
+    x = Int64[bio1[k], bio2[k], bio15[k]]
+    S1[k] = shapleyvalues(predictor, X, x, 1; M=50)
+    S2[k] = shapleyvalues(predictor, X, x, 2; M=50)
+    S15[k] = shapleyvalues(predictor, X, x, 3; M=50)
+end
+```
+

@@ -1,3 +1,11 @@
 # Understanding the effects of variables {#sec-varimp}
 
 In this chapter, we will
+
+@strumbelj2013 monte carlo approximation of shapley values
+
+@wadoux2023 mapping of shapley values
+
+@mesgaran2014 mapping of most important covariates
+
+@lundberg2017 SHAP
