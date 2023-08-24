@@ -43,7 +43,10 @@ function κ(M::ConfusionMatrix)
     return 2.0 * (M.tp * M.tn - M.fn * M.fp) /
            ((M.tp + M.fp) * (M.fp + M.tn) + (M.tp + M.fn) * (M.fn + M.tn))
 end
-mcc(M::ConfusionMatrix) = (M.tp*M.tn-M.fp*M.fn)/sqrt((M.tp+M.fp)*(M.tp+M.fn)*(M.tn+M.fp)*(M.tn+M.fn))
+function mcc(M::ConfusionMatrix)
+    ret = (M.tp*M.tn-M.fp*M.fn)/sqrt((M.tp+M.fp)*(M.tp+M.fn)*(M.tn+M.fp)*(M.tn+M.fn))
+    return isnan(ret) ? 0.0 : ret
+end
 
 function auc(x::Array{T}, y::Array{T}) where {T<:Number}
     S = zero(Float64)
