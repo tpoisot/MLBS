@@ -38,9 +38,39 @@ P = [predictor(X[i,:]) for i in axes(X, 1)]
 heatmap(S)
 ```
 
+look at spread for each value
+
+```{julia}
+f = Figure()
+gl = f[1,1] = GridLayout()
+ax1 = Axis(gl[1,1]; ylabel="Annual Temperature")
+density!(ax1, S[:,1])
+ax2 = Axis(gl[2,1]; ylabel="Diurnal range")
+density!(ax2, S[:,2])
+ax3 = Axis(gl[3,1]; ylabel="Prec. seasonality")
+density!(ax3, S[:,3])
+
+xmin, xmax = extrema(S)
+for ax in [ax1, ax2, ax3]
+    xlims!(ax, low=xmin, high=xmax)
+    ylims!(ax, low=0.0)
+    hideydecorations!(ax, label=false)
+end
+hidexdecorations!(ax1, grid=false)
+hidexdecorations!(ax2, grid=false)
+
+rowgap!(gl, 0.0)
+
+current_figure()
+```
+
 make some plots of the shapley values per points
 
-and now for the variables, this is the prp
+```{julia}
+scatter(X[:,1], S[:,1], color=(:black, 0.2))
+scatter(X[:,2], S[:,2], color=(:black, 0.2))
+scatter(X[:,3], S[:,3], color=(:black, 0.2))
+```
 
 ```{julia}
 using SpeciesDistributionToolkit
@@ -48,19 +78,34 @@ _layer_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-layers.tiff"
 bio1 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=1)
 bio2 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=2)
 bio15 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=15)
+bio1 = coarsen(bio1, median, (23, 13))
+bio2 = coarsen(bio2, median, (23, 13))
+bio15 = coarsen(bio15, median, (23, 13))
 ```
 
-map shapley values -- this takes a long time
+map shapley values -- this is done on the coarsened data to save time
 
 ```{julia}
 S1 = convert(Float64, similar(bio1))
 S2 = convert(Float64, similar(bio2))
 S15 = convert(Float64, similar(bio15))
 Threads.@threads for k in keys(S1)
-    x = Int64[bio1[k], bio2[k], bio15[k]]
-    S1[k] = shapleyvalues(predictor, X, x, 1; M=50)
-    S2[k] = shapleyvalues(predictor, X, x, 2; M=50)
-    S15[k] = shapleyvalues(predictor, X, x, 3; M=50)
+    x = round.(Int64, [bio1[k], bio2[k], bio15[k]])
+    S1[k] = shapleyvalues(predictor, X, x, 1; M=200)
+    S2[k] = shapleyvalues(predictor, X, x, 2; M=200)
+    S15[k] = shapleyvalues(predictor, X, x, 3; M=200)
 end
 ```
 
+plot the partial effects of each variable
+
+```{julia}
+heatmap(S1)
+```
+
+most important variables
+
+```{julia}
+mostimp = mosaic(x -> argmax(abs.(x)), [S1, S2, S15])
+heatmap(mostimp, colormap=:Dark2_3)
+```
