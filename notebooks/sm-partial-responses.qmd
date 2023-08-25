@@ -14,7 +14,7 @@ load the model
 
 ```{julia}
 _ptm_path = joinpath(@__DIR__, "..", "ptm")
-modelpath = joinpath(_ptm_path, "reindeer.jld")
+modelpath = joinpath(_ptm_path, "reindeer-tuned.jld")
 ptm = JLD.load(modelpath)
 ```
 
@@ -24,6 +24,7 @@ re-train
 τ = ptm["threshold"]
 predictor = naivebayes(ptm["training"]...; presence=ptm["prior"])
 y, X = ptm["testing"]
+sv = ptm["varidx"]
 # ConfusionMatrix(vec(mapslices(predictor, X; dims=2)), y, τ)
 ```
 
@@ -42,16 +43,17 @@ look at spread for each value
 
 ```{julia}
 f = Figure()
-gl = f[1,1] = GridLayout()
-ax1 = Axis(gl[1,1]; ylabel="Annual Temperature")
+ax1 = Axis(f[1,1]; ylabel="BIO $(sv[1])")
 density!(ax1, S[:,1])
-ax2 = Axis(gl[2,1]; ylabel="Diurnal range")
+ax2 = Axis(f[2,1]; ylabel="BIO $(sv[2])")
 density!(ax2, S[:,2])
-ax3 = Axis(gl[3,1]; ylabel="Prec. seasonality")
+ax3 = Axis(f[1,2]; ylabel="BIO $(sv[3])")
 density!(ax3, S[:,3])
+ax4 = Axis(f[2,2]; ylabel="BIO $(sv[4])")
+density!(ax4, S[:,4])
 
 xmin, xmax = extrema(S)
-for ax in [ax1, ax2, ax3]
+for ax in [ax1, ax2, ax3, ax4]
     xlims!(ax, low=xmin, high=xmax)
     ylims!(ax, low=0.0)
     hideydecorations!(ax, label=false)
@@ -70,42 +72,49 @@ make some plots of the shapley values per points
 scatter(X[:,1], S[:,1], color=(:black, 0.2))
 scatter(X[:,2], S[:,2], color=(:black, 0.2))
 scatter(X[:,3], S[:,3], color=(:black, 0.2))
+scatter(X[:,4], S[:,4], color=(:black, 0.2))
 ```
 
 ```{julia}
 using SpeciesDistributionToolkit
 _layer_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-layers.tiff")
-bio1 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=1)
-bio2 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=2)
-bio15 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=15)
-bio1 = coarsen(bio1, median, (23, 13))
-bio2 = coarsen(bio2, median, (23, 13))
-bio15 = coarsen(bio15, median, (23, 13))
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in ptm["varidx"]]
 ```
 
 map shapley values -- this is done on the coarsened data to save time
 
 ```{julia}
-S1 = convert(Float64, similar(bio1))
-S2 = convert(Float64, similar(bio2))
-S15 = convert(Float64, similar(bio15))
-Threads.@threads for k in keys(S1)
-    x = round.(Int64, [bio1[k], bio2[k], bio15[k]])
-    S1[k] = shapleyvalues(predictor, X, x, 1; M=200)
-    S2[k] = shapleyvalues(predictor, X, x, 2; M=200)
-    S15[k] = shapleyvalues(predictor, X, x, 3; M=200)
+V = [convert(Float32, similar(bio[1])) for i in axes(sv, 1)]
+
+Threads.@threads for k in keys(V[1])
+    x = [b[k] for b in bio]
+    for i in axes(sv, 1)
+        V[i][k] = shapleyvalues(predictor, X, x, i; M=200)
+    end
 end
 ```
 
 plot the partial effects of each variable
 
 ```{julia}
-heatmap(S1)
+heatmap(V[2], colormap=:roma, colorrange=(-0.2,0.2))
 ```
 
 most important variables
 
 ```{julia}
-mostimp = mosaic(x -> argmax(abs.(x)), [S1, S2, S15])
-heatmap(mostimp, colormap=:Dark2_3)
+mostimp = mosaic(x -> argmax(abs.(x)), V)
+
+cmap = Makie.wong_colors()[2:5]
+
+f = Figure()
+ax = Axis(f[1,1])
+
+heatmap!(ax, mostimp, colormap=cmap)
+
+cleg = [PolyElement(color = c, strokecolor = :transparent) for c in cmap]
+clab = ["BIO$(s)" for s in sv]
+Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10))
+
+current_figure()
 ```

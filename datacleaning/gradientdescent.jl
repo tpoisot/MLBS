@@ -6,10 +6,12 @@ using CairoMakie
 
 #spatial_extent = (left = 3.0, bottom = 54.0, right = 21.0, top = 67.0)
 
-spatial_extent = (left = 3.0, bottom = 56.0, right = 20.0, top = 65.0)
-dataprovider = RasterData(CHELSA1, BioClim)
+spatial_extent = (left = 4.0, bottom = 55.0, right = 29.0, top = 72.0)
+args = (resolution = 5.0, )
 
-temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
+dataprovider = RasterData(WorldClim2, BioClim)
+
+temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent..., args...)
 heatmap(temperature, colormap=:lajolla)
 
 # Data
@@ -34,7 +36,7 @@ presencelayer = mask(temperature, presences, Bool)
 heatmap(presencelayer)
 
 background = pseudoabsencemask(WithinRadius, presencelayer; distance = 200.0)
-buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 25.0)
+buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 50.0)
 bgmask = background .& (.! buffer)
 
 heatmap(
@@ -47,7 +49,7 @@ heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.4sum(presencelayer)))
+bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.5sum(presencelayer)))
 replace!(bgpoints, false => nothing)
 
 heatmap(

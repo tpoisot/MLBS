@@ -13,36 +13,18 @@ include(joinpath(_code_path, "splitters.jl"))
 We load the data
 
 ```{julia}
-_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-observations.csv")
-rangifer = DataFrame(CSV.File(_path))
-presences = select(rangifer, [:latitude, :longitude, :presence])
-select!(rangifer, Not(:latitude))
-select!(rangifer, Not(:longitude))
-select!(rangifer, [:presence, :BIO1, :BIO2, :BIO15])
-```
-
-we take aside a testing set
-
-```{julia}
-labels = rangifer.presence
-features = Matrix(select(rangifer, Not(:presence)))
-training_idx, testing_idx = holdout(labels, features)
-```
-
-we will split this a little more to make it easier
-
-```{julia}
-trainlabels = labels[training_idx]
-testlabels = labels[testing_idx]
-trainfeatures = features[training_idx,:]
-testfeatures = features[testing_idx,:]
+_ptm_path = joinpath(@__DIR__, "..", "ptm")
+modelpath = joinpath(_ptm_path, "reindeer-varselected.jld")
+ptm = JLD.load(modelpath)
+trainlabels, trainfeatures = ptm["training"]
+testlabels, testfeatures = ptm["testing"]
 ```
 
 MC CV
 
 ```{julia}
 thresholds = collect(LinRange(0.0, 1.0, 300))
-k = 20
+k = 10
 conftrain = zeros(ConfusionMatrix, (k, length(thresholds)))
 confvalid = zeros(ConfusionMatrix, (k, length(thresholds)))
 
@@ -149,7 +131,7 @@ thresholds = collect(LinRange(0.0, 1.0, 100))
 priors = collect(LinRange(0.5, 0.65, 50))
 scores = zeros(Float64, (length(priors), length(thresholds)))
 
-k = 5
+k = 10
 folds = kfold(trainlabels, trainfeatures; k=k, permute=true)
 conftrain = zeros(ConfusionMatrix, (k, length(thresholds)))
 confvalid = zeros(ConfusionMatrix, (k, length(thresholds)))
@@ -183,8 +165,8 @@ we get the best parameters
 
 ```{julia}
 best_pos = last(findmax(scores))
-prior = priors[best_pos[2]]
-τ = thresholds[best_pos[1]]
+prior = priors[best_pos[1]]
+τ = thresholds[best_pos[2]]
 @info prior, τ
 ```
 
@@ -249,18 +231,16 @@ get the data
 ```{julia}
 using SpeciesDistributionToolkit
 _layer_path = joinpath(@__DIR__, "..", "data", "general", "rangifer-layers.tiff")
-bio1 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=1)
-bio2 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=2)
-bio15 = SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=15)
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in ptm["varidx"]]
 ```
 
 make the predictions for every pixel and get the entropy
 
 ```{julia}
-pr = convert(Float64, similar(bio1))
+pr = convert(Float64, similar(first(bio)))
 entropy = similar(pr)
 Threads.@threads for k in keys(pr)
-    x = [bio1[k], bio2[k], bio15[k]]
+    x = [b[k] for b in bio]
     pr[k] = predictor(x)
     p = [pr[k], 1.0 - pr[k]]
     entropy[k] = -sum(p .* log2.(p))
@@ -302,6 +282,14 @@ Finally we _save_ the model to use it in the next modules
 
 ```{julia}
 _ptm_path = joinpath(@__DIR__, "..", "ptm")
-modelpath = joinpath(_ptm_path, "reindeer.jld")
-JLD.save(modelpath, "threshold", τ, "prior", prior, "testing", (testlabels, testfeatures), "C", conf, "training", (trainlabels, trainfeatures))
+modelpath = joinpath(_ptm_path, "reindeer-tuned.jld")
+JLD.save(
+    modelpath,
+    "threshold", τ,
+    "prior", prior,
+    "testing", (testlabels, testfeatures),
+    "varidx", crvar,
+    "C", conf,
+    "training", (trainlabels, trainfeatures)
+)
 ```
