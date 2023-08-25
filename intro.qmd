@@ -78,10 +78,6 @@ From a teaching point of view, the `iris` dataset is like hearing Smash Mouth in
 
 But there is a far more important reason not to use `iris`: eugenics.
 
-::: column-margin
-This is, perhaps, the section of this book I re-wrote the most. If I had to use one F-bomb, it would go in this section *for sure*.
-:::
-
 Listen, we made it several hundred words in a text about quantitative techniques in life sciences without encountering a sad little man with racist ideas that academia decided to ignore because "he just contributed so much to the field, and these were different times, maybe we shouldn't be so quick to judge?". Ronald Aylmer Fisher, statistics' most racist nerd, was such a man; and there are, of course, those who want to consider the possibility that you can be outrageously racist as long as you are an outstanding scientist [@bodmer2021].
 
 The `iris` dataset was first published by @fisher1936 in the *Annals of Eugenics* (so, there's a bit of a red flag there already), and draws from several publications by Edgar Anderson, starting with @anderson1928; @unwin2021 have an interesting historiographic deep-dive into the correspondence between the two. Judging by the dates, you may think that Fisher was a product of his time. But this could not be further from the truth. Fisher was dissatisfied with his time, to the point where his contributions to statistics were done in service of his views, in order to provide the appearance of scientific rigor to his bigotry.

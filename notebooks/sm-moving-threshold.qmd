@@ -120,7 +120,7 @@ and test on the testing data
 #| tbl-cap: confusion table after tuning the value of $\tau$ etc etc 
 prediction = vec(mapslices(predictor, testfeatures, dims=2))
 conf = ConfusionMatrix(prediction, testlabels, τ)
-out = pretty_table(String, conf, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = false)
+out = pretty_table(String, Matrix(conf), tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = false)
 display("text/html", out)
 ```
 
@@ -183,7 +183,7 @@ output the table
 #| tbl-cap: confusion table after tuning the value of $\tau$ and the prior etc etc 
 prediction = vec(mapslices(predictor, testfeatures, dims=2))
 conf = ConfusionMatrix(prediction, testlabels, τ)
-out = pretty_table(String, conf, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = false)
+out = pretty_table(String, Matrix(conf), tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = false)
 display("text/html", out)
 ```
 
@@ -259,7 +259,7 @@ gl = f[1,1] = GridLayout()
 
 axpt = Axis(gl[1,1]; ylabel="Latitude", xgridvisible=false, ygridvisible=false)
 heatmap!(axpt, pr .> τ, colormap=[:lightgrey, :grey])
-scatter!(axpt, presences.longitude, presences.latitude, color=presences.presence, markersize=1, colormap=[:grey, :black])
+#scatter!(axpt, presences.longitude, presences.latitude, color=presences.presence, markersize=1, colormap=[:grey, :black])
 
 axpr = Axis(gl[1,2]; xlabel="Longitude", ylabel="", xgridvisible=false, ygridvisible=false)
 heatmap!(axpr, pr, colormap=[:lightgrey, :darkgreen])
@@ -288,7 +288,7 @@ JLD.save(
     "threshold", τ,
     "prior", prior,
     "testing", (testlabels, testfeatures),
-    "varidx", crvar,
+    "varidx", ptm["varidx"],
     "C", conf,
     "training", (trainlabels, trainfeatures)
 )

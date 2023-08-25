@@ -85,7 +85,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -190,6 +190,12 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./chapters/varimp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Understanding the effects of variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
@@ -218,13 +224,13 @@ div.csl-indent {
   <li><a href="#no-code" id="toc-no-code" class="nav-link" data-scroll-target="#no-code"><span class="header-section-number">1.3.1</span> No code</a></li>
   <li><a href="#no-simulated-data" id="toc-no-simulated-data" class="nav-link" data-scroll-target="#no-simulated-data"><span class="header-section-number">1.3.2</span> No simulated data</a></li>
   <li><a href="#no-model-zoo" id="toc-no-model-zoo" class="nav-link" data-scroll-target="#no-model-zoo"><span class="header-section-number">1.3.3</span> No model zoo</a></li>
-  <li><a href="#no-iris" id="toc-no-iris" class="nav-link" data-scroll-target="#no-iris"><span class="header-section-number">1.3.4</span> No <code>iris</code></a></li>
+  <li><a href="#no-iris-dataset" id="toc-no-iris-dataset" class="nav-link" data-scroll-target="#no-iris-dataset"><span class="header-section-number">1.3.4</span> No <code>iris</code> dataset</a></li>
   </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -273,17 +279,18 @@ div.csl-indent {
 </section>
 <section id="an-overview-of-the-content" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</h2>
-<p>In <span class="quarto-unresolved-ref">?sec-clustering</span>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
+<p>In <a href="chapters/clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
 <p>In <a href="chapters/gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
 <p>In <a href="chapters/splits.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
 <p>In <a href="chapters/leakage.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
-<p>In <span class="quarto-unresolved-ref">?sec-classification</span>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
+<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
 <p>In <a href="chapters/variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.</p>
 <p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
+<p>In <a href="chapters/varimp.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
 </section>
-<section id="some-rules-about-this-book" class="level2" data-number="1.3">
+<section id="some-rules-about-this-book" class="level2 page-columns page-full" data-number="1.3">
 <h2 data-number="1.3" class="anchored" data-anchor-id="some-rules-about-this-book"><span class="header-section-number">1.3</span> Some rules about this book</h2>
-<p>When I started aggregating these notes, I decided on a series of four rules. No code, no simulated data, no long list of model, and no <code>iris</code>. In this section, I will go through <em>why</em> I decided to adopt these rules, and how it should change the way you interact with the book.</p>
+<p>When I started aggregating these notes, I decided on a series of four rules. No code, no simulated data, no long list of model, and above all, no <code>iris</code> dataset. In this section, I will go through <em>why</em> I decided to adopt these rules, and how it should change the way you interact with the book.</p>
 <section id="no-code" class="level3" data-number="1.3.1">
 <h3 data-number="1.3.1" class="anchored" data-anchor-id="no-code"><span class="header-section-number">1.3.1</span> No code</h3>
 <p>This is, maybe, the most surprising rule, because data science <em>is</em> programming (in a sense). But sometimes there is so much focus on programming that we lose track of the other, important aspects of the practice of data science: abstractions, relationship with data, and domain knowledge.</p>
@@ -292,6 +299,8 @@ div.csl-indent {
 </section>
 <section id="no-simulated-data" class="level3" data-number="1.3.2">
 <h3 data-number="1.3.2" class="anchored" data-anchor-id="no-simulated-data"><span class="header-section-number">1.3.2</span> No simulated data</h3>
+<p>I have nothing against simulated data. I have, in fact, generated simulated data in many different contexts, for training or for research. But the limit of simulated is that we almost inevitably fail to include what makes real data challenging: noise, incomplete or uneven sampling, data representation artifacts. And so when it is time to work on real data, everything seems suddenly more difficult.</p>
+<p>Simulated data have <em>immense</em> training value; but it is also important to engage with the imperfect actual data, as we will overwhelmingly apply the concepts from this book to them. For this reason, there are no simulated data in this book. Everything that is presented correspond to an actual use case that proceeds from a question we could reasonably ask in the context, paired with a dataset that could be used to answer this question.</p>
 </section>
 <section id="no-model-zoo" class="level3" data-number="1.3.3">
 <h3 data-number="1.3.3" class="anchored" data-anchor-id="no-model-zoo"><span class="header-section-number">1.3.3</span> No model zoo</h3>
@@ -299,12 +308,18 @@ div.csl-indent {
 <p>Reading a long enumeration of things is boring; unless it’s sung by Yakko Warner, I’m not interested, and I refuse to inflict it on people. But more importantly, these enumerations of models often distract from thinking about the problem we want to solve in more abstract terms. I rarely wake up in the morning and think “oh boy I can’t wait to train a SVM today”; chances are, my thought process will be closer to “I need to tell the mushroom people where I think the next good foraging locations will be”. The rest, is implementation details.</p>
 <p>In fact, 90% of this book uses only two models: linear regression, and the Naïve Bayes Classifier. Some other models are involved in a few chapters, but these two models are breathtakingly simple, work surprisingly well, run fast, and can be tweaked to allow us to build deep intuitions about how machines learn. They are perfect for the classroom, and give us the freedom to spent most of our time thinking about how we interact with models, and why, and how we make methodological decisions.</p>
 </section>
-<section id="no-iris" class="level3" data-number="1.3.4">
-<h3 data-number="1.3.4" class="anchored" data-anchor-id="no-iris"><span class="header-section-number">1.3.4</span> No <code>iris</code></h3>
-<p>From a teaching point of view, the <code>iris</code> dataset is like hearing Smash Mouth in a movie trailer, in that it tells you two things with absolute certainty. First, that you are indeed watching a movie trailer. Second, that you could be watching Shrek instead. There are datasets out there that are <em>infinitely more</em> exciting to use than <code>iris</code>, and these are the ones we will use.</p>
-<p>But there is a far more important reason not to use <code>iris</code>: eugenics. Listen, we made it several hundred words in a text about machine learning without mentioning eugenics, and this is as much as we can delay the inevitable. We need to talk about statistic’s most racist nerd, Ronald Aylmer Fisher. I will not be fair (or polite) here. The field of Fisher apologetics, after all, has enough (more than 0!) practitioners <span class="citation" data-cites="bodmer2021">(<a href="references.html#ref-bodmer2021" role="doc-biblioref">Bodmer <em>et al.</em> 2021</a>)</span>.</p>
-<p>The <code>iris</code> dataset was first published by <span class="citation" data-cites="fisher1936">Fisher (<a href="references.html#ref-fisher1936" role="doc-biblioref">1936</a>)</span> in the <em>Annals of Eugenics</em> (so, there’s that), and draws from several publications by Edgar Anderson, starting with <span class="citation" data-cites="anderson1928">Anderson (<a href="references.html#ref-anderson1928" role="doc-biblioref">1928</a>)</span>; <span class="citation" data-cites="unwin2021">Unwin &amp; Kleinman (<a href="references.html#ref-unwin2021" role="doc-biblioref">2021</a>)</span> have an interesting historiographic deep-dive into the correspondence between the two. But Fisher was <em>not</em> a product of his time. He was a man so profoundly dissatisfied with his time, in fact, that he developed entire statistical methodologies to do <em>more</em> eugenics. We owe a large part of our statistical toolkit to a ghoulish little troll’s ardent desire to eliminate anyone he considered to be undesirable.</p>
-<p>Thankfully, there are alternatives! The most broadly known is <code>penguins</code>, which was collected by ecologists <span class="citation" data-cites="gorman2014">(<a href="references.html#ref-gorman2014" role="doc-biblioref">Gorman <em>et al.</em> 2014</a>)</span>, and published as a standard dataset <span class="citation" data-cites="horst2020">(<a href="references.html#ref-horst2020" role="doc-biblioref">Horst <em>et al.</em> 2020</a>)</span> so that we can train students without engaging with the “legacy” of sad genocidal shitstains. The <code>penguins</code> dataset is also really good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won’t use <code>penguins</code> either. It’s a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go <code>penguins</code>.</p>
+<section id="no-iris-dataset" class="level3 page-columns page-full" data-number="1.3.4">
+<h3 data-number="1.3.4" class="anchored" data-anchor-id="no-iris-dataset"><span class="header-section-number">1.3.4</span> No <code>iris</code> dataset</h3>
+<p>From a teaching point of view, the <code>iris</code> dataset is like hearing Smash Mouth in a movie trailer, in that it tells you two things with absolute certainty. First, that you are indeed watching a movie trailer. Second, that you could be watching Shrek instead. There are datasets out there that are <em>infinitely more</em> exciting to use than <code>iris</code>.</p>
+<p>But there is a far more important reason not to use <code>iris</code>: eugenics.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>This is, perhaps, the section of this book I re-wrote the most. If I had to use one F-bomb, it would go in this section <em>for sure</em>.</p>
+</div></div><p>Listen, we made it several hundred words in a text about quantitative techniques in life sciences without encountering a sad little man with racist ideas that academia decided to ignore because “he just contributed so much to the field, and these were different times, maybe we shouldn’t be so quick to judge?”. Ronald Aylmer Fisher, statistics’ most racist nerd, was such a man; and there are, of course, those who want to consider the possibility that you can be outrageously racist as long as you are an outstanding scientist <span class="citation" data-cites="bodmer2021">(<a href="references.html#ref-bodmer2021" role="doc-biblioref">Bodmer <em>et al.</em> 2021</a>)</span>.</p>
+<p>The <code>iris</code> dataset was first published by <span class="citation" data-cites="fisher1936">Fisher (<a href="references.html#ref-fisher1936" role="doc-biblioref">1936</a>)</span> in the <em>Annals of Eugenics</em> (so, there’s a bit of a red flag there already), and draws from several publications by Edgar Anderson, starting with <span class="citation" data-cites="anderson1928">Anderson (<a href="references.html#ref-anderson1928" role="doc-biblioref">1928</a>)</span>; <span class="citation" data-cites="unwin2021">Unwin &amp; Kleinman (<a href="references.html#ref-unwin2021" role="doc-biblioref">2021</a>)</span> have an interesting historiographic deep-dive into the correspondence between the two. Judging by the dates, you may think that Fisher was a product of his time. But this could not be further from the truth. Fisher was dissatisfied with his time, to the point where his contributions to statistics were done in service of his views, in order to provide the appearance of scientific rigor to his bigotry.</p>
+<p>Fisher advocated for forced sterilization for the “defectives” (which he estimated at, oh, roughly 10% of the population), argued that not all races had equal capacity for intellectual and emotional development, and held a host of related opinions. There is no amount of contribution to science that pardon these views. Coming up with the idea of the null hypothesis does not even out lending “scientific” credibility to ideas whose logical (and historical) conclusion is genocide. That Ronald Fisher is still described as a polymath and a genius is infuriating, and we should use every alternative to his work that we have.</p>
+<p>Thankfully, there are alternatives!</p>
+<p>The most broadly known alternative to the <code>iris</code> dataset is <code>penguins</code>, which was collected by ecologists <span class="citation" data-cites="gorman2014">(<a href="references.html#ref-gorman2014" role="doc-biblioref">Gorman <em>et al.</em> 2014</a>)</span>, and published as a standard dataset <span class="citation" data-cites="horst2020">(<a href="references.html#ref-horst2020" role="doc-biblioref">Horst <em>et al.</em> 2020</a>)</span> so that we can train students without engaging with the “legacy” of eugenicists. The <code>penguins</code> dataset is also genuinely good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won’t use <code>penguins</code> either. It’s a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go <code>penguins</code>.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">

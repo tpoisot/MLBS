@@ -195,6 +195,12 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/varimp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Understanding the effects of variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
@@ -254,7 +260,7 @@ div.csl-indent {
 
 </header>
 
-<p>In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we were very lucky. Because we applied an unsupervised method, we didn’t really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-kmeans</span>, we were very lucky. Because we applied an unsupervised method, we didn’t really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.</p>
 <p>In a sense, we started thinking about these concepts in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>; specifically, we came up with a way to optimize the parameters of our model (<em>i.e.</em> of <em>training</em> our model) based on a series of empirical observations, and a criteria for what a “good fit” is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.</p>
 <section id="how-can-we-split-a-dataset" class="level2 page-columns page-full" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</h2>

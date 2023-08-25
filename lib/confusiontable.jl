@@ -21,6 +21,10 @@ function ConfusionMatrix(pred::Vector{T}, truth::Vector{Bool}) where {T <: Numbe
     return ConfusionMatrix(pred, truth, 0.5)
 end
 
+function Base.Matrix(c::ConfusionMatrix)
+    return [c.tp c.fp; c.fn c.tn]
+end
+
 Base.zero(ConfusionMatrix) = ConfusionMatrix(0, 0, 0, 0)
 
 tpr(M::ConfusionMatrix) = M.tp / (M.tp + M.fn)

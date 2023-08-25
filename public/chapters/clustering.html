@@ -192,6 +192,12 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/varimp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Understanding the effects of variables</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
@@ -214,14 +220,13 @@ div.csl-indent {
   <li><a href="#assigning-instances-to-classes" id="toc-assigning-instances-to-classes" class="nav-link" data-scroll-target="#assigning-instances-to-classes"><span class="header-section-number">2.3.2</span> Assigning instances to classes</a></li>
   <li><a href="#optimizing-the-centroids" id="toc-optimizing-the-centroids" class="nav-link" data-scroll-target="#optimizing-the-centroids"><span class="header-section-number">2.3.3</span> Optimizing the centroids</a></li>
   <li><a href="#updating-the-classes" id="toc-updating-the-classes" class="nav-link" data-scroll-target="#updating-the-classes"><span class="header-section-number">2.3.4</span> Updating the classes</a></li>
-  <li><a href="#identification-of-the-optimal-number-of-clusters" id="toc-identification-of-the-optimal-number-of-clusters" class="nav-link" data-scroll-target="#identification-of-the-optimal-number-of-clusters"><span class="header-section-number">2.3.5</span> Identification of the optimal number of clusters</a></li>
+  <li><a href="#sec-clustering-optimality" id="toc-sec-clustering-optimality" class="nav-link" data-scroll-target="#sec-clustering-optimality"><span class="header-section-number">2.3.5</span> Identification of the optimal number of clusters</a></li>
   </ul></li>
   <li><a href="#application-optimal-clustering-of-the-satellite-image-data" id="toc-application-optimal-clustering-of-the-satellite-image-data" class="nav-link" data-scroll-target="#application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.4</span> Application: optimal clustering of the satellite image data</a>
   <ul class="collapse">
   <li><a href="#initial-run" id="toc-initial-run" class="nav-link" data-scroll-target="#initial-run"><span class="header-section-number">2.4.1</span> Initial run</a></li>
   <li><a href="#optimal-number-of-pixels" id="toc-optimal-number-of-pixels" class="nav-link" data-scroll-target="#optimal-number-of-pixels"><span class="header-section-number">2.4.2</span> Optimal number of pixels</a></li>
   <li><a href="#clustering-with-optimal-number-of-classes" id="toc-clustering-with-optimal-number-of-classes" class="nav-link" data-scroll-target="#clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</a></li>
-  <li><a href="#partition-of-the-pixels" id="toc-partition-of-the-pixels" class="nav-link" data-scroll-target="#partition-of-the-pixels"><span class="header-section-number">2.4.4</span> Partition of the pixels</a></li>
   </ul></li>
   <li><a href="#alternatives-and-improvements" id="toc-alternatives-and-improvements" class="nav-link" data-scroll-target="#alternatives-and-improvements"><span class="header-section-number">2.5</span> Alternatives and improvements</a></li>
   </ul>
@@ -232,7 +237,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-kmeans" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering</span></span></h1>
+<h1 class="title"><span id="sec-clustering" class="quarto-section-identifier"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering</span></span></h1>
 </div>
 
 
@@ -248,7 +253,7 @@ div.csl-indent {
 
 </header>
 
-<p>As we mentioned in the introduction, a core idea of data science is that things that look the same (in that, when described with data, they resemble one another) are likely to be the same. Although this sounds like a simplifying assumption, this can provide the basis for a very powerful technique in which we <em>create</em> groups in data that have no labels. This task is called unsupervised clustering: we seek to add a <em>label</em> to each observation, in order to form groups, and the data we work from do <em>not</em> have a label that we can use to train a model.</p>
+<p>As we mentioned in the introduction, a core idea of data science is that things that look the same (in that, when described with data, they resemble one another) are likely to be the same. Although this sounds like a simplifying assumption, this can provide the basis for approaches in which we <em>create</em> groups in data that have no labels. This task is called clustering: we seek to add a <em>label</em> to each observation, in order to form groups, and the data we work from do <em>not</em> have a label that we can use to train a model. In this chapter, we will explore the <em>k</em>-means algorithm for clustering, and illustrate how it can be used in practice.</p>
 <section id="a-digression-which-birds-are-red" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="a-digression-which-birds-are-red"><span class="header-section-number">2.1</span> A digression: which birds are red?</h2>
 <p>Before diving in, it is a good idea to ponder a simple case. We can divide everything in just two categories: things with red feathers, and things without red feathers. An example of a thing with red feathers is the Northern Cardinal (<em>Cardinalis cardinalis</em>), and things without red feathers are the iMac G3, Haydn’s string quartets, and of course the Northern Cardinal (<em>Cardinalis cardinalis</em>).</p>
@@ -261,9 +266,10 @@ div.csl-indent {
 </section>
 <section id="the-problem-classifying-pixels-from-an-image" class="level2 page-columns page-full" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="the-problem-classifying-pixels-from-an-image"><span class="header-section-number">2.2</span> The problem: classifying pixels from an image</h2>
-<p>Throughout this chapter, we will work on a single image – we may initially balk at the idea that an image is data, but it is! Specifically, an image is a series of instances (the pixels), each described by their position in a multidimensional colorimetric space. Greyscale images have one dimension, and images in color will have three: their red, green, and blue channels. Not only are images data, this specific dataset is going to be far larger than many of the datasets we will work on in practice: the number of pixels we work with is given by the product of the width and height of the image!</p>
-<p>In fact, we are going to use an image with a lot more dimensions: the data in this chapter are coming from a Landsat 9 image <span class="citation" data-cites="vermote2016">(<a href="../references.html#ref-vermote2016" role="doc-biblioref">Vermote <em>et al.</em> 2016</a>)</span>, for which we have access to 7 different bands (the full data product has more bands, but we will not use them all in this example).</p>
+<p>Throughout this chapter, we will work on a single image – we may initially balk at the idea that an image is data, but it is! Specifically, an image is a series of instances (the pixels), each described by their position in a multidimensional colorimetric space. Greyscale images have one dimension, and images in color will have three: their red, green, and blue channels. Not only are images data, this specific dataset is going to be far larger than many of the datasets we will work on in practice: the number of pixels we work with is given by the product of the width, height, and depth of the image!</p>
+<p>In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene <span class="citation" data-cites="vermote2016">(<a href="../references.html#ref-vermote2016" role="doc-biblioref">Vermote <em>et al.</em> 2016</a>)</span>, for which we have access to 7 different bands (the full data product has more bands, but we will not use them all in this example).</p>
 <table class="table">
+<caption>Overview of the bands in a Landsat 9 scene. The data were downloaded from <a href="https://landsatlook.usgs.gov">LandsatLook</a>.</caption>
 <thead>
 <tr class="header">
 <th>Band number</th>
@@ -297,12 +303,13 @@ div.csl-indent {
 </tr>
 <tr class="odd">
 <td>7</td>
-<td>SWIR 2</td>
+<td>Short wavelength IR (SWIR 2)</td>
 </tr>
 </tbody>
 </table>
-<p>From these channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).</p>
-<p>Or can we? If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a <em>lot</em> of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel. But just like we can get more information that Landsat 9, so to can Landsat 9 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape.</p>
+<p>By using the data present in the channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).</p>
+<p>Or can we?</p>
+<p>If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a <em>lot</em> of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel. But just like we can get more information that Landsat 9, so too can Landsat 9 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-composites">
 <div id="cell-fig-kmeans-composites" class="cell page-columns page-full" data-execution_count="4">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -315,81 +322,94 @@ div.csl-indent {
 </div>
 </div>
 </div>
-<p>In <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we compare the natural color reconstruction to two different false color composites. All of the panels in <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: what we measure defines what we can see. In order to tell something meaningful about this place, we need to look at it in the “right” way.</p>
+<p>In <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we compare the natural color reconstruction (left) to two different false color composites. All of the panels in <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: <em>what we measure defines what we can see</em>. In order to tell something ecologically meaningful about this place, we need to look at it in the “right” way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale <span class="citation" data-cites="gonzalez2023">(<a href="../references.html#ref-gonzalez2023" role="doc-biblioref">Gonzalez <em>et al.</em> 2023</a>)</span>, there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily right for all problems.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of variable selection and feature engineering in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>.</p>
-</div></div><p>So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the <em>right</em> data. In fact, they may not hold information that is relevant to our question <em>at all</em>; or worse, they can hold more noise than signal. Looking at <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we might wonder, “where are the areas with vegetation?”. And based on our knowledge of what plants do, we can start thinking about this question in a different way. Specifically, “is there a series of features of ares with vegetation that are not shared by area without vegetation?”. But this a complicated question to answer, and so we can simplify this by asking, “how can I guess that there is a plant?”. Thankfully, ecologists, whose hobbies include (i) guessing even in the presence of data and (ii) plants, have ways to answer this question rather accurately.</p>
-<p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="../references.html#ref-kennedy2020" role="doc-biblioref">Kennedy &amp; Burbach 2020</a>)</span>. NDVI is derived from the band data (we will see how in a minute), and is an adequate heuristic to make a difference between vegetation, barren soil, and water. Because we are specifically thinking about fields, we can also consider the NDWI (water) and NDMI (moisture) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI).</p>
-<p>Because there are a few guidelines (educated guesses, in truth, and the jury is still out on the “educated” part) about the values, we can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 (note how there is a strong cluster of points here) are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops.</p>
+</div></div><p>So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the <em>right</em> data. In fact, they may not hold information that is relevant to our question <em>at all</em>; or worse, they can hold more noise than signal. Looking at <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we might wonder, “where are the areas with vegetation?”. And based on our knowledge of what plants do, we can start thinking about this question in a different way. Specifically, “is there a series of features of areas with vegetation that are not shared by area without vegetation?”. But this a complicated question to answer, and so we can simplify this by asking, “how can I guess that there is a plant?”. Thankfully, ecologists, whose hobbies include (i) guesswork and (ii) plants, have ways to answer this question rather accurately.</p>
+<p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="../references.html#ref-kennedy2020" role="doc-biblioref">Kennedy &amp; Burbach 2020</a>)</span>. NDVI is derived from the band data, and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water) and NDMI (moisture) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI).</p>
+<p>Because there are a few guidelines (educated guesses, in truth, and the jury is still out on the “educated” part) about the values we are using in this section, we can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-hexbin">
 <div id="cell-fig-kmeans-hexbin" class="cell page-columns page-full" data-execution_count="7">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-hexbin" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-hexbin-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.2: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are <em>derived</em> data, and represent the creation of new features from the raw data.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.2: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are <em>derived</em> data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
-<p>By picking these three values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm see, through the lens of what we know is important about the system.</p>
+<p>By picking these three transformed values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm sees, through the lens of what we know is important about the system. With these data in hands, we can start building a classification algorithm.</p>
 </section>
 <section id="the-theory-behind-k-means-clustering" class="level2 page-columns page-full" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="the-theory-behind-k-means-clustering"><span class="header-section-number">2.3</span> The theory behind <em>k</em>-means clustering</h2>
-<p>In order to understand the theory underlying <em>k</em>-means, we will work backwards from its output. As a method for unsupervised clustering, <em>k</em>-means will return a vector of <em>class memberships</em>, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that <em>k</em>-means is a transformation, taking as its input a vector with three dimensions (red, green, blue), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. These are the input and output of our blackbox, and now we can start figuring out its internals.</p>
+<p>In order to understand the theory underlying <em>k</em>-means, we will work backwards from its output. As a method for clustering, <em>k</em>-means will return a vector of <em>class memberships</em>, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that <em>k</em>-means is a transformation, taking as its input a vector with three dimensions (NDVI, NDMI, NDWI), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. Pixels only belongs to one class. These are the input and output of our blackbox, and now we can start figuring out its internals.</p>
 <section id="inputs-and-parameters" class="level3 page-columns page-full" data-number="2.3.1">
 <h3 data-number="2.3.1" class="anchored" data-anchor-id="inputs-and-parameters"><span class="header-section-number">2.3.1</span> Inputs and parameters</h3>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>Throughout this book, we will use <span class="math inline">\(\mathbf{X}\)</span> to note the matrix of features, and <span class="math inline">\(\mathbf{y}\)</span> to note the vector of labels. Instances are columns of the features matrix.</p>
+<p>Throughout this book, we will use <span class="math inline">\(\mathbf{X}\)</span> to note the matrix of features, and <span class="math inline">\(\mathbf{y}\)</span> to note the vector of labels. Instances are columns of the features matrix, noted <span class="math inline">\(\mathbf{x}_i\)</span>.</p>
 </div></div><p>In <em>k</em>-means, a set of observations <span class="math inline">\(\mathbf{x}_i\)</span> are assigned to a set of classes <span class="math inline">\(\mathbf{C}\)</span>, also called the clusters. All <span class="math inline">\(\mathbf{x}_i\)</span> are vectors with the same dimension (we will call it <span class="math inline">\(f\)</span>, for <em>features</em>), and we can think of our observations as a matrix of features <span class="math inline">\(\mathbf{X}\)</span> of size <span class="math inline">\((f, n)\)</span>, with <span class="math inline">\(f\)</span> features and <span class="math inline">\(n\)</span> observations (the columns of this matrix).</p>
-<p>The number of classes of <span class="math inline">\(\mathbf{C}\)</span> is <span class="math inline">\(|\mathbf{C}| = k\)</span>, and <span class="math inline">\(k\)</span> is an hyper-parameter of the model, as it needs to bet fixed before we start running the algorithm. Each class is defined by its centroid, a vector <span class="math inline">\(\mathbf{c}\)</span> with <span class="math inline">\(f\)</span> dimensions (<em>i.e.</em> the centroid corresponds to a potential “idealized” observation of this class in the space of the features).</p>
+<p>The number of classes of <span class="math inline">\(\mathbf{C}\)</span> is <span class="math inline">\(|\mathbf{C}| = k\)</span>, and <span class="math inline">\(k\)</span> is an hyper-parameter of the model, as it needs to fixed before we start running the algorithm. Each class is defined by its centroid, a vector <span class="math inline">\(\mathbf{c}\)</span> with <span class="math inline">\(f\)</span> dimensions (<em>i.e.</em> the centroid corresponds to a potential “idealized” observation of this class in the space of the features), which <em>k</em>-means progressively refines.</p>
 </section>
 <section id="assigning-instances-to-classes" class="level3 page-columns page-full" data-number="2.3.2">
 <h3 data-number="2.3.2" class="anchored" data-anchor-id="assigning-instances-to-classes"><span class="header-section-number">2.3.2</span> Assigning instances to classes</h3>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Of course, the correct distance measure to use depends on what is appropriate for the data!</p>
-</div></div><p>Instances are assigned to the class when the distance between themselves and the centroid of this class is lower than the distance between themselves and any other class. To phrase it differently, the class membership of an instance <span class="math inline">\(\mathbf{x}_i\)</span> is given by</p>
+</div></div><p>Instances are assigned to the class when the distance between themselves and the centroid of this class is lower than the distance between themselves and the centroid of any other class. To phrase it differently, the class membership of an instance <span class="math inline">\(\mathbf{x}_i\)</span> is given by</p>
 <p><span id="eq-clustering-onepoint"><span class="math display">\[
 \text{argmin}_j \left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2 \,,
 \tag{2.1}\]</span></span></p>
-<p>which is the value of <span class="math inline">\(j\)</span> that minimizes the <span class="math inline">\(L^2\)</span> norm (the Euclidean distance) between the instance and the centroid, and <span class="math inline">\(\text{argmin}_j\)</span> is the function returning the value of <span class="math inline">\(j\)</span> that minimizes its argument.</p>
+<p>which is the value of <span class="math inline">\(j\)</span> that minimizes the <span class="math inline">\(L^2\)</span> norm (the Euclidean distance) between the instance and the centroid; <span class="math inline">\(\text{argmin}_j\)</span> is the function returning the value of <span class="math inline">\(j\)</span> that minimizes its argument.</p>
 </section>
 <section id="optimizing-the-centroids" class="level3" data-number="2.3.3">
 <h3 data-number="2.3.3" class="anchored" data-anchor-id="optimizing-the-centroids"><span class="header-section-number">2.3.3</span> Optimizing the centroids</h3>
-<p>Of course, what we really care about is the assignment of <em>all</em> instances to the classes. For this reason, the configuration (the disposition of the centroid) that solves our specific problem is the one that leads to the lowest possible variance within the clusters. As it turns out, it is not that difficult to go from <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a> to a solution for the entire problem: we simply have to sum over all points!</p>
-<p>This leads to a measure of the variance, which we want to minimize.</p>
+<p>Of course, what we really care about is the assignment of <em>all</em> instances to the classes. For this reason, the configuration (the disposition of the centroids) that solves our specific problem is the one that leads to the lowest possible variance within the clusters. As it turns out, it is not that difficult to go from <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a> to a solution for the entire problem: we simply have to sum over all points!</p>
+<p>This leads to a measure of the variance, which we want to minimize, expressed as</p>
 <p><span id="eq-clustering-variance"><span class="math display">\[
 \sum_{i=1}^k \sum_{\mathbf{x}\in \mathbf{C}_i} \|\mathbf{x} - \mathbf{c}_i\|_2 \,.
 \tag{2.2}\]</span></span></p>
 <p>The part that is non-trivial is now to decide on the value of <span class="math inline">\(\mathbf{c}\)</span> for each class. This is the heart of the <em>k</em>-means algorithm. From <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>, we have a criteria to decide to which class each instance belongs. Of course, there is nothing that prevents us from using this in the opposite direction, to define the instance by the points that form it! In this approach, the membership of class <span class="math inline">\(\mathbf{C}_j\)</span> is the list of points that satisfy the condition in <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>. But there is no guarantee that the <em>current</em> position of <span class="math inline">\(\mathbf{c}_j\)</span> in the middle of all of these points is optimal, <em>i.e.</em> that it minimizes the within-class variance.</p>
-<p>To ensure that this is the case, we can re-define the value of <span class="math inline">\(\mathbf{c}_j\)</span> as</p>
+<p>This is easily achieved, however. To ensure that this is the case, we can re-define the value of <span class="math inline">\(\mathbf{c}_j\)</span> as</p>
 <p><span id="eq-clustering-centroid-update"><span class="math display">\[
 \mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j&nbsp;\,,
 \tag{2.3}\]</span></span></p>
-<p>where <span class="math inline">\(|\cdot|\)</span> is the cardinality of (number of istances in) <span class="math inline">\(\mathbf{C}_j\)</span>, and <span class="math inline">\(\sum \mathbf{C}_j\)</span> is the sum of each feature in <span class="math inline">\(\mathbf{C}_j\)</span>. To put it plainly: we update the centroid of <span class="math inline">\(\mathbf{C}_j\)</span> so that it takes, for each feature, the average value of all the points that form <span class="math inline">\(\mathbf{C}_j\)</span>.</p>
+<p>where <span class="math inline">\(|\cdot|\)</span> is the cardinality of (number of istances in) <span class="math inline">\(\mathbf{C}_j\)</span>, and <span class="math inline">\(\sum \mathbf{C}_j\)</span> is the sum of each feature in <span class="math inline">\(\mathbf{C}_j\)</span>. To put it plainly: we update the centroid of <span class="math inline">\(\mathbf{C}_j\)</span> so that it takes, for each feature, the average value of all the instances that form <span class="math inline">\(\mathbf{C}_j\)</span>.</p>
 </section>
 <section id="updating-the-classes" class="level3 page-columns page-full" data-number="2.3.4">
 <h3 data-number="2.3.4" class="anchored" data-anchor-id="updating-the-classes"><span class="header-section-number">2.3.4</span> Updating the classes</h3>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Repeating a step multiple times in a row is called an iterative process, and we will see a <em>lot</em> of them.</p>
-</div></div><p>Once we have applied <a href="#eq-clustering-centroid-update" class="quarto-xref">Equation&nbsp;<span>2.3</span></a> to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.</p>
-<p>But until when? Finding the optimal solution for a set of points is an NP-hard problem <span class="citation" data-cites="aloise2009">(<a href="../references.html#ref-aloise2009" role="doc-biblioref">Aloise <em>et al.</em> 2009</a>)</span>, which means that we will need to rely on a little bit of luck. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is <em>global</em> and not <em>local</em>.</p>
+</div></div><p>Once we have applied <a href="#eq-clustering-centroid-update" class="quarto-xref">Equation&nbsp;<span>2.3</span></a> to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.</p>
+<p>But until when?</p>
+<p>Finding the optimal solution for a set of points is an NP-hard problem <span class="citation" data-cites="aloise2009">(<a href="../references.html#ref-aloise2009" role="doc-biblioref">Aloise <em>et al.</em> 2009</a>)</span>, which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is <em>global</em> and not <em>local</em>.</p>
 <p>A global optimum is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is <em>greedy</em>, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum.</p>
-<p>In order to get the best possible solution, it is common to run <em>k</em>-means multiple times for a given <span class="math inline">\(k\)</span>, and to pick the positions of the centroids that give the best overall fit.</p>
+<p>In order to get the best possible solution, it is therefore common to run <em>k</em>-means multiple times for a given <span class="math inline">\(k\)</span>, and to pick the positions of the centroids that give the best overall fit.</p>
 </section>
-<section id="identification-of-the-optimal-number-of-clusters" class="level3" data-number="2.3.5">
-<h3 data-number="2.3.5" class="anchored" data-anchor-id="identification-of-the-optimal-number-of-clusters"><span class="header-section-number">2.3.5</span> Identification of the optimal number of clusters</h3>
+<section id="sec-clustering-optimality" class="level3 page-columns page-full" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="sec-clustering-optimality"><span class="header-section-number">2.3.5</span> Identification of the optimal number of clusters</h3>
+<p>One question that is left un-answered is the value of <span class="math inline">\(k\)</span>. How do we decide on the number of clusters?</p>
+<p>There are two solutions here. One is to have an <em>a priori</em> knowledge of the number of classes. For example, if the purpose of clustering is to create groups for some specific task, there might be an upper/lower bound to the number of tasks you are willing to consider. The other solution is to run the algorithm in a way that optimizes the number of clusters for us.</p>
+<p>This second solution turns out to be rather simple with <em>k</em>-means. We need to change the value of <span class="math inline">\(k\)</span>, run it on the same dataset several times, and then pick the solution that was <em>optimal</em>. But this is not trivial. Simply using <a href="#eq-clustering-variance" class="quarto-xref">Equation&nbsp;<span>2.2</span></a> would lead to always preferring many clusters. After all, each point in its own cluster would get a pretty low variance!</p>
+<p>For this reason, we use measures of optimality that are a little more refined. One of them is the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> method, which is built around a simple idea: an assignment of instances to clusters is good if the instances within a cluster are not too far away from the centroids, and the centroids are as far away from one another as possible.</p>
+<p>The Davies-Bouldin measure is striking in its simplicity. From a series of points and their assigned clusters, we only need to compute two things. The first is a vector <span class="math inline">\(\mathbf{s}\)</span>, which holds the average distance between the points and their centroids (this is the <span class="math inline">\(\left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2\)</span> term in <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>, so this measure still relates directly to the variance); the second is a matrix <span class="math inline">\(\mathbf{M}\)</span>, which measures the distances <em>between</em> the centroids.</p>
+<p>These two information are combined in a matrix <span class="math inline">\(\mathbf{R}\)</span>, wherein <span class="math inline">\(\mathbf{R}_{ij} = (s_i + s_j)/\mathbf{M}_{ij}\)</span>. The interpretation of this term is quite simply: is the average distance <em>within</em> clusters <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> much larger compared to the distance <em>between</em> these clusters. This is, in a sense, a measure of the stress that these two clusters impose on the entire system. In order to turn this matrix into a single value, we calculate the maximum value (ignoring the diagonal!) for each row: this is a measure of the <em>maximal</em> amount of stress in which a cluster is involved. By averaging these values across all clusters, we have a measure of the quality of the assignment, that can be compared for multiple values of <span class="math inline">\(k\)</span>.</p>
+<p>Note that this approach protects us against the each-point-in-its-cluster situation: in this scenario, the distance between clusters would decrease really rapidly, meaning that the values in <span class="math inline">\(\mathbf{R}\)</span> would <em>increase</em>; the Davies-Bouldin measure indicates a better clustering when the values are <em>lower</em>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>In fact, there is very little enumeration of techniques in this book. The important point is to understand how all of the pieces fit together, not to make a census of all possible pieces.</p>
+</div></div><p>There are alternatives to this method, including silhouettes <span class="citation" data-cites="rousseeuw1987">(<a href="../references.html#ref-rousseeuw1987" role="doc-biblioref">Rousseeuw 1987</a>)</span> and the technique of <span class="citation" data-cites="dunn1974">Dunn (<a href="../references.html#ref-dunn1974" role="doc-biblioref">1974</a>)</span>. The question of optimizing the number of clusters goes back several decades <span class="citation" data-cites="thorndike1953">(<a href="../references.html#ref-thorndike1953" role="doc-biblioref">Thorndike 1953</a>)</span>, and it still actively studied. What matter is less to give a comprehensive overview of all the measures: the message here is to pick one that works (and can be justified) for your specific problem!</p>
 </section>
 </section>
 <section id="application-optimal-clustering-of-the-satellite-image-data" class="level2 page-columns page-full" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="application-optimal-clustering-of-the-satellite-image-data"><span class="header-section-number">2.4</span> Application: optimal clustering of the satellite image data</h2>
 <section id="initial-run" class="level3 page-columns page-full" data-number="2.4.1">
 <h3 data-number="2.4.1" class="anchored" data-anchor-id="initial-run"><span class="header-section-number">2.4.1</span> Initial run</h3>
+<p>Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using <span class="math inline">\(k = 3\)</span>, we get the results presented in <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-initial-landscape">
 <div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="9">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -409,7 +429,7 @@ div.csl-indent {
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
 </div></div><p>In order to produce <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose.</p>
-<p>We will use the method from <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span>, which … .</p>
+<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. There are a few reasons why. First, if we ask for <span class="math inline">\(k = 2\)</span>, there is a good chance that the algorithm will separate pixels as “open water”, “not open water”, which is not terribly useful. Second, more than 10 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-tuning">
 <div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="12">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -422,9 +442,16 @@ div.csl-indent {
 </div>
 </div>
 </div>
+<p>There are two interesting things in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. First, note that for <span class="math inline">\(k=\{3,4\}\)</span>, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! Second, the assignments get progressively worse (until <span class="math inline">\(k = 6\)</span>), and then slightly better, but without beating <span class="math inline">\(k = 3\)</span>.</p>
+<p>In this situation, you have a decision to make. Trusting the data would mean picking <span class="math inline">\(k = 3\)</span>. This is a fine choice, easy to justify, and grounded in trusting the measure of optimality that we decided to use. But maybe <span class="math inline">\(k=3\)</span> is a little underwhelming, and you would rather have a little more classes to work with. Using <span class="math inline">\(k=4\)</span> gives you one more class, with the added advantage of also having no dispersal, and so a very consistent assignment. If you wanted to get back to a number of classes with the same Davies-Bouldin index, you would need to increase all the way to <span class="math inline">\(k=\{9,10\}\)</span>.</p>
+<p>In this specific case, we will sacrifice a little bit of optimal clustering for a little more classes, and use <span class="math inline">\(k = 4\)</span>. Is it the optimal partition of our pixels? No.&nbsp;But the way to read <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a> is not necessarily “pick <span class="math inline">\(k=3\)</span> or else”. Instead, it is closer to “whatever you do, do not pick <span class="math inline">\(k=6\)</span>”. Just because we start using measures of model performance does not mean we can stop using critical thinking.</p>
 </section>
 <section id="clustering-with-optimal-number-of-classes" class="level3 page-columns page-full" data-number="2.4.3">
 <h3 data-number="2.4.3" class="anchored" data-anchor-id="clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>We will revisit the issue of understanding how a model makes a prediction in <a href="varimp.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>.</p>
+</div></div><p>The clustering of pixels using <span class="math inline">\(k = 4\)</span> is presented in <a href="#fig-kmeans-optimal-landscape" class="quarto-xref">Figure&nbsp;<span>2.5</span></a>, again framed by the true color and false color composites from <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> (again, because our immediate question should be, “does it makes ecological sense?”). Unsurprisingly, <em>k</em>-means separated the open water pixels, what looks like urban and more arid areas, and split vegetation in two classes. This is excellent information! There are two relevant classes for our question of “where are areas with vegetation?”, and we can look for reasons why that would be the case.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-optimal-landscape">
 <div id="cell-fig-kmeans-optimal-landscape" class="cell page-columns page-full" data-execution_count="14">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -437,9 +464,7 @@ div.csl-indent {
 </div>
 </div>
 </div>
-</section>
-<section id="partition-of-the-pixels" class="level3 page-columns page-full" data-number="2.4.4">
-<h3 data-number="2.4.4" class="anchored" data-anchor-id="partition-of-the-pixels"><span class="header-section-number">2.4.4</span> Partition of the pixels</h3>
+<p>Instead, we will focus on learning some more things about the behavior of this model. In <a href="#fig-kmeans-barplot-classes" class="quarto-xref">Figure&nbsp;<span>2.6</span></a>, we show the relative size of the clusters, as measured by the number of points in them. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about <em>k</em>-means is that it gives clusters of the same size, but this sized does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-barplot-classes">
 <div id="cell-fig-kmeans-barplot-classes" class="cell page-columns page-full" data-execution_count="15">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -452,6 +477,10 @@ div.csl-indent {
 </div>
 </div>
 </div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>In fact, this behavior makes <em>k</em>-means excellent at creating color palettes from images! Cases in point, <a href="https://github.com/karthik/wesanderson">Karthik Ram’s Wes Anderson palettes</a>, and <a href="https://github.com/dill/beyonce">David Lawrence Miller’s Beyoncé palettes</a>. Let it never again be said that ecologists should not be trusted with machine learning methods.</p>
+</div></div><p>The area of the space of parameters covered by each cluster in represented in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.7</span></a>, and this result is actually not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with sharp boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for vector quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-clustering">
 <div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="16">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -464,15 +493,10 @@ div.csl-indent {
 </div>
 </div>
 </div>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>In fact, this behavior makes <em>k</em>-means excellent at creating color palettes from images! Cases in point, <a href="https://github.com/karthik/wesanderson">Karthik Ram’s Wes Anderson palettes</a>, and <a href="https://github.com/dill/beyonce">David Lawrence Miller’s Beyoncé palettes</a>. Let it never again be said that ecologists should not be trusted with machine learning methods.</p>
-</div></div><p>The result in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.7</span></a> is not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with sharp boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for vector quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
 </section>
 </section>
 <section id="alternatives-and-improvements" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="alternatives-and-improvements"><span class="header-section-number">2.5</span> Alternatives and improvements</h2>
-<p>EM</p>
 <p>k-median</p>
 <p>k-medoids</p>
 
@@ -490,6 +514,12 @@ Cooper, N., Bond, A.L., Davis, J.L., Portela Miguez, R., Tomsett, L. &amp; Helge
 <div id="ref-davies1979" class="csl-entry" role="listitem">
 Davies, D.L. &amp; Bouldin, D.W. (1979). <a href="https://doi.org/10.1109/tpami.1979.4766909">A cluster separation measure</a>. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, PAMI-1, 224–227.
 </div>
+<div id="ref-dunn1974" class="csl-entry" role="listitem">
+Dunn, J.C. (1974). <a href="https://doi.org/10.1080/01969727408546059">Well-Separated Clusters and Optimal Fuzzy Partitions</a>. <em>Journal of Cybernetics</em>, 4, 95–104.
+</div>
+<div id="ref-gonzalez2023" class="csl-entry" role="listitem">
+Gonzalez, A., Vihervaara, P., Balvanera, P., Bates, A.E., Bayraktarov, E., Bellingham, P.J., <em>et al.</em> (2023). <a href="https://doi.org/10.1038/s41559-023-02171-0">A global biodiversity observing system to unite monitoring and guide action</a>. <em>Nature Ecology &amp; Evolution</em>.
+</div>
 <div id="ref-gray1984" class="csl-entry" role="listitem">
 Gray, R. (1984). <a href="https://doi.org/10.1109/massp.1984.1162229">Vector quantization</a>. <em>IEEE ASSP Magazine</em>, 1, 4–29.
 </div>
@@ -498,6 +528,12 @@ Kennedy, S. &amp; Burbach, M. (2020). <a href="https://doi.org/10.1353/gpr.2020.
 </div>
 <div id="ref-luccioni2023" class="csl-entry" role="listitem">
 Luccioni, A.S. &amp; Rolnick, D. (2023). <a href="https://doi.org/10.1609/aaai.v37i12.26682">Bugs in the data: How ImageNet misrepresents biodiversity</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>, 37, 14382–14390.
+</div>
+<div id="ref-rousseeuw1987" class="csl-entry" role="listitem">
+Rousseeuw, P.J. (1987). <a href="https://doi.org/10.1016/0377-0427(87)90125-7">Silhouettes: A graphical aid to the interpretation and validation of cluster analysis</a>. <em>Journal of Computational and Applied Mathematics</em>, 20, 53–65.
+</div>
+<div id="ref-thorndike1953" class="csl-entry" role="listitem">
+Thorndike, R.L. (1953). <a href="https://doi.org/10.1007/bf02289263">Who belongs in the family?</a> <em>Psychometrika</em>, 18, 267–276.
 </div>
 <div id="ref-vermote2016" class="csl-entry" role="listitem">
 Vermote, E., Justice, C., Claverie, M. &amp; Franch, B. (2016). <a href="https://doi.org/10.1016/j.rse.2016.04.008">Preliminary analysis of the performance of the Landsat 8/OLI land surface reflectance product</a>. <em>Remote Sensing of Environment</em>, 185, 46–56.
