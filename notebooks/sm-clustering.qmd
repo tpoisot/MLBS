@@ -71,10 +71,10 @@ plot
 
 ```{julia}
 #| label: fig-kmeans-hexbin
-#| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data.
+#| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
 fig = Figure(resolution=(500,500))
 ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-hexbin!(ax, vec(ndvi), vec(ndmi), colormap=:delta, bins=120)
+hexbin!(ax, vec(ndvi), vec(ndmi), colormap=[:lightgrey, :black], bins=120)
 tightlimits!(ax)
 current_figure()
 ```
@@ -91,10 +91,24 @@ initial classification
 ```{julia}
 #| label: fig-kmeans-initial-landscape
 #| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis. This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into five categories. 
+rgb_cube = colorcube(R, G, B)
+veg_cube = colorcube(S, N, R)
+
+fig = Figure(resolution=(500, 300))
+ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
+ax_sat = Makie.Axis(fig[1,2], aspect=DataAspect())
+ax_veg = Makie.Axis(fig[1,3], aspect=DataAspect())
+
+image!(ax_rgb, load(assetpath(rgb_cube)))
+image!(ax_veg, load(assetpath(veg_cube)))
+
 C = reshape(assignments(clusters), size(ndvi))
-fig = Figure(resolution=(500,500))
-ax = Makie.Axis(fig[1,1]; aspect=DataAspect())
-heatmap!(ax, C; colormap=Makie.wong_colors())
+heatmap!(ax_sat, C; colormap=Makie.wong_colors())
+
+hidedecorations!(ax_rgb)
+hidedecorations!(ax_veg)
+hidedecorations!(ax_sat)
+
 current_figure()
 ```
 
@@ -107,12 +121,11 @@ DaviesBouldin(X, clusters)
 now we optimize -- this runs on multiple threads, but it's still not super fast
 
 ```{julia}
-k_trial = repeat(2:15, 8)
+k_trial = repeat(3:10, 15)
 score = zeros(Float64, length(k_trial))
 Threads.@threads for i in 1:length(k_trial)
     k = k_trial[i]
     score[i] = DaviesBouldin(X, kmeans(X, k))
-    @info maximum(score)
 end
 ```
 
@@ -123,15 +136,16 @@ figure with the number of clusters v. cost
 #| fig-cap: tuning of k
 f = Figure()
 ax = CairoMakie.Axis(f[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index")
-scatter!(ax, k_trial, score)
+scatter!(ax, k_trial, score, color=:black)
+ylims!(ax, low=0.5, high=1.0)
 current_figure()
 ```
 
 now we can pick the best number of clusters and search for a solution
 
 ```{julia}
-bscore, imax = findmax(score)
-k = k_trial[imax]
+bscore, imax = findmin(score)
+k = k_trial[imax] + 1
 clusters = kmeans(X, k)
 @info DaviesBouldin(X, clusters)
 ```
@@ -173,11 +187,8 @@ clust = unique(assigns)
 counts = [count(isequal(k), assigns) for k in clust]
 
 fig = Figure(resolution=(500,300))
-ax = Makie.Axis(fig[1,1]; xlabel="Cluster", xgridvisible=false)
-ylims!(ax, (0, maximum(counts)*1.1))
-scatter!(ax, sort(counts), color=:slategrey)
-hidespines!(ax)
-#hideydecorations!(ax)
+ax = Makie.Axis(fig[1,1]; xlabel="Cluster", ylabel="Proportion of pixels")
+scatter!(ax, sort(counts)./sum(counts), color=:slategrey)
 current_figure()
 ```
 
