@@ -35,21 +35,42 @@ S = [shapleyvalues(predictor, X, i, j) for i in axes(X, 1), j in axes(X, 2)]
 P = [predictor(X[i,:]) for i in axes(X, 1)]
 ```
 
+Example for a single prediction
+
 ```{julia}
-heatmap(S)
+#| label: fig-shapley-example
+#| fig-cap: Example of the contribution of the model variables to the prediction. The dashed line indicates the average prediction across all instances, and each arrow shows how the value of the feature for this instance moves the prediction, in an additive way. The length of each arrow is the Shapley value for this feature in this instance. The final prediction (in this case, how much higher/lower than the average) is given in a red cirle.
+shaps = S[1,:]
+
+f = Figure()
+
+ax = Axis(f[1,1], yticks = ([4,3,2,1], ["BIO$(v)" for v in sv]))
+xlims!(ax, low=-0.5, high=0.5)
+
+vlines!([0.0], color=:black, linestyle=:dash)
+
+starts = cumsum(shaps) .- shaps
+elev = reverse(collect(axes(shaps, 1)))
+ydir = zeros(length(shaps))
+
+arrows!(ax, starts, elev, shaps, ydir, align=:tailhead)
+scatter!(ax, [P[1]-mean(P)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=25)
+
+current_figure()
 ```
 
 look at spread for each value
 
 ```{julia}
 f = Figure()
-ax1 = Axis(f[1,1]; ylabel="BIO $(sv[1])")
+gl = f[1,1] = GridLayout()
+ax1 = Axis(gl[1,1]; ylabel="BIO $(sv[1])", xaxisposition=:top)
 density!(ax1, S[:,1])
-ax2 = Axis(f[2,1]; ylabel="BIO $(sv[2])")
+ax2 = Axis(gl[2,1]; ylabel="BIO $(sv[2])")
 density!(ax2, S[:,2])
-ax3 = Axis(f[1,2]; ylabel="BIO $(sv[3])")
+ax3 = Axis(gl[1,2]; ylabel="BIO $(sv[3])", xaxisposition=:top, yaxisposition=:right)
 density!(ax3, S[:,3])
-ax4 = Axis(f[2,2]; ylabel="BIO $(sv[4])")
+ax4 = Axis(gl[2,2]; ylabel="BIO $(sv[4])", yaxisposition=:right)
 density!(ax4, S[:,4])
 
 xmin, xmax = extrema(S)
@@ -58,10 +79,9 @@ for ax in [ax1, ax2, ax3, ax4]
     ylims!(ax, low=0.0)
     hideydecorations!(ax, label=false)
 end
-hidexdecorations!(ax1, grid=false)
-hidexdecorations!(ax2, grid=false)
 
 rowgap!(gl, 0.0)
+colgap!(gl, 0.0)
 
 current_figure()
 ```
@@ -84,9 +104,6 @@ scatter!(ax4, X[:,4], S[:,4]; args...)
 xmin, xmax = extrema(S)
 for ax in [ax1, ax2, ax3, ax4]
     hlines!(ax, [0.0], color=:black, linestyle=:dash)
-    #xlims!(ax, low=xmin, high=xmax)
-    #ylims!(ax, low=0.0)
-    #hideydecorations!(ax, label=false)
 end
 
 current_figure()
@@ -114,7 +131,7 @@ end
 plot the partial effects of each variable
 
 ```{julia}
-heatmap(V[2], colormap=:roma, colorrange=(-0.2,0.2))
+heatmap(V[3], colormap=:roma, colorrange=(-0.2,0.2))
 ```
 
 most important variables
