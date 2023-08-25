@@ -69,10 +69,27 @@ current_figure()
 make some plots of the shapley values per points
 
 ```{julia}
-scatter(X[:,1], S[:,1], color=(:black, 0.2))
-scatter(X[:,2], S[:,2], color=(:black, 0.2))
-scatter(X[:,3], S[:,3], color=(:black, 0.2))
-scatter(X[:,4], S[:,4], color=(:black, 0.2))
+f = Figure()
+args = (color=:black, markersize=5, colorrange=(0., 1.))
+
+ax1 = Axis(f[1,1]; xlabel="BIO $(sv[1])")
+scatter!(ax1, X[:,1], S[:,1]; args...)
+ax2 = Axis(f[2,1]; xlabel="BIO $(sv[2])")
+scatter!(ax2, X[:,2], S[:,2]; args...)
+ax3 = Axis(f[1,2]; xlabel="BIO $(sv[3])")
+scatter!(ax3, X[:,3], S[:,3]; args...)
+ax4 = Axis(f[2,2]; xlabel="BIO $(sv[4])")
+scatter!(ax4, X[:,4], S[:,4]; args...)
+
+xmin, xmax = extrema(S)
+for ax in [ax1, ax2, ax3, ax4]
+    hlines!(ax, [0.0], color=:black, linestyle=:dash)
+    #xlims!(ax, low=xmin, high=xmax)
+    #ylims!(ax, low=0.0)
+    #hideydecorations!(ax, label=false)
+end
+
+current_figure()
 ```
 
 ```{julia}
