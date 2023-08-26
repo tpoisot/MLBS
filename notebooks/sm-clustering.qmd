@@ -78,7 +78,7 @@ plot
 ```{julia}
 #| label: fig-kmeans-hexbin
 #| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
-fig = Figure(resolution=(500,500))
+fig = Figure(resolution=(500,300))
 ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
 hexbin!(ax, vec(ndvi), vec(ndmi), colormap=[:lightgrey, :black], bins=120)
 tightlimits!(ax)
@@ -125,15 +125,25 @@ DaviesBouldin(X, clusters)
 now we optimize -- this runs on multiple threads, but it's still not super fast
 
 ```{julia}
-k_trial = repeat(3:8, 10)
-score = ones(Float64, length(k_trial))
-costs = ones(Float64, length(k_trial))
+k_trial = 3:8
+score = zeros(Float64, length(k_trial))
+costs = copy(score)
+vscore = copy(score)
+vcosts = copy(score)
 Suppressor.@suppress_err begin
-    Threads.@threads for i in 1:length(k_trial)
-        k = k_trial[i]
-        cl = kmeans(X, k)
-        score[i] = DaviesBouldin(X, cl)
-        costs[i] = cl.totalcost
+    Threads.@threads for j in axes(k_trial, 1)
+        k = k_trial[j]
+        sc = zeros(Float64, 6)
+        cs = copy(sc)
+        for rep in axes(sc, 1)
+            cl = kmeans(X, k)
+            sc[rep] = DaviesBouldin(X, cl)
+            cs[rep] = cl.totalcost
+        end
+        score[j] = mean(sc)
+        costs[j] = mean(cs)
+        vscore[j] = std(sc)
+        vcosts[j] = std(cs)
     end
 end
 ```
@@ -142,18 +152,18 @@ figure with the number of clusters v. cost
 
 ```{julia}
 #| label: fig-kmeans-tuning
-#| fig-cap: tuning of k
-f = Figure()
+#| fig-cap: Results of running the *k*-means algorithm ten times for each number of clusters between 3 and 8. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
+f = Figure(; resolution=(500,500))
 
 gl = f[1,1] = GridLayout()
 
-jitter = rand(length(score)).*0.2 .- 0.1
-
 ax1 = CairoMakie.Axis(gl[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index", xticks=3:8)
-scatter!(ax1, k_trial.+jitter, score, color=:black)
+scatterlines!(ax1, k_trial, score, color=:black)
+errorbars!(ax1, k_trial, score, .5vscore, .5vscore, whiskerwidth = 10)
 
 ax2 = CairoMakie.Axis(gl[2,1]; xlabel="Number of clusters", ylabel="Total cost", xticks=3:8)
-scatter!(ax2, k_trial.+jitter, costs, color=:black)
+scatterlines!(ax2, k_trial, costs, color=:black)
+errorbars!(ax2, k_trial, costs, .5vcosts, .5vcosts, whiskerwidth = 10)
 
 hidexdecorations!(ax1, grid=false)
 
@@ -166,7 +176,7 @@ now we can pick the best number of clusters and search for a solution
 
 ```{julia}
 bscore, imax = findmin(score)
-k = 4
+k = 5
 clusters = kmeans(X, k)
 @info DaviesBouldin(X, clusters)
 ```
@@ -175,7 +185,7 @@ now plot
 
 ```{julia}
 #| label: fig-kmeans-optimal-landscape
-#| fig-cap: blah
+#| fig-cap: Results of the landscape clustering with k=5 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
 
 C = permutedims(reshape(assignments(clusters), size(ndvi)))
 
@@ -212,6 +222,10 @@ current_figure()
 
 ```{julia}
 #| label: fig-kmeans-clustering
-#| fig-cap: Visualisation of the clustering output using ...
-scatter(vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=Makie.wong_colors())
+#| fig-cap: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
+fig = Figure(resolution=(500,300))
+ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
+scatter!(ax, vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=Makie.wong_colors())
+tightlimits!(ax)
+current_figure()
 ```
