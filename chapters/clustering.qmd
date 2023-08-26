@@ -103,7 +103,7 @@ The part that is non-trivial is now to decide on the value of $\mathbf{c}$ for e
 This is easily achieved, however. To ensure that this is the case, we can re-define the value of $\mathbf{c}_j$ as
 
 $$
-\mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j \,,
+\mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j \,,
 $$ {#eq-clustering-centroid-update}
 
 where $|\cdot|$ is the cardinality of (number of istances in) $\mathbf{C}_j$, and $\sum \mathbf{C}_j$ is the sum of each feature in $\mathbf{C}_j$. To put it plainly: we update the centroid of $\mathbf{C}_j$ so that it takes, for each feature, the average value of all the instances that form $\mathbf{C}_j$.
