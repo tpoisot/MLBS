@@ -4,6 +4,8 @@ using PrettyTables
 
 import JLD
 
+import Suppressor
+
 using Statistics
 
 using CairoMakie

@@ -7,6 +7,8 @@ _code_path = joinpath(@__DIR__, "..", "lib")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "confusiontable.jl"))
 include(joinpath(_code_path, "nbc.jl"))
+include(joinpath(_code_path, "vif.jl"))
+include(joinpath(_code_path, "splitters.jl"))
 ```
 
 We load the data and the model
@@ -180,11 +182,65 @@ push!(varsel,
 @info variableset
 ```
 
+now we run vif with a threshold of 10
+
+```{julia}
+vifvars = stepwisevif(trainfeatures, 10.0)
+C = [last(confusion_for_fold(trainlabels, trainfeatures, fold; vars=vifvars)) for fold in folds]
+
+variableset = copy(vifvars)
+
+# Retrain
+C = [last(confusion_for_fold(trainlabels, trainfeatures, fold; vars=variableset)) for fold in folds]
+_tss = mean(trueskill.(C))
+_acc = mean(accuracy.(C))
+_ppv = mean(ppv.(C))
+_npv = mean(npv.(C))
+_mcc = mean(mcc.(C))
+push!(varsel, 
+    (Method = :VIF, N = length(variableset), Accuracy = _acc, TSS = _tss, NPV = _npv, PPV = _ppv, MCC = _mcc)
+)
+
+@info variableset
+```
+
+and now we run a PCA -- trained on the training data, measured on the validation data, k-fold cross validation
+
+```{julia}
+using MultivariateStats
+
+C = zeros(ConfusionMatrix, length(folds))
+v = zeros(Int64, length(C))
+for (i,fold) in enumerate(folds)
+    pX = fit(PCA, permutedims(trainfeatures[fold[1],:]))
+    v[i] = outdim(pX)
+    vX = permutedims(predict(pX, permutedims(trainfeatures[fold[2],:])))
+    tX = permutedims(predict(pX, permutedims(trainfeatures[fold[1],:])))
+    
+    predictor = naivebayes(trainlabels[fold[1]], tX)
+    
+    prediction = vec(mapslices(predictor, tX, dims=2))
+    validation = vec(mapslices(predictor, vX, dims=2))
+
+    C[i] = ConfusionMatrix(validation, trainlabels[fold[2]])
+end
+
+# Retrain
+_tss = mean(trueskill.(C))
+_acc = mean(accuracy.(C))
+_ppv = mean(ppv.(C))
+_npv = mean(npv.(C))
+_mcc = mean(mcc.(C))
+push!(varsel, 
+    (Method = :PCA, N = mean(v), Accuracy = _acc, TSS = _tss, NPV = _npv, PPV = _ppv, MCC = _mcc)
+)
+```
+
 look at method
 
 ```{julia}
 for col in [:Accuracy, :TSS, :NPV, :PPV, :MCC]
-    varsel[!,col] = round.(varsel[!,col]; digits=3)
+    varsel[!,col] = round.(varsel[!,col]; digits=2)
 end
 sort!(varsel, :MCC)
 ```
