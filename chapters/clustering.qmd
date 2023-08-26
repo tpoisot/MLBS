@@ -2,6 +2,8 @@
 
 As we mentioned in the introduction, a core idea of data science is that things that look the same (in that, when described with data, they resemble one another) are likely to be the same. Although this sounds like a simplifying assumption, this can provide the basis for approaches in which we *create* groups in data that have no labels. This task is called clustering: we seek to add a *label* to each observation, in order to form groups, and the data we work from do *not* have a label that we can use to train a model. In this chapter, we will explore the *k*-means algorithm for clustering, and illustrate how it can be used in practice.
 
+**TODO** cite 10.1186/s42834-019-0016-5 automatic split water/non water
+
 ## A digression: which birds are red?
 
 Before diving in, it is a good idea to ponder a simple case. We can divide everything in just two categories: things with red feathers, and things without red feathers. An example of a thing with red feathers is the Northern Cardinal (*Cardinalis cardinalis*), and things without red feathers are the iMac G3, Haydn's string quartets, and of course the Northern Cardinal (*Cardinalis cardinalis*).
@@ -25,7 +27,7 @@ Throughout this chapter, we will work on a single image -- we may initially balk
 In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene [@vermote2016], for which we have access to 9 different bands.
 
 | Band   | Measure                      | Notes                                           |
-|---------|----------------------|------------------------------|
+|----------------|------------------------|---------------------------------|
 | 1      | Aerosol                      | Good proxy for Chl. in oceans                   |
 | 2      | Visible blue                 |                                                 |
 | 3      | Visible red                  |                                                 |

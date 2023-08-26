@@ -125,12 +125,15 @@ DaviesBouldin(X, clusters)
 now we optimize -- this runs on multiple threads, but it's still not super fast
 
 ```{julia}
-k_trial = repeat(3:8, 12)
+k_trial = repeat(3:8, 10)
 score = ones(Float64, length(k_trial))
+costs = ones(Float64, length(k_trial))
 Suppressor.@suppress_err begin
     Threads.@threads for i in 1:length(k_trial)
         k = k_trial[i]
-        score[i] = DaviesBouldin(X, kmeans(X, k))
+        cl = kmeans(X, k)
+        score[i] = DaviesBouldin(X, cl)
+        costs[i] = cl.totalcost
     end
 end
 ```
@@ -141,9 +144,21 @@ figure with the number of clusters v. cost
 #| label: fig-kmeans-tuning
 #| fig-cap: tuning of k
 f = Figure()
-ax = CairoMakie.Axis(f[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index")
-scatter!(ax, k_trial, score, color=:black)
-#ylims!(ax, low=0.5, high=1.0)
+
+gl = f[1,1] = GridLayout()
+
+jitter = rand(length(score)).*0.2 .- 0.1
+
+ax1 = CairoMakie.Axis(gl[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index", xticks=3:8)
+scatter!(ax1, k_trial.+jitter, score, color=:black)
+
+ax2 = CairoMakie.Axis(gl[2,1]; xlabel="Number of clusters", ylabel="Total cost", xticks=3:8)
+scatter!(ax2, k_trial.+jitter, costs, color=:black)
+
+hidexdecorations!(ax1, grid=false)
+
+rowgap!(gl, 0.0)
+
 current_figure()
 ```
 
