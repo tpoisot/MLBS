@@ -229,3 +229,22 @@ scatter!(ax, vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=Makie.wo
 tightlimits!(ax)
 current_figure()
 ```
+
+```{julia}
+#| label: tbl-clustering-centers
+#| fig-cap: Summary of the values for the centers of the optimal clusters found in this image.
+df = DataFrame()
+ctr = clusters.centers
+for cluster in axes(ctr, 2)
+    push!(df,
+        (
+            Cluster=cluster,
+            NDVI=round(ctr[1,cluster]; digits=3),
+            NDWI=round(ctr[2,cluster]; digits=3),
+            NDMI=round(ctr[3,cluster]; digits=3))
+    )
+end
+sort!(df, :NDVI)
+out = pretty_table(String, df, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = true)
+display("text/html", out)
+```

@@ -2,8 +2,6 @@
 
 As we mentioned in the introduction, a core idea of data science is that things that look the same (in that, when described with data, they resemble one another) are likely to be the same. Although this sounds like a simplifying assumption, this can provide the basis for approaches in which we *create* groups in data that have no labels. This task is called clustering: we seek to add a *label* to each observation, in order to form groups, and the data we work from do *not* have a label that we can use to train a model. In this chapter, we will explore the *k*-means algorithm for clustering, and illustrate how it can be used in practice.
 
-**TODO** cite 10.1186/s42834-019-0016-5 automatic split water/non water
-
 ## A digression: which birds are red?
 
 Before diving in, it is a good idea to ponder a simple case. We can divide everything in just two categories: things with red feathers, and things without red feathers. An example of a thing with red feathers is the Northern Cardinal (*Cardinalis cardinalis*), and things without red feathers are the iMac G3, Haydn's string quartets, and of course the Northern Cardinal (*Cardinalis cardinalis*).
@@ -27,7 +25,7 @@ Throughout this chapter, we will work on a single image -- we may initially balk
 In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene [@vermote2016], for which we have access to 9 different bands.
 
 | Band   | Measure                      | Notes                                           |
-|----------------|------------------------|---------------------------------|
+|------------------|-----------------------|--------------------------------|
 | 1      | Aerosol                      | Good proxy for Chl. in oceans                   |
 | 2      | Visible blue                 |                                                 |
 | 3      | Visible red                  |                                                 |
@@ -166,7 +164,7 @@ We will revisit the issue of tuning the hyper-parameters in more depth in @sec-t
 
 In order to produce @fig-kmeans-initial-landscape, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose.
 
-We will now change the values of $k$ and use the @davies1979 measure introduced in @sec-clustering-optimality to identify the optimal value of $k$. The results are presented in @fig-kmeans-tuning. Note that we only explore $k \in [3, 10]$. There are a few reasons why. First, if we ask for $k = 2$, there is a good chance that the algorithm will separate pixels as "open water", "not open water", which is not terribly useful. Second, more than 10 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.
+We will now change the values of $k$ and use the @davies1979 measure introduced in @sec-clustering-optimality to identify the optimal value of $k$. The results are presented in @fig-kmeans-tuning. Note that we only explore $k \in [3, 10]$. There are a few reasons why. First, if we ask for $k = 2$, there is a good chance that the algorithm will separate pixels as "open water", "not open water", which is not terribly useful. In fact, removing open water pixels from images is an interesting image analysis challenge [@mondejar2019]. Second, more than 10 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.
 
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-tuning >}}
 
@@ -178,13 +176,13 @@ In this specific case, we will sacrifice a little bit of optimal clustering for 
 
 ### Clustering with optimal number of classes
 
-::: column-margin
-We will revisit the issue of understanding how a model makes a prediction in @sec-varimp.
-:::
-
 The clustering of pixels using $k = 4$ is presented in @fig-kmeans-optimal-landscape, again framed by the true color and false color composites from @fig-kmeans-composites (again, because our immediate question should be, "does it makes ecological sense?"). Unsurprisingly, *k*-means separated the open water pixels, what looks like urban and more arid areas, and split vegetation in two classes. This is excellent information! There are two relevant classes for our question of "where are areas with vegetation?", and we can look for reasons why that would be the case.
 
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-optimal-landscape >}}
+
+::: column-margin
+We will revisit the issue of understanding how a model makes a prediction in @sec-varimp.
+:::
 
 Instead, we will focus on learning some more things about the behavior of this model. In @fig-kmeans-barplot-classes, we show the relative size of the clusters, as measured by the number of points in them. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about *k*-means is that it gives clusters of the same size, but this sized does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!
 
@@ -200,6 +198,4 @@ The area of the space of parameters covered by each cluster in represented in @f
 
 ## Alternatives and improvements
 
-k-median
-
-k-medoids
+{{< embed ../notebooks/sm-clustering.qmd#tbl-clustering-centers >}}
