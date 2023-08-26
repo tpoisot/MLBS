@@ -39,7 +39,7 @@ rgb_cube = colorcube(R, G, B)
 veg_cube = colorcube(S1, N, R)
 urb_cube = colorcube(S2, S1, R)
 
-fig = Figure(resolution=(500, 300))
+fig = Figure(resolution=(500, 150))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
 ax_urb = Makie.Axis(fig[1,3], aspect=DataAspect())
@@ -100,7 +100,7 @@ initial classification
 
 C = permutedims(reshape(assignments(clusters), size(ndvi)))
 
-fig = Figure(resolution=(500, 300))
+fig = Figure(resolution=(500, 150))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
 ax_urb = Makie.Axis(fig[1,3], aspect=DataAspect())
@@ -125,7 +125,7 @@ DaviesBouldin(X, clusters)
 now we optimize -- this runs on multiple threads, but it's still not super fast
 
 ```{julia}
-k_trial = repeat(3:8, 5)
+k_trial = repeat(3:8, 12)
 score = ones(Float64, length(k_trial))
 Suppressor.@suppress_err begin
     Threads.@threads for i in 1:length(k_trial)
@@ -151,7 +151,7 @@ now we can pick the best number of clusters and search for a solution
 
 ```{julia}
 bscore, imax = findmin(score)
-k = 10
+k = 4
 clusters = kmeans(X, k)
 @info DaviesBouldin(X, clusters)
 ```
@@ -198,5 +198,5 @@ current_figure()
 ```{julia}
 #| label: fig-kmeans-clustering
 #| fig-cap: Visualisation of the clustering output using ...
-scatter(vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=:Dark2)
+scatter(vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=Makie.wong_colors())
 ```

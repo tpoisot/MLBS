@@ -15,7 +15,7 @@ end
 
 b5 = readLS9band(img_files, "B5")
 heatmap(b5)
-bbox = (left=8.95, right=9.3, bottom=41.35, top=41.65)
+bbox = (left=9.05, right=9.27, bottom=41.35, top=41.5)
 clp = clip(b5; bbox...)
 @info size(clp)
 heatmap(clp, colormap=:vik, aspect=DataAspect())
