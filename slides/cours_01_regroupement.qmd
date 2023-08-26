@@ -1,7 +1,6 @@
 ---
 title: "Introduction au regroupement"
 subtitle: "Cours 2"
-output-dir: slides/compiled
 date: today
 lang: fr
 author: "Timothée Poisot"
