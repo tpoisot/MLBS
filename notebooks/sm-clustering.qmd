@@ -17,44 +17,50 @@ Read the different datafiles
 
 ```{julia}
 _data_path = joinpath(@__DIR__, "..", "data", "kmeans", "cooked")
-R = readdlm(joinpath(_data_path, "red.dat"));
-G = readdlm(joinpath(_data_path, "green.dat"));
-B = readdlm(joinpath(_data_path, "blue.dat"));
-S = readdlm(joinpath(_data_path, "swir.dat"));
-N = readdlm(joinpath(_data_path, "nir.dat"));
+R = readdlm(joinpath(_data_path, "red.dat"));   # Band 4
+G = readdlm(joinpath(_data_path, "green.dat")); # Band 3
+B = readdlm(joinpath(_data_path, "blue.dat")); # Band 2
+S1 = readdlm(joinpath(_data_path, "swir1.dat")); # Band 6
+S2 = readdlm(joinpath(_data_path, "swir2.dat")); # Band 7
+N = readdlm(joinpath(_data_path, "nir.dat")); # Band 5
 ```
 
 RGB composite
+
+natural color 4,3,2
+cir 5,4,3
+false urban 7,6,4
+false veg 6,5,4
 
 ```{julia}
 #| label: fig-kmeans-composites
 #| fig-cap: The Landsat 9 data are combined into the "Natural Color" image, in which the red, green, and blue bands are mapped to their respective channels (left). The two other composites are the false color infrared, and the composite for vegetation analysis.
 rgb_cube = colorcube(R, G, B)
-cir_cube = colorcube(N, R, G)
-veg_cube = colorcube(S, N, R)
+veg_cube = colorcube(S1, N, R)
+urb_cube = colorcube(S2, S1, R)
 
 fig = Figure(resolution=(500, 300))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
-ax_cir = Makie.Axis(fig[1,3], aspect=DataAspect())
+ax_urb = Makie.Axis(fig[1,3], aspect=DataAspect())
 
 image!(ax_rgb, load(assetpath(rgb_cube)))
 image!(ax_veg, load(assetpath(veg_cube)))
-image!(ax_cir, load(assetpath(cir_cube)))
+image!(ax_urb, load(assetpath(urb_cube)))
 
 hidedecorations!(ax_rgb)
 hidedecorations!(ax_veg)
-hidedecorations!(ax_cir)
+hidedecorations!(ax_urb)
 
 current_figure()
 ```
 
-Now we can do the NDVI
+Now we can do the NDVI, NDMI, NDWI
 
 ```{julia}
 ndvi = @. (N - R) / (N + R)
 ndwi = @. (G - N) / (G + N)
-ndmi = @. (N - S) / (N + S)
+ndmi = @. (N - S1) / (N + S1)
 ```
 
 and combine in a single matrix
@@ -90,24 +96,22 @@ initial classification
 
 ```{julia}
 #| label: fig-kmeans-initial-landscape
-#| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis. This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into five categories. 
-rgb_cube = colorcube(R, G, B)
-veg_cube = colorcube(S, N, R)
+#| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis. This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into three categories. 
+
+C = permutedims(reshape(assignments(clusters), size(ndvi)))
 
 fig = Figure(resolution=(500, 300))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
-ax_sat = Makie.Axis(fig[1,2], aspect=DataAspect())
-ax_veg = Makie.Axis(fig[1,3], aspect=DataAspect())
+ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
+ax_urb = Makie.Axis(fig[1,3], aspect=DataAspect())
 
-image!(ax_rgb, load(assetpath(rgb_cube)))
+heatmap!(ax_rgb, C; colormap=Makie.wong_colors())
 image!(ax_veg, load(assetpath(veg_cube)))
-
-C = reshape(assignments(clusters), size(ndvi))
-heatmap!(ax_sat, C; colormap=Makie.wong_colors())
+image!(ax_urb, load(assetpath(urb_cube)))
 
 hidedecorations!(ax_rgb)
 hidedecorations!(ax_veg)
-hidedecorations!(ax_sat)
+hidedecorations!(ax_urb)
 
 current_figure()
 ```
@@ -121,11 +125,13 @@ DaviesBouldin(X, clusters)
 now we optimize -- this runs on multiple threads, but it's still not super fast
 
 ```{julia}
-k_trial = repeat(3:10, 15)
-score = zeros(Float64, length(k_trial))
-Threads.@threads for i in 1:length(k_trial)
-    k = k_trial[i]
-    score[i] = DaviesBouldin(X, kmeans(X, k))
+k_trial = repeat(3:8, 5)
+score = ones(Float64, length(k_trial))
+Suppressor.@suppress_err begin
+    Threads.@threads for i in 1:length(k_trial)
+        k = k_trial[i]
+        score[i] = DaviesBouldin(X, kmeans(X, k))
+    end
 end
 ```
 
@@ -137,7 +143,7 @@ figure with the number of clusters v. cost
 f = Figure()
 ax = CairoMakie.Axis(f[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index")
 scatter!(ax, k_trial, score, color=:black)
-ylims!(ax, low=0.5, high=1.0)
+#ylims!(ax, low=0.5, high=1.0)
 current_figure()
 ```
 
@@ -145,7 +151,7 @@ now we can pick the best number of clusters and search for a solution
 
 ```{julia}
 bscore, imax = findmin(score)
-k = k_trial[imax] + 1
+k = 10
 clusters = kmeans(X, k)
 @info DaviesBouldin(X, clusters)
 ```
@@ -156,23 +162,20 @@ now plot
 #| label: fig-kmeans-optimal-landscape
 #| fig-cap: blah
 
-rgb_cube = colorcube(R, G, B)
-veg_cube = colorcube(S, N, R)
+C = permutedims(reshape(assignments(clusters), size(ndvi)))
 
-fig = Figure(resolution=(500, 300))
+fig = Figure(resolution=(500, 170))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
-ax_sat = Makie.Axis(fig[1,2], aspect=DataAspect())
-ax_veg = Makie.Axis(fig[1,3], aspect=DataAspect())
+ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
+ax_urb = Makie.Axis(fig[1,3], aspect=DataAspect())
 
-image!(ax_rgb, load(assetpath(rgb_cube)))
+heatmap!(ax_rgb, C; colormap=Makie.wong_colors())
 image!(ax_veg, load(assetpath(veg_cube)))
-
-C = reshape(assignments(clusters), size(ndvi))
-heatmap!(ax_sat, C; colormap=Makie.wong_colors())
+image!(ax_urb, load(assetpath(urb_cube)))
 
 hidedecorations!(ax_rgb)
 hidedecorations!(ax_veg)
-hidedecorations!(ax_sat)
+hidedecorations!(ax_urb)
 
 current_figure()
 ```
