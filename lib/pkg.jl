@@ -10,3 +10,6 @@ using Statistics
 
 using CairoMakie
 CairoMakie.activate!(; px_per_unit = 2)
+
+using Random
+Random.seed!(12345)

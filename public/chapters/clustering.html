@@ -227,8 +227,8 @@ div.csl-indent {
   <li><a href="#initial-run" id="toc-initial-run" class="nav-link" data-scroll-target="#initial-run"><span class="header-section-number">2.4.1</span> Initial run</a></li>
   <li><a href="#optimal-number-of-pixels" id="toc-optimal-number-of-pixels" class="nav-link" data-scroll-target="#optimal-number-of-pixels"><span class="header-section-number">2.4.2</span> Optimal number of pixels</a></li>
   <li><a href="#clustering-with-optimal-number-of-classes" id="toc-clustering-with-optimal-number-of-classes" class="nav-link" data-scroll-target="#clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</a></li>
+  <li><a href="#there-and-back-again" id="toc-there-and-back-again" class="nav-link" data-scroll-target="#there-and-back-again"><span class="header-section-number">2.4.4</span> There and back again</a></li>
   </ul></li>
-  <li><a href="#alternatives-and-improvements" id="toc-alternatives-and-improvements" class="nav-link" data-scroll-target="#alternatives-and-improvements"><span class="header-section-number">2.5</span> Alternatives and improvements</a></li>
   </ul>
 </nav>
     </div>
@@ -267,43 +267,61 @@ div.csl-indent {
 <section id="the-problem-classifying-pixels-from-an-image" class="level2 page-columns page-full" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="the-problem-classifying-pixels-from-an-image"><span class="header-section-number">2.2</span> The problem: classifying pixels from an image</h2>
 <p>Throughout this chapter, we will work on a single image – we may initially balk at the idea that an image is data, but it is! Specifically, an image is a series of instances (the pixels), each described by their position in a multidimensional colorimetric space. Greyscale images have one dimension, and images in color will have three: their red, green, and blue channels. Not only are images data, this specific dataset is going to be far larger than many of the datasets we will work on in practice: the number of pixels we work with is given by the product of the width, height, and depth of the image!</p>
-<p>In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene <span class="citation" data-cites="vermote2016">(<a href="../references.html#ref-vermote2016" role="doc-biblioref">Vermote <em>et al.</em> 2016</a>)</span>, for which we have access to 7 different bands (the full data product has more bands, but we will not use them all in this example).</p>
+<p>In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene <span class="citation" data-cites="vermote2016">(<a href="../references.html#ref-vermote2016" role="doc-biblioref">Vermote <em>et al.</em> 2016</a>)</span>, for which we have access to 9 different bands.</p>
 <table class="table">
-<caption>Overview of the bands in a Landsat 9 scene. The data were downloaded from <a href="https://landsatlook.usgs.gov">LandsatLook</a>.</caption>
+<caption>Overview of the bands in a Landsat 9 scene. The data from this chapter were downloaded from <a href="https://landsatlook.usgs.gov">LandsatLook</a>.</caption>
 <thead>
 <tr class="header">
-<th>Band number</th>
-<th>Information</th>
+<th>Band</th>
+<th>Measure</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>1</td>
 <td>Aerosol</td>
+<td>Good proxy for Chl. in oceans</td>
 </tr>
 <tr class="even">
 <td>2</td>
 <td>Visible blue</td>
+<td></td>
 </tr>
 <tr class="odd">
 <td>3</td>
-<td>Visible red</td>
+<td>Visible green</td>
+<td></td>
 </tr>
 <tr class="even">
 <td>4</td>
-<td>Visible green</td>
+<td>Visible red</td>
+<td></td>
 </tr>
 <tr class="odd">
 <td>5</td>
 <td>Near-infrared (NIR)</td>
+<td>Reflected by healthy plants</td>
 </tr>
 <tr class="even">
-<td>6</td>
+<td>6, 7</td>
 <td>Short wavelength IR (SWIR 1)</td>
+<td>Good at differentiating wet earth and dry earth</td>
 </tr>
 <tr class="odd">
-<td>7</td>
-<td>Short wavelength IR (SWIR 2)</td>
+<td>8</td>
+<td>Panchromatic</td>
+<td>High-resolution monochrome</td>
+</tr>
+<tr class="even">
+<td>9</td>
+<td>Cirrus band</td>
+<td>Can pick up high and thin clouds</td>
+</tr>
+<tr class="odd">
+<td>10, 11</td>
+<td>Thermal infrared</td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -311,12 +329,12 @@ div.csl-indent {
 <p>Or can we?</p>
 <p>If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a <em>lot</em> of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel. But just like we can get more information that Landsat 9, so too can Landsat 9 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-composites">
-<div id="cell-fig-kmeans-composites" class="cell page-columns page-full" data-execution_count="4">
+<div id="cell-fig-kmeans-composites" class="cell page-columns page-full" data-execution_count="3">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-composites" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-composites-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.1: The Landsat 9 data are combined into the “Natural Color” image, in which the red, green, and blue bands are mapped to their respective channels (left). The two other composites are the false color infrared, and the composite for vegetation analysis.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.1: The Landsat 9 data are combined into the “Natural Color” image, in which the red, green, and blue bands are mapped to their respective channels (left). The two other composites are the false color infrared, and the composite for vegetation analysis. Note that the true-color composite is slightly distored compared to the colors of the landscape we expect; this is because natural colors are difficult to reproduce accurately.</figcaption>
 </figure>
 </div>
 </div>
@@ -326,22 +344,23 @@ div.csl-indent {
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of variable selection and feature engineering in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>.</p>
-</div></div><p>So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the <em>right</em> data. In fact, they may not hold information that is relevant to our question <em>at all</em>; or worse, they can hold more noise than signal. Looking at <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we might wonder, “where are the areas with vegetation?”. And based on our knowledge of what plants do, we can start thinking about this question in a different way. Specifically, “is there a series of features of areas with vegetation that are not shared by area without vegetation?”. But this a complicated question to answer, and so we can simplify this by asking, “how can I guess that there is a plant?”. Thankfully, ecologists, whose hobbies include (i) guesswork and (ii) plants, have ways to answer this question rather accurately.</p>
-<p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="../references.html#ref-kennedy2020" role="doc-biblioref">Kennedy &amp; Burbach 2020</a>)</span>. NDVI is derived from the band data, and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water) and NDMI (moisture) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI).</p>
-<p>Because there are a few guidelines (educated guesses, in truth, and the jury is still out on the “educated” part) about the values we are using in this section, we can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops.</p>
+</div></div><p>So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the <em>right</em> data. In fact, they may not hold information that is relevant to our question <em>at all</em>; or worse, they can hold more noise than signal. The are we will work on in this chapter is a very small crop of a Landsat 9 scene, taken on path 17 and row 24, early in June 2023. In this period, forest fires were intensifying in Québec, and therefore a relevant question may be “can we identify areas with different levels of risk?”.</p>
+<p>Based on our knowledge of plants, we can start thinking about this question in a different way. Specifically, “can we guess that a pixel contains plants?”, “can we guess at how much water there is in a pixel?”, and “do we have suggestions of a history of fire in this pixel?”. Thankfully, ecologists, whose hobbies include (i) guesswork and (ii) plants, have ways to answer these questions rather accurately.</p>
+<p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="../references.html#ref-kennedy2020" role="doc-biblioref">Kennedy &amp; Burbach 2020</a>)</span>. NDVI is derived from the band data, and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water) and NDMI (moisture) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI). Another commonly used index based on Landsat 9 data is the NBR (Normalized Burned Ratio), for which high values are suggestive of a history of intense fire <span class="citation" data-cites="roy2006">(<a href="../references.html#ref-roy2006" role="doc-biblioref">Roy <em>et al.</em> 2006</a> have challenged the idea that this measure is relevant immediately post-fire)</span>.</p>
+<p>We can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-hexbin">
-<div id="cell-fig-kmeans-hexbin" class="cell page-columns page-full" data-execution_count="7">
+<div id="cell-fig-kmeans-hexbin" class="cell page-columns page-full" data-execution_count="6">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-hexbin" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-hexbin-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.2: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are <em>derived</em> data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.2: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, NDWI, and NBR combinations of bands. These are <em>derived</em> data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
-<p>By picking these three transformed values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm sees, through the lens of what we know is important about the system. With these data in hands, we can start building a classification algorithm.</p>
+<p>By picking these four transformed values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm sees, through the lens of what we know is important about the system. With these data in hands, we can start building a classification algorithm.</p>
 </section>
 <section id="the-theory-behind-k-means-clustering" class="level2 page-columns page-full" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="the-theory-behind-k-means-clustering"><span class="header-section-number">2.3</span> The theory behind <em>k</em>-means clustering</h2>
@@ -375,7 +394,7 @@ div.csl-indent {
 <p>The part that is non-trivial is now to decide on the value of <span class="math inline">\(\mathbf{c}\)</span> for each class. This is the heart of the <em>k</em>-means algorithm. From <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>, we have a criteria to decide to which class each instance belongs. Of course, there is nothing that prevents us from using this in the opposite direction, to define the instance by the points that form it! In this approach, the membership of class <span class="math inline">\(\mathbf{C}_j\)</span> is the list of points that satisfy the condition in <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>. But there is no guarantee that the <em>current</em> position of <span class="math inline">\(\mathbf{c}_j\)</span> in the middle of all of these points is optimal, <em>i.e.</em> that it minimizes the within-class variance.</p>
 <p>This is easily achieved, however. To ensure that this is the case, we can re-define the value of <span class="math inline">\(\mathbf{c}_j\)</span> as</p>
 <p><span id="eq-clustering-centroid-update"><span class="math display">\[
-\mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j&nbsp;\,,
+\mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j \,,
 \tag{2.3}\]</span></span></p>
 <p>where <span class="math inline">\(|\cdot|\)</span> is the cardinality of (number of istances in) <span class="math inline">\(\mathbf{C}_j\)</span>, and <span class="math inline">\(\sum \mathbf{C}_j\)</span> is the sum of each feature in <span class="math inline">\(\mathbf{C}_j\)</span>. To put it plainly: we update the centroid of <span class="math inline">\(\mathbf{C}_j\)</span> so that it takes, for each feature, the average value of all the instances that form <span class="math inline">\(\mathbf{C}_j\)</span>.</p>
 </section>
@@ -411,17 +430,22 @@ div.csl-indent {
 <h3 data-number="2.4.1" class="anchored" data-anchor-id="initial-run"><span class="header-section-number">2.4.1</span> Initial run</h3>
 <p>Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using <span class="math inline">\(k = 3\)</span>, we get the results presented in <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-initial-landscape">
-<div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="9">
+<div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="8">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-initial-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-initial-landscape-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.3: After iterating the <em>k</em>-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis. This clustering was produced using <span class="math inline">\(k=5\)</span>, <em>i.e.</em> we want to see what the landscape would look like when divided into five categories.</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.3: After iterating the <em>k</em>-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, NBR, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using <span class="math inline">\(k=3\)</span>, <em>i.e.</em> we want to see what the landscape would look like when divided into three categories.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>In fact, take some time to think about how you would use <span class="math inline">\(k\)</span>-means to come up with a way to remove pixels with only water from this image!</p>
+</div></div><p>It is always a good idea to look at the first results and state the obvious. Here, for example, we can say that water is easy to identify. In fact, removing open water pixels from images is an interesting image analysis challenge <span class="citation" data-cites="mondejar2019">(<a href="../references.html#ref-mondejar2019" role="doc-biblioref">Mondejar &amp; Tongco 2019</a>)</span>, and because we used an index that specifically identifies water bodies (NDWI), it is not surprising that there is an entire cluster that seems to be associated with water.</p>
+<p>This might seem like an idle observation, but this is not the case! One cluster in our image analysis will (likely) always be assigned to water, which means that if we are interested in classifying land pixels, we only have <span class="math inline">\(k-1\)</span> clusters available. This will become an important point to help decide on the best value of <span class="math inline">\(k\)</span> later.</p>
 </section>
 <section id="optimal-number-of-pixels" class="level3 page-columns page-full" data-number="2.4.2">
 <h3 data-number="2.4.2" class="anchored" data-anchor-id="optimal-number-of-pixels"><span class="header-section-number">2.4.2</span> Optimal number of pixels</h3>
@@ -429,44 +453,45 @@ div.csl-indent {
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
 </div></div><p>In order to produce <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose.</p>
-<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. There are a few reasons why. First, if we ask for <span class="math inline">\(k = 2\)</span>, there is a good chance that the algorithm will separate pixels as “open water”, “not open water”, which is not terribly useful. Second, more than 10 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
+<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. There are a few reasons why. First, if we ask for <span class="math inline">\(k = 2\)</span>, there is a good chance that the algorithm will separate pixels as “open water”, “not open water”, which is not terribly useful. Second, more than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-tuning">
-<div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="12">
+<div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="11">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-tuning" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-tuning-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.4: tuning of k</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.4: Results of running the <em>k</em>-means algorithm ten times for each number of clusters between 3 and 8. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
 <p>There are two interesting things in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. First, note that for <span class="math inline">\(k=\{3,4\}\)</span>, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! Second, the assignments get progressively worse (until <span class="math inline">\(k = 6\)</span>), and then slightly better, but without beating <span class="math inline">\(k = 3\)</span>.</p>
-<p>In this situation, you have a decision to make. Trusting the data would mean picking <span class="math inline">\(k = 3\)</span>. This is a fine choice, easy to justify, and grounded in trusting the measure of optimality that we decided to use. But maybe <span class="math inline">\(k=3\)</span> is a little underwhelming, and you would rather have a little more classes to work with. Using <span class="math inline">\(k=4\)</span> gives you one more class, with the added advantage of also having no dispersal, and so a very consistent assignment. If you wanted to get back to a number of classes with the same Davies-Bouldin index, you would need to increase all the way to <span class="math inline">\(k=\{9,10\}\)</span>.</p>
-<p>In this specific case, we will sacrifice a little bit of optimal clustering for a little more classes, and use <span class="math inline">\(k = 4\)</span>. Is it the optimal partition of our pixels? No.&nbsp;But the way to read <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a> is not necessarily “pick <span class="math inline">\(k=3\)</span> or else”. Instead, it is closer to “whatever you do, do not pick <span class="math inline">\(k=6\)</span>”. Just because we start using measures of model performance does not mean we can stop using critical thinking.</p>
+<p>In this situation, you have a decision to make. Trusting the data would mean picking <span class="math inline">\(k = 3\)</span>. This is a fine choice, easy to justify, and grounded in trusting the measure of optimality that we decided to use. But maybe <span class="math inline">\(k=3\)</span> is a little underwhelming, and you would rather have a little more classes to work with. Recall that pixels that are associated to open water take up an entire cluster!</p>
+<p>Using <span class="math inline">\(k=4\)</span> gives you one more class, with the added advantage of also having no dispersal, and so a very consistent assignment. If you wanted to get back to a number of classes with the same Davies-Bouldin index, you would need to increase all the way to <span class="math inline">\(k=8\)</span>, but this would mean dealing with a lot more classes.</p>
+<p>In this specific case, we will sacrifice a little bit of optimal clustering for a little more classes, and use <span class="math inline">\(k = 4\)</span>. Is it the optimal partition of our pixels? No one knows. But the way to read <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a> is not necessarily “pick <span class="math inline">\(k=3\)</span> or else”. Instead, it is closer to “whatever you do, do not pick <span class="math inline">\(k=6\)</span>”. Just because we start using measures of model performance does not mean we can stop using critical thinking.</p>
 </section>
 <section id="clustering-with-optimal-number-of-classes" class="level3 page-columns page-full" data-number="2.4.3">
 <h3 data-number="2.4.3" class="anchored" data-anchor-id="clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</h3>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<p>We will revisit the issue of understanding how a model makes a prediction in <a href="varimp.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>.</p>
-</div></div><p>The clustering of pixels using <span class="math inline">\(k = 4\)</span> is presented in <a href="#fig-kmeans-optimal-landscape" class="quarto-xref">Figure&nbsp;<span>2.5</span></a>, again framed by the true color and false color composites from <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> (again, because our immediate question should be, “does it makes ecological sense?”). Unsurprisingly, <em>k</em>-means separated the open water pixels, what looks like urban and more arid areas, and split vegetation in two classes. This is excellent information! There are two relevant classes for our question of “where are areas with vegetation?”, and we can look for reasons why that would be the case.</p>
+<p>The clustering of pixels using <span class="math inline">\(k = 4\)</span> is presented in <a href="#fig-kmeans-optimal-landscape" class="quarto-xref">Figure&nbsp;<span>2.5</span></a>, again framed by the true color and false color composites from <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> (again, because our immediate question should be, “does it makes ecological sense?”). Unsurprisingly, <em>k</em>-means separated the open water pixels, what looks like urban and more arid areas, and split vegetation in two classes. This is excellent information! There are two relevant classes for our question of “where are areas with vegetation?”, and we can look for reasons why that would be the case.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-optimal-landscape">
-<div id="cell-fig-kmeans-optimal-landscape" class="cell page-columns page-full" data-execution_count="14">
+<div id="cell-fig-kmeans-optimal-landscape" class="cell page-columns page-full" data-execution_count="13">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-optimal-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-optimal-landscape-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.5: blah</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.5: Results of the landscape clustering with k=4 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
-<p>Instead, we will focus on learning some more things about the behavior of this model. In <a href="#fig-kmeans-barplot-classes" class="quarto-xref">Figure&nbsp;<span>2.6</span></a>, we show the relative size of the clusters, as measured by the number of points in them. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about <em>k</em>-means is that it gives clusters of the same size, but this sized does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>We will revisit the issue of understanding how a model makes a prediction in <a href="varimp.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>.</p>
+</div></div><p>Instead, we will focus on learning some more things about the behavior of this model. In <a href="#fig-kmeans-barplot-classes" class="quarto-xref">Figure&nbsp;<span>2.6</span></a>, we show the relative size of the clusters, as measured by the number of points in them. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about <em>k</em>-means is that it gives clusters of the same size. This “size” does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-barplot-classes">
-<div id="cell-fig-kmeans-barplot-classes" class="cell page-columns page-full" data-execution_count="15">
+<div id="cell-fig-kmeans-barplot-classes" class="cell page-columns page-full" data-execution_count="14">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-barplot-classes" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
@@ -480,25 +505,79 @@ div.csl-indent {
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In fact, this behavior makes <em>k</em>-means excellent at creating color palettes from images! Cases in point, <a href="https://github.com/karthik/wesanderson">Karthik Ram’s Wes Anderson palettes</a>, and <a href="https://github.com/dill/beyonce">David Lawrence Miller’s Beyoncé palettes</a>. Let it never again be said that ecologists should not be trusted with machine learning methods.</p>
-</div></div><p>The area of the space of parameters covered by each cluster in represented in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.7</span></a>, and this result is actually not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with sharp boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for vector quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
+</div></div><p>The area of the space of parameters covered by each cluster in represented in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.7</span></a>, and this result is actually not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them. By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for vector quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-fig-kmeans-clustering">
-<div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="16">
+<div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="15">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-kmeans-clustering" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="clustering_files/figure-html/fig-kmeans-clustering-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;2.7: Visualisation of the clustering output using …</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;2.7: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
 </section>
-</section>
-<section id="alternatives-and-improvements" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="alternatives-and-improvements"><span class="header-section-number">2.5</span> Alternatives and improvements</h2>
-<p>k-median</p>
-<p>k-medoids</p>
+<section id="there-and-back-again" class="level3 page-columns page-full" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="there-and-back-again"><span class="header-section-number">2.4.4</span> There and back again</h3>
+<p>The assignment of pixels to cluster is not the end of the process. In fact, in many ways, it is just what we need to get started! In <a href="#tbl-clustering-centers" class="quarto-xref">Table&nbsp;<span>2.1</span></a>, we can take a look at how the clusters are composed. We can see, for example, that one of the clusters has high NDVI and high NBR values, which may be a good cluster to pay more attention to.</p>
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-clustering.qmd" data-notebook-title="Supp. Mat. - Clustering" data-notebook-cellid="cell-tbl-clustering-centers">
+<div class="cell page-columns page-full" data-execution_count="16">
+<div class="cell-output cell-output-display page-columns page-full">
+<div id="tbl-clustering-centers" class="anchored page-columns page-full">
+<table class="table table-sm table-striped small">
+
+<thead>
+<tr class="header">
+<th style="text-align: right;">Cluster</th>
+<th style="text-align: right;">Cover</th>
+<th style="text-align: right;">NDVI</th>
+<th style="text-align: right;">NDWI</th>
+<th style="text-align: right;">NDMI</th>
+<th style="text-align: right;">NBR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">-0.008</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: right;">0.026</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">0.214</td>
+<td style="text-align: right;">-0.24</td>
+<td style="text-align: right;">0.036</td>
+<td style="text-align: right;">0.147</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">0.246</td>
+<td style="text-align: right;">-0.273</td>
+<td style="text-align: right;">0.063</td>
+<td style="text-align: right;">0.18</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.282</td>
+<td style="text-align: right;">-0.327</td>
+<td style="text-align: right;">0.114</td>
+<td style="text-align: right;">0.23</td>
+</tr>
+</tbody>
+</table>
+<div class="quarto-table-caption margin-caption">Table&nbsp;2.1: Summary of the values for the centers of the optimal clusters found in this image. The cover column gives the percentage of all pixels associated to this class. The clusters are sorted by the NDVI of their centroid.</div></div>
+</div>
+</div>
+</div>
+<p>After a clustering analysis, it is a good idea to get back to the position of the centroids in the space of the parameters. Because this approach is unsupervised learning, we do not really have a reference to compare the outputs to; for this reason, an <em>a posteriori</em> discussion of the clusters is one way to establish a link between the groups and, for example, similar types of land cover.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -529,8 +608,14 @@ Kennedy, S. &amp; Burbach, M. (2020). <a href="https://doi.org/10.1353/gpr.2020.
 <div id="ref-luccioni2023" class="csl-entry" role="listitem">
 Luccioni, A.S. &amp; Rolnick, D. (2023). <a href="https://doi.org/10.1609/aaai.v37i12.26682">Bugs in the data: How ImageNet misrepresents biodiversity</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>, 37, 14382–14390.
 </div>
+<div id="ref-mondejar2019" class="csl-entry" role="listitem">
+Mondejar, J.P. &amp; Tongco, A.F. (2019). <a href="https://doi.org/10.1186/s42834-019-0016-5">Near infrared band of Landsat 8 as water index: a case study around Cordova and Lapu-Lapu City, Cebu, Philippines</a>. <em>Sustainable Environment Research</em>, 29.
+</div>
 <div id="ref-rousseeuw1987" class="csl-entry" role="listitem">
 Rousseeuw, P.J. (1987). <a href="https://doi.org/10.1016/0377-0427(87)90125-7">Silhouettes: A graphical aid to the interpretation and validation of cluster analysis</a>. <em>Journal of Computational and Applied Mathematics</em>, 20, 53–65.
+</div>
+<div id="ref-roy2006" class="csl-entry" role="listitem">
+Roy, D.P., Boschetti, L. &amp; Trigg, S.N. (2006). <a href="https://doi.org/10.1109/lgrs.2005.858485">Remote Sensing of Fire Severity: Assessing the Performance of the Normalized Burn Ratio</a>. <em>IEEE Geoscience and Remote Sensing Letters</em>, 3, 112–116.
 </div>
 <div id="ref-thorndike1953" class="csl-entry" role="listitem">
 Thorndike, R.L. (1953). <a href="https://doi.org/10.1007/bf02289263">Who belongs in the family?</a> <em>Psychometrika</em>, 18, 267–276.
@@ -539,6 +624,7 @@ Thorndike, R.L. (1953). <a href="https://doi.org/10.1007/bf02289263">Who belongs
 Vermote, E., Justice, C., Claverie, M. &amp; Franch, B. (2016). <a href="https://doi.org/10.1016/j.rse.2016.04.008">Preliminary analysis of the performance of the Landsat 8/OLI land surface reflectance product</a>. <em>Remote Sensing of Environment</em>, 185, 46–56.
 </div>
 </div>
+</section>
 </section>
 
 </main> <!-- /main -->

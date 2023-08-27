@@ -1,5 +1,4 @@
 using StatsBase
-using Random
 
 function holdout(y, X; proportion=0.2, permute=true)
     @assert size(y,1) == size(X, 1)

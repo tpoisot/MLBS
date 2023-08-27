@@ -258,7 +258,7 @@ div.csl-indent {
 
 </header>
 
-<p>As we progress into this book, the process of delivering a trained model is going to become increasingly complex. In <span class="quarto-unresolved-ref">?sec-kmeans</span>, we work with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.</p>
+<p>As we progress into this book, the process of delivering a trained model is going to become more and more complex. In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we worked with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.</p>
 <p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
 <section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
@@ -428,66 +428,66 @@ p := p - \eta\times \nabla f(p) \,.
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">3.76499</td>
-<td style="text-align: right;">3.80862</td>
+<td style="text-align: right;">3.81952</td>
+<td style="text-align: right;">3.59185</td>
 <td style="text-align: right;">0.4</td>
 <td style="text-align: right;">0.2</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">2.89253</td>
-<td style="text-align: right;">2.92815</td>
-<td style="text-align: right;">0.484911</td>
-<td style="text-align: right;">0.226326</td>
+<td style="text-align: right;">2.93171</td>
+<td style="text-align: right;">2.73714</td>
+<td style="text-align: right;">0.485703</td>
+<td style="text-align: right;">0.226401</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">30</td>
-<td style="text-align: right;">1.67942</td>
-<td style="text-align: right;">1.70338</td>
-<td style="text-align: right;">0.634037</td>
-<td style="text-align: right;">0.271068</td>
+<td style="text-align: right;">1.69896</td>
+<td style="text-align: right;">1.55981</td>
+<td style="text-align: right;">0.63612</td>
+<td style="text-align: right;">0.271203</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.520525</td>
-<td style="text-align: right;">0.531215</td>
-<td style="text-align: right;">0.897115</td>
-<td style="text-align: right;">0.337741</td>
+<td style="text-align: right;">0.525114</td>
+<td style="text-align: right;">0.474702</td>
+<td style="text-align: right;">0.901006</td>
+<td style="text-align: right;">0.337528</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">300</td>
-<td style="text-align: right;">0.37642</td>
-<td style="text-align: right;">0.382963</td>
-<td style="text-align: right;">1.02958</td>
-<td style="text-align: right;">0.314715</td>
+<td style="text-align: right;">0.379423</td>
+<td style="text-align: right;">0.365137</td>
+<td style="text-align: right;">1.03407</td>
+<td style="text-align: right;">0.312931</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.315432</td>
-<td style="text-align: right;">0.317133</td>
-<td style="text-align: right;">1.10148</td>
-<td style="text-align: right;">0.121468</td>
+<td style="text-align: right;">0.315998</td>
+<td style="text-align: right;">0.305429</td>
+<td style="text-align: right;">1.10702</td>
+<td style="text-align: right;">0.115729</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3000</td>
-<td style="text-align: right;">0.219669</td>
-<td style="text-align: right;">0.21287</td>
-<td style="text-align: right;">1.24419</td>
-<td style="text-align: right;">-0.288171</td>
+<td style="text-align: right;">0.218368</td>
+<td style="text-align: right;">0.208811</td>
+<td style="text-align: right;">1.25051</td>
+<td style="text-align: right;">-0.297807</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.159629</td>
-<td style="text-align: right;">0.14473</td>
-<td style="text-align: right;">1.43799</td>
-<td style="text-align: right;">-0.844439</td>
+<td style="text-align: right;">0.160111</td>
+<td style="text-align: right;">0.143257</td>
+<td style="text-align: right;">1.43959</td>
+<td style="text-align: right;">-0.84272</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">20000</td>
-<td style="text-align: right;">0.157238</td>
-<td style="text-align: right;">0.141086</td>
-<td style="text-align: right;">1.48077</td>
-<td style="text-align: right;">-0.967222</td>
+<td style="text-align: right;">0.15805</td>
+<td style="text-align: right;">0.138455</td>
+<td style="text-align: right;">1.47878</td>
+<td style="text-align: right;">-0.955684</td>
 </tr>
 </tbody>
 </table>

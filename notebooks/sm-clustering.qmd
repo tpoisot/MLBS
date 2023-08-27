@@ -90,7 +90,7 @@ initial classification
 
 ```{julia}
 #| label: fig-kmeans-initial-landscape
-#| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on a specific hypothesis. This clustering was produced using $k=5$, *i.e.* we want to see what the landscape would look like when divided into three categories. 
+#| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, NBR, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, *i.e.* we want to see what the landscape would look like when divided into three categories. 
 
 C = permutedims(reshape(assignments(clusters), size(ndvi)))
 
@@ -127,7 +127,7 @@ vcosts = copy(score)
 Suppressor.@suppress_err begin
     Threads.@threads for j in axes(k_trial, 1)
         k = k_trial[j]
-        sc = zeros(Float64, 6)
+        sc = zeros(Float64, 12)
         cs = copy(sc)
         for rep in axes(sc, 1)
             cl = kmeans(X, k)
@@ -179,11 +179,11 @@ now plot
 
 ```{julia}
 #| label: fig-kmeans-optimal-landscape
-#| fig-cap: Results of the landscape clustering with k=5 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
+#| fig-cap: Results of the landscape clustering with k=4 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
 
 C = permutedims(reshape(assignments(clusters), size(ndvi)))
 
-fig = Figure(resolution=(500, 170))
+fig = Figure(resolution=(500, 150))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[1,2], aspect=DataAspect())
 ax_cir = Makie.Axis(fig[1,3], aspect=DataAspect())
@@ -226,7 +226,7 @@ current_figure()
 
 ```{julia}
 #| label: tbl-clustering-centers
-#| fig-cap: Summary of the values for the centers of the optimal clusters found in this image. The cover column gives the percentage of all pixels associated to this class. The clusters are sorted by the NDVI of their centroid.
+#| tbl-cap: Summary of the values for the centers of the optimal clusters found in this image. The cover column gives the percentage of all pixels associated to this class. The clusters are sorted by the NDVI of their centroid.
 df = DataFrame()
 ctr = clusters.centers
 for cluster in axes(ctr, 2)
