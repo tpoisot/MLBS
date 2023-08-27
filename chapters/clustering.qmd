@@ -178,17 +178,13 @@ We will now change the values of $k$ and use the @davies1979 measure introduced 
 
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-tuning >}}
 
-There are two interesting things in @fig-kmeans-tuning. First, note that for $k=\{3,4\}$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! Second, the assignments get progressively worse (until $k = 6$), and then slightly better, but without beating $k = 3$.
+There are two interesting things in @fig-kmeans-tuning. First, note that for $k=4$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! This is a good sign, and, anecdotally, something that might suggest a really information separation of the points. Second, $k = 4$ has by far the lowest Davies-Bouldin index of all values we tried, and is therefore strongly suggestive of an optimal hyper-parameter.
 
-In this situation, you have a decision to make. Trusting the data would mean picking $k = 3$. This is a fine choice, easy to justify, and grounded in trusting the measure of optimality that we decided to use. But maybe $k=3$ is a little underwhelming, and you would rather have a little more classes to work with. Recall that pixels that are associated to open water take up an entire cluster!
-
-Using $k=4$ gives you one more class, with the added advantage of also having no dispersal, and so a very consistent assignment. If you wanted to get back to a number of classes with the same Davies-Bouldin index, you would need to increase all the way to $k=8$, but this would mean dealing with a lot more classes.
-
-In this specific case, we will sacrifice a little bit of optimal clustering for a little more classes, and use $k = 4$. Is it the optimal partition of our pixels? No one knows. But the way to read @fig-kmeans-tuning is not necessarily "pick $k=3$ or else". Instead, it is closer to "whatever you do, do not pick $k=6$". Just because we start using measures of model performance does not mean we can stop using critical thinking.
+In this specific case, it makers very little sense *not* to use $k = 4$. We will likely lose a cluster to water pixels, but the rest of the landmass will be split into three categories. In some cases, there will be values of $k$ that are very close to one another in terms of how well they partition the data. In these cases, applying your best judgment is required! There are many cases where it is acceptable to sacrifice a little bit of optimality in order to present more actionable information.
 
 ### Clustering with optimal number of classes
 
-The clustering of pixels using $k = 4$ is presented in @fig-kmeans-optimal-landscape, again framed by the true color and false color composites from @fig-kmeans-composites (again, because our immediate question should be, "does it makes ecological sense?"). Unsurprisingly, *k*-means separated the open water pixels, what looks like urban and more arid areas, and split vegetation in two classes. This is excellent information! There are two relevant classes for our question of "where are areas with vegetation?", and we can look for reasons why that would be the case.
+The clustering of pixels using $k = 4$ is presented in @fig-kmeans-optimal-landscape. Unsurprisingly, *k*-means separated the open water pixels, what looks like urban and more arid areas, and split vegetation in two classes. This is excellent information! There are two relevant classes for our question of "where are areas with vegetation?", and we can look for reasons why that would be the case.
 
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-optimal-landscape >}}
 
@@ -196,9 +192,9 @@ The clustering of pixels using $k = 4$ is presented in @fig-kmeans-optimal-lands
 We will revisit the issue of understanding how a model makes a prediction in @sec-varimp.
 :::
 
-Instead, we will focus on learning some more things about the behavior of this model. In @fig-kmeans-barplot-classes, we show the relative size of the clusters, as measured by the number of points in them. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about *k*-means is that it gives clusters of the same size. This "size" does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!
+Instead, we will focus on learning some more things about the behavior of this model. In @fig-kmeans-barplot-classes, we show the relative size of the clusters, as measured by the number of points in them. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about *k*-means is that it gives clusters of the same size. This "size" does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points! The relative size of the clusters (as well as the position of their centroids) is presented in @tbl-clustering-centers.
 
-{{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-barplot-classes >}}
+{{< embed ../notebooks/sm-clustering.qmd#tbl-clustering-centers >}}
 
 ::: column-margin
 In fact, this behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes](https://github.com/karthik/wesanderson), and [David Lawrence Miller's Beyoncé palettes](https://github.com/dill/beyonce). Let it never again be said that ecologists should not be trusted with machine learning methods.
@@ -208,10 +204,6 @@ The area of the space of parameters covered by each cluster in represented in @f
 
 {{< embed ../notebooks/sm-clustering.qmd#fig-kmeans-clustering >}}
 
-### There and back again
+## Conclusion
 
-The assignment of pixels to cluster is not the end of the process. In fact, in many ways, it is just what we need to get started! In @tbl-clustering-centers, we can take a look at how the clusters are composed. We can see, for example, that one of the clusters has high NDVI and high NBR values, which may be a good cluster to pay more attention to.
-
-{{< embed ../notebooks/sm-clustering.qmd#tbl-clustering-centers >}}
-
-After a clustering analysis, it is a good idea to get back to the position of the centroids in the space of the parameters. Because this approach is unsupervised learning, we do not really have a reference to compare the outputs to; for this reason, an *a posteriori* discussion of the clusters is one way to establish a link between the groups and, for example, similar types of land cover.
+In this chapter, we have used the *k*-means algorithm to create groups in a large dataset that had no labels, *i.e.* the points were not assigned to a class. By picking the features we wanted to cluster the point, we were able to highlight specific aspects of the landscape. In @sec-gradientdescent, we will start adding labels to our data, and shift our attention from classification to regression problems.

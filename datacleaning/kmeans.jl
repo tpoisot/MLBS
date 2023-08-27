@@ -4,7 +4,7 @@ using SpeciesDistributionToolkit
 using DelimitedFiles
 using CairoMakie
 
-img_path = "data/kmeans/raw/LC08_L2SP_017024_20230602_20230607_02_T1/"
+img_path = "data/kmeans/raw/LC09_L2SP_193031_20230814_20230817_02_T1/"
 all_files = readdir(img_path; join=true)
 bands = filter(contains(r"SR_B\d.TIF"), all_files)
 
@@ -13,13 +13,19 @@ function readLS9band(files, pattern; kwargs...)
     return SpeciesDistributionToolkit._read_geotiff(band_file, SimpleSDMResponse; kwargs...)
 end
 
-testband = readLS9band(img_files, "B6")
+testband = readLS9band(bands, "B6")
 heatmap(testband, colormap=:Spectral)
 
-bbox = (left=-76.3, right=-76.15, bottom=51.1, top=51.25)
-clp = clip(testband; bbox...)
-@info size(clp)
-heatmap(clp, colormap=:Spectral)
+begin
+    #bbox = (left=-75.85, right=-75.4, bottom=49.3, top=49.46)
+    bbox = (left=8.75, right=9.0, bottom=41.55, top=41.675)
+    clp = clip(testband; bbox...)
+    @info size(clp)
+    f = Figure()
+    ax = CairoMakie.Axis(f[1,1], aspect=DataAspect())
+    heatmap!(ax, clp, colormap=:Spectral)
+    f
+end
 
 function get_and_correct_band(img_files, bid, bbox)
     raw_bd = readLS9band(img_files, "B$(bid)"; bbox...)
@@ -28,12 +34,12 @@ function get_and_correct_band(img_files, bid, bbox)
     return normed
 end
 
-blue = get_and_correct_band(img_files, 2, bbox)
-green = get_and_correct_band(img_files, 3, bbox)
-red = get_and_correct_band(img_files, 4, bbox)
-nir = get_and_correct_band(img_files, 5, bbox)
-swir1 = get_and_correct_band(img_files, 6, bbox)
-swir2 = get_and_correct_band(img_files, 7, bbox)
+blue = get_and_correct_band(bands, 2, bbox)
+green = get_and_correct_band(bands, 3, bbox)
+red = get_and_correct_band(bands, 4, bbox)
+nir = get_and_correct_band(bands, 5, bbox)
+swir1 = get_and_correct_band(bands, 6, bbox)
+swir2 = get_and_correct_band(bands, 7, bbox)
 
 T = SimpleSDMLayers._inner_type(red)
 
@@ -59,6 +65,11 @@ ndvi = @. (N - R) / (N + R)
 ndwi = @. (G - N) / (G + N)
 ndmi = @. (N - S1) / (N + S1)
 
-fig, ax, hm = heatmap(permutedims(ndwi), colormap=:Spectral, colorrange=(-0.1, 0.1))
-Colorbar(fig[:, end+1], hm)
-fig
+begin
+    Y = ndvi
+    f = Figure()
+    ax = CairoMakie.Axis(f[1,1], aspect=DataAspect())
+    hm = heatmap!(ax, permutedims(Y), colormap=:viridis)
+    Colorbar(f[1,2], hm)
+    f
+end

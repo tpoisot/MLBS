@@ -1,6 +1,6 @@
 using Images
 
-function rscale(Y; q=(0.001, 0.999))
+function rscale(Y; q=(0.01, 0.99))
     m, M = quantile(vec(Y), q)
     return clamp01.((Y .- m)./(M - m))
 end
@@ -8,9 +8,15 @@ end
 function colorcube(R, G, B; natural=false)
     cube = zeros(eltype(B), (3, size(permutedims(B))...))
 
-    qR = rscale(R)
-    qG = rscale(G)
-    qB = rscale(B)
+    if natural
+        qR = clamp01.((R .- 0.10) ./ 0.18)
+        qG = clamp01.((G .- 0.10) ./ 0.13)
+        qB = clamp01.((B .- 0.10) ./ 0.15)
+    else
+        qR = rscale(R)
+        qG = rscale(G)
+        qB = rscale(B)
+    end
 
     cube[1,:,:] .= permutedims(qR)
     cube[2,:,:] .= permutedims(qG)
