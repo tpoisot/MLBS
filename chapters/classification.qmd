@@ -56,17 +56,58 @@ $$ {#eq-classification-explain}
 
 The four components of the confusion table are the true positives (TP; correct prediction of $+$), the true negatives (TN; correct prediction of $-$), the false positives (FP; incorrect prediction of $+$), and the false negatives (FN; incorrect prediction of $-$). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible.
 
+As there are many different possible measures on this matrix, we will introduce them as we go. In this section, it it more important to understand how the matrix responds to two important features of the data and the model: balance and bias.
+
+Balance refers to the proportion of the positive class. Whenever this balance is not equal to 1/2 (there are as many positives as negative cases), we are performing *imbalanced* classification, which comes with additional challenges; few ecological problems are balanced. There is a specific hypothetical classifier, called the *no-skill classifier*, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note $b$ the proportion of positive classes, the no-skill classifier will guess $+$ with probability $b$, and $-$ with probability $1-b$. Because these are also the proportion in the data, we can write the adjacency matrix as
+
+$$
+\begin{pmatrix}
+b^2 & b(1-b)\\
+(1-b)b & (1-b)^2 
+\end{pmatrix} \,.
+$$ {#eq-classification-noskill}
+
+The proportion of elements that are on the diagonal of this matrix is $b^2 + (1-b)^2$. When $b$ gets lower, this value actually increases: the more difficult a classification problem is, the more accurate random guesses *look like*. This has a simple explanation: if most of the cases are negative, and you predict a negative case often, you will by chance get a very high true negative score. For this reason, measures of model performance will combine the positions of the confusion table to avoid some of these artifacts.
+
+Bias refers to the fact that a model can recommend more (or fewer) positive or negative classes than it should. An extreme example is the *zero-rate classifier*, which will always guess the most common class, and which is commonly used as a baseline for imbalanced classification. A good classifier has high skill (which we can measure by whether it beats the no-skill classifier for our specific problem) and low bias. In this chapter, we will explore different measures on the confusion table the inform us about these aspects of model performance, using the Naive Bayes Classifier.
+
 ## The Naive Bayes Classifier
 
-The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive [@hand2001]. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying "eh, I reckon it's probably *this* class" and somehow getting it right 95% of the case.
+The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive [@hand2001]. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying "eh, I reckon it's probably *this* class" and somehow getting it right 95% of the case [there are, in fact, several papers questioning *why* NBC works so well; see *e.g.* @kupervasser2014].
 
-### Assumptions of the NBC
+### How the NBC works
 
-In @fig-classification-separability, what is the most likely class if the temperature is 2°C?
+In @fig-classification-separability, what is the most likely class if the temperature is 2°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that $P(2^\circ C | +) > P(2^\circ C | -)$. It would appear that we are looking at the problem in the wrong way, because we are really interested in $P(+ | 2^\circ C)$, the probability that the species is present knowing that the temperature is 2°C.
 
-### How to train the NBC
+Using Baye's theorem, we can re-write our goal as
 
-### Decision rule for prediction
+$$
+P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
+$$ {#eq-nbc-onevar}
+
+where $x$ is one value of one feature, $P(x)$ is the probability of this observation (the evidence, in Bayesian parlance), and $P(+)$ is the probability of the positive class (in other words, the prior). So, this is where the "Bayes" part comes from.
+
+But why is NBC naïve?
+
+In @eq-nbc-onevar, we have used a single feature $x$, but the problem we want to solve uses a vector of features, $\mathbf{x}$. These features, statisticians will say, will have covariance, and a joint distribution, and many things that will challenge the simplicity of what we have written so far. These details, NBC says, are meaningless.
+
+NBC is naïve because it makes the assumptions that the features are all independent. This is very important, as it means that $P(+|\mathbf{x}) \propto P(+)\prod_i P(\mathbf{x}_i|+)$ (by the chain rule). Note that this is not a strict equality,as we need to divide by the evidence. But the evidence is constant across all classes, and so we do not need to measure it to get an estimate of the score for a class.
+
+To generalize our notation, the score for a class $\mathbf{c}_j$ is $P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j)$. In order to decide on a class, we apply the following rule:
+
+$$
+\hat y = \text{argmax}_j \, P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j) \,.
+$$ {#eq-nbc-decision}
+
+In other words, whichever class gives the higher score, is what the NBC will recommend for this instance $\mathbf{x}$. In @sec-tuning, we will improve upon this model by thinking about the evidence $P(\mathbf{x})$, but as you will see, this simple formulation will already prove frightfully effective.
+
+### How the NBC learns
+
+There are two unknown quantities at this point. The first is the value of $P(+)$ and $P(-)$. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) *is* their prior.
+
+The most delicate problem is to figure out $P(x|c)$, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in $x$; as we work with continuous variables, we will rely on Gaussain NBC. In Gaussian NBC, we will consider that $x$ comes from a normal distribution $\mathcal{N}(\mu_{x,c},\sigma_{x,c})$, and therefore we simply need to evaluate the probability density function of this distribution at the point $x$. Other types of data are handled in the same way, with the difference that they use a different set of distributions.
+
+Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier.
 
 ## Application: a baseline model of reindeer presence
 

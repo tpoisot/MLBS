@@ -223,9 +223,8 @@ div.csl-indent {
   </ul></li>
   <li><a href="#the-naive-bayes-classifier" id="toc-the-naive-bayes-classifier" class="nav-link" data-scroll-target="#the-naive-bayes-classifier"><span class="header-section-number">6.3</span> The Naive Bayes Classifier</a>
   <ul class="collapse">
-  <li><a href="#assumptions-of-the-nbc" id="toc-assumptions-of-the-nbc" class="nav-link" data-scroll-target="#assumptions-of-the-nbc"><span class="header-section-number">6.3.1</span> Assumptions of the NBC</a></li>
-  <li><a href="#how-to-train-the-nbc" id="toc-how-to-train-the-nbc" class="nav-link" data-scroll-target="#how-to-train-the-nbc"><span class="header-section-number">6.3.2</span> How to train the NBC</a></li>
-  <li><a href="#decision-rule-for-prediction" id="toc-decision-rule-for-prediction" class="nav-link" data-scroll-target="#decision-rule-for-prediction"><span class="header-section-number">6.3.3</span> Decision rule for prediction</a></li>
+  <li><a href="#how-the-nbc-works" id="toc-how-the-nbc-works" class="nav-link" data-scroll-target="#how-the-nbc-works"><span class="header-section-number">6.3.1</span> How the NBC works</a></li>
+  <li><a href="#how-the-nbc-learns" id="toc-how-the-nbc-learns" class="nav-link" data-scroll-target="#how-the-nbc-learns"><span class="header-section-number">6.3.2</span> How the NBC learns</a></li>
   </ul></li>
   <li><a href="#application-a-baseline-model-of-reindeer-presence" id="toc-application-a-baseline-model-of-reindeer-presence" class="nav-link" data-scroll-target="#application-a-baseline-model-of-reindeer-presence"><span class="header-section-number">6.4</span> Application: a baseline model of reindeer presence</a>
   <ul class="collapse">
@@ -309,20 +308,43 @@ div.csl-indent {
 \end{pmatrix} \,.
 \tag{6.2}\]</span></span></p>
 <p>The four components of the confusion table are the true positives (TP; correct prediction of <span class="math inline">\(+\)</span>), the true negatives (TN; correct prediction of <span class="math inline">\(-\)</span>), the false positives (FP; incorrect prediction of <span class="math inline">\(+\)</span>), and the false negatives (FN; incorrect prediction of <span class="math inline">\(-\)</span>). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible.</p>
+<p>As there are many different possible measures on this matrix, we will introduce them as we go. In this section, it it more important to understand how the matrix responds to two important features of the data and the model: balance and bias.</p>
+<p>Balance refers to the proportion of the positive class. Whenever this balance is not equal to 1/2 (there are as many positives as negative cases), we are performing <em>imbalanced</em> classification, which comes with additional challenges; few ecological problems are balanced. There is a specific hypothetical classifier, called the <em>no-skill classifier</em>, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note <span class="math inline">\(b\)</span> the proportion of positive classes, the no-skill classifier will guess <span class="math inline">\(+\)</span> with probability <span class="math inline">\(b\)</span>, and <span class="math inline">\(-\)</span> with probability <span class="math inline">\(1-b\)</span>. Because these are also the proportion in the data, we can write the adjacency matrix as</p>
+<p><span id="eq-classification-noskill"><span class="math display">\[
+\begin{pmatrix}
+b^2 &amp; b(1-b)\\
+(1-b)b &amp; (1-b)^2
+\end{pmatrix} \,.
+\tag{6.3}\]</span></span></p>
+<p>The proportion of elements that are on the diagonal of this matrix is <span class="math inline">\(b^2 + (1-b)^2\)</span>. When <span class="math inline">\(b\)</span> gets lower, this value actually increases: the more difficult a classification problem is, the more accurate random guesses <em>look like</em>. This has a simple explanation: if most of the cases are negative, and you predict a negative case often, you will by chance get a very high true negative score. For this reason, measures of model performance will combine the positions of the confusion table to avoid some of these artifacts.</p>
+<p>Bias refers to the fact that a model can recommend more (or fewer) positive or negative classes than it should. An extreme example is the <em>zero-rate classifier</em>, which will always guess the most common class, and which is commonly used as a baseline for imbalanced classification. A good classifier has high skill (which we can measure by whether it beats the no-skill classifier for our specific problem) and low bias. In this chapter, we will explore different measures on the confusion table the inform us about these aspects of model performance, using the Naive Bayes Classifier.</p>
 </section>
 </section>
 <section id="the-naive-bayes-classifier" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="the-naive-bayes-classifier"><span class="header-section-number">6.3</span> The Naive Bayes Classifier</h2>
-<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case.</p>
-<section id="assumptions-of-the-nbc" class="level3" data-number="6.3.1">
-<h3 data-number="6.3.1" class="anchored" data-anchor-id="assumptions-of-the-nbc"><span class="header-section-number">6.3.1</span> Assumptions of the NBC</h3>
-<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 2°C?</p>
+<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case [there are, in fact, several papers questioning <em>why</em> NBC works so well; see <em>e.g.</em> <span class="citation" data-cites="kupervasser2014">Kupervasser (<a href="../references.html#ref-kupervasser2014" role="doc-biblioref">2014</a>)</span>].</p>
+<section id="how-the-nbc-works" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="how-the-nbc-works"><span class="header-section-number">6.3.1</span> How the NBC works</h3>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 2°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(2^\circ C | +) &gt; P(2^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 2^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 2°C.</p>
+<p>Using Baye’s theorem, we can re-write our goal as</p>
+<p><span id="eq-nbc-onevar"><span class="math display">\[
+P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
+\tag{6.4}\]</span></span></p>
+<p>where <span class="math inline">\(x\)</span> is one value of one feature, <span class="math inline">\(P(x)\)</span> is the probability of this observation (the evidence, in Bayesian parlance), and <span class="math inline">\(P(+)\)</span> is the probability of the positive class (in other words, the prior). So, this is where the “Bayes” part comes from.</p>
+<p>But why is NBC naïve?</p>
+<p>In <a href="#eq-nbc-onevar" class="quarto-xref">Equation&nbsp;<span>6.4</span></a>, we have used a single feature <span class="math inline">\(x\)</span>, but the problem we want to solve uses a vector of features, <span class="math inline">\(\mathbf{x}\)</span>. These features, statisticians will say, will have covariance, and a joint distribution, and many things that will challenge the simplicity of what we have written so far. These details, NBC says, are meaningless.</p>
+<p>NBC is naïve because it makes the assumptions that the features are all independent. This is very important, as it means that <span class="math inline">\(P(+|\mathbf{x}) \propto P(+)\prod_i P(\mathbf{x}_i|+)\)</span> (by the chain rule). Note that this is not a strict equality,as we need to divide by the evidence. But the evidence is constant across all classes, and so we do not need to measure it to get an estimate of the score for a class.</p>
+<p>To generalize our notation, the score for a class <span class="math inline">\(\mathbf{c}_j\)</span> is <span class="math inline">\(P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j)\)</span>. In order to decide on a class, we apply the following rule:</p>
+<p><span id="eq-nbc-decision"><span class="math display">\[
+\hat y = \text{argmax}_j \, P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j) \,.
+\tag{6.5}\]</span></span></p>
+<p>In other words, whichever class gives the higher score, is what the NBC will recommend for this instance <span class="math inline">\(\mathbf{x}\)</span>. In <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will improve upon this model by thinking about the evidence <span class="math inline">\(P(\mathbf{x})\)</span>, but as you will see, this simple formulation will already prove frightfully effective.</p>
 </section>
-<section id="how-to-train-the-nbc" class="level3" data-number="6.3.2">
-<h3 data-number="6.3.2" class="anchored" data-anchor-id="how-to-train-the-nbc"><span class="header-section-number">6.3.2</span> How to train the NBC</h3>
-</section>
-<section id="decision-rule-for-prediction" class="level3" data-number="6.3.3">
-<h3 data-number="6.3.3" class="anchored" data-anchor-id="decision-rule-for-prediction"><span class="header-section-number">6.3.3</span> Decision rule for prediction</h3>
+<section id="how-the-nbc-learns" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="how-the-nbc-learns"><span class="header-section-number">6.3.2</span> How the NBC learns</h3>
+<p>There are two unknown quantities at this point. The first is the value of <span class="math inline">\(P(+)\)</span> and <span class="math inline">\(P(-)\)</span>. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) <em>is</em> their prior.</p>
+<p>The most delicate problem is to figure out <span class="math inline">\(P(x|c)\)</span>, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in <span class="math inline">\(x\)</span>; as we work with continuous variables, we will rely on Gaussain NBC. In Gaussian NBC, we will consider that <span class="math inline">\(x\)</span> comes from a normal distribution <span class="math inline">\(\mathcal{N}(\mu_{x,c},\sigma_{x,c})\)</span>, and therefore we simply need to evaluate the probability density function of this distribution at the point <span class="math inline">\(x\)</span>. Other types of data are handled in the same way, with the difference that they use a different set of distributions.</p>
+<p>Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier.</p>
 </section>
 </section>
 <section id="application-a-baseline-model-of-reindeer-presence" class="level2 page-columns page-full" data-number="6.4">
@@ -398,6 +420,9 @@ Hand, D.J. &amp; Yu, K. (2001). <a href="https://doi.org/10.2307/1403452">Idiot�
 </div>
 <div id="ref-karger2017" class="csl-entry" role="listitem">
 Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., <em>et al.</em> (2017). <a href="https://doi.org/10.1038/sdata.2017.122">Climatologies at high resolution for the earth<span>’</span>s land surface areas</a>. <em>Scientific Data</em>, 4.
+</div>
+<div id="ref-kupervasser2014" class="csl-entry" role="listitem">
+Kupervasser, O. (2014). <a href="https://doi.org/10.1134/s1054661814010088">The mysterious optimality of Naive Bayes: Estimation of the probability in the system of <span>“</span>classifiers<span>”</span></a>. <em>Pattern Recognition and Image Analysis</em>, 24, 1–10.
 </div>
 <div id="ref-perl2022" class="csl-entry" role="listitem">
 Perl, R.G.B., Avidor, E., Roll, U., Malka, Y., Geffen, E. &amp; Gafny, S. (2022). <a href="https://doi.org/10.1002/edn3.276">Using eDNA presence/non<span>-</span>detection data to characterize the abiotic and biotic habitat requirements of a rare, elusive amphibian</a>. <em>Environmental DNA</em>, 4, 642–653.
