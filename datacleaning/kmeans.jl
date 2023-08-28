@@ -4,7 +4,7 @@ using SpeciesDistributionToolkit
 using DelimitedFiles
 using CairoMakie
 
-img_path = "data/kmeans/raw/LC09_L2SP_193031_20230814_20230817_02_T1/"
+img_path = "data/kmeans/raw/LC09_L2SP_014028_20230621_20230623_02_T1/"
 all_files = readdir(img_path; join=true)
 bands = filter(contains(r"SR_B\d.TIF"), all_files)
 
@@ -17,8 +17,7 @@ testband = readLS9band(bands, "B6")
 heatmap(testband, colormap=:Spectral)
 
 begin
-    #bbox = (left=-75.85, right=-75.4, bottom=49.3, top=49.46)
-    bbox = (left=8.75, right=9.0, bottom=41.55, top=41.675)
+    bbox = (left=-74.0, right=-73.75, bottom=45.39, top=45.525)
     clp = clip(testband; bbox...)
     @info size(clp)
     f = Figure()
