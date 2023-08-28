@@ -2,6 +2,12 @@
 
 In this chapter, we will
 
+navigate the accuracy-explainability for public policy @bell2022
+
+what is explainable differs between stakeholders @amarasinghe2023
+
+biodiversity need sustained model uptake @weiskopf2022
+
 @strumbelj2013 monte carlo approximation of shapley values
 
 @wadoux2023 mapping of shapley values

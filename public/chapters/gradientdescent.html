@@ -233,7 +233,8 @@ div.csl-indent {
   <li><a href="#visualizing-the-learning-process" id="toc-visualizing-the-learning-process" class="nav-link" data-scroll-target="#visualizing-the-learning-process"><span class="header-section-number">3.4.5</span> Visualizing the learning process</a></li>
   <li><a href="#outcome-of-the-model" id="toc-outcome-of-the-model" class="nav-link" data-scroll-target="#outcome-of-the-model"><span class="header-section-number">3.4.6</span> Outcome of the model</a></li>
   </ul></li>
-  <li><a href="#notes-on-regularization" id="toc-notes-on-regularization" class="nav-link" data-scroll-target="#notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</a></li>
+  <li><a href="#a-note-on-regularization" id="toc-a-note-on-regularization" class="nav-link" data-scroll-target="#a-note-on-regularization"><span class="header-section-number">3.5</span> A note on regularization</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">3.6</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -262,6 +263,10 @@ div.csl-indent {
 <p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
 <section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
+<p>Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument <span class="citation" data-cites="morrison1999">(the model itself, see <em>e.g.</em> <a href="../references.html#ref-morrison1999" role="doc-biblioref">Morrison &amp; Morgan 1999</a>)</span>. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.</p>
+<p>As we will see in this chapter, then in <a href="splits.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, and finally in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the <em>machine</em> we train in machine learning.</p>
+<p>Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we ended up with a machine (the trained <em>k</em>-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.</p>
+<p>For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to <em>explain</em> how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in <a href="varimp.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>), and is more related to explaining the process, the “outer core” of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?</p>
 </section>
 <section id="sec-gradientdescent-problem" class="level2 page-columns page-full" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
@@ -401,15 +406,15 @@ p := p - \eta\times \nabla f(p) \,.
 </section>
 <section id="starting-the-learning-process" class="level3" data-number="3.4.2">
 <h3 data-number="3.4.2" class="anchored" data-anchor-id="starting-the-learning-process"><span class="header-section-number">3.4.2</span> Starting the learning process</h3>
-<p>In order to start the gradient descent process, we need to decide on an initial value of the parameters. There are many ways to do it. We could work our way from our knowledge of the system; for example <span class="math inline">\(b &lt; 1\)</span> and <span class="math inline">\(a = 2\)</span> would fit relatively well with early results in the food web literature. Or we could draw a pair of values <span class="math inline">\((a, b)\)</span> at random. Looking at <span class="quarto-unresolved-ref">?fig-gradientdescent-data</span>, it is clear that our problem is remarkably simple, and so presumably either solution would work.</p>
+<p>In order to start the gradient descent process, we need to decide on an initial value of the parameters. There are many ways to do it. We could work our way from our knowledge of the system; for example <span class="math inline">\(b &lt; 1\)</span> and <span class="math inline">\(a = 2\)</span> would fit relatively well with early results in the food web literature. Or we could draw a pair of values <span class="math inline">\((a, b)\)</span> at random. Looking at <a href="#fig-gradient-data" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>, it is clear that our problem is remarkably simple, and so presumably either solution would work.</p>
 </section>
 <section id="stopping-the-learning-process" class="level3 page-columns page-full" data-number="3.4.3">
 <h3 data-number="3.4.3" class="anchored" data-anchor-id="stopping-the-learning-process"><span class="header-section-number">3.4.3</span> Stopping the learning process</h3>
-<p>The gradient descent algorithm is entirely contained in <strong>TODO EQ</strong>, and so we only need to iterate several times to optimize the parameters. How long we need to run the algorithm for depends on a variety of factors, including our learning rate (slow learning requires more time!), our constraints in terms of computing time, but also how good we need to model to be.</p>
+<p>The gradient descent algorithm is entirely contained in <a href="#eq-gradientdescent-loop" class="quarto-xref">Equation&nbsp;<span>3.5</span></a> , and so we only need to iterate several times to optimize the parameters. How long we need to run the algorithm for depends on a variety of factors, including our learning rate (slow learning requires more time!), our constraints in terms of computing time, but also how good we need to model to be.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>The number of iterations over which we train the model is called the number of epochs, and is an hyper-parameter of the model.</p>
-</div></div><p>One usual approach is to decide on a number of iterations, and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning <em>too much</em> from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In <a href="#tbl-gradient-attempt-one" class="quarto-xref">Table&nbsp;<span>3.2</span></a>, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.</p>
+<p>The number of iterations over which we train the model is usually called the number of epochs, and is an hyper-parameter of the model.</p>
+</div></div><p>One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning <em>too much</em> from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In <a href="#tbl-gradient-attempt-one" class="quarto-xref">Table&nbsp;<span>3.2</span></a>, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-tbl-gradient-attempt-one">
 <div class="cell page-columns page-full" data-execution_count="13">
 <div class="cell-output cell-output-display page-columns page-full">
@@ -428,66 +433,66 @@ p := p - \eta\times \nabla f(p) \,.
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">3.81952</td>
-<td style="text-align: right;">3.59185</td>
+<td style="text-align: right;">3.92114</td>
+<td style="text-align: right;">3.18785</td>
 <td style="text-align: right;">0.4</td>
 <td style="text-align: right;">0.2</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">2.93171</td>
-<td style="text-align: right;">2.73714</td>
-<td style="text-align: right;">0.485703</td>
-<td style="text-align: right;">0.226401</td>
+<td style="text-align: right;">2.99934</td>
+<td style="text-align: right;">2.3914</td>
+<td style="text-align: right;">0.487395</td>
+<td style="text-align: right;">0.226696</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">30</td>
-<td style="text-align: right;">1.69896</td>
-<td style="text-align: right;">1.55981</td>
-<td style="text-align: right;">0.63612</td>
-<td style="text-align: right;">0.271203</td>
+<td style="text-align: right;">1.72775</td>
+<td style="text-align: right;">1.31211</td>
+<td style="text-align: right;">0.640263</td>
+<td style="text-align: right;">0.271814</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.525114</td>
-<td style="text-align: right;">0.474702</td>
-<td style="text-align: right;">0.901006</td>
-<td style="text-align: right;">0.337528</td>
+<td style="text-align: right;">0.536207</td>
+<td style="text-align: right;">0.373075</td>
+<td style="text-align: right;">0.907004</td>
+<td style="text-align: right;">0.337644</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">300</td>
-<td style="text-align: right;">0.379423</td>
-<td style="text-align: right;">0.365137</td>
-<td style="text-align: right;">1.03407</td>
-<td style="text-align: right;">0.312931</td>
+<td style="text-align: right;">0.392477</td>
+<td style="text-align: right;">0.308264</td>
+<td style="text-align: right;">1.03855</td>
+<td style="text-align: right;">0.311011</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.315998</td>
-<td style="text-align: right;">0.305429</td>
-<td style="text-align: right;">1.10702</td>
-<td style="text-align: right;">0.115729</td>
+<td style="text-align: right;">0.326848</td>
+<td style="text-align: right;">0.253939</td>
+<td style="text-align: right;">1.11195</td>
+<td style="text-align: right;">0.110083</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3000</td>
-<td style="text-align: right;">0.218368</td>
-<td style="text-align: right;">0.208811</td>
-<td style="text-align: right;">1.25051</td>
-<td style="text-align: right;">-0.297807</td>
+<td style="text-align: right;">0.225623</td>
+<td style="text-align: right;">0.167897</td>
+<td style="text-align: right;">1.25704</td>
+<td style="text-align: right;">-0.311373</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">10000</td>
-<td style="text-align: right;">0.160111</td>
-<td style="text-align: right;">0.143257</td>
-<td style="text-align: right;">1.43959</td>
-<td style="text-align: right;">-0.84272</td>
+<td style="text-align: right;">0.164974</td>
+<td style="text-align: right;">0.119597</td>
+<td style="text-align: right;">1.4487</td>
+<td style="text-align: right;">-0.868105</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">20000</td>
-<td style="text-align: right;">0.15805</td>
-<td style="text-align: right;">0.138455</td>
-<td style="text-align: right;">1.47878</td>
-<td style="text-align: right;">-0.955684</td>
+<td style="text-align: right;">0.162808</td>
+<td style="text-align: right;">0.118899</td>
+<td style="text-align: right;">1.48864</td>
+<td style="text-align: right;">-0.984121</td>
 </tr>
 </tbody>
 </table>
@@ -515,12 +520,14 @@ p := p - \eta\times \nabla f(p) \,.
 </div>
 </div>
 </div>
-<p>We are producting the loss over time figure after the training, as it is good practice – but as we mentionned in the previous section, it is very common to have the training code look at the dynamics of these two values in order to decide whether to stop the training early.</p>
+<p>We are producing the loss over time figure after the training, as it is good practice – but as we mentioned in the previous section, it is very common to have the training code look at the dynamics of these two values in order to decide whether to stop the training early.</p>
+<p>Before moving forward, let’s look at <a href="#fig-gradient-loss-comparison" class="quarto-xref">Figure&nbsp;<span>3.2</span></a> a little more closely. In the first steps, the loss decreases very rapidly – this is because we started from a value of <span class="math inline">\(\mathbf{\beta}\)</span> that is, presumably, far away from the optimum, and therefore the gradient is really strong. Despite the low learning rate, we are making long steps in the space of parameters. After this initial rapid increase, the loss decreases much more slowly. This, counter-intuitively, indicates that we are getting closer to the optimum! At the exact point where <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> optimally describe our dataset, the gradient vanishes, and our system would stop moving. And as we get closer and closer to this point, we are slowing down. In the next section, we will see how the change in loss over times ties into the changes with the optimal parameter values.</p>
 </section>
 <section id="visualizing-the-learning-process" class="level3 page-columns page-full" data-number="3.4.5">
 <h3 data-number="3.4.5" class="anchored" data-anchor-id="visualizing-the-learning-process"><span class="header-section-number">3.4.5</span> Visualizing the learning process</h3>
+<p>From <a href="#fig-gradient-param-change" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>, we can see the change in <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, as well as the movement of the current best estimate of the parameters (right panel). The sharp decrease in loss early in the training is specifically associated to a rapid change in the value of <span class="math inline">\(\beta_0\)</span>. Further note that the change in parameters values is <em>not</em> monotonous! The value of <span class="math inline">\(\beta_1\)</span> initially increases, but when <span class="math inline">\(\beta_0\)</span> gets closer to the optimum, the gradient indicates that we have been moving <span class="math inline">\(\beta_1\)</span> in the “wrong” direction.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-param-change">
-<div id="cell-fig-gradient-param-change" class="cell page-columns page-full" data-execution_count="15">
+<div id="cell-fig-gradient-param-change" class="cell page-columns page-full" data-execution_count="17">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-gradient-param-change" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
@@ -531,49 +538,41 @@ p := p - \eta\times \nabla f(p) \,.
 </div>
 </div>
 </div>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-landscape">
-<div id="cell-fig-gradient-landscape" class="cell page-columns page-full" data-execution_count="18">
-<div class="cell-output cell-output-display page-columns page-full">
-<div id="fig-gradient-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full">
-<p><img src="gradientdescent_files/figure-html/fig-gradient-landscape-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;3.4: Alternative representation of the data from <a href="#fig-gradient-param-change" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>, where the change in parameter values (solid line) is plotted on top of the surface giving the log-loss for all pairs of parameters. We can intuit this figure as showing the movement of a ball (the parameters) rolling down a bowl, at the bottom of which is the correct model parameterization.</figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
+<p>This is what gives rise to the “elbow” shape in the right panel of <a href="#fig-gradient-param-change" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>. Remember that the gradient descent algorithm, in its simple formulation, assumes that we can <em>never</em> climb back up, <em>i.e.</em> we never accept a costly move. The trajectory of the parameters therefore represents the path that brings them to the lowest point they can reach <em>without</em> having to temporarily recommend a worse solution.</p>
+<p>But how good is the solution we have reached?</p>
 </section>
 <section id="outcome-of-the-model" class="level3 page-columns page-full" data-number="3.4.6">
 <h3 data-number="3.4.6" class="anchored" data-anchor-id="outcome-of-the-model"><span class="header-section-number">3.4.6</span> Outcome of the model</h3>
+<p>We could read the performance of the model using the data in <a href="#fig-gradient-loss-comparison" class="quarto-xref">Figure&nbsp;<span>3.2</span></a>, but what we <em>really</em> care about is the model’s ability to tell us something about the data we initially gave it. This is presented in <a href="#fig-gradient-fitted" class="quarto-xref">Figure&nbsp;<span>3.4</span></a>. As we can see, the model is doing a rather good job at capturing the relationship between the number of species and the number of interactions.</p>
 <div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-fitted">
-<div id="cell-fig-gradient-fitted" class="cell page-columns page-full" data-execution_count="17">
+<div id="cell-fig-gradient-fitted" class="cell page-columns page-full" data-execution_count="15">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-gradient-fitted" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="gradientdescent_files/figure-html/fig-gradient-fitted-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;3.5: Overview of data from …</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;3.4: Overview of data from …</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-residuals">
-<div id="cell-fig-gradient-residuals" class="cell page-columns page-full" data-execution_count="16">
-<div class="cell-output cell-output-display page-columns page-full">
-<div id="fig-gradient-residuals" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full">
-<p><img src="gradientdescent_files/figure-html/fig-gradient-residuals-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;3.6: Overview of the distributions of residuals (note that the residuals are calculated on the <span class="math inline">\(log_2(L)\)</span> and <span class="math inline">\(log_2(S)\)</span>) after a large enough number of epochs for gradient descent. The grey histogram is the residuals on the training data, and the red density line is the residuals on the testing data.</figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
+<p>We will have a far more nuanced discussion of “what is this model good for?” in <a href="splits.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, but for now, we can make a decision about this model: it provides a good approximation of the relationship between the species richness, and the number of interactions, in a food web.</p>
 </section>
 </section>
-<section id="notes-on-regularization" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="notes-on-regularization"><span class="header-section-number">3.5</span> Notes on regularization</h2>
+<section id="a-note-on-regularization" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="a-note-on-regularization"><span class="header-section-number">3.5</span> A note on regularization</h2>
+<p>One delicate issue that we have avoided in this chapter is the absolute value of the parameters. In other words, we didn’t really care about how large the model parameters would be, only the quality of the fit. This is (generally) safe to do in a model with a single parameter. But what if we had many different terms? What if, for example, we had a linear model of the form <span class="math inline">\(\hat y \approx \beta_0 + \beta_1 x + \beta_2 x^2\)</span>? What if our model was of the form <span class="math inline">\(\hat y&nbsp;\approx \beta_0 + \beta_1 x + \dots + \beta_n x^n\)</span>? What if <span class="math inline">\(n\)</span> started to get very large compared to the number of data points?</p>
+<p>In this situation, we would very likely see overfitting, wherein the model would use the polynomial terms we provided to capture more and more noise in the data. This would be a dangerous situation, as the model will lose its ability to work on unknown data!</p>
+<p>To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In <span class="quarto-unresolved-ref">?eq-gradientdescent-gradient</span>, the function <span class="math inline">\(f(p)\)</span> we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where</p>
+<p><span class="math display">\[
+f(p) = \text{loss} + \lambda \times g(\beta)&nbsp;\,,
+\]</span></p>
+<p>where <span class="math inline">\(\lambda\)</span> is an hyper-parameter giving the strength of the regularization, and <span class="math inline">\(g(\beta)\)</span> is a function to calculate the total penalty of a set of parameters.</p>
+<p>When using <span class="math inline">\(L1\)</span> regularization (LASSO regression), <span class="math inline">\(g(\beta) = \sum |\beta|\)</span>, and when using <span class="math inline">\(L2\)</span> regularization (ridge regression), <span class="math inline">\(g(\beta) = \sum \beta^2\)</span>. When this gets larger, which happens when the absolute value of the parameters increases, the model is penalized. Note that if <span class="math inline">\(\lambda = 0\)</span>, we are back to the initial formulation of the gradient, where the parameters have no direct effect on the cost.</p>
+</section>
+<section id="conclusion" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">3.6</span> Conclusion</h2>
+<p>In this chapter, we have used a dataset of species richness and number of interactions to start exploring the practice of machine learning. We defined a model (a linear regression), and based about assumptions about how to get closer to ideal parameters, we used the technique of gradient descent to estimate the best possible relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span>. In order to provide a fair evaluation of the performance of this model, we kept a part of the dataset hidden from it while training. In <a href="splits.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, we will explore this last point in great depth, by introducing the concept of cross-validation, testing set, and performance evaluation.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
@@ -591,6 +590,9 @@ MacDonald, A.A.M., Banville, F. &amp; Poisot, T. (2020). <a href="https://doi.or
 </div>
 <div id="ref-martinez1992" class="csl-entry" role="listitem">
 Martinez, N.D. (1992). <a href="http://www.jstor.org/stable/2462337">Constant connectance in community food webs</a>. <em>The American Naturalist</em>, 139, 1208–1218.
+</div>
+<div id="ref-morrison1999" class="csl-entry" role="listitem">
+Morrison, M. &amp; Morgan, M.S. (1999). <a href="https://doi.org/10.1017/cbo9780511660108.003">Models as mediating instruments</a>. Cambridge University Press, pp. 10–37.
 </div>
 </div>
 </section>

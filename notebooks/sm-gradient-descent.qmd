@@ -142,62 +142,39 @@ axislegend(axs; position=:rt)
 current_figure()
 ```
 
-see parameter values
-
-
-```{julia}
-#| label: fig-gradient-param-change
-#| fig-cap: This figure shows the change in the parameters values over time. Note that the change is very large initially, because we make large steps when the gradient is strong. The rate of change gets much lower as we get nearer to the "correct" value.
-fig = Figure(; resolution=(500, 300))
-
-axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="β₀")
-lines!(axs, 0:epochs, track_p1, color=:black, label="Training")
-
-axs = Axis(fig[2,1]; xlabel="Training epoch", ylabel="β₁")
-lines!(axs, 0:epochs, track_p2, color=:black, label="Testing")
-
-current_figure()
-```
-
-
-and the residuals
-
-```{julia}
-#| label: fig-gradient-residuals
-#| fig-cap: Overview of the distributions of residuals (note that the residuals are calculated on the $log_2(L)$ and $log_2(S)$) after a large enough number of epochs for gradient descent. The grey histogram is the residuals on the training data, and the red density line is the residuals on the testing data.
-fig = Figure(; resolution=(500, 300))
-axs = Axis(fig[1,1])
-hist!(axs, lm(x, p...) .- y; normalization=:pdf, color=:lightgrey, bins=20)
-density!(axs, lm(tx, p...) .- ty, color=:transparent, strokewidth=1, strokecolor=:red, npoints=500)
-tightlimits!(axs)
-hidespines!(axs, :l, :r, :t)
-hideydecorations!(axs; grid=true)
-hidexdecorations!(axs; grid=true, label=false, ticks=false, ticklabels=false)
-current_figure()
-```
-
 and the predictions:
 
 ```{julia}
 #| label: fig-gradient-fitted
 #| fig-cap: Overview of data from ...
 fig = Figure(; resolution=(500, 500))
-axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
+
+gl = fig[1,1] = GridLayout()
+
+axs = Axis(gl[2,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, training.S, training.L, color=:black, markersize=4)
 pseudox = exp.(LinRange(1, log.(maximum(training.S)), 20))
 lines!(axs, pseudox, exp.(p[1] .* log.(pseudox) .+ p[2]), color=:red)
 lines!(axs, pseudox, pseudox.^2.0, color=:grey, linestyle=:dash)
 lines!(axs, pseudox, pseudox.-1.0, color=:grey, linestyle=:dash)
+
+axs = Axis(gl[1,1])
+hist!(axs, lm(x, p...) .- y; normalization=:pdf, color=:lightgrey, bins=20)
+density!(axs, lm(tx, p...) .- ty, color=:transparent, strokewidth=1, strokecolor=:red, npoints=500)
+tightlimits!(axs)
+hidespines!(axs, :l, :r, :t)
+hideydecorations!(axs; grid=true)
+hidexdecorations!(axs; grid=true, label=false, ticks=false, ticklabels=false)
+
+rowsize!(gl, 1, Relative(0.3))
+
 current_figure()
 ```
 
-model for the parameters
+
+now we get the landscape
 
 ```{julia}
-#| label: fig-gradient-landscape
-#| fig-cap: Alternative representation of the data from @fig-gradient-param-change, where the change in parameter values (solid line) is plotted on top of the surface giving the log-loss for all pairs of parameters. We can intuit this figure as showing the movement of a ball (the parameters) rolling down a bowl, at the bottom of which is the correct model parameterization.
-f = Figure()
-
 p0 = LinRange(0.0, 2.0, 50)
 p1 = LinRange(-2.0, 1.0, 50)
 S = zeros(Float64, (length(p0), length(p1)))
@@ -207,11 +184,29 @@ for i in axes(S, 1)
         S[i,j] = L2(y, x, lm, p0[i], p1[j])
     end
 end
+```
 
-ax = Axis(f[1,1,], xlabel="β₀", ylabel="β₁")
 
-contourf!(ax, p0, p1, log.(S), colormap=[:white, :darkblue], levels=12)
-lines!(ax, track_p1, track_p2, color=:black)
+```{julia}
+#| label: fig-gradient-param-change
+#| fig-cap: This figure shows the change in the parameters values over time. Note that the change is very large initially, because we make large steps when the gradient is strong. The rate of change gets much lower as we get nearer to the "correct" value.
+fig = Figure(; resolution=(600, 250))
+
+axp = fig[1,1] = GridLayout()
+
+axb0 = Axis(axp[1,1]; xlabel="Training epoch", ylabel="β₀")
+lines!(axb0, (0:epochs)./1000, track_p1, color=:black)
+
+axb1 = Axis(axp[2,1]; xlabel="Training epoch", ylabel="β₁")
+lines!(axb1, (0:epochs)./1000, track_p2, color=:black)
+
+hidexdecorations!(axb0, grid=false)
+rowgap!(axp, 0)
+
+axl = Axis(fig[1,2], xlabel="β₀", ylabel="β₁")
+
+contourf!(axl, p0, p1, log.(S), colormap=[:white, :darkblue], levels=12)
+lines!(axl, track_p1, track_p2, color=:black)
 
 current_figure()
 ```

@@ -69,6 +69,7 @@ format:
       gutter-width: 2rem
   pdf:
     documentclass: scrbook
+    linkcolor: SteelBlue4
     fig-pos: 'bt'
     tbl-pos: 'bt'
     toc: true

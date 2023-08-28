@@ -6,6 +6,14 @@ Doing do will require to introduce several new concepts, and so the "correct" wa
 
 ## A digression: what is a trained model? {#sec-gradientdescent-trainedmodel}
 
+Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument [the model itself, see *e.g.* @morrison1999]. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.
+
+As we will see in this chapter, then in @sec-splits, and finally in @sec-tuning, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the *machine* we train in machine learning.
+
+Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In @sec-clustering, we ended up with a machine (the trained *k*-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.
+
+For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to *explain* how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in @sec-varimp), and is more related to explaining the process, the "outer core" of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?
+
 ## The problem: how many interactions in a food web? {#sec-gradientdescent-problem}
 
 One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years. In
@@ -135,17 +143,17 @@ In order to get a sense of the performance of our model, we will remove some of 
 
 ### Starting the learning process
 
-In order to start the gradient descent process, we need to decide on an initial value of the parameters. There are many ways to do it. We could work our way from our knowledge of the system; for example $b < 1$ and $a = 2$ would fit relatively well with early results in the food web literature. Or we could draw a pair of values $(a, b)$ at random. Looking at @fig-gradientdescent-data, it is clear that our problem is remarkably simple, and so presumably either solution would work.
+In order to start the gradient descent process, we need to decide on an initial value of the parameters. There are many ways to do it. We could work our way from our knowledge of the system; for example $b < 1$ and $a = 2$ would fit relatively well with early results in the food web literature. Or we could draw a pair of values $(a, b)$ at random. Looking at @fig-gradient-data, it is clear that our problem is remarkably simple, and so presumably either solution would work.
 
 ### Stopping the learning process
 
-The gradient descent algorithm is entirely contained in **TODO EQ**, and so we only need to iterate several times to optimize the parameters. How long we need to run the algorithm for depends on a variety of factors, including our learning rate (slow learning requires more time!), our constraints in terms of computing time, but also how good we need to model to be.
+The gradient descent algorithm is entirely contained in @eq-gradientdescent-loop , and so we only need to iterate several times to optimize the parameters. How long we need to run the algorithm for depends on a variety of factors, including our learning rate (slow learning requires more time!), our constraints in terms of computing time, but also how good we need to model to be.
 
 ::: column-margin
-The number of iterations over which we train the model is called the number of epochs, and is an hyper-parameter of the model.
+The number of iterations over which we train the model is usually called the number of epochs, and is an hyper-parameter of the model.
 :::
 
-One usual approach is to decide on a number of iterations, and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning *too much* from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In @tbl-gradient-attempt-one, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.
+One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning *too much* from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In @tbl-gradient-attempt-one, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.
 
 {{< embed ../notebooks/sm-gradient-descent.qmd#tbl-gradient-attempt-one >}}
 
@@ -161,18 +169,44 @@ Underfitting is also a possible scenario, where the model is *not* learning from
 
 {{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-loss-comparison >}}
 
-We are producting the loss over time figure after the training, as it is good practice -- but as we mentionned in the previous section, it is very common to have the training code look at the dynamics of these two values in order to decide whether to stop the training early.
+We are producing the loss over time figure after the training, as it is good practice -- but as we mentioned in the previous section, it is very common to have the training code look at the dynamics of these two values in order to decide whether to stop the training early.
+
+Before moving forward, let's look at @fig-gradient-loss-comparison a little more closely. In the first steps, the loss decreases very rapidly -- this is because we started from a value of $\mathbf{\beta}$ that is, presumably, far away from the optimum, and therefore the gradient is really strong. Despite the low learning rate, we are making long steps in the space of parameters. After this initial rapid increase, the loss decreases much more slowly. This, counter-intuitively, indicates that we are getting closer to the optimum! At the exact point where $\beta_0$ and $\beta_1$ optimally describe our dataset, the gradient vanishes, and our system would stop moving. And as we get closer and closer to this point, we are slowing down. In the next section, we will see how the change in loss over times ties into the changes with the optimal parameter values.
 
 ### Visualizing the learning process
 
+From @fig-gradient-param-change, we can see the change in $\beta_0$ and $\beta_1$, as well as the movement of the current best estimate of the parameters (right panel). The sharp decrease in loss early in the training is specifically associated to a rapid change in the value of $\beta_0$. Further note that the change in parameters values is *not* monotonous! The value of $\beta_1$ initially increases, but when $\beta_0$ gets closer to the optimum, the gradient indicates that we have been moving $\beta_1$ in the "wrong" direction.
+
 {{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-param-change >}}
 
-{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-landscape >}}
+This is what gives rise to the "elbow" shape in the right panel of @fig-gradient-param-change. Remember that the gradient descent algorithm, in its simple formulation, assumes that we can *never* climb back up, *i.e.* we never accept a costly move. The trajectory of the parameters therefore represents the path that brings them to the lowest point they can reach *without* having to temporarily recommend a worse solution.
+
+But how good is the solution we have reached?
 
 ### Outcome of the model
 
+We could read the performance of the model using the data in @fig-gradient-loss-comparison, but what we *really* care about is the model's ability to tell us something about the data we initially gave it. This is presented in @fig-gradient-fitted. As we can see, the model is doing a rather good job at capturing the relationship between the number of species and the number of interactions.
+
 {{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-fitted >}}
 
-{{< embed ../notebooks/sm-gradient-descent.qmd#fig-gradient-residuals >}}
+We will have a far more nuanced discussion of "what is this model good for?" in @sec-splits, but for now, we can make a decision about this model: it provides a good approximation of the relationship between the species richness, and the number of interactions, in a food web.
 
-## Notes on regularization
+## A note on regularization
+
+One delicate issue that we have avoided in this chapter is the absolute value of the parameters. In other words, we didn't really care about how large the model parameters would be, only the quality of the fit. This is (generally) safe to do in a model with a single parameter. But what if we had many different terms? What if, for example, we had a linear model of the form $\hat y \approx \beta_0 + \beta_1 x + \beta_2 x^2$? What if our model was of the form $\hat y \approx \beta_0 + \beta_1 x + \dots + \beta_n x^n$? What if $n$ started to get very large compared to the number of data points?
+
+In this situation, we would very likely see overfitting, wherein the model would use the polynomial terms we provided to capture more and more noise in the data. This would be a dangerous situation, as the model will lose its ability to work on unknown data!
+
+To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In @eq-gradientdescent-gradient, the function $f(p)$ we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where
+
+$$
+f(p) = \text{loss} + \lambda \times g(\beta) \,,
+$$
+
+where $\lambda$ is an hyper-parameter giving the strength of the regularization, and $g(\beta)$ is a function to calculate the total penalty of a set of parameters.
+
+When using $L1$ regularization (LASSO regression), $g(\beta) = \sum |\beta|$, and when using $L2$ regularization (ridge regression), $g(\beta) = \sum \beta^2$. When this gets larger, which happens when the absolute value of the parameters increases, the model is penalized. Note that if $\lambda = 0$, we are back to the initial formulation of the gradient, where the parameters have no direct effect on the cost.
+
+## Conclusion
+
+In this chapter, we have used a dataset of species richness and number of interactions to start exploring the practice of machine learning. We defined a model (a linear regression), and based about assumptions about how to get closer to ideal parameters, we used the technique of gradient descent to estimate the best possible relationship between $S$ and $L$. In order to provide a fair evaluation of the performance of this model, we kept a part of the dataset hidden from it while training. In @sec-splits, we will explore this last point in great depth, by introducing the concept of cross-validation, testing set, and performance evaluation.
