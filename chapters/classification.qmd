@@ -1,43 +1,60 @@
 # Supervised classification {#sec-classification}
 
-In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in **TODO**, we will think about predictions of classes as probabilities; in **TODO**, we will generalize these ideas and think about learning curves; finally, in **TODO**, we will finally think about variables a lot more, and introduce elements of model interpretation
+In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in @sec-variable-selection, we will explore techniques to fine-tune the set of variables we use for prediction; in @sec-tuning, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in @sec-varimp, we will think about variables a lot more, and introduce elements of model interpretability.
 
 ## The problem: reindeer distribution
 
-Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, *Rangifer tarandus tarandus*. Species Distribution Modeling (SDM; @elith2009), or Ecological Niche Modeling (ENM), is an excellent instance of ecologist essentially doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters, has been covered in the SDM [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem.
+Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, *Rangifer tarandus tarandus*. Species Distribution Modeling (SDM; @elith2009), or Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-splits-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem.
 
-These two predictors are important for plants [@clapham1935] or animals [@whittaker1962] **ECOZONES**, and see *e.g.* climate change [@berteaux2014]
+Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.
 
-data from [@fick2017], an alternative is [@karger2017] which is higher resolution, so for iteration we work with a smaller data product
+We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants [@clapham1935] and animals [@whittaker1962], to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start [@berteaux2014].
+
+Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the [Global Biodiversity Information Facility](https://www.gbif.org/). We need information about where the species has *not* been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this [@hanberry2012; @barbet-massin2012]. All of these data points come in the form $(\text{lat.}, \text{lon.}, y)$, which give a position in space, as well as $y = \{+,-\}$ (the species is present or absent!) at this position.
+
+To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the WorldClim2 dataset [@fick2017] for this purpose. In a great many situations, CHELSA2 [@karger2017] would be a better source of bioclimatic variables, but it has a much higher spatial resolution; what we want to do here is iterate rapidly and focus on the high-level discussion of how we make predictions, so a coarser data product will serve us just as well.
+
+The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
 
 ## What is classification?
 
-Classification is the prediction of a qualitative response. In @sec-kmeans, for example, we predicted the class of a pixel, which is a qualitative variable with levels $\{1, 2, \dots, k\}$. This represented an instance of *unsupervised* learning, as we had no *a priori* notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate "background points", that represent assumptions about where the species are not [@hanberry2012; @barbet-massin2012].
+Classification is the prediction of a qualitative response. In @sec-clustering, for example, we predicted the class of a pixel, which is a qualitative variable with levels $\{1, 2, \dots, k\}$. This represented an instance of *unsupervised* learning, as we had no *a priori* notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate "background points", that represent assumptions about where the species are not.
 
-In short, our response variable has levels $\{0, 1\}$: the species is there, or it is not -- we will challenge this assumption later in the series of chapters, but for now, this will do.
+::: column-margin
+When working on $\{+,-\}$ outcomes, we are specifically performing *binary* classification. Classification can be applied to more than two levels.
+:::
 
-### Separability and the curse of dimensionality
+In short, our response variable has levels $\{+, -\}$: the species is there, or it is not -- we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the *positive class*, and the case where it is absent is the *negative class*. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA [*e.g.* @perl2022] are a classification problem: the species can be present or not, $y = \{+,-\}$, and the test can be positive of negative $\hat y = \{+,-\}$. We would be happy in this situation whenever $\hat y = y$, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.
 
-A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth).
+### Separability
 
-In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of reindeers (top), and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (but maybe there is a different projection of the data that would change this), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 0°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become more likely. The locations with a temperature between 0°C and 5°C can go either way.
+A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in @sec-variable-selection-curse, simply adding more predictors is not necessarily the right thing to do.
+
+In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of reindeers, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in @sec-variable-selection), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.
 
 {{< embed ../notebooks/sm-classification.qmd#fig-classification-separability >}}
 
-It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!
-
-curse of dimensionality
-
 ### The confusion table
 
-The most important element we need in order to evaluate the performance of a classification model is the confusion table.
+Evaluating the performance of a classifier (a classifier is a model that performs classification) is usually done by looking at its confusion table, which is a contingency table of the form
 
 $$
 \begin{pmatrix}
 \text{TP} & \text{FP}\\
 \text{FN} & \text{TN} 
-\end{pmatrix}
+\end{pmatrix} \,.
+$$ {#eq-classification-confusion}
+
+This can be stated as "counting the number of times each pair of prediction, observation occurs", like so:
+
 $$
+\begin{pmatrix}
+|\hat +, +| & |\hat +, -|\\
+|\hat -, +| & |\hat -, -| 
+\end{pmatrix} \,.
+$$ {#eq-classification-explain}
+
+The four components of the confusion table are the true positives (TP; correct prediction of $+$), the true negatives (TN; correct prediction of $-$), the false positives (FP; incorrect prediction of $+$), and the false negatives (FN; incorrect prediction of $-$). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible.
 
 ## The Naive Bayes Classifier
 
