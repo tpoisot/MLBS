@@ -52,7 +52,7 @@ book:
 bibliography: references.bib
 csl: https://www.zotero.org/styles/ecology-letters
 
-cap-location: margin
+fig-cap-location: margin
 tbl-cap-location: top
 
 preview:
@@ -74,7 +74,7 @@ format:
     tbl-pos: 'bt'
     toc: true
     toc-depth: 2
-    mainfont: TeX Gyre Pagella
-    mathfont: TeX Gyre Pagella Math
+    mainfont: TeX Gyre Termes
+    mathfont: TeX Gyre Termes
     sansfont: TeX Gyre Heros
     monofont: TeX Gyre Cursor
