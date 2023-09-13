@@ -4,3 +4,10 @@ Manifest.toml
 data/**/raw/*
 /.luarc.json
 data/**/*.tiff
+
+# Quarto files
+_freeze/
+getopt
+os
+sys
+sysconfig

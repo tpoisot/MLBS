@@ -262,7 +262,7 @@ div.csl-indent {
 
 <p>In <span class="quarto-unresolved-ref">?sec-kmeans</span>, we were very lucky. Because we applied an unsupervised method, we didn’t really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation; we will further think about data leakage, why it is somehow worse than it sounds, and how to protect against it.</p>
 <p>In a sense, we started thinking about these concepts in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>; specifically, we came up with a way to optimize the parameters of our model (<em>i.e.</em> of <em>training</em> our model) based on a series of empirical observations, and a criteria for what a “good fit” is. We further appraised the performance of our model by measuring the loss (our measure of how good the fit is) on a dataset that was not accessible during training.</p>
-<section id="how-can-we-split-a-dataset" class="level2 page-columns page-full" data-number="4.1">
+<section id="how-can-we-split-a-dataset" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="how-can-we-split-a-dataset"><span class="header-section-number">4.1</span> How can we split a dataset?</h2>
 <p>There is a much more important question to ask first: <em>why</em> do we split a dataset? In a sense, answering this question echoes the discussion we started in <strong>TODO REG MOD</strong>, because the purpose of splitting a dataset is to ensure we can train and evaluate it properly, in order to deliver the best possible model.</p>
 <p>When a model is trained, it has learned from the data, we have tuned its hyper-parameters to ensure that it learned with the best possible conditions, and we have applied a measure of performance after the entire process to communicate how well our model works. These three tasks require three different datasets, and this is the purpose of splitting our data into groups.</p>
@@ -271,9 +271,9 @@ div.csl-indent {
 <p>The testing data are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in <strong>TODO LEAKAGE</strong>.</p>
 <p>The validation data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.</p>
 <p>The difference between testing and validation is largely a difference of <em>intent</em>. When we want to provide an a posteriori assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let’s look at each of these datasets in turn. The differences between these three datasets are summarized in <a href="#tbl-splits-models" class="quarto-xref">Table&nbsp;<span>4.1</span></a>.</p>
-<div id="tbl-splits-models" class="anchored page-columns page-full">
+<div id="tbl-splits-models" class="anchored">
 <table class="table">
-
+<caption>Table&nbsp;4.1: gfkdf jdshgl dsjg d.&nbsp;Information in the “Data used for training” column refer to the data that have been used to train the model when calculating its performance.</caption>
 <colgroup>
 <col style="width: 16%">
 <col style="width: 10%">
@@ -309,7 +309,7 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
-<div class="quarto-table-caption margin-caption">Table&nbsp;4.1: gfkdf jdshgl dsjg d.&nbsp;Information in the “Data used for training” column refer to the data that have been used to train the model when calculating its performance.</div></div>
+</div>
 <section id="training" class="level3" data-number="4.1.1">
 <h3 data-number="4.1.1" class="anchored" data-anchor-id="training"><span class="header-section-number">4.1.1</span> Training</h3>
 <p>In data science (in applied machine learning in particular), we do <em>fit</em> models. We <em>train</em> them. This is an important difference: training is an iterative process, that we can repeat, optimize, and tweak. The outcome of training and the outcome of fitting are essentially the same (a model that is parameterized to work as well as possible on a given dataset), but it is good practice to adopt the language of a field, and the language of data science emphasizes the different practices in model training.</p>
@@ -413,12 +413,12 @@ div.csl-indent {
 </div>
 </div>
 <p>Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
-<div class="cell page-columns page-full" data-execution_count="14">
-<div class="cell-output cell-output-display page-columns page-full">
-<div id="tbl-splits-performance-summary" class="anchored page-columns page-full">
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
+<div class="cell" data-execution_count="14">
+<div class="cell-output cell-output-display">
+<div id="tbl-splits-performance-summary" class="anchored">
 <table class="table table-sm table-striped small">
-
+<caption>Table&nbsp;4.2: TODO</caption>
 <thead>
 <tr class="header">
 <th style="text-align: right;">Dataset</th>
@@ -502,7 +502,7 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
-<div class="quarto-table-caption margin-caption">Table&nbsp;4.2: TODO</div></div>
+</div>
 </div>
 </div>
 </div>

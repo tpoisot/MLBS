@@ -307,9 +307,9 @@ div.csl-indent {
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In data science, things often have multiple names. This is true of loss functions, and this will be even more true on other things later.</p>
 </div></div><p>This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in <a href="#tbl-gradientdescent-regressionloss" class="quarto-xref">Table&nbsp;<span>3.1</span></a>.</p>
-<div id="tbl-gradientdescent-regressionloss" class="anchored page-columns page-full">
+<div id="tbl-gradientdescent-regressionloss" class="anchored">
 <table class="table">
-
+<caption>Table&nbsp;3.1: List of common loss functions for regression problems</caption>
 <colgroup>
 <col style="width: 25%">
 <col style="width: 25%">
@@ -345,7 +345,7 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
-<div class="quarto-table-caption margin-caption">Table&nbsp;3.1: List of common loss functions for regression problems</div></div>
+</div>
 <p>Throughout this chapter, we will use the L2 loss (<a href="#eq-loss-mse" class="quarto-xref">Equation&nbsp;<span>3.1</span></a>), because it has <em>really</em> nice properties when it comes to taking derivatives, which we will do a lot of. In the case of a linear model, we can rewrite <a href="#eq-loss-mse" class="quarto-xref">Equation&nbsp;<span>3.1</span></a> as</p>
 <p><span id="eq-loss-withmodel"><span class="math display">\[
 f = \frac{1}{n}\sum\left(y_i - m\times x_i - b\right)^2
@@ -415,12 +415,12 @@ p := p - \eta\times \nabla f(p) \,.
 <div class="no-row-height column-margin column-container"><div class="">
 <p>The number of iterations over which we train the model is usually called the number of epochs, and is an hyper-parameter of the model.</p>
 </div></div><p>One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning <em>too much</em> from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In <a href="#tbl-gradient-attempt-one" class="quarto-xref">Table&nbsp;<span>3.2</span></a>, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-tbl-gradient-attempt-one">
-<div class="cell page-columns page-full" data-execution_count="13">
-<div class="cell-output cell-output-display page-columns page-full">
-<div id="tbl-gradient-attempt-one" class="anchored page-columns page-full">
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-tbl-gradient-attempt-one">
+<div class="cell" data-execution_count="13">
+<div class="cell-output cell-output-display">
+<div id="tbl-gradient-attempt-one" class="anchored">
 <table class="table table-sm table-striped small">
-
+<caption>Table&nbsp;3.2: This table shows the change in the model, as measured by the loss and by the estimates of the parameters, after an increasing amount of training epochs. The loss drops sharply in the first 500 iterations, but even after 20000 iterations, there are still some changes in the values of the parameters.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: right;">Step</th>
@@ -496,7 +496,7 @@ p := p - \eta\times \nabla f(p) \,.
 </tr>
 </tbody>
 </table>
-<div class="quarto-table-caption margin-caption">Table&nbsp;3.2: This table shows the change in the model, as measured by the loss and by the estimates of the parameters, after an increasing amount of training epochs. The loss drops sharply in the first 500 iterations, but even after 20000 iterations, there are still some changes in the values of the parameters.</div></div>
+</div>
 </div>
 </div>
 </div>
