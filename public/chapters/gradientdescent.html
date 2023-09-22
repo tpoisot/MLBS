@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.330">
+<meta name="generator" content="quarto-1.4.358">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -276,7 +276,7 @@ div.csl-indent {
 <p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="../references.html#ref-brose2004" role="doc-biblioref">Brose <em>et al.</em> 2004</a>)</span>.</p>
 <p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="../references.html#ref-macdonald2020" role="doc-biblioref">MacDonald <em>et al.</em> 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
 <p>In <a href="#fig-gradient-data" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>, we can check that there is a linear relationship between the natural log of the number of species and the natural log of the number of links. This is not surprising! If we assume that <span class="math inline">\(L \approx b\times S^a\)</span>, then we can take the log of both sides, and we get <span class="math inline">\(\text{log}\, L \approx a \times \text{log}\, S + \text{log}\,b\)</span>. This is linear model, and so we can estimate its parameters using linear regression!</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-data">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-data">
 <div id="cell-fig-gradient-data" class="cell page-columns page-full" data-execution_count="3">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-gradient-data" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -415,7 +415,7 @@ p := p - \eta\times \nabla f(p) \,.
 <div class="no-row-height column-margin column-container"><div class="">
 <p>The number of iterations over which we train the model is usually called the number of epochs, and is an hyper-parameter of the model.</p>
 </div></div><p>One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning <em>too much</em> from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In <a href="#tbl-gradient-attempt-one" class="quarto-xref">Table&nbsp;<span>3.2</span></a>, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-tbl-gradient-attempt-one">
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-tbl-gradient-attempt-one">
 <div class="cell" data-execution_count="13">
 <div class="cell-output cell-output-display">
 <div id="tbl-gradient-attempt-one" class="anchored">
@@ -508,7 +508,7 @@ p := p - \eta\times \nabla f(p) \,.
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Underfitting is also a possible scenario, where the model is <em>not</em> learning from the data, and can be detected by seeing the loss measures remain high or even increase.</p>
-</div></div><div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-loss-comparison">
+</div></div><div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-loss-comparison">
 <div id="cell-fig-gradient-loss-comparison" class="cell page-columns page-full" data-execution_count="14">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-gradient-loss-comparison" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -526,7 +526,7 @@ p := p - \eta\times \nabla f(p) \,.
 <section id="visualizing-the-learning-process" class="level3 page-columns page-full" data-number="3.4.5">
 <h3 data-number="3.4.5" class="anchored" data-anchor-id="visualizing-the-learning-process"><span class="header-section-number">3.4.5</span> Visualizing the learning process</h3>
 <p>From <a href="#fig-gradient-param-change" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>, we can see the change in <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, as well as the movement of the current best estimate of the parameters (right panel). The sharp decrease in loss early in the training is specifically associated to a rapid change in the value of <span class="math inline">\(\beta_0\)</span>. Further note that the change in parameters values is <em>not</em> monotonous! The value of <span class="math inline">\(\beta_1\)</span> initially increases, but when <span class="math inline">\(\beta_0\)</span> gets closer to the optimum, the gradient indicates that we have been moving <span class="math inline">\(\beta_1\)</span> in the “wrong” direction.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-param-change">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-param-change">
 <div id="cell-fig-gradient-param-change" class="cell page-columns page-full" data-execution_count="17">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-gradient-param-change" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -544,7 +544,7 @@ p := p - \eta\times \nabla f(p) \,.
 <section id="outcome-of-the-model" class="level3 page-columns page-full" data-number="3.4.6">
 <h3 data-number="3.4.6" class="anchored" data-anchor-id="outcome-of-the-model"><span class="header-section-number">3.4.6</span> Outcome of the model</h3>
 <p>We could read the performance of the model using the data in <a href="#fig-gradient-loss-comparison" class="quarto-xref">Figure&nbsp;<span>3.2</span></a>, but what we <em>really</em> care about is the model’s ability to tell us something about the data we initially gave it. This is presented in <a href="#fig-gradient-fitted" class="quarto-xref">Figure&nbsp;<span>3.4</span></a>. As we can see, the model is doing a rather good job at capturing the relationship between the number of species and the number of interactions.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-fitted">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-gradient-descent.qmd" data-notebook-title="Suppl Mat. - Gradient descent and linear regression" data-notebook-cellid="cell-fig-gradient-fitted">
 <div id="cell-fig-gradient-fitted" class="cell page-columns page-full" data-execution_count="15">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-gradient-fitted" class="quarto-figure quarto-figure-center anchored page-columns page-full">

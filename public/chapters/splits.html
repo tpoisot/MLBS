@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.330">
+<meta name="generator" content="quarto-1.4.358">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -334,7 +334,7 @@ div.csl-indent {
 <h2 data-number="4.2" class="anchored" data-anchor-id="the-problem-phenology-of-cherry-blossom"><span class="header-section-number">4.2</span> The problem: phenology of cherry blossom</h2>
 <p>The cherry blossom tree (<em>Prunus</em>) is …</p>
 <p>Long-term time series of the date of first bloom in Japan reveal that in the last decades, cherry blossom blooms earlier, which has been linked to, possibly, climate change and urbanization. The suspected causal mechanism is as follows: both global warming and urbanization lead to higher temperatures, which means a faster accumulation of degree days over the growing season, leading to an earlier bloom. Indeed, the raw data presented in <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> show that trees bloom early when the temperatures are higher.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-rawdata">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-rawdata">
 <div id="cell-fig-splits-rawdata" class="cell page-columns page-full" data-execution_count="4">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-splits-rawdata" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -373,7 +373,7 @@ div.csl-indent {
 <h3 data-number="4.3.4" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">4.3.4</span> k-fold</h3>
 <p>One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into <span class="math inline">\(k\)</span> equal parts (and so when <span class="math inline">\(k = n\)</span>, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used <em>exactly</em> one time to evaluate the model , and <em>exactly</em> <span class="math inline">\(k-1\)</span> times to train it. But by contrast with the holdout validation approach, <em>all</em> observations are used to train the model.</p>
 <p>When the data have some specific structure, it can be a good thing to manipulate the splits in order to maintain this structure. For example, <span class="citation" data-cites="bergmeir2012">Bergmeir &amp; Benítez (<a href="../references.html#ref-bergmeir2012" role="doc-biblioref">2012</a>)</span> use temporal blocks for validation of time series, and retain the last part of the series for testing (we illustrate this in <a href="#fig-splits-illustration" class="quarto-xref">Figure&nbsp;<span>4.2</span></a>). For spatial data, <span class="citation" data-cites="hijmans2012">Hijmans (<a href="../references.html#ref-hijmans2012" role="doc-biblioref">2012</a>)</span> suggests the use of a null model based on distance to training sites to decide on how to split the data; <span class="citation" data-cites="valavi2018">Valavi <em>et al.</em> (<a href="../references.html#ref-valavi2018" role="doc-biblioref">2018</a>)</span> have designed specific k-fold cross-validation schemes for species distribution models. These approaches all belong to the family of <em>stratified</em> k-fold cross-validation <span class="citation" data-cites="zeng2000">(<a href="../references.html#ref-zeng2000" role="doc-biblioref">Zeng &amp; Martinez 2000</a>)</span>.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-illustration">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-illustration">
 <div id="cell-fig-splits-illustration" class="cell page-columns page-full" data-execution_count="7">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-splits-illustration" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -400,7 +400,7 @@ div.csl-indent {
 <section id="performance-evaluation" class="level3 page-columns page-full" data-number="4.4.1">
 <h3 data-number="4.4.1" class="anchored" data-anchor-id="performance-evaluation"><span class="header-section-number">4.4.1</span> Performance evaluation</h3>
 <p>We can visualize the results of our model training and assessment process. These results are presented in <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a> (as well as in <a href="#tbl-splits-performance-summary" class="quarto-xref">Table&nbsp;<span>4.2</span></a>, if you want to see the standard deviation across all splits), and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-performance">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-performance">
 <div id="cell-fig-splits-performance" class="cell page-columns page-full" data-execution_count="15">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-splits-performance" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -413,7 +413,7 @@ div.csl-indent {
 </div>
 </div>
 <p>Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.</p>
-<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
+<div class="quarto-embed-nb-cell" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-tbl-splits-performance-summary">
 <div class="cell" data-execution_count="14">
 <div class="cell-output cell-output-display">
 <div id="tbl-splits-performance-summary" class="anchored">
@@ -512,7 +512,7 @@ div.csl-indent {
 <section id="model-predictions" class="level3 page-columns page-full" data-number="4.4.2">
 <h3 data-number="4.4.2" class="anchored" data-anchor-id="model-predictions"><span class="header-section-number">4.4.2</span> Model predictions</h3>
 <p>The predictions of our model are presented in <a href="#fig-splits-prediction" class="quarto-xref">Figure&nbsp;<span>4.4</span></a>; these are the predictions of the <em>final</em> model, that is, the model that we trained on everything <em>except</em> the testing data, and for which we can get the performance by looking at <a href="#fig-splits-performance" class="quarto-xref">Figure&nbsp;<span>4.3</span></a>.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/biodiversitymlfundamentals/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-splits.qmd" data-notebook-title="An analysis of the sakura phenology dataset" data-notebook-cellid="cell-fig-splits-prediction">
 <div id="cell-fig-splits-prediction" class="cell page-columns page-full" data-execution_count="12">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-splits-prediction" class="quarto-figure quarto-figure-center anchored page-columns page-full">
