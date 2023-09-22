@@ -37,7 +37,9 @@ heatmap(presencelayer)
 
 background = pseudoabsencemask(WithinRadius, presencelayer; distance = 200.0)
 buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 50.0)
-bgmask = background .& (.! buffer)
+bgmask = .!(background .| (.! buffer))
+
+heatmap(bgmask)
 
 heatmap(
     temperature;
