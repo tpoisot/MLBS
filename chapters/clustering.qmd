@@ -5,7 +5,7 @@ As we mentioned in the introduction, a core idea of data science is that things 
 ```{julia}
 #| echo: false
 #| output: false
-_code_path = joinpath(@__DIR__, "lib")
+_code_path = joinpath(dirname(Base.active_project()), "lib")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "colorcube.jl"))
 include(joinpath(_code_path, "landsat.jl"))
