@@ -3,6 +3,7 @@
 As we progress into this book, the process of delivering a trained model is going to become more and more complex. In @sec-clustering, we worked with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
 
 ```{julia}
+#| label: Loading the required packages
 #| echo: false
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "lib")
@@ -38,6 +39,7 @@ In @fig-gradient-data, we can check that there is a linear relationship between 
 
 
 ```{julia}
+#| label: Loading the data
 #| echo: false
 #| output: false
 ls = DataFrame(CSV.File(joinpath(dirname(Base.active_project()), "data/gradientdescent/ls.csv")))
@@ -159,6 +161,7 @@ In order to protect against this, in reality, we update the gradient only a litt
 The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.
 
 ```{julia}
+#| label: Linear model and gradient calculation
 #| echo: false
 #| output: false
 lm(x, m, b) = m .* x .+ b
@@ -192,6 +195,7 @@ The number of iterations over which we train the model is usually called the num
 :::
 
 ```{julia}
+#| label: Split between test/train data
 #| echo: false
 #| output: false
 train_idx, test_idx = holdout(ls.S, ls.L)
@@ -206,6 +210,7 @@ tx = log.(testing.S)
 ```
 
 ```{julia}
+#| label: Training loop
 #| echo: false
 #| output: false
 loss_train = zeros(Float64, 20_000+1)
@@ -231,6 +236,7 @@ One usual approach is to decide on a number of iterations (we need to start some
 
 ```{julia}
 #| label: tbl-gradient-attempt-one
+#| echo: false
 #| tbl-cap: This table shows the change in the model, as measured by the loss and by the estimates of the parameters, after an increasing amount of training epochs. The loss drops sharply in the first 500 iterations, but even after 20000 iterations, there are still some changes in the values of the parameters.
 df = DataFrame()
 for i in [1, 10, 30, 100, 300, 1000, 3000, 10000, 20000]
@@ -256,6 +262,7 @@ Underfitting is also a possible scenario, where the model is *not* learning from
 
 ```{julia}
 #| label: fig-gradient-loss-comparison
+#| echo: false
 #| fig-cap: This figures shows the change in the loss for the training and testing dataset. As the two curves converge on low values at the same rate, this suggests that the model is not over-fitting, and is therefore suitable for use.
 fig = Figure(; resolution=(500, 300))
 
@@ -276,6 +283,9 @@ Before moving forward, let's look at @fig-gradient-loss-comparison a little more
 From @fig-gradient-param-change, we can see the change in $\beta_0$ and $\beta_1$, as well as the movement of the current best estimate of the parameters (right panel). The sharp decrease in loss early in the training is specifically associated to a rapid change in the value of $\beta_0$. Further note that the change in parameters values is *not* monotonous! The value of $\beta_1$ initially increases, but when $\beta_0$ gets closer to the optimum, the gradient indicates that we have been moving $\beta_1$ in the "wrong" direction.
 
 ```{julia}
+#| label: Grid for the parameters
+#| echo: false
+#| output: false
 p0 = LinRange(0.0, 2.0, 50)
 p1 = LinRange(-2.0, 1.0, 50)
 S = zeros(Float64, (length(p0), length(p1)))
@@ -289,6 +299,7 @@ end
 
 ```{julia}
 #| label: fig-gradient-param-change
+#| echo: false
 #| fig-cap: This figure shows the change in the parameters values over time. Note that the change is very large initially, because we make large steps when the gradient is strong. The rate of change gets much lower as we get nearer to the "correct" value.
 fig = Figure(; resolution=(600, 250))
 
@@ -319,10 +330,10 @@ But how good is the solution we have reached?
 
 We could read the performance of the model using the data in @fig-gradient-loss-comparison, but what we *really* care about is the model's ability to tell us something about the data we initially gave it. This is presented in @fig-gradient-fitted. As we can see, the model is doing a rather good job at capturing the relationship between the number of species and the number of interactions.
 
-
 ```{julia}
 #| label: fig-gradient-fitted
-#| fig-cap: Overview of data from ...
+#| echo: false
+#| fig-cap: Overview of the fitted model. The residuals (top panel) are mostly centered around 0, which suggests little bias towards over/under predicting interactions. The red line (based on the optimal coefficients) goes through the points, and indicates a rather good fit of the model.
 fig = Figure(; resolution=(500, 500))
 
 gl = fig[1,1] = GridLayout()
@@ -355,7 +366,7 @@ One delicate issue that we have avoided in this chapter is the absolute value of
 
 In this situation, we would very likely see overfitting, wherein the model would use the polynomial terms we provided to capture more and more noise in the data. This would be a dangerous situation, as the model will lose its ability to work on unknown data!
 
-To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In @eq-gradientdescent-gradient, the function $f(p)$ we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where
+To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In @eq-gradientdescent-gradientexplicit, the function $f(p)$ we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where
 
 $$
 f(p) = \text{loss} + \lambda \times g(\beta) \,,

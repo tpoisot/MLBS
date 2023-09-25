@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -448,16 +414,6 @@ p := p - \eta\times \nabla f(p) \,.
 <p>The number of iterations over which we train the model is usually called the number of epochs, and is an hyper-parameter of the model.</p>
 </div></div><p>One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning <em>too much</em> from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In <a href="#tbl-gradient-attempt-one" class="quarto-xref">Table&nbsp;<span>3.2</span></a>, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.</p>
 <div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> <span class="fu">DataFrame</span>()</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> [<span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">100</span>, <span class="fl">300</span>, <span class="fl">1000</span>, <span class="fl">3000</span>, <span class="fl">10000</span>, <span class="fl">20000</span>]</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">push!</span>(df, (Step <span class="op">=</span> i, LossTrain <span class="op">=</span> loss_train[i] , LossTest <span class="op">=</span> loss_test[i], b0 <span class="op">=</span> track_p1[i], b1 <span class="op">=</span> track_p2[i]))</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rename!</span>(df, <span class="op">:</span>LossTrain <span class="op">=&gt;</span> <span class="st">"Loss (training)"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rename!</span>(df, <span class="op">:</span>LossTest <span class="op">=&gt;</span> <span class="st">"Loss (testing)"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rename!</span>(df, <span class="op">:</span>b0 <span class="op">=&gt;</span> <span class="st">"β₀"</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rename!</span>(df, <span class="op">:</span>b1 <span class="op">=&gt;</span> <span class="st">"β₁"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> <span class="fu">pretty_table</span>(<span class="dt">String</span>, df, tf <span class="op">=</span> tf_html_simple, formatters <span class="op">=</span> ft_nomissing, show_subheader <span class="op">=</span> <span class="cn">false</span>, show_header <span class="op">=</span> <span class="cn">true</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">display</span>(<span class="st">"text/html"</span>, out)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="tbl-gradient-attempt-one" class="anchored">
 <table data-quarto-postprocess="true" class="table table-sm table-striped small">
@@ -549,14 +505,6 @@ p := p - \eta\times \nabla f(p) \,.
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Underfitting is also a possible scenario, where the model is <em>not</em> learning from the data, and can be detected by seeing the loss measures remain high or even increase.</p>
 </div></div><div id="cell-fig-gradient-loss-comparison" class="cell page-columns page-full" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">500</span>, <span class="fl">300</span>))</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>axs <span class="op">=</span> <span class="fu">Axis</span>(fig[<span class="fl">1</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"Training epoch"</span>, ylabel<span class="op">=</span><span class="st">"L₂ loss"</span>, yscale<span class="op">=</span>log10)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axs, <span class="fl">0</span><span class="op">:</span>epochs, loss_train, color<span class="op">=:</span>black, label<span class="op">=</span><span class="st">"Training"</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axs, <span class="fl">0</span><span class="op">:</span>epochs, loss_test, color<span class="op">=:</span>red, label<span class="op">=</span><span class="st">"Testing"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">axislegend</span>(axs; position<span class="op">=:</span>rt)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="9">
 <div id="fig-gradient-loss-comparison" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
@@ -572,37 +520,7 @@ p := p - \eta\times \nabla f(p) \,.
 <section id="visualizing-the-learning-process" class="level3 page-columns page-full" data-number="3.4.5">
 <h3 data-number="3.4.5" class="anchored" data-anchor-id="visualizing-the-learning-process"><span class="header-section-number">3.4.5</span> Visualizing the learning process</h3>
 <p>From <a href="#fig-gradient-param-change" class="quarto-xref">Figure&nbsp;<span>3.3</span></a>, we can see the change in <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, as well as the movement of the current best estimate of the parameters (right panel). The sharp decrease in loss early in the training is specifically associated to a rapid change in the value of <span class="math inline">\(\beta_0\)</span>. Further note that the change in parameters values is <em>not</em> monotonous! The value of <span class="math inline">\(\beta_1\)</span> initially increases, but when <span class="math inline">\(\beta_0\)</span> gets closer to the optimum, the gradient indicates that we have been moving <span class="math inline">\(\beta_1\)</span> in the “wrong” direction.</p>
-<div id="9edf04de" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p0 <span class="op">=</span> <span class="fu">LinRange</span>(<span class="fl">0.0</span>, <span class="fl">2.0</span>, <span class="fl">50</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> <span class="fu">LinRange</span>(<span class="op">-</span><span class="fl">2.0</span>, <span class="fl">1.0</span>, <span class="fl">50</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> <span class="fu">zeros</span>(<span class="dt">Float64</span>, (<span class="fu">length</span>(p0), <span class="fu">length</span>(p1)))</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="fu">axes</span>(S, <span class="fl">1</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="fu">axes</span>(S, <span class="fl">2</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        S[i,j] <span class="op">=</span> <span class="fu">L2</span>(y, x, lm, p0[i], p1[j])</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <div id="cell-fig-gradient-param-change" class="cell page-columns page-full" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">600</span>, <span class="fl">250</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>axp <span class="op">=</span> fig[<span class="fl">1</span>,<span class="fl">1</span>] <span class="op">=</span> <span class="fu">GridLayout</span>()</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>axb0 <span class="op">=</span> <span class="fu">Axis</span>(axp[<span class="fl">1</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"Training epoch"</span>, ylabel<span class="op">=</span><span class="st">"β₀"</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axb0, (<span class="fl">0</span><span class="op">:</span>epochs)<span class="op">./</span><span class="fl">1000</span>, track_p1, color<span class="op">=:</span>black)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>axb1 <span class="op">=</span> <span class="fu">Axis</span>(axp[<span class="fl">2</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"Training epoch"</span>, ylabel<span class="op">=</span><span class="st">"β₁"</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axb1, (<span class="fl">0</span><span class="op">:</span>epochs)<span class="op">./</span><span class="fl">1000</span>, track_p2, color<span class="op">=:</span>black)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">hidexdecorations!</span>(axb0, grid<span class="op">=</span><span class="cn">false</span>)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rowgap!</span>(axp, <span class="fl">0</span>)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>axl <span class="op">=</span> <span class="fu">Axis</span>(fig[<span class="fl">1</span>,<span class="fl">2</span>], xlabel<span class="op">=</span><span class="st">"β₀"</span>, ylabel<span class="op">=</span><span class="st">"β₁"</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">contourf!</span>(axl, p0, p1, <span class="fu">log</span>.(S), colormap<span class="op">=</span>[<span class="op">:</span>white, <span class="op">:</span>darkblue], levels<span class="op">=</span><span class="fl">12</span>)</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axl, track_p1, track_p2, color<span class="op">=:</span>black)</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
 <div id="fig-gradient-param-change" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
@@ -619,33 +537,11 @@ p := p - \eta\times \nabla f(p) \,.
 <h3 data-number="3.4.6" class="anchored" data-anchor-id="outcome-of-the-model"><span class="header-section-number">3.4.6</span> Outcome of the model</h3>
 <p>We could read the performance of the model using the data in <a href="#fig-gradient-loss-comparison" class="quarto-xref">Figure&nbsp;<span>3.2</span></a>, but what we <em>really</em> care about is the model’s ability to tell us something about the data we initially gave it. This is presented in <a href="#fig-gradient-fitted" class="quarto-xref">Figure&nbsp;<span>3.4</span></a>. As we can see, the model is doing a rather good job at capturing the relationship between the number of species and the number of interactions.</p>
 <div id="cell-fig-gradient-fitted" class="cell page-columns page-full" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">500</span>, <span class="fl">500</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>gl <span class="op">=</span> fig[<span class="fl">1</span>,<span class="fl">1</span>] <span class="op">=</span> <span class="fu">GridLayout</span>()</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>axs <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">2</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"Number of species"</span>, ylabel<span class="op">=</span><span class="st">"Number of interactions"</span>, xscale<span class="op">=</span>log, yscale<span class="op">=</span>log)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(axs, training.S, training.L, color<span class="op">=:</span>black, markersize<span class="op">=</span><span class="fl">4</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>pseudox <span class="op">=</span> <span class="fu">exp</span>.(<span class="fu">LinRange</span>(<span class="fl">1</span>, <span class="fu">log</span>.(<span class="fu">maximum</span>(training.S)), <span class="fl">20</span>))</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axs, pseudox, <span class="fu">exp</span>.(p[<span class="fl">1</span>] <span class="op">.*</span> <span class="fu">log</span>.(pseudox) <span class="op">.+</span> p[<span class="fl">2</span>]), color<span class="op">=:</span>red)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axs, pseudox, pseudox<span class="op">.^</span><span class="fl">2.0</span>, color<span class="op">=:</span>grey, linestyle<span class="op">=:</span>dash)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">lines!</span>(axs, pseudox, pseudox<span class="op">.-</span><span class="fl">1.0</span>, color<span class="op">=:</span>grey, linestyle<span class="op">=:</span>dash)</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>axs <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">1</span>,<span class="fl">1</span>])</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">hist!</span>(axs, <span class="fu">lm</span>(x, p<span class="op">...</span>) <span class="op">.-</span> y; normalization<span class="op">=:</span>pdf, color<span class="op">=:</span>lightgrey, bins<span class="op">=</span><span class="fl">20</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(axs, <span class="fu">lm</span>(tx, p<span class="op">...</span>) <span class="op">.-</span> ty, color<span class="op">=:</span>transparent, strokewidth<span class="op">=</span><span class="fl">1</span>, strokecolor<span class="op">=:</span>red, npoints<span class="op">=</span><span class="fl">500</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">tightlimits!</span>(axs)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">hidespines!</span>(axs, <span class="op">:</span>l, <span class="op">:</span>r, <span class="op">:</span>t)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">hideydecorations!</span>(axs; grid<span class="op">=</span><span class="cn">true</span>)</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="fu">hidexdecorations!</span>(axs; grid<span class="op">=</span><span class="cn">true</span>, label<span class="op">=</span><span class="cn">false</span>, ticks<span class="op">=</span><span class="cn">false</span>, ticklabels<span class="op">=</span><span class="cn">false</span>)</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">rowsize!</span>(gl, <span class="fl">1</span>, <span class="fu">Relative</span>(<span class="fl">0.3</span>))</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="12">
 <div id="fig-gradient-fitted" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="gradientdescent_files/figure-html/fig-gradient-fitted-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;3.4: Overview of data from …</figcaption>
+<figcaption class="figure-caption margin-caption">Figure&nbsp;3.4: Overview of the fitted model. The residuals (top panel) are mostly centered around 0, which suggests little bias towards over/under predicting interactions. The red line (based on the optimal coefficients) goes through the points, and indicates a rather good fit of the model.</figcaption>
 </figure>
 </div>
 </div>
@@ -655,11 +551,11 @@ p := p - \eta\times \nabla f(p) \,.
 </section>
 <section id="a-note-on-regularization" class="level2" data-number="3.5">
 <h2 data-number="3.5" class="anchored" data-anchor-id="a-note-on-regularization"><span class="header-section-number">3.5</span> A note on regularization</h2>
-<p>One delicate issue that we have avoided in this chapter is the absolute value of the parameters. In other words, we didn’t really care about how large the model parameters would be, only the quality of the fit. This is (generally) safe to do in a model with a single parameter. But what if we had many different terms? What if, for example, we had a linear model of the form <span class="math inline">\(\hat y \approx \beta_0 + \beta_1 x + \beta_2 x^2\)</span>? What if our model was of the form <span class="math inline">\(\hat y&nbsp;\approx \beta_0 + \beta_1 x + \dots + \beta_n x^n\)</span>? What if <span class="math inline">\(n\)</span> started to get very large compared to the number of data points?</p>
+<p>One delicate issue that we have avoided in this chapter is the absolute value of the parameters. In other words, we didn’t really care about how large the model parameters would be, only the quality of the fit. This is (generally) safe to do in a model with a single parameter. But what if we had many different terms? What if, for example, we had a linear model of the form <span class="math inline">\(\hat y \approx \beta_0 + \beta_1 x + \beta_2 x^2\)</span>? What if our model was of the form <span class="math inline">\(\hat y \approx \beta_0 + \beta_1 x + \dots + \beta_n x^n\)</span>? What if <span class="math inline">\(n\)</span> started to get very large compared to the number of data points?</p>
 <p>In this situation, we would very likely see overfitting, wherein the model would use the polynomial terms we provided to capture more and more noise in the data. This would be a dangerous situation, as the model will lose its ability to work on unknown data!</p>
-<p>To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In <span class="quarto-unresolved-ref">?eq-gradientdescent-gradient</span>, the function <span class="math inline">\(f(p)\)</span> we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where</p>
+<p>To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In <a href="#eq-gradientdescent-gradientexplicit" class="quarto-xref">Equation&nbsp;<span>3.4</span></a>, the function <span class="math inline">\(f(p)\)</span> we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where</p>
 <p><span class="math display">\[
-f(p) = \text{loss} + \lambda \times g(\beta)&nbsp;\,,
+f(p) = \text{loss} + \lambda \times g(\beta) \,,
 \]</span></p>
 <p>where <span class="math inline">\(\lambda\)</span> is an hyper-parameter giving the strength of the regularization, and <span class="math inline">\(g(\beta)\)</span> is a function to calculate the total penalty of a set of parameters.</p>
 <p>When using <span class="math inline">\(L1\)</span> regularization (LASSO regression), <span class="math inline">\(g(\beta) = \sum |\beta|\)</span>, and when using <span class="math inline">\(L2\)</span> regularization (ridge regression), <span class="math inline">\(g(\beta) = \sum \beta^2\)</span>. When this gets larger, which happens when the absolute value of the parameters increases, the model is penalized. Note that if <span class="math inline">\(\lambda = 0\)</span>, we are back to the initial formulation of the gradient, where the parameters have no direct effect on the cost.</p>
