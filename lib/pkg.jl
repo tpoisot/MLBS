@@ -1,5 +1,6 @@
 using DataFrames
 import CSV
+using GLM
 using PrettyTables
 
 import JLD
