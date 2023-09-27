@@ -10,7 +10,7 @@ function stepwisevif(X::Matrix{T}, v, threshold) where {T<:Number}
     X = (X .- mean(X; dims=1)) ./ std(X; dims=1)
     vifs = zeros(Float64, length(v))
     for i in eachindex(v)
-        Suppressor.@suppress_err begin
+        begin
             # GLM gives warning with matrices
             model = lm(X[:, setdiff(eachindex(v), i)], X[:, i])
             vifs[i] = vif(model)

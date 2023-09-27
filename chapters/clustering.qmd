@@ -260,7 +260,7 @@ score = zeros(Float64, length(k_trial))
 costs = copy(score)
 vscore = copy(score)
 vcosts = copy(score)
-Suppressor.@suppress_err begin
+begin
     Threads.@threads for j in axes(k_trial, 1)
         k = k_trial[j]
         sc = zeros(Float64, 5)
