@@ -1,3 +1,3 @@
-# README
+# Data Science for Biodiversity Scientists
 
-[https://tpoisot.gitlab.io/biodiversitymlfundamentals](https://tpoisot.gitlab.io/biodiversitymlfundamentals)
+(this is a work in progress)
