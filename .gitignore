@@ -1,6 +1,8 @@
 /.quarto/
 Manifest.toml
 
+.vscode/*
+
 data/**/raw/*
 /.luarc.json
 data/**/*.tiff
