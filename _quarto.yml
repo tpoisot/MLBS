@@ -45,7 +45,7 @@ book:
     - chapters/classification.qmd
     - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
-    - chapters/varimp.qmd
+    - chapters/explanations.qmd
     - references.qmd
 
 bibliography: references.bib

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.358">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -24,6 +24,7 @@ ul.task-list li input[type="checkbox"] {
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -162,8 +163,8 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  <a href="../chapters/crossvalidation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Cross-validation</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -248,14 +249,15 @@ div.csl-indent {
 
 </header>
 
-<p>Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <a href="gradientdescent.html#sec-gradientdescent-trainedmodel" class="quarto-xref"><span>Section&nbsp;3.1</span></a>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe <em>et al.</em> 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock <em>et al.</em> (<a href="../references.html#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
+
+<p>Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <a href="#sec-gradientdescent-trainedmodel" class="quarto-xref"><span class="quarto-unresolved-ref">sec-gradientdescent-trainedmodel</span></a>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe <em>et al.</em> 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock <em>et al.</em> (<a href="#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
 <section id="sec-leakage-consequences" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="sec-leakage-consequences"><span class="header-section-number">5.1</span> Consequences of data leakage</h2>
-<p>We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning <span class="citation" data-cites="nisbet2018">(<a href="../references.html#ref-nisbet2018" role="doc-biblioref">Nisbet <em>et al.</em> 2018</a>)</span>. Data leakage happens information “leaks” from the training conditions to the evaluation conditions. In other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time <span class="citation" data-cites="Peterson2018">(<a href="../references.html#ref-Peterson2018" role="doc-biblioref">Peterson <em>et al.</em> 2018</a>)</span>.</p>
+<p>We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning <span class="citation" data-cites="nisbet2018">(<a href="#ref-nisbet2018" role="doc-biblioref">Nisbet <em>et al.</em> 2018</a>)</span>. Data leakage happens information “leaks” from the training conditions to the evaluation conditions. In other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time <span class="citation" data-cites="Peterson2018">(<a href="#ref-Peterson2018" role="doc-biblioref">Peterson <em>et al.</em> 2018</a>)</span>.</p>
 <p>It is worth stopping for a moment to consider what these “real-life situations” are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are <em>applying</em> a model, we can start from the model <em>only</em>. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data.</p>
-<p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the validation data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="../references.html#ref-dornelas2018" role="doc-biblioref">Dornelas <em>et al.</em> 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to test these models, and a last one for validation.</p>
+<p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the validation data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="#ref-dornelas2018" role="doc-biblioref">Dornelas <em>et al.</em> 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to test these models, and a last one for validation.</p>
 <p>Congratulations! We have created data leakage! Because we are splitting our timeseries at random, the model will likely have been trained using data that date from <em>after</em> the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.</p>
-<p><strong>TODO</strong> stationary processes <span class="citation" data-cites="politis1994">Politis &amp; Romano (<a href="../references.html#ref-politis1994" role="doc-biblioref">1994</a>)</span></p>
+<p><strong>TODO</strong> stationary processes <span class="citation" data-cites="politis1994">Politis &amp; Romano (<a href="#ref-politis1994" role="doc-biblioref">1994</a>)</span></p>
 </section>
 <section id="leakage-sec-leakage-sources" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="leakage-sec-leakage-sources"><span class="header-section-number">5.2</span> Sources of data leakage</h2>
@@ -271,10 +273,10 @@ div.csl-indent {
 </section>
 <section id="leakage-sec-leakage-avoid" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="leakage-sec-leakage-avoid"><span class="header-section-number">5.3</span> Avoiding data leakage</h2>
-<p>The most common advice given in order to prevent data leakage is the “learn/predict separation” <span class="citation" data-cites="kaufman2011">(<a href="../references.html#ref-kaufman2011" role="doc-biblioref">Kaufman <em>et al.</em> 2011</a>)</span>. Simply put, this means that whatever happens to the data used for training cannot be <em>simultaneously</em> applied to the data used for testing (or validation).</p>
+<p>The most common advice given in order to prevent data leakage is the “learn/predict separation” <span class="citation" data-cites="kaufman2011">(<a href="#ref-kaufman2011" role="doc-biblioref">Kaufman <em>et al.</em> 2011</a>)</span>. Simply put, this means that whatever happens to the data used for training cannot be <em>simultaneously</em> applied to the data used for testing (or validation).</p>
 <section id="an-example-using-pca" class="level3" data-number="5.3.1">
 <h3 data-number="5.3.1" class="anchored" data-anchor-id="an-example-using-pca"><span class="header-section-number">5.3.1</span> An example using PCA</h3>
-<p>Assume that we want to transform our data using a Principal Component Analysis (PCA; <span class="citation" data-cites="pearson1901">Pearson (<a href="../references.html#ref-pearson1901" role="doc-biblioref">1901</a>)</span>). Ecologists often think of PCA as a technique to explore data <span class="citation" data-cites="legendre2012">(<a href="../references.html#ref-legendre2012" role="doc-biblioref">Legendre &amp; Legendre 2012</a>)</span>, but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.</p>
+<p>Assume that we want to transform our data using a Principal Component Analysis (PCA; <span class="citation" data-cites="pearson1901">Pearson (<a href="#ref-pearson1901" role="doc-biblioref">1901</a>)</span>). Ecologists often think of PCA as a technique to explore data <span class="citation" data-cites="legendre2012">(<a href="#ref-legendre2012" role="doc-biblioref">Legendre &amp; Legendre 2012</a>)</span>, but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.</p>
 <p>If we have a dataset <span class="math inline">\(\mathbf{X}\)</span>, which we split into two components <span class="math inline">\(\mathbf{X}_0\)</span> for training ,and <span class="math inline">\(\mathbf{X}_1\)</span> for validation, there are two ways to use a PCA to transform these data. The first is <span class="math inline">\(\mathbf{T} = \mathbf{X}\mathbf{W}\)</span>, which uses the full dataset. When we predict the position of the validation data, we could use the transformation <span class="math inline">\(\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}\)</span>, but this would introduce data leakage: we have trained the transformation we apply to <span class="math inline">\(\mathbf{X}_1\)</span> using data that are already in <span class="math inline">\(\mathbf{X}_1\)</span>, and therefore we have not respected the learn/predict separation.</p>
 <p>The second way to handle this situation is to perform our PCA using <span class="math inline">\(\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0\)</span>, which is to say, the weights of our PCA are derived <em>only</em> from the training data. In this situation, whenever we project the data in the validation set using <span class="math inline">\(\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0\)</span>, we respect the learn/predict separation: the transformation of <span class="math inline">\(\mathbf{X}_1\)</span> is entirely independent from the data contained in <span class="math inline">\(\mathbf{X}_1\)</span>.</p>
 </section>
@@ -286,7 +288,7 @@ div.csl-indent {
 <p>Treating the data preparation step as a part of the learning process, which is to say that we learn every transformation on the training set, and retain this transformation as part of the prediction process, we are protecting ourselves against both data leakage and the hiding of relevant changes in our predictors.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
 Amarasinghe, K., Rodolfa, K.T., Lamba, H. &amp; Ghani, R. (2023). <a href="https://doi.org/10.1017/dap.2023.2">Explainable machine learning for public policy: Use cases, gaps, and research directions</a>. <em>Data &amp; Policy</em>, 5.
 </div>
@@ -447,15 +449,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    const typesetMath = (el) => {
+      if (window.MathJax) {
+        // MathJax Typeset
+        window.MathJax.typeset([el]);
+      } else if (window.katex) {
+        // KaTeX Render
+        var mathElements = el.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            window.katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains('display'),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false
+            });
+          }
+        }
+      }
+    }
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
         for (let i = 0; i < 2; i++) {
           container.appendChild(note.children[i].cloneNode(true));
         }
+        typesetMath(container);
         return container.innerHTML
       } else {
+        typesetMath(note);
         return note.innerHTML;
       }
     } else {
@@ -464,6 +489,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
+      typesetMath(note);
       return note.innerHTML;
     }
   }
@@ -506,6 +532,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -581,7 +630,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);

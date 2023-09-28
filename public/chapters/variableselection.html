@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.358">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -24,6 +24,7 @@ ul.task-list li input[type="checkbox"] {
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -162,8 +163,8 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  <a href="../chapters/crossvalidation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Cross-validation</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -237,16 +238,17 @@ div.csl-indent {
 
 </header>
 
+
 <section id="sec-variable-selection-curse" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="sec-variable-selection-curse"><span class="header-section-number">7.1</span> The curse of dimensionality</h2>
 <p>It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!</p>
 <p>The “curse of dimensionality” is the common term of everything breaking down when the dimensions of a problem increase. In our perspective, where we rely on the resemblance between features to make a prediction, increasing the dimensions of a problem means adding features, and it has important consequences on the distance between observations. Picture two points positioned at random on the unit interval: the average distance between them is 1/3. If we add one dimension, keeping two points but turning this line into a cube, the average distance would be about 1/2. For a cube, about 2/3. For <span class="math inline">\(n\)</span> dimensions, we can figure out that the average distance grows like <span class="math inline">\(\sqrt{n/6 + c}\)</span>, which is to say that when we add more dimensions, we make the average distance between two points go to infinity. To ass</p>
-<p>Ecological studies are not immune to this <span class="citation" data-cites="smith2017">(e.g. <a href="../references.html#ref-smith2017" role="doc-biblioref">Smith <em>et al.</em> 2017</a>)</span>!</p>
-<p>we will use MCC <span class="citation" data-cites="chicco2020">(<a href="../references.html#ref-chicco2020" role="doc-biblioref">Chicco &amp; Jurman 2020</a>)</span> rather than <span class="math inline">\(F_1\)</span> or accuracy to decide on the best model</p>
-<p>is the Pearson product-moment correlation on a contingency table <span class="citation" data-cites="powers2020">(<a href="../references.html#ref-powers2020" role="doc-biblioref">Powers 2020</a>)</span></p>
+<p>Ecological studies are not immune to this <span class="citation" data-cites="smith2017">(e.g. <a href="#ref-smith2017" role="doc-biblioref">Smith <em>et al.</em> 2017</a>)</span>!</p>
+<p>we will use MCC <span class="citation" data-cites="chicco2020">(<a href="#ref-chicco2020" role="doc-biblioref">Chicco &amp; Jurman 2020</a>)</span> rather than <span class="math inline">\(F_1\)</span> or accuracy to decide on the best model</p>
+<p>is the Pearson product-moment correlation on a contingency table <span class="citation" data-cites="powers2020">(<a href="#ref-powers2020" role="doc-biblioref">Powers 2020</a>)</span></p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-chicco2020" class="csl-entry" role="listitem">
 Chicco, D. &amp; Jurman, G. (2020). <a href="https://doi.org/10.1186/s12864-019-6413-7">The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation</a>. <em>BMC Genomics</em>, 21.
 </div>
@@ -388,15 +390,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    const typesetMath = (el) => {
+      if (window.MathJax) {
+        // MathJax Typeset
+        window.MathJax.typeset([el]);
+      } else if (window.katex) {
+        // KaTeX Render
+        var mathElements = el.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            window.katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains('display'),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false
+            });
+          }
+        }
+      }
+    }
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
         for (let i = 0; i < 2; i++) {
           container.appendChild(note.children[i].cloneNode(true));
         }
+        typesetMath(container);
         return container.innerHTML
       } else {
+        typesetMath(note);
         return note.innerHTML;
       }
     } else {
@@ -405,6 +430,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
+      typesetMath(note);
       return note.innerHTML;
     }
   }
@@ -447,6 +473,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -522,7 +571,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);

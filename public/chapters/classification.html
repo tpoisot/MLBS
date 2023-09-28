@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.358">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -24,6 +24,7 @@ ul.task-list li input[type="checkbox"] {
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -165,8 +166,8 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/splits.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Testing, training, validating</span></span></a>
+  <a href="../chapters/crossvalidation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Cross-validation</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -257,34 +258,39 @@ div.csl-indent {
 
 </header>
 
-<p>In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="varimp.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
+
+<p>In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <a href="#sec-variable-selection" class="quarto-xref"><span class="quarto-unresolved-ref">sec-variable-selection</span></a>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="#sec-tuning" class="quarto-xref"><span class="quarto-unresolved-ref">sec-tuning</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="#sec-varimp" class="quarto-xref"><span class="quarto-unresolved-ref">sec-varimp</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
 <section id="the-problem-reindeer-distribution" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="the-problem-reindeer-distribution"><span class="header-section-number">6.1</span> The problem: reindeer distribution</h2>
-<p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, <em>Rangifer tarandus tarandus</em>. Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith &amp; Leathwick (<a href="../references.html#ref-elith2009" role="doc-biblioref">2009</a>)</span>), or Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery <em>et al.</em> (<a href="../references.html#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="splits.html#sec-splits-fitness" class="quarto-xref"><span>Section&nbsp;4.4.3</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="../references.html#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita <em>et al.</em> 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem.</p>
+<p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, <em>Rangifer tarandus tarandus</em>. Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith &amp; Leathwick (<a href="#ref-elith2009" role="doc-biblioref">2009</a>)</span>), or Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery <em>et al.</em> (<a href="#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="#sec-crossvalidation-fitness" class="quarto-xref"><span class="quarto-unresolved-ref">sec-crossvalidation-fitness</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita <em>et al.</em> 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem.</p>
 <p>Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.</p>
-<p>We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants <span class="citation" data-cites="clapham1935">(<a href="../references.html#ref-clapham1935" role="doc-biblioref">Clapham <em>et al.</em> 1935</a>)</span> and animals <span class="citation" data-cites="whittaker1962">(<a href="../references.html#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span>, to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start <span class="citation" data-cites="berteaux2014">(<a href="../references.html#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span>.</p>
-<p>Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>. We need information about where the species has <em>not</em> been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="../references.html#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin <em>et al.</em> 2012</a>; <a href="../references.html#ref-hanberry2012" role="doc-biblioref">Hanberry <em>et al.</em> 2012</a>)</span>. All of these data points come in the form <span class="math inline">\((\text{lat.}, \text{lon.}, y)\)</span>, which give a position in space, as well as <span class="math inline">\(y = \{+,-\}\)</span> (the species is present or absent!) at this position.</p>
-<p>To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the WorldClim2 dataset <span class="citation" data-cites="fick2017">(<a href="../references.html#ref-fick2017" role="doc-biblioref">Fick &amp; Hijmans 2017</a>)</span> for this purpose. In a great many situations, CHELSA2 <span class="citation" data-cites="karger2017">(<a href="../references.html#ref-karger2017" role="doc-biblioref">Karger <em>et al.</em> 2017</a>)</span> would be a better source of bioclimatic variables, but it has a much higher spatial resolution; what we want to do here is iterate rapidly and focus on the high-level discussion of how we make predictions, so a coarser data product will serve us just as well.</p>
+<p>We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants <span class="citation" data-cites="clapham1935">(<a href="#ref-clapham1935" role="doc-biblioref">Clapham <em>et al.</em> 1935</a>)</span> and animals <span class="citation" data-cites="whittaker1962">(<a href="#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span>, to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start <span class="citation" data-cites="berteaux2014">(<a href="#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span>.</p>
+<p>Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>. We need information about where the species has <em>not</em> been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin <em>et al.</em> 2012</a>; <a href="#ref-hanberry2012" role="doc-biblioref">Hanberry <em>et al.</em> 2012</a>)</span>. All of these data points come in the form <span class="math inline">\((\text{lat.}, \text{lon.}, y)\)</span>, which give a position in space, as well as <span class="math inline">\(y = \{+,-\}\)</span> (the species is present or absent!) at this position.</p>
+<p>To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the WorldClim2 dataset <span class="citation" data-cites="fick2017">(<a href="#ref-fick2017" role="doc-biblioref">Fick &amp; Hijmans 2017</a>)</span> for this purpose. In a great many situations, CHELSA2 <span class="citation" data-cites="karger2017">(<a href="#ref-karger2017" role="doc-biblioref">Karger <em>et al.</em> 2017</a>)</span> would be a better source of bioclimatic variables, but it has a much higher spatial resolution; what we want to do here is iterate rapidly and focus on the high-level discussion of how we make predictions, so a coarser data product will serve us just as well.</p>
 <p>The predictive task we want to complete is to get a predicted presence or absence <span class="math inline">\(\hat y = \{+,-\}\)</span>, from a vector <span class="math inline">\(\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]\)</span>. This specific task is called classification, and we will now introduce some elements of theory.</p>
 </section>
 <section id="what-is-classification" class="level2 page-columns page-full" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="what-is-classification"><span class="header-section-number">6.2</span> What is classification?</h2>
-<p>Classification is the prediction of a qualitative response. In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, for example, we predicted the class of a pixel, which is a qualitative variable with levels <span class="math inline">\(\{1, 2, \dots, k\}\)</span>. This represented an instance of <em>unsupervised</em> learning, as we had no <em>a priori</em> notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate “background points”, that represent assumptions about where the species are not.</p>
+<p>Classification is the prediction of a qualitative response. In <a href="#sec-clustering" class="quarto-xref"><span class="quarto-unresolved-ref">sec-clustering</span></a>, for example, we predicted the class of a pixel, which is a qualitative variable with levels <span class="math inline">\(\{1, 2, \dots, k\}\)</span>. This represented an instance of <em>unsupervised</em> learning, as we had no <em>a priori</em> notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate “background points”, that represent assumptions about where the species are not.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>When working on <span class="math inline">\(\{+,-\}\)</span> outcomes, we are specifically performing <em>binary</em> classification. Classification can be applied to more than two levels.</p>
-</div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="../references.html#ref-perl2022" role="doc-biblioref">Perl <em>et al.</em> 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
+</div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="#ref-perl2022" role="doc-biblioref">Perl <em>et al.</em> 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
 <section id="separability" class="level3 page-columns page-full" data-number="6.2.1">
 <h3 data-number="6.2.1" class="anchored" data-anchor-id="separability"><span class="header-section-number">6.2.1</span> Separability</h3>
-<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <a href="variableselection.html#sec-variable-selection-curse" class="quarto-xref"><span>Section&nbsp;7.1</span></a>, simply adding more predictors is not necessarily the right thing to do.</p>
-<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of reindeers, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-separability">
+<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <a href="#sec-variable-selection-curse" class="quarto-xref"><span class="quarto-unresolved-ref">sec-variable-selection-curse</span></a>, simply adding more predictors is not necessarily the right thing to do.</p>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-classification-separability</span></a>, we can see the temperature (in degrees) for locations with recorded presences of reindeers, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <a href="#sec-variable-selection" class="quarto-xref"><span class="quarto-unresolved-ref">sec-variable-selection</span></a>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.</p>
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Book/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-separability">
 <div id="cell-fig-classification-separability" class="cell page-columns page-full" data-execution_count="8">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-classification-separability" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full">
-<p><img src="classification_files/figure-html/fig-classification-separability-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;6.1: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.</figcaption>
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-separability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-separability-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-separability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.
+</figcaption>
 </figure>
 </div>
 </div>
@@ -322,23 +328,23 @@ b^2 &amp; b(1-b)\\
 </section>
 <section id="the-naive-bayes-classifier" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="the-naive-bayes-classifier"><span class="header-section-number">6.3</span> The Naive Bayes Classifier</h2>
-<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case [there are, in fact, several papers questioning <em>why</em> NBC works so well; see <em>e.g.</em> <span class="citation" data-cites="kupervasser2014">Kupervasser (<a href="../references.html#ref-kupervasser2014" role="doc-biblioref">2014</a>)</span>].</p>
+<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case [there are, in fact, several papers questioning <em>why</em> NBC works so well; see <em>e.g.</em> <span class="citation" data-cites="kupervasser2014">Kupervasser (<a href="#ref-kupervasser2014" role="doc-biblioref">2014</a>)</span>].</p>
 <section id="how-the-nbc-works" class="level3" data-number="6.3.1">
 <h3 data-number="6.3.1" class="anchored" data-anchor-id="how-the-nbc-works"><span class="header-section-number">6.3.1</span> How the NBC works</h3>
-<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 2°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(2^\circ C | +) &gt; P(2^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 2^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 2°C.</p>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-classification-separability</span></a>, what is the most likely class if the temperature is 2°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(2^\circ C | +) &gt; P(2^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 2^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 2°C.</p>
 <p>Using Baye’s theorem, we can re-write our goal as</p>
 <p><span id="eq-nbc-onevar"><span class="math display">\[
 P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 \tag{6.4}\]</span></span></p>
 <p>where <span class="math inline">\(x\)</span> is one value of one feature, <span class="math inline">\(P(x)\)</span> is the probability of this observation (the evidence, in Bayesian parlance), and <span class="math inline">\(P(+)\)</span> is the probability of the positive class (in other words, the prior). So, this is where the “Bayes” part comes from.</p>
 <p>But why is NBC naïve?</p>
-<p>In <a href="#eq-nbc-onevar" class="quarto-xref">Equation&nbsp;<span>6.4</span></a>, we have used a single feature <span class="math inline">\(x\)</span>, but the problem we want to solve uses a vector of features, <span class="math inline">\(\mathbf{x}\)</span>. These features, statisticians will say, will have covariance, and a joint distribution, and many things that will challenge the simplicity of what we have written so far. These details, NBC says, are meaningless.</p>
+<p>In <a href="#eq-nbc-onevar" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-nbc-onevar</span></a>, we have used a single feature <span class="math inline">\(x\)</span>, but the problem we want to solve uses a vector of features, <span class="math inline">\(\mathbf{x}\)</span>. These features, statisticians will say, will have covariance, and a joint distribution, and many things that will challenge the simplicity of what we have written so far. These details, NBC says, are meaningless.</p>
 <p>NBC is naïve because it makes the assumptions that the features are all independent. This is very important, as it means that <span class="math inline">\(P(+|\mathbf{x}) \propto P(+)\prod_i P(\mathbf{x}_i|+)\)</span> (by the chain rule). Note that this is not a strict equality,as we need to divide by the evidence. But the evidence is constant across all classes, and so we do not need to measure it to get an estimate of the score for a class.</p>
 <p>To generalize our notation, the score for a class <span class="math inline">\(\mathbf{c}_j\)</span> is <span class="math inline">\(P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j)\)</span>. In order to decide on a class, we apply the following rule:</p>
 <p><span id="eq-nbc-decision"><span class="math display">\[
 \hat y = \text{argmax}_j \, P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j) \,.
 \tag{6.5}\]</span></span></p>
-<p>In other words, whichever class gives the higher score, is what the NBC will recommend for this instance <span class="math inline">\(\mathbf{x}\)</span>. In <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will improve upon this model by thinking about the evidence <span class="math inline">\(P(\mathbf{x})\)</span>, but as you will see, this simple formulation will already prove frightfully effective.</p>
+<p>In other words, whichever class gives the higher score, is what the NBC will recommend for this instance <span class="math inline">\(\mathbf{x}\)</span>. In <a href="#sec-tuning" class="quarto-xref"><span class="quarto-unresolved-ref">sec-tuning</span></a>, we will improve upon this model by thinking about the evidence <span class="math inline">\(P(\mathbf{x})\)</span>, but as you will see, this simple formulation will already prove frightfully effective.</p>
 </section>
 <section id="how-the-nbc-learns" class="level3" data-number="6.3.2">
 <h3 data-number="6.3.2" class="anchored" data-anchor-id="how-the-nbc-learns"><span class="header-section-number">6.3.2</span> How the NBC learns</h3>
@@ -354,13 +360,17 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 </section>
 <section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="6.4.2">
 <h3 data-number="6.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">6.4.2</span> Performance evaluation of the model</h3>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-crossvalidation">
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Book/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-crossvalidation">
 <div id="cell-fig-classification-crossvalidation" class="cell page-columns page-full" data-execution_count="6">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-classification-crossvalidation" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full">
-<p><img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;6.2: WAH NEVER CHANGES</figcaption>
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: WAH NEVER CHANGES
+</figcaption>
 </figure>
 </div>
 </div>
@@ -370,27 +380,31 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <section id="the-decision-boundary" class="level3 page-columns page-full" data-number="6.4.3">
 <h3 data-number="6.4.3" class="anchored" data-anchor-id="the-decision-boundary"><span class="header-section-number">6.4.3</span> The decision boundary</h3>
 <p>Now that the model is trained, we can take a break in our discussion of its performance, and think about <em>why</em> it makes a specific classification in the first place. Because we are using a model with only two input features, we can generate a grid of variables, and the ask, for every point on this grid, the classification made by our trained model. This will reveal the regions in the space of parameters where the model will conclude that the species is present.</p>
-<p>The output of this simulation is given in <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a>. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.</p>
-<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Manuscripts/DataSciForBiodivSci/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-decision">
+<p>The output of this simulation is given in <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-classification-decision</span></a>. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.</p>
+<div class="quarto-embed-nb-cell page-columns page-full" data-notebook="/home/tpoisot/Book/notebooks/sm-classification.qmd" data-notebook-title="Supp. Mat. - classification" data-notebook-cellid="cell-fig-classification-decision">
 <div id="cell-fig-classification-decision" class="cell page-columns page-full" data-execution_count="10">
 <div class="cell-output cell-output-display page-columns page-full">
 <div id="fig-classification-decision" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="figure page-columns page-full">
-<p><img src="classification_files/figure-html/fig-classification-decision-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption margin-caption">Figure&nbsp;6.3: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.</figcaption>
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-decision-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
 <p>The line that separates the two classes is usually refered to as the “decision boundary” of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.</p>
-<p>It is interesting to compare <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a> with, for example, the distribution of the raw data presented in <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that reindeers enjoy cold and dry climates.</p>
+<p>It is interesting to compare <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-classification-decision</span></a> with, for example, the distribution of the raw data presented in <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-classification-separability</span></a>. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that reindeers enjoy cold and dry climates.</p>
 </section>
 <section id="what-is-an-acceptable-model" class="level3" data-number="6.4.4">
 <h3 data-number="6.4.4" class="anchored" data-anchor-id="what-is-an-acceptable-model"><span class="header-section-number">6.4.4</span> What is an acceptable model?</h3>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-barbet-massin2012" class="csl-entry" role="listitem">
 Barbet-Massin, M., Jiguet, F., Albert, C.H. &amp; Thuiller, W. (2012). <a href="https://doi.org/10.1111/j.2041-210x.2011.00172.x">Selecting pseudo-absences for species distribution models: how, where and how many?</a> <em>Methods in Ecology and Evolution</em>, 3, 327–338.
 </div>
@@ -563,15 +577,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    if (id.startsWith('sec-')) {
+    const typesetMath = (el) => {
+      if (window.MathJax) {
+        // MathJax Typeset
+        window.MathJax.typeset([el]);
+      } else if (window.katex) {
+        // KaTeX Render
+        var mathElements = el.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            window.katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains('display'),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false
+            });
+          }
+        }
+      }
+    }
+    if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
         for (let i = 0; i < 2; i++) {
           container.appendChild(note.children[i].cloneNode(true));
         }
+        typesetMath(container);
         return container.innerHTML
       } else {
+        typesetMath(note);
         return note.innerHTML;
       }
     } else {
@@ -580,6 +617,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
+      typesetMath(note);
       return note.innerHTML;
     }
   }
@@ -622,6 +660,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
       }
     }, function(instance) {
     });
@@ -697,7 +758,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     window.addEventListener(
       "resize",
       throttle(() => {
-        console.log("RESIZE");
         elRect = undefined;
         if (selectedAnnoteEl) {
           selectCodeLines(selectedAnnoteEl);

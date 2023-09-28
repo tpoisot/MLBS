@@ -4,8 +4,6 @@ import CSV
 using SpeciesDistributionToolkit
 using CairoMakie
 
-#spatial_extent = (left = 3.0, bottom = 54.0, right = 21.0, top = 67.0)
-
 spatial_extent = (left = 4.0, bottom = 55.0, right = 29.0, top = 72.0)
 args = (resolution = 5.0, )
 

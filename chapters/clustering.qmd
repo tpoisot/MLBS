@@ -327,7 +327,7 @@ current_figure()
 ```
 
 ::: column-margin
-We will revisit the issue of understanding how a model makes a prediction in @sec-varimp.
+We will revisit the issue of understanding how a model makes a prediction in @sec-explanations.
 :::
 
 The relative size of the clusters (as well as the position of their centroids) is presented in @tbl-clustering-centers. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about *k*-means is that it gives clusters of the same size. This "size" does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!
