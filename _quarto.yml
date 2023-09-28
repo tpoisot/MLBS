@@ -1,6 +1,6 @@
 project:
   type: book
-  output-dir: public
+  output-dir: docs
   execute-dir: project
 
 execute: 

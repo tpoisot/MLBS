@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 9&nbsp; Explaining predictions</title>
+<title>Data Science for Biodiversity Scientists - 6&nbsp; Supervised classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,27 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -95,7 +75,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/explanations.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/classification.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -173,7 +153,7 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link">
+  <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
   </div>
 </li>
@@ -191,7 +171,7 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link active">
+  <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
@@ -214,7 +194,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-explanations" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></h1>
+<h1 class="title"><span id="sec-classification" class="quarto-section-identifier"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></h1>
 </div>
 
 
@@ -231,39 +211,9 @@ div.csl-indent {
 </header>
 
 
-<p>In this chapter, we will</p>
-<p>navigate the accuracy-explainability for public policy <span class="citation" data-cites="bell2022">Bell <em>et al.</em> (<a href="#ref-bell2022" role="doc-biblioref">2022</a>)</span></p>
-<p>what is explainable differs between stakeholders <span class="citation" data-cites="amarasinghe2023">Amarasinghe <em>et al.</em> (<a href="#ref-amarasinghe2023" role="doc-biblioref">2023</a>)</span></p>
-<p>biodiversity need sustained model uptake <span class="citation" data-cites="weiskopf2022">Weiskopf <em>et al.</em> (<a href="#ref-weiskopf2022" role="doc-biblioref">2022</a>)</span></p>
-<p><span class="citation" data-cites="strumbelj2013">Štrumbelj &amp; Kononenko (<a href="#ref-strumbelj2013" role="doc-biblioref">2013</a>)</span> monte carlo approximation of shapley values</p>
-<p><span class="citation" data-cites="wadoux2023">Wadoux <em>et al.</em> (<a href="#ref-wadoux2023" role="doc-biblioref">2023</a>)</span> mapping of shapley values</p>
-<p><span class="citation" data-cites="mesgaran2014">Mesgaran <em>et al.</em> (<a href="#ref-mesgaran2014" role="doc-biblioref">2014</a>)</span> mapping of most important covariates</p>
-<p><span class="citation" data-cites="lundberg2017">Lundberg &amp; Lee (<a href="#ref-lundberg2017" role="doc-biblioref">2017</a>)</span> SHAP</p>
+<p>In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
-Amarasinghe, K., Rodolfa, K.T., Lamba, H. &amp; Ghani, R. (2023). <a href="https://doi.org/10.1017/dap.2023.2">Explainable machine learning for public policy: Use cases, gaps, and research directions</a>. <em>Data &amp; Policy</em>, 5.
-</div>
-<div id="ref-bell2022" class="csl-entry" role="listitem">
-Bell, A., Solano-Kamaiko, I., Nov, O. &amp; Stoyanovich, J. (2022). <a href="https://doi.org/10.1145/3531146.3533090">It<span>’</span>s just not that simple: An empirical study of the accuracy-explainability trade-off in machine learning for public policy</a>. <em>2022 ACM Conference on Fairness, Accountability, and Transparency</em>.
-</div>
-<div id="ref-lundberg2017" class="csl-entry" role="listitem">
-Lundberg, S.M. &amp; Lee, S.-I. (2017). <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf">A unified approach to interpreting model predictions</a>. In: <em>Advances in neural information processing systems</em> (eds. Guyon, I., Luxburg, U.V., Bengio, S., Wallach, H., Fergus, R., Vishwanathan, S., et al.). Curran Associates, Inc.
-</div>
-<div id="ref-mesgaran2014" class="csl-entry" role="listitem">
-Mesgaran, M.B., Cousens, R.D. &amp; Webber, B.L. (2014). <a href="https://doi.org/10.1111/ddi.12209">Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models</a>. <em>Diversity and Distributions</em>, 20, 1147–1159.
-</div>
-<div id="ref-strumbelj2013" class="csl-entry" role="listitem">
-Štrumbelj, E. &amp; Kononenko, I. (2013). <a href="https://doi.org/10.1007/s10115-013-0679-x">Explaining prediction models and individual predictions with feature contributions</a>. <em>Knowledge and Information Systems</em>, 41, 647–665.
-</div>
-<div id="ref-wadoux2023" class="csl-entry" role="listitem">
-Wadoux, A.M.J.-C., Saby, N.P.A. &amp; Martin, M.P. (2023). <a href="https://doi.org/10.5194/soil-9-21-2023">Shapley values reveal the drivers of soil organic carbon stock prediction</a>. <em>SOIL</em>, 9, 21–38.
-</div>
-<div id="ref-weiskopf2022" class="csl-entry" role="listitem">
-Weiskopf, S.R., Harmáčková, Z.V., Johnson, C.G., Londoño-Murcia, M.C., Miller, B.W., Myers, B.J.E., <em>et al.</em> (2022). <a href="https://doi.org/10.1016/j.envsoft.2022.105318">Increasing the uptake of ecological model results in policy decisions to improve biodiversity outcomes</a>. <em>Environmental Modelling &amp; Software</em>, 149, 105318.
-</div>
-</div>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
