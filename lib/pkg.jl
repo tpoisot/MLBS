@@ -10,8 +10,8 @@ import JLD
 using Statistics
 
 using CairoMakie
-using GeoMakie
 CairoMakie.activate!(; px_per_unit = 2)
+import GeoMakie
 
 import Downloads
 

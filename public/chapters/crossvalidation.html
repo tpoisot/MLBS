@@ -196,8 +196,8 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/varimp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Understanding the effects of variables</span></span></a>
+  <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -527,7 +527,7 @@ Table&nbsp;4.2: TODO
 </div>
 </div>
 <p>First, what are we predicting? Our response variable is not <em>really</em> the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.</p>
-<p>Second, what difference <em>does</em> a day make? <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-splits-rawdata</span></a> shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error – a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluations can help us contextualize the predictions.</p>
+<p>Second, what difference <em>does</em> a day make? <a href="#fig-splits-rawdata" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-splits-rawdata</span></a> shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error – a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluation can help us contextualize the predictions, and in particular how actionable they can be.</p>
 </section>
 <section id="model-predictions" class="level3 page-columns page-full" data-number="4.4.2">
 <h3 data-number="4.4.2" class="anchored" data-anchor-id="model-predictions"><span class="header-section-number">4.4.2</span> Model predictions</h3>
@@ -546,13 +546,16 @@ Figure&nbsp;4.4: TODO
 </div>
 </div>
 </div>
-<p>The question we now need to answer is: is our model doing a good job? We can start thinking about this question in a very qualitative way: yes, it does a goob job at drawing a line that, through time, goes right through the original data. As far as validation goes, it maybe underestimates the drop in the response variable (it predicts the bloom a little later), but maybe there are long-term effects, expressed over the lifetime of the tree (the first bloom usually takes places after 6 or 7 growth seasons), that we do not account for.</p>
-<p>Our model tends to smooth out some of the variation; it does not predict bloom dates before day of year 100, or after day of year 108, although they do happen. This may not be a trivial under-prediction: some of these cycles leading to very early/late bloom can take place over a century, meaning that our model could be consistently wrong (which is to say, wrong with the same bias) for dozens of years in a row.</p>
+<p>The question we now need to answer is: is our model doing a good job? We can start thinking about this question in a very qualitative way: yes, it does a goob job at drawing a line that, through time, goes right through the original data more often that it doesn’t. As far as validation goes, it maybe underestimates the drop in the response variable (it predicts the bloom a little later), but maybe there are long-term effects, expressed over the lifetime of the tree (the first bloom usually takes places after 6 or 7 growth seasons), that we do not account for.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Think about the structure of linear models. Can we use information about the previous years in our model? Would there be a risk associated to adding more parameters?</p>
+</div></div><p>Our model tends to smooth out some of the variation; it does not predict bloom dates before day of year 100, or after day of year 108, although they do happen. This may not be a trivial under-prediction: some of these cycles leading to very early/late bloom can take place over a century, meaning that our model could be consistently wrong (which is to say, wrong with the same bias) for dozens of years in a row.</p>
 </section>
 <section id="sec-crossvalidation-fitness" class="level3 page-columns page-full" data-number="4.4.3">
 <h3 data-number="4.4.3" class="anchored" data-anchor-id="sec-crossvalidation-fitness"><span class="header-section-number">4.4.3</span> Is our model good, then?</h3>
 <p>The answer is, it depends. Models are neither good, nor bad. They are either fit, or unfit, for a specific purpose.</p>
-<p>If the purpose is to decide when to schedule a one-day trip to see the cherry blossom bloom, our model is not really fit – looking at the predictions, it gets within a day of the date of bloom (but oh, by the way, this is an average over close to a decade!) about 15% of the time, which jumps up to close to 30% if you accept a two-days window of error.</p>
+<p>If the purpose is to decide when to schedule a one-day trip to see the cherry blossom bloom, our model is not really fit – looking at the predictions, it gets within a day of the date of bloom (but oh, by the way, this is an average over almost a decade!) about 15% of the time, which jumps up to almost 30% if you accept a two-days window of error.</p>
 <p>If the purpose is to look at long-time trends in the date of bloom, then our model actually works rather well. It does under-estimate the amplitude of the cycles, but not by a large amount. In fact, we could probably stretch the predictions a little, applying a little correction factor, and have a far more interesting model.</p>
 <p>We will often be confronted to this question when working with prediction. There is not really a criteria for “good”, only a series of compromises and judgment calls about “good enough”. This is important. It reinforces the imperative of keeping the practice of data science connected to the domain knowledge, as ultimately, a domain expert will have to settle on whether to use a model or not.</p>
 <div id="cell-fig-splits-detail" class="cell page-columns page-full" data-execution_count="13">

@@ -20,27 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -83,8 +63,6 @@ div.csl-indent {
   }
 }</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -193,8 +171,8 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/varimp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Understanding the effects of variables</span></span></a>
+  <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -209,13 +187,7 @@ div.csl-indent {
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#sec-variable-selection-curse" id="toc-sec-variable-selection-curse" class="nav-link active" data-scroll-target="#sec-variable-selection-curse"><span class="header-section-number">7.1</span> The curse of dimensionality</a></li>
-  </ul>
-</nav>
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -239,27 +211,8 @@ div.csl-indent {
 </header>
 
 
-<section id="sec-variable-selection-curse" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="sec-variable-selection-curse"><span class="header-section-number">7.1</span> The curse of dimensionality</h2>
-<p>It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!</p>
-<p>The “curse of dimensionality” is the common term of everything breaking down when the dimensions of a problem increase. In our perspective, where we rely on the resemblance between features to make a prediction, increasing the dimensions of a problem means adding features, and it has important consequences on the distance between observations. Picture two points positioned at random on the unit interval: the average distance between them is 1/3. If we add one dimension, keeping two points but turning this line into a cube, the average distance would be about 1/2. For a cube, about 2/3. For <span class="math inline">\(n\)</span> dimensions, we can figure out that the average distance grows like <span class="math inline">\(\sqrt{n/6 + c}\)</span>, which is to say that when we add more dimensions, we make the average distance between two points go to infinity. To ass</p>
-<p>Ecological studies are not immune to this <span class="citation" data-cites="smith2017">(e.g. <a href="#ref-smith2017" role="doc-biblioref">Smith <em>et al.</em> 2017</a>)</span>!</p>
-<p>we will use MCC <span class="citation" data-cites="chicco2020">(<a href="#ref-chicco2020" role="doc-biblioref">Chicco &amp; Jurman 2020</a>)</span> rather than <span class="math inline">\(F_1\)</span> or accuracy to decide on the best model</p>
-<p>is the Pearson product-moment correlation on a contingency table <span class="citation" data-cites="powers2020">(<a href="#ref-powers2020" role="doc-biblioref">Powers 2020</a>)</span></p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
-<div id="ref-chicco2020" class="csl-entry" role="listitem">
-Chicco, D. &amp; Jurman, G. (2020). <a href="https://doi.org/10.1186/s12864-019-6413-7">The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation</a>. <em>BMC Genomics</em>, 21.
-</div>
-<div id="ref-powers2020" class="csl-entry" role="listitem">
-Powers, D.M.W. (2020). <a href="https://doi.org/10.48550/ARXIV.2010.16061">Evaluation: From precision, recall and f-measure to ROC, informedness, markedness and correlation</a>. <em>arXiv</em>.
-</div>
-<div id="ref-smith2017" class="csl-entry" role="listitem">
-Smith, M.L., Ruffley, M., Espíndola, A., Tank, D.C., Sullivan, J. &amp; Carstens, B.C. (2017). <a href="https://doi.org/10.1111/mec.14223">Demographic model selection using random forests and the site frequency spectrum</a>. <em>Molecular Ecology</em>, 26, 4562–4573.
-</div>
-</div>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
