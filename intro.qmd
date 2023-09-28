@@ -34,7 +34,7 @@ In @sec-clustering, we introduce some fundamental questions in data science, by 
 
 In @sec-gradientdescent, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a "fitted" model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.
 
-In @sec-splits, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of "what kind of decision-making can we justify with a model".
+In @sec-crossvalidation, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of "what kind of decision-making can we justify with a model".
 
 In @sec-leakage, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.
 
@@ -44,7 +44,7 @@ In @sec-variable-selection, we explore ways to perform variable selection, think
 
 In @sec-tuning, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.
 
-In @sec-varimp, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.
+In @sec-explanations, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.
 
 ## Some rules about this book
 
