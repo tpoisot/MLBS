@@ -1,6 +1,6 @@
 # Data Science for Biodiversity Scientists
 
-[![Static Badge](https://img.shields.io/badge/Read_on-quarto.pub-skyblue)](https://tpoisot.quarto.pub/data-science-for-biodiversity/)
+[![Static Badge](https://img.shields.io/badge/Read_on-github_pages-skyblue)](https://tpoisot.github.io/DataSciForBiodivSci/)
 
 [![Static Badge](https://img.shields.io/badge/License-CC--BY--NC-green)](https://creativecommons.org/licenses/by-nc/4.0/)
 
