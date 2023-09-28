@@ -40,7 +40,7 @@ book:
     - intro.qmd
     - chapters/clustering.qmd
     - chapters/gradientdescent.qmd
-    - chapters/splits.qmd
+    - chapters/crossvalidation.qmd
     - chapters/leakage.qmd
     - chapters/classification.qmd
     - chapters/variableselection.qmd

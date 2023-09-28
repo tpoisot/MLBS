@@ -1,4 +1,4 @@
-# Testing, training, validating {#sec-splits}
+# Cross-validation {#sec-crossvalidation}
 
 In @sec-clustering, we were very lucky. Because we applied an unsupervised method, we didn't really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation.
 
@@ -329,7 +329,7 @@ The question we now need to answer is: is our model doing a good job? We can sta
 
 Our model tends to smooth out some of the variation; it does not predict bloom dates before day of year 100, or after day of year 108, although they do happen. This may not be a trivial under-prediction: some of these cycles leading to very early/late bloom can take place over a century, meaning that our model could be consistently wrong (which is to say, wrong with the same bias) for dozens of years in a row.
 
-### Is our model good, then? {#sec-splits-fitness}
+### Is our model good, then? {#sec-crossvalidation-fitness}
 
 The answer is, it depends. Models are neither good, nor bad. They are either fit, or unfit, for a specific purpose.
 

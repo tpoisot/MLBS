@@ -17,7 +17,7 @@ Doing do will require to introduce several new concepts, and so the "correct" wa
 
 Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument [the model itself, see *e.g.* @morrison1999]. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.
 
-As we will see in this chapter, then in @sec-splits, and finally in @sec-tuning, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the *machine* we train in machine learning.
+As we will see in this chapter, then in @sec-crossvalidation, and finally in @sec-tuning, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the *machine* we train in machine learning.
 
 Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In @sec-clustering, we ended up with a machine (the trained *k*-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.
 
@@ -180,7 +180,7 @@ We will not get back to the problem exposed in @fig-gradient-data, and use gradi
 
 At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the units of species and interactions (after dealing with the natural log, of course). In addition, as we will see in @sec-leakage, applying a transformation to the data too soon can be a dangerous thing. We will have to live with raw features for a few more chapters.
 
-In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these data points. We will get back to this practice (cross-validation) in a lot more details in @sec-splits, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.
+In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these data points. We will get back to this practice (cross-validation) in a lot more details in @sec-crossvalidation, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.
 
 ### Starting the learning process
 
@@ -358,7 +358,7 @@ rowsize!(gl, 1, Relative(0.3))
 current_figure()
 ```
 
-We will have a far more nuanced discussion of "what is this model good for?" in @sec-splits, but for now, we can make a decision about this model: it provides a good approximation of the relationship between the species richness, and the number of interactions, in a food web.
+We will have a far more nuanced discussion of "what is this model good for?" in @sec-crossvalidation, but for now, we can make a decision about this model: it provides a good approximation of the relationship between the species richness, and the number of interactions, in a food web.
 
 ## A note on regularization
 
@@ -378,4 +378,4 @@ When using $L1$ regularization (LASSO regression), $g(\beta) = \sum |\beta|$, an
 
 ## Conclusion
 
-In this chapter, we have used a dataset of species richness and number of interactions to start exploring the practice of machine learning. We defined a model (a linear regression), and based about assumptions about how to get closer to ideal parameters, we used the technique of gradient descent to estimate the best possible relationship between $S$ and $L$. In order to provide a fair evaluation of the performance of this model, we kept a part of the dataset hidden from it while training. In @sec-splits, we will explore this last point in great depth, by introducing the concept of cross-validation, testing set, and performance evaluation.
+In this chapter, we have used a dataset of species richness and number of interactions to start exploring the practice of machine learning. We defined a model (a linear regression), and based about assumptions about how to get closer to ideal parameters, we used the technique of gradient descent to estimate the best possible relationship between $S$ and $L$. In order to provide a fair evaluation of the performance of this model, we kept a part of the dataset hidden from it while training. In @sec-crossvalidation, we will explore this last point in great depth, by introducing the concept of cross-validation, testing set, and performance evaluation.
