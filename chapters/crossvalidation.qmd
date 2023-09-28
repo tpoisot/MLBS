@@ -29,7 +29,7 @@ The *validation* data are used in-between, as part of the training process. They
 
 The difference between testing and validation is largely a difference of *intent*. When we want to provide an *a posteriori* assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let's look at each of these datasets in turn. The differences between these three datasets are summarized in @tbl-splits-models.
 
-| Dataset    | Trains | Purpose                         | Data for performance |
+| Dataset    | Trains | Purpose                         | Data used for training |
 |------------|--------|---------------------------------|----------------------|
 | Training   | yes    | train model                     |                      |
 | Validation |        | validate during training        | training data only   |
@@ -73,7 +73,8 @@ In order to come up with a trained model, it would be a strange idea not to use 
 #| label: Load the data
 #| echo: false
 #| output: false
-sakura = DataFrame(CSV.File(joinpath(@__DIR__, "..", "data", "general", "sakura.csv")))
+_data_path = joinpath(dirname(Base.active_project()), "data")
+sakura = DataFrame(CSV.File(joinpath(_data_path, "general", "sakura.csv")))
 allowmissing!(sakura, :temperature)
 replace!(sakura.temperature, -50.0 => missing)
 sort!(sakura, :year)
@@ -206,7 +207,9 @@ One issue with Monte-Carlo cross-validation is that we lose the guarantee that e
 
 ## Application: when do cherry blossom bloom?
 
-The model we will train for this section is really simple: $\text{bloom day} = m \times \text{temperature} + b$. This is a linear model, and one with a nice, direct biological interpretation: the average (baseline) day of bloom is $b$, and each degree adds $m$ days to the bloom date. At this point, we *might* start thinking about the distribution of the response, and what type of GLM we should used, but no. Not today. Today, we want to iterate quickly, and so we will start with a model that is exactly as simple as it needs to be: this is linear regression.
+The model we will train for this section is really simple: $\text{bloom day} = m \times \text{temperature} + b$. This is a linear model, and one with a nice, direct biological interpretation: the average (baseline) day of bloom is $b$, and each degree of temperature expected in March adds $m$ days to the bloom date. At this point, we *might* start thinking about the distribution of the response, and what type of GLM we should used, but no. Not today. Today, we want to iterate quickly, and so we will start with a model that is exactly as simple as it needs to be: this is, in our case, linear regression.
+
+At this point, we may be tempted to think a little more deeply about the variables and the structure of the model, to express the bloom day as a departure from the expected value, and similarly with the temperature, using for example the *z*-score. This is a transformation we will apply starting from @sec-classification, but in order to apply it properly, we need to consider some elements that will be introduced in @sec-leakage. For this reason, we will not apply any transformation to the data yet; feel free to revisit this exercise after reading through @sec-leakage.
 
 This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work well enough to support a discussion of the model and training process.
 
@@ -226,13 +229,11 @@ for (i, Ki) in enumerate(folds)
         valid = sakuratrain[valid_idx, :]
         train = sakuratrain[train_idx, :]
         m1 = lm(@formula(flowavg ~ temperature), train)
-        for (md, mn) in [(m1, :Simple)]
             for (ds, dn) in [(train, :Training), (valid, :Validation)]
                 for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
-                    loss = m(ds.flowavg, predict(md, ds))
+                    loss = m(ds.flowavg, predict(m1, ds))
                     push!(test_results,
                         (
-                            Model = mn,
                             Dataset = dn,
                             Measure = p,
                             Value = loss
@@ -240,13 +241,12 @@ for (i, Ki) in enumerate(folds)
                     )
                 end
             end
-        end
     end
 end
 
-gr_test = groupby(test_results, [:Model, :Dataset, :Measure])
+gr_test = groupby(test_results, [:Dataset, :Measure])
 benchmark_result = combine(gr_test, :Value => mean => Symbol("Loss (avg.)"), :Value => std => Symbol("Loss (std. dev.)"))
-sort!(benchmark_result, [:Measure, :Dataset, :Model, Symbol("Loss (avg.)")])
+sort!(benchmark_result, [:Measure, :Dataset, Symbol("Loss (avg.)")])
 choice = benchmark_result[(benchmark_result.Measure .== :MAE),:]
 sort!(choice, :Dataset)
 ```
@@ -254,15 +254,30 @@ sort!(choice, :Dataset)
 We can visualize the results of our model training and assessment process. These results are presented in @fig-splits-performance (as well as in @tbl-splits-performance-summary, if you want to see the standard deviation across all splits), and follow the same color-coding convention we have used so far. All three loss measures presented here express their loss in the units of the response variable, which in this case is the day of the year where the bloom was recorded. These results show that our trained model achieves a loss of the order of a day or two in the testing data, which sounds really good!
 
 ```{julia}
-#| label: Re-train the model
+#| label: Re-train the model and test it
+#| echo: false
+#| output: false
 model = lm(@formula(flowavg ~ temperature), sakuratrain)
+
+summary_table = copy(benchmark_result)
+allowmissing!(summary_table, Symbol("Loss (std. dev.)"))
+for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
+    loss = m(sakuratest.flowavg, predict(model, sakuratest))
+    push!(summary_table,
+        (
+            :Testing, p, loss, missing
+        )
+    )
+end
+sort!(summary_table, [:Measure, :Dataset])
 ```
 
 ```{julia}
 #| label: fig-splits-performance
-#| fig-cap: Visualisation of the model performance for .... The colors are the same as in fig-splits-illustration, *i.e.* grey for the training data, green for the validation data, and purple for the testing data.
+#| fig-cap: Visualisation of the model performance for three loss functions (MA, RMSE, MBE, as defined in @tbl-gradientdescent-regressionloss). The colors are the same as in @fig-splits-illustration, *i.e.* grey for the training data, green for the validation data, and purple for the testing data.
+#| echo: false
 f = Figure(; resolution=(500, 300))
-model_results = test_results[test_results.Model .== :Simple, :]
+model_results = copy(test_results)
 for (i,m) in enumerate([:MAE, :RMSE, :MBE])
     ax = Axis(f[i,1]; ylabel=String(m))
     ylims!(ax, (-0.15, 0.15))
@@ -284,30 +299,16 @@ current_figure()
 Yet it is important to contextualize these results. What does it means for our prediction to be correct plus or minus two days? There are at least two important points to consider.
 
 ```{julia}
-summary_table = benchmark_result[benchmark_result.Model .== :Simple, :]
-select!(summary_table, Not(:Model))
-allowmissing!(summary_table, Symbol("Loss (std. dev.)"))
-for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
-    loss = m(sakuratest.flowavg, predict(model, sakuratest))
-    push!(summary_table,
-        (
-            :Testing, p, loss, missing
-        )
-    )
-end
-sort!(summary_table, [:Measure, :Dataset])
-```
-
-```{julia}
 #| label: tbl-splits-performance-summary
 #| tbl-cap: TODO
+#| echo: false
 out = pretty_table(String, summary_table, tf= tf_html_simple, formatters = ft_nomissing, show_subheader = false)
 display("text/html", out)
 ```
 
 First, what are we predicting? Our response variable is not *really* the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.
 
-Second, what difference *does* a day make? @fig-splits-rawdata shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error -- a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluations can help us contextualize the predictions.
+Second, what difference *does* a day make? @fig-splits-rawdata shows that most of the days of bloom happen between day-of-year 100 and day-of-year 110. Recall that the MAE is measured by taking the average absolute error -- a mistake of 24 hours is 10% of this interval! This is an example of how thinking about the units of the loss function we use for model evaluation can help us contextualize the predictions, and in particular how actionable they can be.
 
 ### Model predictions
 
@@ -351,16 +352,8 @@ current_figure()
 ```
 
 ```{julia}
+#| label: TK???
+#| echo: false
+#| output: false
 (count(sort(abs.(predict(model, sakura) .- sakura.flowavg)) .< 0.5) / size(sakura, 1))*100
-```
-
-stretching for in-class demo
-
-```{julia}
-pred = predict(model, sakura)
-truth = sakura.flowavg
-mpred = (pred .- mean(pred)) .* 1.9 .+ mean(pred)
-scatter(sakura.year, sakura.flowavg)
-scatter!(sakura.year, mpred)
-current_figure()
 ```
