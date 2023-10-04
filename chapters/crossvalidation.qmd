@@ -30,10 +30,10 @@ The *validation* data are used in-between, as part of the training process. They
 The difference between testing and validation is largely a difference of *intent*. When we want to provide an *a posteriori* assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let's look at each of these datasets in turn. The differences between these three datasets are summarized in @tbl-splits-models.
 
 | Dataset    | Trains | Purpose                         | Data used for training |
-|------------|--------|---------------------------------|----------------------|
-| Training   | yes    | train model                     |                      |
-| Validation |        | validate during training        | training data only   |
-| Testing    |        | estimates of future performance | all except testing   |
+|--------------|--------------|---------------------------|-----------------|
+| Training   | yes    | train model                     |                        |
+| Validation |        | validate during training        | training data only     |
+| Testing    |        | estimates of future performance | all except testing     |
 
 : Overview of the three datasets used for training and cross-validation. Information in the "Data used for training" column refer to the data that have been used to train the model when calculating its performance. {#tbl-splits-models}
 
@@ -43,7 +43,7 @@ In data science (in applied machine learning in particular), we do not *fit* mod
 
 Training, to provide a general definition, is the action of modifying the parameters of a model, based on knowledge of the data, and the error that results from using the current parameter values. In @sec-gradientdescent, for example, we saw how to train a linear model using the technique of gradient descent, based on a specific dataset, with a learning rate and loss function we picked based on trial and error. Our focus in this chapter is not on the methods we use for training, but on the data that are required to train a model.
 
-Training a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease.
+Training a model is a process akin to rote learning: we will present the same input, and the same expected responses, many times over, and we will find ways for the error on each response to decrease (this is usually achieved by minimizing the loss function).
 
 In order to initiate this process, we need an untrained model. Untrained, in this context, refers to a model that has not been trained *on the specific problem* we are addressing; the model may have been trained on a different problem (for example, we want to predict the distribution of a species based on a GLM trained on a phylogenetically related species). It is important to note that by "training the model", what we really mean is "change the structure of the parameters until the output looks right". For example, assuming a simple linear model like $c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2$, training this model would lead to changes in the values of $\beta$, but not to the consideration of a new model $c(X) = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_1X_2$. Comparing models is (often) the point of validation, which we will address later on.
 
@@ -201,7 +201,7 @@ The appropriate value of $k$ is often an unknown. It is common to use $k = 10$ a
 
 ### Monte-Carlo
 
-One limitation of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.
+One limitation of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation [@roberts2017]. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.
 
 One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.
 
@@ -317,7 +317,7 @@ The predictions of our model are presented in @fig-splits-prediction; these are 
 ```{julia}
 #| label: fig-splits-prediction
 #| echo: false
-#| fig-cap: TODO
+#| fig-cap: Overview of the fit of the final model (trained on all the training examples), visualized as the time series. Note that the year was not used as a variable in the model. The purple part of the prediction corresponds to the prediction of the model for the testing data, which are zoomed-in on in @fig-splits-detail. Although the model captures the cycles reasonably well, it tends to smooth out a lot of extreme events.
 f = Figure(; resolution=(500, 300))
 ax = Axis(f[1,1]; xlabel="Year", ylabel="Day of bloom")
 scatter!(ax, sakura.year, sakura.flowavg, color=:lightgrey, markersize=6)
@@ -347,7 +347,7 @@ We will often be confronted to this question when working with prediction. There
 ```{julia}
 #| label: fig-splits-detail
 #| echo: false
-#| fig-cap: TODO
+#| fig-cap: Overview of the model predictions on the testing data. Note that the model still smoothes out some of the extreme values. More importantly, it seems that it is under-estimating the sharp decline in the day of first bloom that happens starting in 1950; this suggests that the model is not adequately capturing important processes shaping the data.
 f = Figure()
 ax = Axis(f[1,1])
 scatter!(ax, sakuratest.year, sakuratest.flowavg, color=:lightgrey)
@@ -361,3 +361,7 @@ current_figure()
 #| output: false
 (count(sort(abs.(predict(model, sakura) .- sakura.flowavg)) .< 0.5) / size(sakura, 1))*100
 ```
+
+## Conclusion
+
+In this chapter, we trained a linear regression model to predict the day of bloom of cherry blossom trees based on the predicted temperature in March. Although the model makes a reasonable error (of the order of a few days), a deeper investigation of the amplitude of this error compared to the amplitude of the response variable, and of the comparison of extreme values in the prediction and in the data, led us to a more cautious view about the usefulness of this model. In practice, if we really wanted to solve this problem, this is the point where we would either add variables, or try another regression algorithm, or both.
