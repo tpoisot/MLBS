@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -311,49 +277,10 @@ div.csl-indent {
 </div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="../references.html#ref-perl2022" role="doc-biblioref">Perl <em>et al.</em> 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
 <section id="separability" class="level3 page-columns page-full" data-number="6.2.1">
 <h3 data-number="6.2.1" class="anchored" data-anchor-id="separability"><span class="header-section-number">6.2.1</span> Separability</h3>
-<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <a href="variableselection.html#sec-variable-selection-curse" class="quarto-xref"><span>Section&nbsp;7.1</span></a>, simply adding more predictors is not necessarily the right thing to do.</p>
+<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <span class="quarto-unresolved-ref">?sec-variable-selection-curse</span>, simply adding more predictors is not necessarily the right thing to do.</p>
 <p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of reindeers, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.</p>
 <div id="cell-fig-classification-separability" class="cell page-columns page-full" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">500</span>, <span class="fl">500</span>))</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>gl <span class="op">=</span> f[<span class="fl">1</span>,<span class="fl">1</span>] <span class="op">=</span> <span class="fu">GridLayout</span>()</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>axtemp <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">1</span>,<span class="fl">1</span>])</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">1</span>]</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(axtemp, <span class="fu">filter</span>(r <span class="op">-&gt;</span> r.presence, rangifer).BIO1, color<span class="op">=</span>(c, <span class="fl">0.3</span>), strokecolor<span class="op">=</span>c, strokewidth<span class="op">=</span><span class="fl">1</span>, normalization<span class="op">=:</span>pdf)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">2</span>]</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(axtemp, <span class="fu">filter</span>(r <span class="op">-&gt;</span> !r.presence, rangifer).BIO1, color<span class="op">=</span>(c, <span class="fl">0.3</span>), strokecolor<span class="op">=</span>c, strokewidth<span class="op">=</span><span class="fl">1</span>, normalization<span class="op">=:</span>pdf)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>axprec <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">2</span>,<span class="fl">2</span>])</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">1</span>]</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(axprec, <span class="fl">0.1</span><span class="fu">filter</span>(r <span class="op">-&gt;</span> r.presence, rangifer).BIO12, color<span class="op">=</span>(c, <span class="fl">0.3</span>), strokecolor<span class="op">=</span>c, strokewidth<span class="op">=</span><span class="fl">1</span>, normalization<span class="op">=:</span>pdf, direction<span class="op">=:</span>y)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">2</span>]</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(axprec, <span class="fl">0.1</span><span class="fu">filter</span>(r <span class="op">-&gt;</span> !r.presence, rangifer).BIO12, color<span class="op">=</span>(c, <span class="fl">0.3</span>), strokecolor<span class="op">=</span>c, strokewidth<span class="op">=</span><span class="fl">1</span>, normalization<span class="op">=:</span>pdf, direction<span class="op">=:</span>y)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>axboth <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">2</span>,<span class="fl">1</span>], xlabel<span class="op">=</span><span class="st">"Mean air temperature (°C)"</span>, ylabel <span class="op">=</span> <span class="st">"Annual precipitation (kg m⁻²)"</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>xp <span class="op">=</span> <span class="fu">filter</span>(r <span class="op">-&gt;</span> r.presence, rangifer).BIO1</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>xn <span class="op">=</span> <span class="fu">filter</span>(r <span class="op">-&gt;</span> !r.presence, rangifer).BIO1</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>yp <span class="op">=</span> <span class="fu">filter</span>(r <span class="op">-&gt;</span> r.presence, rangifer).BIO12</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>yn <span class="op">=</span> <span class="fu">filter</span>(r <span class="op">-&gt;</span> !r.presence, rangifer).BIO12</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">1</span>]</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(axboth, xp, yp, color<span class="op">=</span>c, markersize<span class="op">=</span><span class="fl">4</span>, label<span class="op">=</span><span class="st">"Presence"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">2</span>]</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(axboth, xn, yn, color<span class="op">=</span>c, markersize<span class="op">=</span><span class="fl">4</span>, label<span class="op">=</span><span class="st">"Pseudo-absence"</span>)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">hidespines!</span>(axtemp, <span class="op">:</span>l, <span class="op">:</span>r, <span class="op">:</span>t)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">hidespines!</span>(axprec, <span class="op">:</span>b, <span class="op">:</span>r, <span class="op">:</span>t)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu">hidedecorations!</span>(axtemp, grid <span class="op">=</span> <span class="cn">true</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">hidedecorations!</span>(axprec, grid <span class="op">=</span> <span class="cn">true</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">ylims!</span>(axtemp, low <span class="op">=</span> <span class="fl">0</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">xlims!</span>(axprec, low <span class="op">=</span> <span class="fl">0</span>)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">colgap!</span>(gl, <span class="fl">0</span>)</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">rowgap!</span>(gl, <span class="fl">0</span>)</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="fu">colsize!</span>(gl, <span class="fl">1</span>, <span class="fu">Relative</span>(<span class="fl">4</span><span class="op">/</span><span class="fl">5</span>))</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">rowsize!</span>(gl, <span class="fl">2</span>, <span class="fu">Relative</span>(<span class="fl">4</span><span class="op">/</span><span class="fl">5</span>))</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="53">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="5">
 <div id="fig-classification-separability" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-separability-output-1.png" class="img-fluid figure-img"></p>
@@ -429,24 +356,7 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="6.4.2">
 <h3 data-number="6.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">6.4.2</span> Performance evaluation of the model</h3>
 <div id="cell-fig-classification-crossvalidation" class="cell page-columns page-full" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fmat <span class="op">=</span> [(tpr, <span class="st">"True positives"</span>) (fpr, <span class="st">"False positives"</span>) (trueskill, <span class="st">"TSS"</span>); (tnr, <span class="st">"True negatives"</span>) (fnr, <span class="st">"False negatives"</span>) (mcc, <span class="st">"MCC"</span>)]</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ci <span class="kw">in</span> <span class="fu">CartesianIndices</span>(fmat)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    cfunc, lab <span class="op">=</span> fmat[ci]</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> <span class="fu">Axis</span>(f[ci.I<span class="op">...</span>]; xlabel<span class="op">=</span>lab)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    trv <span class="op">=</span> <span class="fu">cfunc</span>.(conftrain)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    vav <span class="op">=</span> <span class="fu">cfunc</span>.(confvalid)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> <span class="fu">vcat</span>(<span class="fu">fill</span>(<span class="fl">0</span>, <span class="fu">length</span>(trv)), <span class="fu">fill</span>(<span class="fl">1</span>, <span class="fu">length</span>(vav)))</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> <span class="fu">vcat</span>(trv, vav)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    trc <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[<span class="fl">3</span>]</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    vac <span class="op">=</span> <span class="op">:</span>lightgrey</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">boxplot!</span>(ax, x, y; orientation<span class="op">=:</span>vertical, color <span class="op">=</span> <span class="fu">map</span>(d<span class="op">-&gt;</span>d<span class="op">==</span><span class="fl">1</span> ? vac <span class="op">:</span> trc, x))</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hidexdecorations!</span>(ax, label<span class="op">=</span><span class="cn">false</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="56">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="8">
 <div id="fig-classification-crossvalidation" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" class="img-fluid figure-img"></p>
@@ -468,38 +378,38 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <tr class="odd">
 <td>True positive rate</td>
 <td>0.88</td>
-<td>0.88</td>
-<td>0.68</td>
+<td>0.87</td>
+<td>0.67</td>
 </tr>
 <tr class="even">
 <td>False positive rate</td>
-<td>0.18</td>
-<td>0.18</td>
-<td>0.68</td>
+<td>0.14</td>
+<td>0.14</td>
+<td>0.67</td>
 </tr>
 <tr class="odd">
 <td>True negative rate</td>
-<td>0.82</td>
-<td>0.82</td>
-<td>0.32</td>
+<td>0.86</td>
+<td>0.86</td>
+<td>0.33</td>
 </tr>
 <tr class="even">
 <td>False negative rate</td>
 <td>0.12</td>
-<td>0.12</td>
-<td>0.32</td>
+<td>0.13</td>
+<td>0.33</td>
 </tr>
 <tr class="odd">
 <td>True-Skill statistic</td>
-<td>0.7</td>
-<td>0.7</td>
-<td>-0.0</td>
+<td>0.73</td>
+<td>0.73</td>
+<td>0.0</td>
 </tr>
 <tr class="even">
 <td>Matthew’s correlation coefficient</td>
-<td>0.68</td>
-<td>0.68</td>
-<td>-0.0</td>
+<td>0.72</td>
+<td>0.71</td>
+<td>0.0</td>
 </tr>
 </tbody>
 </table>
@@ -508,12 +418,7 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <h3 data-number="6.4.3" class="anchored" data-anchor-id="the-decision-boundary"><span class="header-section-number">6.4.3</span> The decision boundary</h3>
 <p>Now that the model is trained, we can take a break in our discussion of its performance, and think about <em>why</em> it makes a specific classification in the first place. Because we are using a model with only two input features, we can generate a grid of variables, and the ask, for every point on this grid, the classification made by our trained model. This will reveal the regions in the space of parameters where the model will conclude that the species is present.</p>
 <div id="cell-fig-classification-decision" class="cell page-columns page-full" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">500</span>, <span class="fl">500</span>))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>], xlabel<span class="op">=</span><span class="st">"Mean air temperature (°C)"</span>, ylabel <span class="op">=</span> <span class="st">"Annual precipitation (kg m⁻²)"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>pal <span class="op">=</span> Makie.<span class="fu">wong_colors</span>()[[<span class="fl">2</span>,<span class="fl">1</span>]]</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">heatmap!</span>(ax, air, prc, X, colormap<span class="op">=</span>pal, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="59">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
 <div id="fig-classification-decision" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-decision-output-1.png" class="img-fluid figure-img"></p>
@@ -529,22 +434,8 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <section id="visualizing-the-trained-model" class="level3 page-columns page-full" data-number="6.4.4">
 <h3 data-number="6.4.4" class="anchored" data-anchor-id="visualizing-the-trained-model"><span class="header-section-number">6.4.4</span> Visualizing the trained model</h3>
 <p>make the predictions for every pixel and get the entropy</p>
-<div id="d72a1369" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pr <span class="op">=</span> <span class="fu">convert</span>(<span class="dt">Float64</span>, <span class="fu">similar</span>(<span class="fu">first</span>(bio)))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>entropy <span class="op">=</span> <span class="fu">similar</span>(pr)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Threads</span>.<span class="pp">@threads</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="fu">keys</span>(pr)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [b[k] for b <span class="kw">in</span> bio]</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    pr[k] <span class="op">=</span> <span class="fu">predictor</span>(x)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <div id="cell-fig-classification-range" class="cell page-columns page-full" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">500</span>, <span class="fl">500</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">GeoAxis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>], xlabel<span class="op">=</span><span class="st">"Longitude"</span>, ylabel <span class="op">=</span> <span class="st">"Latitude"</span>, lonlims<span class="op">=</span><span class="fu">extrema</span>(<span class="fu">longitudes</span>(pr)), latlims<span class="op">=</span><span class="fu">extrema</span>(<span class="fu">latitudes</span>(pr)), dest <span class="op">=</span> <span class="st">"+proj=moll"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">surface!</span>(ax, pr<span class="op">.&gt;</span><span class="fl">0.5</span>, shading<span class="op">=</span><span class="cn">false</span>, colormap<span class="op">=</span>[<span class="op">:</span>lightgrey, <span class="op">:</span>black], interpolate<span class="op">=</span><span class="cn">false</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>ax.xticklabelpad <span class="op">=</span> <span class="fl">30</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>ax.yticklabelpad <span class="op">=</span> <span class="fl">40</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="62">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="14">
 <div id="fig-classification-range" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="figure page-columns page-full">
 <p><img src="classification_files/figure-html/fig-classification-range-output-1.png" class="img-fluid figure-img"></p>

@@ -71,6 +71,7 @@ In @fig-classification-separability, we can see the temperature (in degrees) for
 
 ```{julia}
 #| label: fig-classification-separability
+#| echo: false
 #| fig-cap: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.
 f = Figure(; resolution=(500, 500))
 
@@ -224,6 +225,7 @@ end
 
 ```{julia}
 #| label: fig-classification-crossvalidation
+#| echo: false
 #| fig-cap: Overview of the scores for the four components of the confusion matrix (false/true positive/negative rates), as well as two summary measures, the True-Skill statistic (Youden's J) and Matthew's correlation coefficient.
 fmat = [(tpr, "True positives") (fpr, "False positives") (trueskill, "TSS"); (tnr, "True negatives") (fnr, "False negatives") (mcc, "MCC")]
 f = Figure()
@@ -273,6 +275,7 @@ Now that the model is trained, we can take a break in our discussion of its perf
 
 ```{julia}
 #| label: fig-classification-decision
+#| echo: false
 #| fig-cap: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
 f = Figure(; resolution=(500, 500))
 ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
@@ -299,6 +302,8 @@ bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; 
 make the predictions for every pixel and get the entropy
 
 ```{julia}
+#| echo: false
+#| output: false
 pr = convert(Float64, similar(first(bio)))
 entropy = similar(pr)
 Threads.@threads for k in keys(pr)
@@ -309,6 +314,7 @@ end
 
 ```{julia}
 #| label: fig-classification-range
+#| echo: false
 #| fig-cap: Prediction mapped in ...
 f = Figure(; resolution=(500, 500))
 ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
