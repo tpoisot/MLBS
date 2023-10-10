@@ -13,7 +13,7 @@ temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...
 heatmap(temperature, colormap=:lajolla)
 
 # Data
-BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
+BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent..., args...) for l in layers(dataprovider)]
 SpeciesDistributionToolkit._write_geotiff("data/general/rangifer-layers.tiff", BIOX)
 
 rangifer = taxon("Rangifer tarandus tarandus"; strict = false)
