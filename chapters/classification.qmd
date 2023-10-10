@@ -8,6 +8,7 @@ In the previous chapters, we have focused on efforts on regression models, which
 _code_path = joinpath(dirname(Base.active_project()), "lib")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "confusion.jl"))
+include(joinpath(_code_path, "mocks.jl"))
 include(joinpath(_code_path, "nbc.jl"))
 include(joinpath(_code_path, "splitters.jl"))
 ```
@@ -193,12 +194,20 @@ Therefore, the learning stage of NBC is extremely quick: we take the mean and st
 
 note that we will not use the testing set here because we keep it for the last chapter in this sequence, explain why
 
+compare to the baseline of the no-skill classifier
+
+```{julia}
+#| echo: false
+#| output: false
+Cnoskill = noskill(trainlabels)
+```
+
 ### Performance evaluation of the model
 
 ```{julia}
 #| echo: false
 #| output: false
-conftrain = zeros(ConfusionMatrix, 100)
+conftrain = zeros(ConfusionMatrix, 1000)
 confvalid = zeros(ConfusionMatrix, length(conftrain))
 
 for fold in axes(conftrain, 1)
@@ -215,8 +224,8 @@ end
 
 ```{julia}
 #| label: fig-classification-crossvalidation
-#| fig-cap: WAH NEVER CHANGES
-fmat = [(tpr, "Sensitivity") (ppv, "PPV") (trueskill, "TSS"); (tnr, "Specificity") (npv, "NPV") (mcc, "MCC")]
+#| fig-cap: Overview of the scores for the four components of the confusion matrix (false/true positive/negative rates), as well as two summary measures, the True-Skill statistic (Youden's J) and Matthew's correlation coefficient.
+fmat = [(tpr, "True positives") (fpr, "False positives") (trueskill, "TSS"); (tnr, "True negatives") (fnr, "False negatives") (mcc, "MCC")]
 f = Figure()
 
 for ci in CartesianIndices(fmat)
@@ -234,6 +243,15 @@ end
 
 current_figure()
 ```
+
+| Measure | Training | Validation | No-skill |
+|-----|--------|---------|---------|
+| True positive rate | `{julia} round(mean(tpr.(conftrain)); digits=2)` | `{julia} round(mean(tpr.(confvalid)); digits=2)` | `{julia} round(tpr(Cnoskill); digits=2)` | 
+| False positive rate | `{julia} round(mean(fpr.(conftrain)); digits=2)` | `{julia} round(mean(fpr.(confvalid)); digits=2)` | `{julia} round(fpr(Cnoskill); digits=2)` | 
+| True negative rate | `{julia} round(mean(tnr.(conftrain)); digits=2)` | `{julia} round(mean(tnr.(confvalid)); digits=2)` | `{julia} round(tnr(Cnoskill); digits=2)` | 
+| False negative rate | `{julia} round(mean(fnr.(conftrain)); digits=2)` | `{julia} round(mean(fnr.(confvalid)); digits=2)` | `{julia} round(fnr(Cnoskill); digits=2)` | 
+| True-Skill statistic | `{julia} round(mean(trueskill.(conftrain)); digits=2)` | `{julia} round(mean(trueskill.(confvalid)); digits=2)` | `{julia} round(trueskill(Cnoskill); digits=2)` | 
+| Matthew's correlation coefficient | `{julia} round(mean(mcc.(conftrain)); digits=2)` | `{julia} round(mean(mcc.(confvalid)); digits=2)` | `{julia} round(mcc(Cnoskill); digits=2)` | 
 
 ### The decision boundary
 
@@ -269,6 +287,37 @@ The line that separates the two classes is usually refered to as the "decision b
 
 It is interesting to compare @fig-classification-decision with, for example, the distribution of the raw data presented in @fig-classification-separability. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that reindeers enjoy cold and dry climates.
 
+### Visualizing the trained model
+
+```{julia}
+#| echo: false
+#| output: false
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "rangifer-layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in [1, 12]]
+```
+
+make the predictions for every pixel and get the entropy
+
+```{julia}
+pr = convert(Float64, similar(first(bio)))
+entropy = similar(pr)
+Threads.@threads for k in keys(pr)
+    x = [b[k] for b in bio]
+    pr[k] = predictor(x)
+end
+```
+
+```{julia}
+#| label: fig-classification-range
+#| fig-cap: Prediction mapped in ...
+f = Figure(; resolution=(500, 500))
+ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
+surface!(ax, pr.>0.5, shading=false, colormap=[:lightgrey, :black], interpolate=false)
+ax.xticklabelpad = 30
+ax.yticklabelpad = 40
+current_figure()
+```
+
 ### What is an acceptable model?
 
 ```{julia}
@@ -282,6 +331,5 @@ JLD.save(
     modelpath,
     "testing", (y[testing_idx], X[testing_idx,:]),
     "training", (y[training_idx], X[training_idx,:]),
-    "C", conf
 )
 ```
