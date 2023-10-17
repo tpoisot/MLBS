@@ -19,7 +19,7 @@ include(joinpath(_code_path, "crossvalidate.jl"))
 
 Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, *Sitta whiteheadi*. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as "vulnerable to extinction" by the International Union for the Conservation of Nature. @barbet-massin2011 nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.
 
-Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one.
+Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious our data science practices when fitting a species distribution model is important: @cholletramampiandra2023 make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.
 
 ```{julia}
 #| echo: false
@@ -237,7 +237,7 @@ current_figure()
 ```
 
 | Measure                           | Training                                        | Validation                                      | No-skill                                       |
-|-----------------|-----------------|-------------------|-------------------|
+|------------------|------------------|-------------------|-------------------|
 | True positive rate                | `{julia} round(mean(tpr.(Ct)); digits=2)`       | `{julia} round(mean(tpr.(Cv)); digits=2)`       | `{julia} round(tpr(Cnoskill); digits=2)`       |
 | False positive rate               | `{julia} round(mean(fpr.(Ct)); digits=2)`       | `{julia} round(mean(fpr.(Cv)); digits=2)`       | `{julia} round(fpr(Cnoskill); digits=2)`       |
 | True negative rate                | `{julia} round(mean(tnr.(Ct)); digits=2)`       | `{julia} round(mean(tnr.(Cv)); digits=2)`       | `{julia} round(tnr(Cnoskill); digits=2)`       |
