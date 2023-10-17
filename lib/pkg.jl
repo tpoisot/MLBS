@@ -11,7 +11,9 @@ using Statistics
 
 using CairoMakie
 CairoMakie.activate!(; px_per_unit = 2)
-import GeoMakie
+using GeoMakie
+
+using SpeciesDistributionToolkit
 
 import Downloads
 

@@ -5,7 +5,7 @@ using SpeciesDistributionToolkit
 using CairoMakie
 
 spatial_extent = (left = 4.0, bottom = 55.0, right = 29.0, top = 72.0)
-args = (resolution = 5.0, )
+args = (resolution = 2.5, )
 
 dataprovider = RasterData(WorldClim2, BioClim)
 
@@ -13,7 +13,7 @@ temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...
 heatmap(temperature, colormap=:lajolla)
 
 # Data
-BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
+BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent..., args...) for l in layers(dataprovider)]
 SpeciesDistributionToolkit._write_geotiff("data/general/rangifer-layers.tiff", BIOX)
 
 rangifer = taxon("Rangifer tarandus tarandus"; strict = false)
@@ -25,7 +25,7 @@ query = [
     "limit" => 300,
 ]
 presences = occurrences(rangifer, query...)
-for i in 1:20
+for i in 1:30
     @info i
     occurrences!(presences)
 end
