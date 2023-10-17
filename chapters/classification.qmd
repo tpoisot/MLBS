@@ -11,6 +11,8 @@ include(joinpath(_code_path, "confusion.jl"))
 include(joinpath(_code_path, "mocks.jl"))
 include(joinpath(_code_path, "nbc.jl"))
 include(joinpath(_code_path, "splitters.jl"))
+include(joinpath(_code_path, "palettes.jl"))
+include(joinpath(_code_path, "crossvalidate.jl"))
 ```
 
 ## The problem: reindeer distribution
@@ -78,15 +80,15 @@ f = Figure(; resolution=(500, 500))
 gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
-c = Makie.wong_colors()[1]
+c = light[2]
 density!(axtemp, filter(r -> r.presence, rangifer).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
-c = Makie.wong_colors()[2]
+c = light[3]
 density!(axtemp, filter(r -> !r.presence, rangifer).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 axprec = Axis(gl[2,2])
-c = Makie.wong_colors()[1]
+c = light[2]
 density!(axprec, 0.1filter(r -> r.presence, rangifer).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
-c = Makie.wong_colors()[2]
+c = light[3]
 density!(axprec, 0.1filter(r -> !r.presence, rangifer).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
@@ -94,9 +96,9 @@ xp = filter(r -> r.presence, rangifer).BIO1
 xn = filter(r -> !r.presence, rangifer).BIO1
 yp = filter(r -> r.presence, rangifer).BIO12
 yn = filter(r -> !r.presence, rangifer).BIO12
-c = Makie.wong_colors()[1]
+c = light[2]
 scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
-c = Makie.wong_colors()[2]
+c = light[3]
 scatter!(axboth, xn, yn, color=c, markersize=4, label="Pseudo-absence")
 
 hidespines!(axtemp, :l, :r, :t)
@@ -208,19 +210,9 @@ Cnoskill = noskill(trainlabels)
 ```{julia}
 #| echo: false
 #| output: false
-conftrain = zeros(ConfusionMatrix, 1000)
-confvalid = zeros(ConfusionMatrix, length(conftrain))
+folds = [holdout(trainlabels, trainfeatures) for _ in 1:50]
 
-for fold in axes(conftrain, 1)
-    t_idx, v_idx = holdout(trainlabels, trainfeatures)
-    predictor = naivebayes(trainlabels[t_idx], trainfeatures[t_idx,:])
-    # Training conf mat
-    prediction = vec(mapslices(predictor, trainfeatures[t_idx,:], dims=2))
-    conftrain[fold] = ConfusionMatrix(prediction, vec(trainlabels[t_idx,:]))
-    # Validation conf mat
-    validation = vec(mapslices(predictor, trainfeatures[v_idx,:], dims=2))
-    confvalid[fold] = ConfusionMatrix(validation, vec(trainlabels[v_idx,:]))
-end
+Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
 ```
 
 ```{julia}
@@ -233,13 +225,13 @@ f = Figure()
 for ci in CartesianIndices(fmat)
     cfunc, lab = fmat[ci]
     ax = Axis(f[ci.I...]; xlabel=lab)
-    trv = cfunc.(conftrain)
-    vav = cfunc.(confvalid)
+    trv = cfunc.(Ct)
+    vav = cfunc.(Cv)
     x = vcat(fill(0, length(trv)), fill(1, length(vav)))
     y = vcat(trv, vav)
     trc = Makie.wong_colors()[3]
     vac = :lightgrey
-    boxplot!(ax, x, y; orientation=:vertical, color = map(d->d==1 ? vac : trc, x))
+    boxplot!(ax, x, y; orientation=:vertical, color = map(d->d==1 ? muted[1] : muted[2], x))
     hidexdecorations!(ax, label=false)
 end
 
@@ -279,7 +271,7 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| fig-cap: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
 f = Figure(; resolution=(500, 500))
 ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-pal = Makie.wong_colors()[[2,1]]
+pal = light[2:3]
 heatmap!(ax, air, prc, X, colormap=pal, alpha=0.3)
 current_figure()
 ```
@@ -318,7 +310,7 @@ end
 #| fig-cap: Prediction mapped in ...
 f = Figure(; resolution=(500, 500))
 ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
-surface!(ax, pr.>0.5, shading=false, colormap=[:lightgrey, :black], interpolate=false)
+surface!(ax, pr.>0.5, shading=false, colormap=vibrant[1:2], interpolate=false)
 ax.xticklabelpad = 30
 ax.yticklabelpad = 40
 current_figure()

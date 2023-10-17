@@ -1,10 +1,13 @@
 function crossvalidate(model, y, X, folds, args...; kwargs...)
-    C = zeros(ConfusionMatrix, length(folds))
+    Cv = zeros(ConfusionMatrix, length(folds))
+    Ct = zeros(ConfusionMatrix, length(folds))
     for (i,f) in enumerate(folds)
         trn, val = f
         foldmodel = model(y[trn], X[trn,:]; kwargs...)
         foldpred = vec(mapslices(foldmodel, X[val,:]; dims=2))
-        C[i] = ConfusionMatrix(foldpred, y[val], args...)
+        Cv[i] = ConfusionMatrix(foldpred, y[val], args...)
+        ontrn = vec(mapslices(foldmodel, X[trn,:]; dims=2))
+        Ct[i] = ConfusionMatrix(ontrn, y[trn], args...)
     end
-    return C
+    return Cv, Ct
 end
