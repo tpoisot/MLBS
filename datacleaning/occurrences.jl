@@ -13,7 +13,13 @@ temperature = mask(msklayer, temperature)
 heatmap(temperature, colormap=:lajolla)
 
 # Data
-BIOX = [mask(msklayer, SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...)) for l in layers(dataprovider)]
+BIOX = convert.(Float32, [mask(msklayer, SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...)) for l in layers(dataprovider)])
+for i in 2:length(BIOX)
+    BIOX[i].left = BIOX[1].left
+    BIOX[i].top = BIOX[1].top
+    BIOX[i].bottom = BIOX[1].bottom
+    BIOX[i].right = BIOX[1].right
+end
 SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
 rangifer = taxon("Sitta whiteheadi"; strict = false)
@@ -25,7 +31,7 @@ query = [
     "limit" => 300,
 ]
 presences = occurrences(rangifer, query...)
-for i in 1:30
+for i in 1:12
     @info i
     occurrences!(presences)
 end
@@ -33,9 +39,8 @@ end
 presencelayer = mask(temperature, presences, Bool)
 heatmap(presencelayer)
 
-background = pseudoabsencemask(WithinRadius, presencelayer; distance = 200.0)
-buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 50.0)
-bgmask = .!(background .| (.! buffer))
+background = pseudoabsencemask(DistanceToEvent, presencelayer)
+bgmask = background
 
 heatmap(bgmask)
 
@@ -48,7 +53,7 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = backgroundpoints(bgmask, round(Int, 0.4sum(presencelayer)); replace=false)
+bgpoints = backgroundpoints((x -> x^1.2).(bgmask), round(Int, 0.8sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
 replace!(presencelayer, false => nothing)
 
