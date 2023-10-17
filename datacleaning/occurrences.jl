@@ -4,19 +4,19 @@ import CSV
 using SpeciesDistributionToolkit
 using CairoMakie
 
-spatial_extent = (left = 4.0, bottom = 55.0, right = 29.0, top = 72.0)
-args = (resolution = 2.5, )
+spatial_extent = (left = 8.412, bottom = 41.325, right = 9.662, top = 43.060)
+dataprovider = RasterData(CHELSA2, BioClim)
 
-dataprovider = RasterData(WorldClim2, BioClim)
-
-temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent..., args...)
+temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
+msklayer = SimpleSDMPredictor(RasterData(CHELSA1, BioClim); layer = "BIO1", spatial_extent...)
+temperature = mask(msklayer, temperature)
 heatmap(temperature, colormap=:lajolla)
 
 # Data
-BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent..., args...) for l in layers(dataprovider)]
-SpeciesDistributionToolkit._write_geotiff("data/general/rangifer-layers.tiff", BIOX)
+BIOX = [mask(msklayer, SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...)) for l in layers(dataprovider)]
+SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
-rangifer = taxon("Rangifer tarandus tarandus"; strict = false)
+rangifer = taxon("Sitta whiteheadi"; strict = false)
 query = [
     "occurrenceStatus" => "PRESENT",
     "hasCoordinate" => true,
@@ -45,12 +45,12 @@ heatmap(
     axis = (; aspect = DataAspect()),
     figure = (; resolution = (800, 500)),
 )
-heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.5sum(presencelayer)))
+bgpoints = backgroundpoints(bgmask, round(Int, 0.4sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
+replace!(presencelayer, false => nothing)
 
 heatmap(
     temperature;
@@ -58,13 +58,12 @@ heatmap(
     axis = (; aspect = DataAspect()),
     figure = (; resolution = (800, 500)),
 )
-heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
-scatter!(presences; color = :black)
+#heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
+scatter!(keys(presencelayer); color = :black)
 scatter!(keys(bgpoints); color = :red)
 current_figure()
 
 # Get the data
-replace!(presencelayer, false => nothing)
 pr = keys(presencelayer)
 ab = keys(bgpoints)
 
@@ -82,4 +81,4 @@ df = DataFrame(latitude=lat, longitude=lon, presence=pre)
 for (i, l) in enumerate(layers(dataprovider))
     df[!,l] = biox[i]
 end
-CSV.write("data/general/rangifer-observations.csv", df)
+CSV.write("data/general/observations.csv", df)

@@ -15,19 +15,19 @@ include(joinpath(_code_path, "palettes.jl"))
 include(joinpath(_code_path, "crossvalidate.jl"))
 ```
 
-## The problem: reindeer distribution
+## The problem: distribution of an endemic species
 
-Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Reindeer, *Rangifer tarandus tarandus*. Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one.
+Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, *Sitta whiteheadi*. Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one.
 
 ```{julia}
 #| echo: false
 #| output: false
-_path = joinpath(dirname(Base.active_project()), "data", "general", "rangifer-observations.csv")
-rangifer = DataFrame(CSV.File(_path))
-select!(rangifer, Not(:latitude))
-select!(rangifer, Not(:longitude))
-raw = copy(rangifer)
-select!(rangifer, [:presence, :BIO1, :BIO12])
+_path = joinpath(dirname(Base.active_project()), "data", "general", "observations.csv")
+occdata = DataFrame(CSV.File(_path))
+select!(occdata, Not(:latitude))
+select!(occdata, Not(:longitude))
+raw = copy(occdata)
+select!(occdata, [:presence, :BIO1, :BIO12])
 ```
 
 Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.
@@ -43,8 +43,8 @@ To build a model with temperature and precipitation as inputs, we need to extrac
 ```{julia}
 #| echo: false
 #| output: false
-labels = rangifer.presence
-features = Matrix(select(rangifer, Not(:presence)))
+labels = occdata.presence
+features = Matrix(select(occdata, Not(:presence)))
 training_idx, testing_idx = holdout(labels, features)
 trainlabels = labels[training_idx]
 testlabels = labels[testing_idx]
@@ -81,21 +81,21 @@ gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
 c = light[2]
-density!(axtemp, filter(r -> r.presence, rangifer).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 c = light[3]
-density!(axtemp, filter(r -> !r.presence, rangifer).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 axprec = Axis(gl[2,2])
 c = light[2]
-density!(axprec, 0.1filter(r -> r.presence, rangifer).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+density!(axprec, 0.1filter(r -> r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 c = light[3]
-density!(axprec, 0.1filter(r -> !r.presence, rangifer).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+density!(axprec, 0.1filter(r -> !r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-xp = filter(r -> r.presence, rangifer).BIO1
-xn = filter(r -> !r.presence, rangifer).BIO1
-yp = filter(r -> r.presence, rangifer).BIO12
-yn = filter(r -> !r.presence, rangifer).BIO12
+xp = filter(r -> r.presence, occdata).BIO1
+xn = filter(r -> !r.presence, occdata).BIO1
+yp = filter(r -> r.presence, occdata).BIO12
+yn = filter(r -> !r.presence, occdata).BIO12
 c = light[2]
 scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
 c = light[3]
@@ -191,7 +191,7 @@ The most delicate problem is to figure out $P(x|c)$, the probability of the obse
 
 Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier.
 
-## Application: a baseline model of reindeer presence
+## Application: a baseline model of the Corsican nuthatch
 
 ### Training and validation strategy
 
@@ -253,8 +253,8 @@ current_figure()
 #| echo: false
 #| output: false
 predictor = naivebayes(trainlabels, trainfeatures)
-air = LinRange(extrema(rangifer.BIO1)..., 150)
-prc = LinRange(extrema(rangifer.BIO12)..., 150)
+air = LinRange(extrema(occdata.BIO1)..., 150)
+prc = LinRange(extrema(occdata.BIO12)..., 150)
 X = zeros(Float64, (length(air), length(prc)))
 for i in axes(air, 1)
     for j in axes(prc, 1)
@@ -287,7 +287,7 @@ It is interesting to compare @fig-classification-decision with, for example, the
 ```{julia}
 #| echo: false
 #| output: false
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "rangifer-layers.tiff")
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in [1, 12]]
 ```
 
