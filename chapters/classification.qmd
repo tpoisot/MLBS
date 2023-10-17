@@ -353,7 +353,7 @@ current_figure()
 #| echo: false
 #| output: false
 _ptm_path = joinpath(@__DIR__, "..", "ptm")
-modelpath = joinpath(_ptm_path, "reindeer-initial.jld")
+modelpath = joinpath(_ptm_path, "sdm-initial.jld")
 y = select(raw, :presence).presence
 X = Matrix(select(raw, Not(:presence)))
 JLD.save(
