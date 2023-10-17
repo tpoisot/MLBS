@@ -17,13 +17,16 @@ include(joinpath(_code_path, "crossvalidate.jl"))
 
 ## The problem: distribution of an endemic species
 
-Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, *Sitta whiteheadi*. Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one.
+Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, *Sitta whiteheadi*. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as "vulnerable to extinction" by the International Union for the Conservation of Nature. @barbet-massin2011 nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.
+
+Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one.
 
 ```{julia}
 #| echo: false
 #| output: false
 _path = joinpath(dirname(Base.active_project()), "data", "general", "observations.csv")
 occdata = DataFrame(CSV.File(_path))
+coordinates = select(occdata, [:presence, :longitude, :latitude])
 select!(occdata, Not(:latitude))
 select!(occdata, Not(:longitude))
 raw = copy(occdata)
@@ -38,7 +41,7 @@ Consider our dataset for a minute. In order to predict the presence of a species
 
   [Global Biodiversity Information Facility]: https://www.gbif.org/
 
-To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the WorldClim2 dataset [@fick2017] for this purpose. In a great many situations, CHELSA2 [@karger2017] would be a better source of bioclimatic variables, but it has a much higher spatial resolution; what we want to do here is iterate rapidly and focus on the high-level discussion of how we make predictions, so a coarser data product will serve us just as well.
+To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the CHELSA2 dataset [@karger2017], at a resolution of 30 seconds of arc. WorldClim2 [@fick2017] is also appropriate, but is known to have some artifacts.
 
 ```{julia}
 #| echo: false
@@ -68,8 +71,7 @@ In short, our response variable has levels $\{+, -\}$: the species is there, or 
 
 A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in @sec-variable-selection-curse, simply adding more predictors is not necessarily the right thing to do.
 
-In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of reindeers, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in @sec-variable-selection), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.
-
+In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in @sec-variable-selection), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.
 
 ```{julia}
 #| label: fig-classification-separability
@@ -81,9 +83,9 @@ gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
 c = light[2]
-density!(axtemp, filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 c = light[3]
-density!(axtemp, filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 axprec = Axis(gl[2,2])
 c = light[2]
@@ -92,14 +94,16 @@ c = light[3]
 density!(axprec, 0.1filter(r -> !r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-xp = filter(r -> r.presence, occdata).BIO1
-xn = filter(r -> !r.presence, occdata).BIO1
-yp = filter(r -> r.presence, occdata).BIO12
-yn = filter(r -> !r.presence, occdata).BIO12
+xp = 0.1filter(r -> r.presence, occdata).BIO1.-273.15
+xn = 0.1filter(r -> !r.presence, occdata).BIO1.-273.15
+yp = 0.1filter(r -> r.presence, occdata).BIO12
+yn = 0.1filter(r -> !r.presence, occdata).BIO12
 c = light[2]
 scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
 c = light[3]
 scatter!(axboth, xn, yn, color=c, markersize=4, label="Pseudo-absence")
+
+axislegend(position = :lb)
 
 hidespines!(axtemp, :l, :r, :t)
 hidespines!(axprec, :b, :r, :t)
@@ -110,8 +114,8 @@ xlims!(axprec, low = 0)
 colgap!(gl, 0)
 rowgap!(gl, 0)
 
-colsize!(gl, 1, Relative(4/5))
-rowsize!(gl, 2, Relative(4/5))
+colsize!(gl, 1, Relative(5/6))
+rowsize!(gl, 2, Relative(5/6))
 
 current_figure()
 ```
@@ -203,17 +207,11 @@ compare to the baseline of the no-skill classifier
 #| echo: false
 #| output: false
 Cnoskill = noskill(trainlabels)
+folds = [holdout(trainlabels, trainfeatures) for _ in 1:50]
+Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
 ```
 
 ### Performance evaluation of the model
-
-```{julia}
-#| echo: false
-#| output: false
-folds = [holdout(trainlabels, trainfeatures) for _ in 1:50]
-
-Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
-```
 
 ```{julia}
 #| label: fig-classification-crossvalidation
@@ -238,14 +236,14 @@ end
 current_figure()
 ```
 
-| Measure | Training | Validation | No-skill |
-|-----|--------|---------|---------|
-| True positive rate | `{julia} round(mean(tpr.(conftrain)); digits=2)` | `{julia} round(mean(tpr.(confvalid)); digits=2)` | `{julia} round(tpr(Cnoskill); digits=2)` | 
-| False positive rate | `{julia} round(mean(fpr.(conftrain)); digits=2)` | `{julia} round(mean(fpr.(confvalid)); digits=2)` | `{julia} round(fpr(Cnoskill); digits=2)` | 
-| True negative rate | `{julia} round(mean(tnr.(conftrain)); digits=2)` | `{julia} round(mean(tnr.(confvalid)); digits=2)` | `{julia} round(tnr(Cnoskill); digits=2)` | 
-| False negative rate | `{julia} round(mean(fnr.(conftrain)); digits=2)` | `{julia} round(mean(fnr.(confvalid)); digits=2)` | `{julia} round(fnr(Cnoskill); digits=2)` | 
-| True-Skill statistic | `{julia} round(mean(trueskill.(conftrain)); digits=2)` | `{julia} round(mean(trueskill.(confvalid)); digits=2)` | `{julia} round(trueskill(Cnoskill); digits=2)` | 
-| Matthew's correlation coefficient | `{julia} round(mean(mcc.(conftrain)); digits=2)` | `{julia} round(mean(mcc.(confvalid)); digits=2)` | `{julia} round(mcc(Cnoskill); digits=2)` | 
+| Measure                           | Training                                        | Validation                                      | No-skill                                       |
+|-----------------|-----------------|-------------------|-------------------|
+| True positive rate                | `{julia} round(mean(tpr.(Ct)); digits=2)`       | `{julia} round(mean(tpr.(Cv)); digits=2)`       | `{julia} round(tpr(Cnoskill); digits=2)`       |
+| False positive rate               | `{julia} round(mean(fpr.(Ct)); digits=2)`       | `{julia} round(mean(fpr.(Cv)); digits=2)`       | `{julia} round(fpr(Cnoskill); digits=2)`       |
+| True negative rate                | `{julia} round(mean(tnr.(Ct)); digits=2)`       | `{julia} round(mean(tnr.(Cv)); digits=2)`       | `{julia} round(tnr(Cnoskill); digits=2)`       |
+| False negative rate               | `{julia} round(mean(fnr.(Ct)); digits=2)`       | `{julia} round(mean(fnr.(Cv)); digits=2)`       | `{julia} round(fnr(Cnoskill); digits=2)`       |
+| True-Skill statistic              | `{julia} round(mean(trueskill.(Ct)); digits=2)` | `{julia} round(mean(trueskill.(Cv)); digits=2)` | `{julia} round(trueskill(Cnoskill); digits=2)` |
+| Matthew's correlation coefficient | `{julia} round(mean(mcc.(Ct)); digits=2)`       | `{julia} round(mean(mcc.(Cv)); digits=2)`       | `{julia} round(mcc(Cnoskill); digits=2)`       |
 
 ### The decision boundary
 
@@ -271,8 +269,16 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| fig-cap: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
 f = Figure(; resolution=(500, 500))
 ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-pal = light[2:3]
-heatmap!(ax, air, prc, X, colormap=pal, alpha=0.3)
+pal = light[[3,2]]
+heatmap!(ax, 0.1air.-273.15, 0.1prc, X, colormap=pal, alpha=0.3)
+xp = 0.1filter(r -> r.presence, occdata).BIO1.-273.15
+xn = 0.1filter(r -> !r.presence, occdata).BIO1.-273.15
+yp = 0.1filter(r -> r.presence, occdata).BIO12
+yn = 0.1filter(r -> !r.presence, occdata).BIO12
+c = light[2]
+scatter!(ax, xp, yp, color=c, markersize=4, label="Presence")
+c = light[3]
+scatter!(ax, xn, yn, color=c, markersize=4, label="Pseudo-absence")
 current_figure()
 ```
 
@@ -280,7 +286,7 @@ The output of this simulation is given in @fig-classification-decision. Of cours
 
 The line that separates the two classes is usually refered to as the "decision boundary" of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.
 
-It is interesting to compare @fig-classification-decision with, for example, the distribution of the raw data presented in @fig-classification-separability. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that reindeers enjoy cold and dry climates.
+It is interesting to compare @fig-classification-decision with, for example, the distribution of the raw data presented in @fig-classification-separability. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that Corsican nuthatches enjoy colder climates with more rainfall.
 
 ### Visualizing the trained model
 
@@ -313,6 +319,31 @@ ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(lo
 surface!(ax, pr.>0.5, shading=false, colormap=vibrant[1:2], interpolate=false)
 ax.xticklabelpad = 30
 ax.yticklabelpad = 40
+current_figure()
+```
+
+We can do bootstrap
+
+```{julia}
+#| echo: false
+samplemodels = [naivebayes(trainlabels, trainfeatures[b,:]) for b in bootstrap(trainlabels, trainfeatures)]
+un = convert(Float64, similar(first(bio)))
+Threads.@threads for k in keys(pr)
+    x = [b[k] for b in bio]
+    un[k] = mean([(m(x)>0.5)==(predictor(x)>0.5) for m in samplemodels])
+end
+```
+
+```{julia}
+#| label: fig-classification-bootstrap
+#| echo: false
+#| fig-cap: After re-training 50 version of the model over randomly bootstrapped datasets, we measure the proportion of the bootstrap models that agree with the original prediction at each pixel. Higher values correspond to a more certain prediction, therefore to pixels where we can be more confident in the model output. In subsequent chapters, we will introduce additional tools to reason about the uncertainty in the model.
+f = Figure(; resolution=(500, 500))
+ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
+sf = surface!(ax, un, shading=false, colormap=cgrad(iridescent), interpolate=false)
+ax.xticklabelpad = 30
+ax.yticklabelpad = 40
+Colorbar(f[1,2],sf)
 current_figure()
 ```
 
