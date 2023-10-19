@@ -50,6 +50,8 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../chapters/gradientdescent.html" rel="next">
+<link href="../intro.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -438,20 +440,23 @@ Figure&nbsp;2.2: The pixels acquired from Landsat 9 exist in a space with many d
 <section id="sec-kmeans-initial" class="level3 page-columns page-full" data-number="2.4.1">
 <h3 data-number="2.4.1" class="anchored" data-anchor-id="sec-kmeans-initial"><span class="header-section-number">2.4.1</span> Initial run</h3>
 <p>Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using <span class="math inline">\(k = 3\)</span>, we get the results presented in <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>.</p>
-<div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="7">
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="8">
+<div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="8">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="9">
 <div id="fig-kmeans-initial-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-initial-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-initial-landscape-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-initial-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.3: After iterating the <em>k</em>-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using <span class="math inline">\(k=3\)</span>, <em>i.e.</em> we want to see what the landscape would look like when divided into three categories.
+Figure&nbsp;2.3: caption
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
+<blockquote class="blockquote">
+<p>After iterating the <em>k</em>-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using <span class="math inline">\(k=3\)</span>, <em>i.e.</em> we want to see what the landscape would look like when divided into three categories.</p>
+</blockquote>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In fact, take some time to think about how you would use <span class="math inline">\(k\)</span>-means to come up with a way to remove pixels with only water from this image!</p>
@@ -465,8 +470,8 @@ Figure&nbsp;2.3: After iterating the <em>k</em>-means algorithm, we obtain a cla
 <p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
 </div></div><p>In order to produce <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in <a href="#sec-kmeans-initial" class="quarto-xref"><span>Section&nbsp;2.4.1</span></a>, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of <span class="math inline">\(k\)</span>; we know that it is more than 3, but how much more?</p>
 <p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. More than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
-<div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="9">
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="10">
+<div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="10">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
 <div id="fig-kmeans-tuning" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-tuning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -485,12 +490,12 @@ Figure&nbsp;2.4: Results of running the <em>k</em>-means algorithm ten times for
 <section id="clustering-with-optimal-number-of-classes" class="level3 page-columns page-full" data-number="2.4.3">
 <h3 data-number="2.4.3" class="anchored" data-anchor-id="clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</h3>
 <p>The clustering of pixels using <span class="math inline">\(k = 5\)</span> is presented in <a href="#fig-kmeans-optimal-landscape" class="quarto-xref">Figure&nbsp;<span>2.5</span></a>. Unsurprisingly, <em>k</em>-means separated the open water pixels, the dense urban areas, as well as the more forested/green areas. Now is a good idea to start thinking about what is representative of these clusters: one is associated with very high NDWI value (these are the water pixels), and two classes have both high NDVI and high NDMI (suggesting different categories of vegetation).</p>
-<div id="cell-fig-kmeans-optimal-landscape" class="cell page-columns page-full" data-execution_count="10">
+<div id="cell-fig-kmeans-optimal-landscape" class="cell page-columns page-full" data-execution_count="11">
 <div class="cell-output cell-output-stderr">
 <pre><code>┌ Warning: The clustering cost increased at iteration #37
-└ @ Clustering ~/.julia/packages/Clustering/yuxBr/src/kmeans.jl:191</code></pre>
+└ @ Clustering ~/.julia/packages/Clustering/wNDPu/src/kmeans.jl:191</code></pre>
 </div>
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="12">
 <div id="fig-kmeans-optimal-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-optimal-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -507,8 +512,8 @@ Figure&nbsp;2.5: Results of the landscape clustering with k=5 clusters. This num
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of understanding how a model makes a prediction in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>.</p>
 </div></div><p>The relative size of the clusters (as well as the position of their centroids) is presented in <a href="#tbl-clustering-centers" class="quarto-xref">Table&nbsp;<span>2.1</span></a>. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about <em>k</em>-means is that it gives clusters of the same size. This “size” does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!</p>
-<div class="cell" data-execution_count="11">
-<div id="tbl-clustering-centers" class="cell anchored" data-execution_count="11">
+<div class="cell" data-execution_count="12">
+<div id="tbl-clustering-centers" class="cell anchored" data-execution_count="12">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-clustering-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2.1: Summary of the values for the centers of the optimal clusters found in this image. The cover column gives the percentage of all pixels associated to this class. The clusters are sorted by the NDVI of their centroid.
@@ -573,8 +578,8 @@ Table&nbsp;2.1: Summary of the values for the centers of the optimal clusters fo
 <p>In fact, this behavior makes <em>k</em>-means excellent at creating color palettes from images! Cases in point, <a href="https://github.com/karthik/wesanderson">Karthik Ram’s Wes Anderson palettes</a>, and <a href="https://github.com/dill/beyonce">David Lawrence Miller’s Beyoncé palettes</a>. Let it never again be said that ecologists should not be trusted with machine learning methods.</p>
 </div></div><p>The area of the space of parameters covered by each cluster in represented in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.6</span></a>, and this result is actually not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.</p>
 <p>By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
-<div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="12">
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="13">
+<div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="13">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="14">
 <div id="fig-kmeans-clustering" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1037,6 +1042,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../intro.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/gradientdescent.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

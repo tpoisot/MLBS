@@ -69,7 +69,7 @@ In short, our response variable has levels $\{+, -\}$: the species is there, or 
 
 ### Separability
 
-A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in @sec-variable-selection-curse, simply adding more predictors is not necessarily the right thing to do.
+A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in @sec-variableselection-curse, simply adding more predictors is not necessarily the right thing to do.
 
 In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in @sec-variable-selection), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.
 
@@ -140,11 +140,15 @@ $$
 \end{pmatrix} \,.
 $$ {#eq-classification-explain}
 
-The four components of the confusion table are the true positives (TP; correct prediction of $+$), the true negatives (TN; correct prediction of $-$), the false positives (FP; incorrect prediction of $+$), and the false negatives (FN; incorrect prediction of $-$). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible.
+The four components of the confusion table are the true positives (TP; correct prediction of $+$), the true negatives (TN; correct prediction of $-$), the false positives (FP; incorrect prediction of $+$), and the false negatives (FN; incorrect prediction of $-$). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible (the proportion of predictions on the diagonal is called the accuracy, and we will spend @sec-classification-accuracy discussing why it is not such a great measure).
 
 As there are many different possible measures on this matrix, we will introduce them as we go. In this section, it it more important to understand how the matrix responds to two important features of the data and the model: balance and bias.
 
-Balance refers to the proportion of the positive class. Whenever this balance is not equal to 1/2 (there are as many positives as negative cases), we are performing *imbalanced* classification, which comes with additional challenges; few ecological problems are balanced. There is a specific hypothetical classifier, called the *no-skill classifier*, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note $b$ the proportion of positive classes, the no-skill classifier will guess $+$ with probability $b$, and $-$ with probability $1-b$. Because these are also the proportion in the data, we can write the adjacency matrix as
+Balance refers to the proportion of the positive class. Whenever this balance is not equal to 1/2 (there are as many positives as negative cases), we are performing *imbalanced* classification, which comes with additional challenges; few ecological problems are balanced.
+
+### The no-skill classifier
+
+There is a specific hypothetical classifier, called the *no-skill classifier*, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note $b$ the proportion of positive classes, the no-skill classifier will guess $+$ with probability $b$, and $-$ with probability $1-b$. Because these are also the proportion in the data, we can write the adjacency matrix as
 
 $$
 \begin{pmatrix}
@@ -156,6 +160,10 @@ $$ {#eq-classification-noskill}
 The proportion of elements that are on the diagonal of this matrix is $b^2 + (1-b)^2$. When $b$ gets lower, this value actually increases: the more difficult a classification problem is, the more accurate random guesses *look like*. This has a simple explanation: if most of the cases are negative, and you predict a negative case often, you will by chance get a very high true negative score. For this reason, measures of model performance will combine the positions of the confusion table to avoid some of these artifacts.
 
 Bias refers to the fact that a model can recommend more (or fewer) positive or negative classes than it should. An extreme example is the *zero-rate classifier*, which will always guess the most common class, and which is commonly used as a baseline for imbalanced classification. A good classifier has high skill (which we can measure by whether it beats the no-skill classifier for our specific problem) and low bias. In this chapter, we will explore different measures on the confusion table the inform us about these aspects of model performance, using the Naive Bayes Classifier.
+
+### The accuracy paradox {#sec-classification-accuracy}
+
+(little digression here)
 
 ## The Naive Bayes Classifier
 
@@ -215,15 +223,15 @@ Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
 
 ### Performance evaluation of the model
 
-In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model *before* reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following @chicco2020 and @Jurman2012, we will use the Matthew's Correlation Coefficient (MCC) as the "main" measure to evaluate the performance of a model (we will return to other alternative measures in @sec-tuning). 
+In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model *before* reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following @chicco2020 and @Jurman2012, we will use the Matthew's Correlation Coefficient (MCC) as the "main" measure to evaluate the performance of a model (we will return to other alternative measures in @sec-tuning).
 
-The MCC is defined as 
+The MCC is defined as
 
 $$
 \frac{\text{TP}\times \text{TN} - \text{FP}\times \text{FN}}{\sqrt{(\text{TP}+\text{FP})\times (\text{TP}+\text{FN})\times (\text{TN}+\text{FP})\times (\text{TN}+\text{FN})}} \,.
 $$
 
-The MCC is a correlation coefficient, meaning that it returns values in $[-1, 1]$. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.
+The MCC is a correlation coefficient (specifically, the Pearson product-moment correlation on a contingency table [@powers2020]), meaning that it returns values in $[-1, 1]$. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.
 
 In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively $\text{TP}/(\text{TP}+\text{FP})$ and $\text{TN}/(\text{TN}+\text{FN})$, measure how likely a prediction of, respectively, presence and absence, are. These range in $[0,1]$, and values of one indicate a better performance of the model.
 
@@ -256,12 +264,12 @@ current_figure()
 
 The output of cross-validation is given in @fig-classification-crossvalidation (and compared to the no-skill classifier in @tbl-classification-crossvalidation). As we are statisfied with the model performance, we can re-train it using all the data (*but not the part used for testing*) in order to make our first series of predictions.
 
-| Measure                           | Training                                        | Validation                                      | No-skill                                       |
+| Measure  | Training                                       | Validation                                     | No-skill                                      |
 |------------------|------------------|------------------|------------------|
-| Accuracy                | `{julia} round(mean(accuracy.(Ct)); digits=3)`       | `{julia} round(mean(accuracy.(Cv)); digits=3)`       | `{julia} round(accuracy(Cnoskill); digits=3)`       |
-| NPV               | `{julia} round(mean(npv.(Ct)); digits=3)`       | `{julia} round(mean(npv.(Cv)); digits=3)`       | `{julia} round(npv(Cnoskill); digits=3)`       |
-| PPV              | `{julia} round(mean(ppv.(Ct)); digits=3)` | `{julia} round(mean(ppv.(Cv)); digits=3)` | `{julia} round(ppv(Cnoskill); digits=3)` |
-| MCC | `{julia} round(mean(mcc.(Ct)); digits=3)`       | `{julia} round(mean(mcc.(Cv)); digits=3)`       | `{julia} round(mcc(Cnoskill); digits=3)`       |
+| Accuracy | `{julia} round(mean(accuracy.(Ct)); digits=3)` | `{julia} round(mean(accuracy.(Cv)); digits=3)` | `{julia} round(accuracy(Cnoskill); digits=3)` |
+| NPV      | `{julia} round(mean(npv.(Ct)); digits=3)`      | `{julia} round(mean(npv.(Cv)); digits=3)`      | `{julia} round(npv(Cnoskill); digits=3)`      |
+| PPV      | `{julia} round(mean(ppv.(Ct)); digits=3)`      | `{julia} round(mean(ppv.(Cv)); digits=3)`      | `{julia} round(ppv(Cnoskill); digits=3)`      |
+| MCC      | `{julia} round(mean(mcc.(Ct)); digits=3)`      | `{julia} round(mean(mcc.(Cv)); digits=3)`      | `{julia} round(mcc(Cnoskill); digits=3)`      |
 
 : Overview of the data presented in @fig-classification-crossvalidation, compared to the no-skill classifier. {#tbl-classification-crossvalidation}
 
@@ -341,14 +349,14 @@ end
 #| echo: false
 #| fig-cap: Occurence data (left), prediction of presences in space (middle), with the uncertainty in the prediction derived from bootstrap replicates (right). As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*.
 f = Figure(; resolution=(600, 700))
-ax0 = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
-ax1 = GeoAxis(f[1,2], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
-ax2 = GeoAxis(f[1,3], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
+ax0 = Axis(f[1,1], xlabel="Longitude", ylabel = "Latitude")
+ax1 = Axis(f[1,2], xlabel="Longitude", ylabel = "Latitude")
+ax2 = Axis(f[1,3], xlabel="Longitude", ylabel = "Latitude")
 
-surface!(ax1, pr.>0.5, shading=false, colormap=vibrant[1:2], interpolate=false)
-sf = surface!(ax2, un, shading=false, colormap=cgrad(iridescent), interpolate=false)
+heatmap!(ax1, pr.>0.5, shading=false, colormap=vibrant[1:2], interpolate=false)
+sf = heatmap!(ax2, un, shading=false, colormap=cgrad(iridescent), interpolate=false)
 
-surface!(ax0, pr, colormap=[:black, :black], shading=false, interpolate=false)
+heatmap!(ax0, pr, colormap=[:black, :black], shading=false, interpolate=false)
 scatter!(ax0, coordinates.longitude, coordinates.latitude, color=coordinates.presence, colormap=vibrant[1:2], markersize=3)
 
 Colorbar(f[2,:],sf; tellheight=false, tellwidth=false, vertical=false, flipaxis=false)
@@ -382,4 +390,4 @@ JLD.save(
 
 ## Conclusion
 
-In this chapter, we introduce the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurence, in which we predicted the potential presence of the species using temperature and classification. Through cross-validation, we confirmed that this model gave a good enough performance (@fig-classification-crossvalidation), looked at the decisions that were being made by the trained model (@fig-classification-decision), and finally mapped the prediction and their uncertainty in space (@fig-classification-range). In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.
+In this chapter, we introduced the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurrence, in which we predicted the potential presence of the species using temperature and classification. Through cross-validation, we confirmed that this model gave a good enough performance (@fig-classification-crossvalidation), looked at the decisions that were being made by the trained model (@fig-classification-decision), and finally mapped the prediction and their uncertainty in space (@fig-classification-range). In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.

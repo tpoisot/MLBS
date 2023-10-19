@@ -50,6 +50,8 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../chapters/variableselection.html" rel="next">
+<link href="../chapters/leakage.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -235,6 +237,7 @@ div.csl-indent {
   <li><a href="#visualizing-the-trained-model" id="toc-visualizing-the-trained-model" class="nav-link" data-scroll-target="#visualizing-the-trained-model"><span class="header-section-number">6.4.4</span> Visualizing the trained model</a></li>
   <li><a href="#what-is-an-acceptable-model" id="toc-what-is-an-acceptable-model" class="nav-link" data-scroll-target="#what-is-an-acceptable-model"><span class="header-section-number">6.4.5</span> What is an acceptable model?</a></li>
   </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">6.5</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -264,7 +267,7 @@ div.csl-indent {
 <section id="the-problem-distribution-of-an-endemic-species" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="the-problem-distribution-of-an-endemic-species"><span class="header-section-number">6.1</span> The problem: distribution of an endemic species</h2>
 <p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, <em>Sitta whiteheadi</em>. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as “vulnerable to extinction” by the International Union for the Conservation of Nature. <span class="citation" data-cites="barbet-massin2011">Barbet-Massin &amp; Jiguet (<a href="../references.html#ref-barbet-massin2011" role="doc-biblioref">2011</a>)</span> nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.</p>
-<p>Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith &amp; Leathwick (<a href="../references.html#ref-elith2009" role="doc-biblioref">2009</a>)</span>), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery <em>et al.</em> (<a href="../references.html#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="crossvalidation.html#sec-crossvalidation-fitness" class="quarto-xref"><span>Section&nbsp;4.4.3</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="../references.html#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita <em>et al.</em> 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one.</p>
+<p>Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith &amp; Leathwick (<a href="../references.html#ref-elith2009" role="doc-biblioref">2009</a>)</span>), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery <em>et al.</em> (<a href="../references.html#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="crossvalidation.html#sec-crossvalidation-fitness" class="quarto-xref"><span>Section&nbsp;4.4.3</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="../references.html#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita <em>et al.</em> 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious our data science practices when fitting a species distribution model is important: <span class="citation" data-cites="cholletramampiandra2023">Chollet Ramampiandra <em>et al.</em> (<a href="../references.html#ref-cholletramampiandra2023" role="doc-biblioref">2023</a>)</span> make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.</p>
 <p>Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.</p>
 <p>We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants <span class="citation" data-cites="clapham1935">(<a href="../references.html#ref-clapham1935" role="doc-biblioref">Clapham <em>et al.</em> 1935</a>)</span> and animals <span class="citation" data-cites="whittaker1962">(<a href="../references.html#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span>, to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start <span class="citation" data-cites="berteaux2014">(<a href="../references.html#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span>.</p>
 <p>Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>. We need information about where the species has <em>not</em> been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="../references.html#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin <em>et al.</em> 2012</a>; <a href="../references.html#ref-hanberry2012" role="doc-biblioref">Hanberry <em>et al.</em> 2012</a>)</span>. All of these data points come in the form <span class="math inline">\((\text{lat.}, \text{lon.}, y)\)</span>, which give a position in space, as well as <span class="math inline">\(y = \{+,-\}\)</span> (the species is present or absent!) at this position.</p>
@@ -280,7 +283,7 @@ div.csl-indent {
 </div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="../references.html#ref-perl2022" role="doc-biblioref">Perl <em>et al.</em> 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
 <section id="separability" class="level3 page-columns page-full" data-number="6.2.1">
 <h3 data-number="6.2.1" class="anchored" data-anchor-id="separability"><span class="header-section-number">6.2.1</span> Separability</h3>
-<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <span class="quarto-unresolved-ref">?sec-variable-selection-curse</span>, simply adding more predictors is not necessarily the right thing to do.</p>
+<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <a href="variableselection.html#sec-variableselection-curse" class="quarto-xref"><span>Section&nbsp;7.1</span></a>, simply adding more predictors is not necessarily the right thing to do.</p>
 <p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 1°C, presences are far more likely. For a location with a temperature warmer than 5°C, absences become overwhelmingly more likely. The locations with a temperature between 0°C and 5°C can go either way.</p>
 <div id="cell-fig-classification-separability" class="cell page-columns page-full" data-execution_count="4">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="5">
@@ -290,7 +293,7 @@ div.csl-indent {
 <img src="classification_files/figure-html/fig-classification-separability-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-separability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.1: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.
+Figure&nbsp;6.1: This figures show the separability of the presences (orange) and pseudo-absences (grey) on the temperature and precipitation dimensions.
 </figcaption>
 </figure>
 </div>
@@ -306,7 +309,7 @@ Figure&nbsp;6.1: This figures show the separability of the presences (blue) and 
 \text{FN} &amp; \text{TN}
 \end{pmatrix} \,.
 \tag{6.1}\]</span></span></p>
-<p>This can be stated as “counting the number of times each pair of prediction, observation occurs”, like so:</p>
+<p>This can be stated as “counting the number of times each pair of (prediction, observation occurs)”, like so:</p>
 <p><span id="eq-classification-explain"><span class="math display">\[
 \begin{pmatrix}
 |\hat +, +| &amp; |\hat +, -|\\
@@ -331,7 +334,7 @@ b^2 &amp; b(1-b)\\
 <p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is build on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works at all is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability is remarkably unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case [there are, in fact, several papers questioning <em>why</em> NBC works so well; see <em>e.g.</em> <span class="citation" data-cites="kupervasser2014">Kupervasser (<a href="../references.html#ref-kupervasser2014" role="doc-biblioref">2014</a>)</span>].</p>
 <section id="how-the-nbc-works" class="level3" data-number="6.3.1">
 <h3 data-number="6.3.1" class="anchored" data-anchor-id="how-the-nbc-works"><span class="header-section-number">6.3.1</span> How the NBC works</h3>
-<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 2°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(2^\circ C | +) &gt; P(2^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 2^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 2°C.</p>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, what is the most likely class if the temperature is 12°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(12^\circ C | +) &gt; P(12^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 12^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 12°C.</p>
 <p>Using Baye’s theorem, we can re-write our goal as</p>
 <p><span id="eq-nbc-onevar"><span class="math display">\[
 P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
@@ -348,20 +351,29 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 </section>
 <section id="how-the-nbc-learns" class="level3" data-number="6.3.2">
 <h3 data-number="6.3.2" class="anchored" data-anchor-id="how-the-nbc-learns"><span class="header-section-number">6.3.2</span> How the NBC learns</h3>
-<p>There are two unknown quantities at this point. The first is the value of <span class="math inline">\(P(+)\)</span> and <span class="math inline">\(P(-)\)</span>. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) <em>is</em> their prior.</p>
+<p>There are two unknown quantities at this point. The first is the value of <span class="math inline">\(P(+)\)</span> and <span class="math inline">\(P(-)\)</span>. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) <em>is</em> their prior. More broadly, we do not need to think about <span class="math inline">\(P(-)\)</span> too much, as it is simply <span class="math inline">\(1-P(+)\)</span>, since the “state” of every single observation of environmental variables is either <span class="math inline">\(+\)</span> or <span class="math inline">\(-\)</span>.</p>
 <p>The most delicate problem is to figure out <span class="math inline">\(P(x|c)\)</span>, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in <span class="math inline">\(x\)</span>; as we work with continuous variables, we will rely on Gaussain NBC. In Gaussian NBC, we will consider that <span class="math inline">\(x\)</span> comes from a normal distribution <span class="math inline">\(\mathcal{N}(\mu_{x,c},\sigma_{x,c})\)</span>, and therefore we simply need to evaluate the probability density function of this distribution at the point <span class="math inline">\(x\)</span>. Other types of data are handled in the same way, with the difference that they use a different set of distributions.</p>
-<p>Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier.</p>
+<p>Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, the learning phase only involves a single epoch: measuring the mean and standard deviation.</p>
 </section>
 </section>
 <section id="application-a-baseline-model-of-the-corsican-nuthatch" class="level2 page-columns page-full" data-number="6.4">
 <h2 data-number="6.4" class="anchored" data-anchor-id="application-a-baseline-model-of-the-corsican-nuthatch"><span class="header-section-number">6.4</span> Application: a baseline model of the Corsican nuthatch</h2>
+<p>In this section, we will have a look at the temperature and precipitation data from <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, and come up with a first version of our classifier.</p>
 <section id="training-and-validation-strategy" class="level3" data-number="6.4.1">
 <h3 data-number="6.4.1" class="anchored" data-anchor-id="training-and-validation-strategy"><span class="header-section-number">6.4.1</span> Training and validation strategy</h3>
-<p>note that we will not use the testing set here because we keep it for the last chapter in this sequence, explain why</p>
-<p>compare to the baseline of the no-skill classifier</p>
+<p>To evaluate our model, as we discussed in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, we will keep a holdout testing set, that will be composed of 20% of the observations. In this chapter, we will not be using these data, because in order to use them as a stand-in for future predictions, it is important that the model only sees them once (this will happen at the end of <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>). Therefore, for the next chapters, we will limit ourselves to an evaluation of the model performance based on the average values of the performance measure we picked as the most informative, calculated on the validation datasets. In this chapter, we will rely on Monte-Carlo cross validation (MCCV; see <a href="crossvalidation.html#sec-crossvalidation-montecarlo" class="quarto-xref"><span>Section&nbsp;4.3.5</span></a>), using 50 replicates. In the following chapters, we will revert to using k-folds cross-validation, but using MCCV here is a good enough starting point.</p>
+<p>In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works <em>at all</em>. In subsequent chapters, we will introduce a slightly more domain-specific model to provide a different baseline.</p>
 </section>
 <section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="6.4.2">
 <h3 data-number="6.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">6.4.2</span> Performance evaluation of the model</h3>
+<p>In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model <em>before</em> reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following <span class="citation" data-cites="chicco2020">Chicco &amp; Jurman (<a href="../references.html#ref-chicco2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Jurman2012">Jurman <em>et al.</em> (<a href="../references.html#ref-Jurman2012" role="doc-biblioref">2012</a>)</span>, we will use the Matthew’s Correlation Coefficient (MCC) as the “main” measure to evaluate the performance of a model (we will return to other alternative measures in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>).</p>
+<p>The MCC is defined as</p>
+<p><span class="math display">\[
+\frac{\text{TP}\times \text{TN} - \text{FP}\times \text{FN}}{\sqrt{(\text{TP}+\text{FP})\times (\text{TP}+\text{FN})\times (\text{TN}+\text{FP})\times (\text{TN}+\text{FN})}} \,.
+\]</span></p>
+<p>The MCC is a correlation coefficient (specifically, the Pearson product-moment correlation on a contingency table <span class="citation" data-cites="powers2020">(<a href="../references.html#ref-powers2020" role="doc-biblioref">Powers 2020</a>)</span>), meaning that it returns values in <span class="math inline">\([-1, 1]\)</span>. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.</p>
+<p>In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively <span class="math inline">\(\text{TP}/(\text{TP}+\text{FP})\)</span> and <span class="math inline">\(\text{TN}/(\text{TN}+\text{FN})\)</span>, measure how likely a prediction of, respectively, presence and absence, are. These range in <span class="math inline">\([0,1]\)</span>, and values of one indicate a better performance of the model.</p>
+<p>Why not pick one of these instead of the MCC? Well, all modeling is compromise; we don’t want a model to become too good at prediciting absences, to the point where prediction about presences would become meaningless. Selecting models on the basis of a measure that only emphasizes one outcome is a risk that we shouldn’t be willing to take. For this reason, measures that are good at optimising the value of a negative and a positive predictions are far better representations of the performance of a model. The MCC does just this.</p>
 <div id="cell-fig-classification-crossvalidation" class="cell page-columns page-full" data-execution_count="6">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="7">
 <div id="fig-classification-crossvalidation" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -370,18 +382,25 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.2: Overview of the scores for the four components of the confusion matrix (false/true positive/negative rates), as well as two summary measures, the True-Skill statistic (Youden’s J) and Matthew’s correlation coefficient.
+Figure&nbsp;6.2: Overview of the scores for the Matthew’s correlation coefficient, as well as the positive and negative predictive values.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
+<p>The output of cross-validation is given in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>6.2</span></a> (and compared to the no-skill classifier in <a href="#tbl-classification-crossvalidation" class="quarto-xref">Table&nbsp;<span>6.1</span></a>). As we are statisfied with the model performance, we can re-train it using all the data (<em>but not the part used for testing</em>) in order to make our first series of predictions.</p>
+<div id="tbl-classification-crossvalidation" class="anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: Overview of the data presented in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>6.2</span></a>, compared to the no-skill classifier.
+</figcaption>
+<div aria-describedby="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="table">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 23%">
-<col style="width: 26%">
-<col style="width: 26%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -393,43 +412,34 @@ Figure&nbsp;6.2: Overview of the scores for the four components of the confusion
 </thead>
 <tbody>
 <tr class="odd">
-<td>True positive rate</td>
-<td>0.91</td>
+<td>Accuracy</td>
+<td>0.879</td>
+<td>0.882</td>
+<td>0.505</td>
+</tr>
+<tr class="even">
+<td>NPV</td>
+<td>0.857</td>
+<td>0.861</td>
+<td>0.449</td>
+</tr>
+<tr class="odd">
+<td>PPV</td>
+<td>0.899</td>
 <td>0.9</td>
-<td>0.56</td>
+<td>0.551</td>
 </tr>
 <tr class="even">
-<td>False positive rate</td>
-<td>0.11</td>
-<td>0.12</td>
-<td>0.56</td>
-</tr>
-<tr class="odd">
-<td>True negative rate</td>
-<td>0.89</td>
-<td>0.88</td>
-<td>0.44</td>
-</tr>
-<tr class="even">
-<td>False negative rate</td>
-<td>0.09</td>
-<td>0.1</td>
-<td>0.44</td>
-</tr>
-<tr class="odd">
-<td>True-Skill statistic</td>
-<td>0.79</td>
-<td>0.78</td>
-<td>-0.0</td>
-</tr>
-<tr class="even">
-<td>Matthew’s correlation coefficient</td>
-<td>0.79</td>
-<td>0.78</td>
-<td>-0.0</td>
+<td>MCC</td>
+<td>0.757</td>
+<td>0.762</td>
+<td>0.0</td>
 </tr>
 </tbody>
 </table>
+</div>
+</figure>
+</div>
 </section>
 <section id="the-decision-boundary" class="level3 page-columns page-full" data-number="6.4.3">
 <h3 data-number="6.4.3" class="anchored" data-anchor-id="the-decision-boundary"><span class="header-section-number">6.4.3</span> The decision boundary</h3>
@@ -450,39 +460,23 @@ Figure&nbsp;6.3: Overview of the decision boundary between the positive (blue) a
 </div>
 <p>The output of this simulation is given in <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a>. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.</p>
 <p>The line that separates the two classes is usually refered to as the “decision boundary” of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.</p>
-<p>It is interesting to compare <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a> with, for example, the distribution of the raw data presented in <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that Corsican nuthatches enjoy colder climates with more rainfall.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Take a minute to think about which places are more likely to have lower temperatures on a Island. Is there an additional layer of geospatial information we could add that would be informative?</p>
+</div></div><p>It is interesting to compare <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a> with, for example, the distribution of the raw data presented in <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that Corsican nuthatches enjoy colder climates with more rainfall.</p>
 </section>
 <section id="visualizing-the-trained-model" class="level3 page-columns page-full" data-number="6.4.4">
 <h3 data-number="6.4.4" class="anchored" data-anchor-id="visualizing-the-trained-model"><span class="header-section-number">6.4.4</span> Visualizing the trained model</h3>
-<p>make the predictions for every pixel and get the entropy</p>
+<p>We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of <em>Sitta whiteheadi</em>. This result is reported in <a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>6.4</span></a>. In order to have a little more information about where the predictions can be trusted, we also perform a little bit of bootstrapping: in this approach, we re-train the model using samples with replacement of the training data (200 times), and apply this batch of models, and measure the proportion of times they give the <em>same</em> prediction as the model trained on all the data. When this is higher, this indicates that the prediction is robust with regard to the training dataset.</p>
 <div id="cell-fig-classification-range" class="cell page-columns page-full" data-execution_count="11">
-<div class="cell-output cell-output-stderr">
-<pre><code>┌ Warning: Could not find font regular, using TeX Gyre Heros Makie
-└ @ Makie ~/.julia/packages/Makie/NrrbP/src/conversions.jl:1119</code></pre>
-</div>
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="13">
 <div id="fig-classification-range" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="classification_files/figure-html/fig-classification-range-output-2.png" class="img-fluid figure-img">
+<img src="classification_files/figure-html/fig-classification-range-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.4: Prediction mapped in …
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<p>We can do bootstrap</p>
-<div id="cell-fig-classification-bootstrap" class="cell page-columns page-full" data-execution_count="13">
-<div class="cell-output cell-output-display page-columns page-full" data-execution_count="15">
-<div id="fig-classification-bootstrap" class="quarto-figure quarto-figure-center anchored page-columns page-full">
-<figure class="quarto-float quarto-float-fig figure page-columns page-full">
-<div aria-describedby="fig-classification-bootstrap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="classification_files/figure-html/fig-classification-bootstrap-output-1.png" class="img-fluid figure-img">
-</div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-bootstrap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.5: After re-training 50 version of the model over randomly bootstrapped datasets, we measure the proportion of the bootstrap models that agree with the original prediction at each pixel. Higher values correspond to a more certain prediction, therefore to pixels where we can be more confident in the model output. In subsequent chapters, we will introduce additional tools to reason about the uncertainty in the model.
+Figure&nbsp;6.4: Occurence data (left), prediction of presences in space (middle), with the uncertainty in the prediction derived from bootstrap replicates (right). As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of <em>Sitta whiteheadi</em>.
 </figcaption>
 </figure>
 </div>
@@ -491,6 +485,12 @@ Figure&nbsp;6.5: After re-training 50 version of the model over randomly bootstr
 </section>
 <section id="what-is-an-acceptable-model" class="level3" data-number="6.4.5">
 <h3 data-number="6.4.5" class="anchored" data-anchor-id="what-is-an-acceptable-model"><span class="header-section-number">6.4.5</span> What is an acceptable model?</h3>
+<p>When comparing the prediction to the spatial distribution of occurrences (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>6.4</span></a>), it appears that the model identifies an area in the northwest where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the <em>purpose</em> of running this model – if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6.5</span> Conclusion</h2>
+<p>In this chapter, we introduced the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurrence, in which we predicted the potential presence of the species using temperature and classification. Through cross-validation, we confirmed that this model gave a good enough performance (<a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>6.2</span></a>), looked at the decisions that were being made by the trained model (<a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>6.3</span></a>), and finally mapped the prediction and their uncertainty in space (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>6.4</span></a>). In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -505,6 +505,12 @@ Beery, S., Cole, E., Parker, J., Perona, P. &amp; Winner, K. (2021). <a href="ht
 </div>
 <div id="ref-berteaux2014" class="csl-entry" role="listitem">
 Berteaux, D. (2014). <em><a href="https://doi.org/10.1353/book35753">Changements climatiques et biodiversité du québec</a></em>. Presses de l’Université du Québec.
+</div>
+<div id="ref-chicco2020" class="csl-entry" role="listitem">
+Chicco, D. &amp; Jurman, G. (2020). <a href="https://doi.org/10.1186/s12864-019-6413-7">The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation</a>. <em>BMC Genomics</em>, 21.
+</div>
+<div id="ref-cholletramampiandra2023" class="csl-entry" role="listitem">
+Chollet Ramampiandra, E., Scheidegger, A., Wydler, J. &amp; Schuwirth, N. (2023). <a href="https://doi.org/10.1016/j.ecolmodel.2023.110353">A comparison of machine learning and statistical species distribution models: Quantifying overfitting supports model interpretation</a>. <em>Ecological Modelling</em>, 481, 110353.
 </div>
 <div id="ref-clapham1935" class="csl-entry" role="listitem">
 Clapham, A.R., Raunkiaer, C., Gilbert-Carter, H., Tansley, A.G. &amp; Fausboll. (1935). <a href="https://doi.org/10.2307/2256153">The life forms of plants and statistical plant geography.</a> <em>The Journal of Ecology</em>, 23, 247.
@@ -524,6 +530,9 @@ Hanberry, B.B., He, H.S. &amp; Palik, B.J. (2012). <a href="https://doi.org/10.1
 <div id="ref-hand2001" class="csl-entry" role="listitem">
 Hand, D.J. &amp; Yu, K. (2001). <a href="https://doi.org/10.2307/1403452">Idiot’s bayes: Not so stupid after all?</a> <em>International Statistical Review / Revue Internationale de Statistique</em>, 69, 385.
 </div>
+<div id="ref-Jurman2012" class="csl-entry" role="listitem">
+Jurman, G., Riccadonna, S. &amp; Furlanello, C. (2012). <a href="https://doi.org/10.1371/journal.pone.0041882">A Comparison of MCC and CEN Error Measures in Multi-Class Prediction</a>. <em>PLoS ONE</em>, 7, e41882.
+</div>
 <div id="ref-karger2017" class="csl-entry" role="listitem">
 Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., <em>et al.</em> (2017). <a href="https://doi.org/10.1038/sdata.2017.122">Climatologies at high resolution for the earth<span>’</span>s land surface areas</a>. <em>Scientific Data</em>, 4.
 </div>
@@ -533,11 +542,13 @@ Kupervasser, O. (2014). <a href="https://doi.org/10.1134/s1054661814010088">The 
 <div id="ref-perl2022" class="csl-entry" role="listitem">
 Perl, R.G.B., Avidor, E., Roll, U., Malka, Y., Geffen, E. &amp; Gafny, S. (2022). <a href="https://doi.org/10.1002/edn3.276">Using eDNA presence/non<span>-</span>detection data to characterize the abiotic and biotic habitat requirements of a rare, elusive amphibian</a>. <em>Environmental DNA</em>, 4, 642–653.
 </div>
+<div id="ref-powers2020" class="csl-entry" role="listitem">
+Powers, D.M.W. (2020). <a href="https://doi.org/10.48550/ARXIV.2010.16061">Evaluation: From precision, recall and f-measure to ROC, informedness, markedness and correlation</a>. <em>arXiv</em>.
+</div>
 <div id="ref-whittaker1962" class="csl-entry" role="listitem">
 Whittaker, R.H. (1962). <a href="https://doi.org/10.1007/bf02860872">Classification of natural communities</a>. <em>The Botanical Review</em>, 28, 1–239.
 </div>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -931,6 +942,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/leakage.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/variableselection.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

@@ -1,14 +1,15 @@
 project:
   type: book
   output-dir: docs
+  execute-dir: project
 
 execute:
-  freeze: auto
+  freeze: true
 
 book:
   title: "Data Science for Biodiversity Scientists"
   subtitle: "An introduction to concepts and practices"
-  page-navigation: false
+  page-navigation: true
   back-to-top-navigation: true
   page-footer: "This work is licensed under the [CC BY-NC 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/)" 
   language: en-CA

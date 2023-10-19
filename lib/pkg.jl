@@ -11,6 +11,7 @@ using Statistics
 
 using CairoMakie
 set_theme!()
+CairoMakie.activate!(type = "png")
 update_theme!(
     backgroundcolor=:transparent,
     Figure=(; backgroundcolor=:transparent),
