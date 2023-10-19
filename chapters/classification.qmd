@@ -76,21 +76,21 @@ In @fig-classification-separability, we can see the temperature (in degrees) for
 ```{julia}
 #| label: fig-classification-separability
 #| echo: false
-#| fig-cap: This figures show the separability of the presences (blue) and pseudo-absences (orange) on the temperature, but not on the precipitation, dimensions.
+#| fig-cap: This figures show the separability of the presences (orange) and pseudo-absences (grey) on the temperature and precipitation dimensions.
 f = Figure(; resolution=(500, 500))
 
 gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
-c = light[2]
+c = vibrant[2]
 density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
-c = light[3]
+c = vibrant[1]
 density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
 
 axprec = Axis(gl[2,2])
-c = light[2]
+c = vibrant[2]
 density!(axprec, 0.1filter(r -> r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
-c = light[3]
+c = vibrant[1]
 density!(axprec, 0.1filter(r -> !r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
@@ -98,9 +98,9 @@ xp = 0.1filter(r -> r.presence, occdata).BIO1.-273.15
 xn = 0.1filter(r -> !r.presence, occdata).BIO1.-273.15
 yp = 0.1filter(r -> r.presence, occdata).BIO12
 yn = 0.1filter(r -> !r.presence, occdata).BIO12
-c = light[2]
+c = vibrant[2]
 scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
-c = light[3]
+c = vibrant[1]
 scatter!(axboth, xn, yn, color=c, markersize=4, label="Pseudo-absence")
 
 axislegend(position = :lb)
@@ -131,7 +131,7 @@ $$
 \end{pmatrix} \,.
 $$ {#eq-classification-confusion}
 
-This can be stated as "counting the number of times each pair of prediction, observation occurs", like so:
+This can be stated as "counting the number of times each pair of (prediction, observation occurs)", like so:
 
 $$
 \begin{pmatrix}
@@ -201,7 +201,7 @@ In this section, we will have a look at the temperature and precipitation data f
 
 ### Training and validation strategy
 
-To evaluate our model, as we discussed in @sec-crossvalidation, we will keep a holdout testing set, that will be composed of 20% of the observations. In this chapter, we will not be using these data, because in order to use them as a stand-in for future predictions, it is important that the model only sees them once (this will happen at the end of @sec-tuning). Therefore, for the next chapters, we will limit ourselves to an evaluation of the model performance based on the average values of the Matthew's Correlation Coefficient calculated on the validation datasets. In this chapter, we will rely on Monte-Carlo cross validation (MCCV; see @sec-crossvalidation-montecarlo), using 50 replicates. In the following chapters, we will revert to using k-folds cross-validation, but using MCCV here is a good enough starting point.
+To evaluate our model, as we discussed in @sec-crossvalidation, we will keep a holdout testing set, that will be composed of 20% of the observations. In this chapter, we will not be using these data, because in order to use them as a stand-in for future predictions, it is important that the model only sees them once (this will happen at the end of @sec-tuning). Therefore, for the next chapters, we will limit ourselves to an evaluation of the model performance based on the average values of the performance measure we picked as the most informative, calculated on the validation datasets. In this chapter, we will rely on Monte-Carlo cross validation (MCCV; see @sec-crossvalidation-montecarlo), using 50 replicates. In the following chapters, we will revert to using k-folds cross-validation, but using MCCV here is a good enough starting point.
 
 In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works *at all*. In subsequent chapters, we will introduce a slightly more domain-specific model to provide a different baseline.
 
@@ -215,12 +215,26 @@ Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
 
 ### Performance evaluation of the model
 
+In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model *before* reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following @chicco2020 and @Jurman2012, we will use the Matthew's Correlation Coefficient (MCC) as the "main" measure to evaluate the performance of a model (we will return to other alternative measures in @sec-tuning). 
+
+The MCC is defined as 
+
+$$
+\frac{\text{TP}\times \text{TN} - \text{FP}\times \text{FN}}{\sqrt{(\text{TP}+\text{FP})\times (\text{TP}+\text{FN})\times (\text{TN}+\text{FP})\times (\text{TN}+\text{FN})}} \,.
+$$
+
+The MCC is a correlation coefficient, meaning that it returns values in $[-1, 1]$. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.
+
+In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively $\text{TP}/(\text{TP}+\text{FP})$ and $\text{TN}/(\text{TN}+\text{FN})$, measure how likely a prediction of, respectively, presence and absence, are. These range in $[0,1]$, and values of one indicate a better performance of the model.
+
+Why not pick one of these instead of the MCC? Well, all modeling is compromise; we don't want a model to become too good at prediciting absences, to the point where prediction about presences would become meaningless. Selecting models on the basis of a measure that only emphasizes one outcome is a risk that we shouldn't be willing to take. For this reason, measures that are good at optimising the value of a negative and a positive predictions are far better representations of the performance of a model. The MCC does just this.
+
 ```{julia}
 #| label: fig-classification-crossvalidation
 #| echo: false
-#| fig-cap: Overview of the scores for the four components of the confusion matrix (false/true positive/negative rates), as well as two summary measures, the True-Skill statistic (Youden's J) and Matthew's correlation coefficient.
-fmat = [(tpr, "True positives") (fpr, "False positives") (trueskill, "TSS"); (tnr, "True negatives") (fnr, "False negatives") (mcc, "MCC")]
-f = Figure()
+#| fig-cap: Overview of the scores for the Matthew's correlation coefficient, as well as the positive and negative predictive values.
+fmat = [(mcc, "Matthew's corr. coeff.") (ppv, "Positive pred. val.") (npv, "Negative pred. val.")]
+f = Figure(; resolution=(600, 300))
 
 for ci in CartesianIndices(fmat)
     cfunc, lab = fmat[ci]
@@ -229,23 +243,23 @@ for ci in CartesianIndices(fmat)
     vav = cfunc.(Cv)
     x = vcat(fill(0, length(trv)), fill(1, length(vav)))
     y = vcat(trv, vav)
-    trc = Makie.wong_colors()[3]
-    vac = :lightgrey
     boxplot!(ax, x, y; orientation=:vertical, color = map(d->d==1 ? muted[1] : muted[2], x))
     hidexdecorations!(ax, label=false)
 end
+
+group_color = [PolyElement(color = color, strokecolor = :transparent)
+    for color in muted[1:2]]
+Legend(f[2,:], group_color, ["Training", "Validation"]; orientation=:horizontal)
 
 current_figure()
 ```
 
 | Measure                           | Training                                        | Validation                                      | No-skill                                       |
 |------------------|------------------|------------------|------------------|
-| True positive rate                | `{julia} round(mean(tpr.(Ct)); digits=2)`       | `{julia} round(mean(tpr.(Cv)); digits=2)`       | `{julia} round(tpr(Cnoskill); digits=2)`       |
-| False positive rate               | `{julia} round(mean(fpr.(Ct)); digits=2)`       | `{julia} round(mean(fpr.(Cv)); digits=2)`       | `{julia} round(fpr(Cnoskill); digits=2)`       |
-| True negative rate                | `{julia} round(mean(tnr.(Ct)); digits=2)`       | `{julia} round(mean(tnr.(Cv)); digits=2)`       | `{julia} round(tnr(Cnoskill); digits=2)`       |
-| False negative rate               | `{julia} round(mean(fnr.(Ct)); digits=2)`       | `{julia} round(mean(fnr.(Cv)); digits=2)`       | `{julia} round(fnr(Cnoskill); digits=2)`       |
-| True-Skill statistic              | `{julia} round(mean(trueskill.(Ct)); digits=2)` | `{julia} round(mean(trueskill.(Cv)); digits=2)` | `{julia} round(trueskill(Cnoskill); digits=2)` |
-| Matthew's correlation coefficient | `{julia} round(mean(mcc.(Ct)); digits=2)`       | `{julia} round(mean(mcc.(Cv)); digits=2)`       | `{julia} round(mcc(Cnoskill); digits=2)`       |
+| Accuracy                | `{julia} round(mean(accuracy.(Ct)); digits=3)`       | `{julia} round(mean(accuracy.(Cv)); digits=3)`       | `{julia} round(accuracy(Cnoskill); digits=3)`       |
+| NPV               | `{julia} round(mean(npv.(Ct)); digits=3)`       | `{julia} round(mean(npv.(Cv)); digits=3)`       | `{julia} round(npv(Cnoskill); digits=3)`       |
+| PPV              | `{julia} round(mean(ppv.(Ct)); digits=3)` | `{julia} round(mean(ppv.(Cv)); digits=3)` | `{julia} round(ppv(Cnoskill); digits=3)` |
+| MCC | `{julia} round(mean(mcc.(Ct)); digits=3)`       | `{julia} round(mean(mcc.(Cv)); digits=3)`       | `{julia} round(mcc(Cnoskill); digits=3)`       |
 
 ### The decision boundary
 
@@ -271,15 +285,15 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| fig-cap: Overview of the decision boundary between the positive (blue) and negative (classes) using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
 f = Figure(; resolution=(500, 500))
 ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-pal = light[[3,2]]
+pal = vibrant[[1,2]]
 heatmap!(ax, 0.1air.-273.15, 0.1prc, X, colormap=pal, alpha=0.3)
 xp = 0.1filter(r -> r.presence, occdata).BIO1.-273.15
 xn = 0.1filter(r -> !r.presence, occdata).BIO1.-273.15
 yp = 0.1filter(r -> r.presence, occdata).BIO12
 yn = 0.1filter(r -> !r.presence, occdata).BIO12
-c = light[2]
+c = vibrant[2]
 scatter!(ax, xp, yp, color=c, markersize=4, label="Presence")
-c = light[3]
+c = vibrant[1]
 scatter!(ax, xn, yn, color=c, markersize=4, label="Pseudo-absence")
 current_figure()
 ```
@@ -312,19 +326,7 @@ Threads.@threads for k in keys(pr)
 end
 ```
 
-```{julia}
-#| label: fig-classification-range
-#| echo: false
-#| fig-cap: Prediction mapped in ...
-f = Figure(; resolution=(500, 500))
-ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
-surface!(ax, pr.>0.5, shading=false, colormap=vibrant[1:2], interpolate=false)
-ax.xticklabelpad = 30
-ax.yticklabelpad = 40
-current_figure()
-```
-
-We can do bootstrap
+bootstrap
 
 ```{julia}
 #| echo: false
@@ -337,17 +339,33 @@ end
 ```
 
 ```{julia}
-#| label: fig-classification-bootstrap
+#| label: fig-classification-range
 #| echo: false
-#| fig-cap: After re-training 50 version of the model over randomly bootstrapped datasets, we measure the proportion of the bootstrap models that agree with the original prediction at each pixel. Higher values correspond to a more certain prediction, therefore to pixels where we can be more confident in the model output. In subsequent chapters, we will introduce additional tools to reason about the uncertainty in the model.
-f = Figure(; resolution=(500, 500))
-ax = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
-sf = surface!(ax, un, shading=false, colormap=cgrad(iridescent), interpolate=false)
-ax.xticklabelpad = 30
-ax.yticklabelpad = 40
-Colorbar(f[1,2],sf)
+#| fig-cap: Occurence data (left), prediction of presences in space (middle), with the uncertainty in the prediction derived from bootstrap replicates (right). As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*.
+f = Figure(; resolution=(600, 700))
+ax0 = GeoAxis(f[1,1], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
+ax1 = GeoAxis(f[1,2], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
+ax2 = GeoAxis(f[1,3], xlabel="Longitude", ylabel = "Latitude", lonlims=extrema(longitudes(pr)), latlims=extrema(latitudes(pr)), dest = "+proj=moll")
+
+surface!(ax1, pr.>0.5, shading=false, colormap=vibrant[1:2], interpolate=false)
+sf = surface!(ax2, un, shading=false, colormap=cgrad(iridescent), interpolate=false)
+
+surface!(ax0, pr, colormap=[:black, :black], shading=false, interpolate=false)
+scatter!(ax0, coordinates.longitude, coordinates.latitude, color=coordinates.presence, colormap=vibrant[1:2], markersize=3)
+
+Colorbar(f[2,:],sf; tellheight=false, tellwidth=false, vertical=false, flipaxis=false)
+
+for ax in [ax1, ax2, ax0]
+    ax.xticklabelpad = 0
+    ax.yticklabelpad = 0
+    hidedecorations!(ax)
+    hidespines!(ax)
+end
 current_figure()
 ```
+
+We can do bootstrap
+
 
 ### What is an acceptable model?
 

@@ -5,24 +5,17 @@ using SpeciesDistributionToolkit
 using CairoMakie
 
 spatial_extent = (left = 8.412, bottom = 41.325, right = 9.662, top = 43.060)
-dataprovider = RasterData(CHELSA2, BioClim)
+dataprovider = RasterData(CHELSA1, BioClim)
 
 temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
-msklayer = SimpleSDMPredictor(RasterData(CHELSA1, BioClim); layer = "BIO1", spatial_extent...)
-temperature = mask(msklayer, temperature)
 heatmap(temperature, colormap=:lajolla)
 
 # Data
-BIOX = convert.(Float32, [mask(msklayer, SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...)) for l in layers(dataprovider)])
-for i in 2:length(BIOX)
-    BIOX[i].left = BIOX[1].left
-    BIOX[i].top = BIOX[1].top
-    BIOX[i].bottom = BIOX[1].bottom
-    BIOX[i].right = BIOX[1].right
-end
+BIOX = convert.(Float32, [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
+#LULC = convert.(Float32, [SimpleSDMPredictor(RasterData(EarthEnv, LandCover); full=true, layer = l, spatial_extent...) for l in layers(RasterData(EarthEnv, LandCover))])
 SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
-rangifer = taxon("Sitta whiteheadi"; strict = false)
+sitta = taxon("Sitta whiteheadi"; strict = false)
 query = [
     "occurrenceStatus" => "PRESENT",
     "hasCoordinate" => true,
@@ -30,9 +23,8 @@ query = [
     "decimalLongitude" => (spatial_extent.left, spatial_extent.right),
     "limit" => 300,
 ]
-presences = occurrences(rangifer, query...)
-for i in 1:12
-    @info i
+presences = occurrences(sitta, query...)
+while length(presences) < count(presences)
     occurrences!(presences)
 end
 
