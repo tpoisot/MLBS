@@ -254,12 +254,16 @@ Legend(f[2,:], group_color, ["Training", "Validation"]; orientation=:horizontal)
 current_figure()
 ```
 
+The output of cross-validation is given in @fig-classification-crossvalidation (and compared to the no-skill classifier in @tbl-classification-crossvalidation). As we are statisfied with the model performance, we can re-train it using all the data (*but not the part used for testing*) in order to make our first series of predictions.
+
 | Measure                           | Training                                        | Validation                                      | No-skill                                       |
 |------------------|------------------|------------------|------------------|
 | Accuracy                | `{julia} round(mean(accuracy.(Ct)); digits=3)`       | `{julia} round(mean(accuracy.(Cv)); digits=3)`       | `{julia} round(accuracy(Cnoskill); digits=3)`       |
 | NPV               | `{julia} round(mean(npv.(Ct)); digits=3)`       | `{julia} round(mean(npv.(Cv)); digits=3)`       | `{julia} round(npv(Cnoskill); digits=3)`       |
 | PPV              | `{julia} round(mean(ppv.(Ct)); digits=3)` | `{julia} round(mean(ppv.(Cv)); digits=3)` | `{julia} round(ppv(Cnoskill); digits=3)` |
 | MCC | `{julia} round(mean(mcc.(Ct)); digits=3)`       | `{julia} round(mean(mcc.(Cv)); digits=3)`       | `{julia} round(mcc(Cnoskill); digits=3)`       |
+
+: Overview of the data presented in @fig-classification-crossvalidation, compared to the no-skill classifier. {#tbl-classification-crossvalidation}
 
 ### The decision boundary
 
@@ -302,6 +306,10 @@ The output of this simulation is given in @fig-classification-decision. Of cours
 
 The line that separates the two classes is usually refered to as the "decision boundary" of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.
 
+::: column-margin
+Take a minute to think about which places are more likely to have lower temperatures on a Island. Is there an additional layer of geospatial information we could add that would be informative?
+:::
+
 It is interesting to compare @fig-classification-decision with, for example, the distribution of the raw data presented in @fig-classification-separability. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that Corsican nuthatches enjoy colder climates with more rainfall.
 
 ### Visualizing the trained model
@@ -313,27 +321,17 @@ _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layer
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in [1, 12]]
 ```
 
-make the predictions for every pixel and get the entropy
+We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of *Sitta whiteheadi*. This result is reported in @fig-classification-range. In order to have a little more information about where the predictions can be trusted, we also perform a little bit of bootstrapping: in this approach, we re-train the model using samples with replacement of the training data (200 times), and apply this batch of models, and measure the proportion of times they give the *same* prediction as the model trained on all the data. When this is higher, this indicates that the prediction is robust with regard to the training dataset.
 
 ```{julia}
 #| echo: false
 #| output: false
+samplemodels = [naivebayes(trainlabels, trainfeatures[b,:]) for b in bootstrap(trainlabels, trainfeatures; n=200)]
+un = convert(Float64, similar(first(bio)))
 pr = convert(Float64, similar(first(bio)))
-entropy = similar(pr)
 Threads.@threads for k in keys(pr)
     x = [b[k] for b in bio]
     pr[k] = predictor(x)
-end
-```
-
-bootstrap
-
-```{julia}
-#| echo: false
-samplemodels = [naivebayes(trainlabels, trainfeatures[b,:]) for b in bootstrap(trainlabels, trainfeatures)]
-un = convert(Float64, similar(first(bio)))
-Threads.@threads for k in keys(pr)
-    x = [b[k] for b in bio]
     un[k] = mean([(m(x)>0.5)==(predictor(x)>0.5) for m in samplemodels])
 end
 ```
@@ -364,10 +362,9 @@ end
 current_figure()
 ```
 
-We can do bootstrap
-
-
 ### What is an acceptable model?
+
+When comparing the prediction to the spatial distribution of occurrences (@fig-classification-range), it appears that the model identifies an area in the northwest where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the *purpose* of running this model -- if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model.
 
 ```{julia}
 #| echo: false
@@ -382,3 +379,7 @@ JLD.save(
     "training", (y[training_idx], X[training_idx,:]),
 )
 ```
+
+## Conclusion
+
+In this chapter, we introduce the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurence, in which we predicted the potential presence of the species using temperature and classification. Through cross-validation, we confirmed that this model gave a good enough performance (@fig-classification-crossvalidation), looked at the decisions that were being made by the trained model (@fig-classification-decision), and finally mapped the prediction and their uncertainty in space (@fig-classification-range). In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.

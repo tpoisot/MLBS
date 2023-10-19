@@ -3,6 +3,7 @@
 As we mentioned in the introduction, a core idea of data science is that things that look the same (in that, when described with data, they resemble one another) are likely to be the same. Although this sounds like a simplifying assumption, this can provide the basis for approaches in which we *create* groups in data that have no labels. This task is called clustering: we seek to add a *label* to each observation, in order to form groups, and the data we work from do *not* have a label that we can use to train a model. In this chapter, we will explore the *k*-means algorithm for clustering, and illustrate how it can be used in practice.
 
 ```{julia}
+#| label: activate-environment
 #| echo: false
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "lib")
@@ -10,6 +11,7 @@ include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "colorcube.jl"))
 include(joinpath(_code_path, "landsat.jl"))
 include(joinpath(_code_path, "daviesbouldin.jl"))
+include(joinpath(_code_path, "palettes.jl"))
 ```
 
 ## A digression: which birds are red?
@@ -32,11 +34,11 @@ Deciding which variables are going to be accounted for, how the labels will be d
 
 Throughout this chapter, we will work on a single image -- we may initially balk at the idea that an image is data, but it is! Specifically, an image is a series of instances (the pixels), each described by their position in a multidimensional colorimetric space. Greyscale images have one dimension, and images in color will have three: their red, green, and blue channels. Not only are images data, this specific dataset is going to be far larger than many of the datasets we will work on in practice: the number of pixels we work with is given by the product of the width, height, and depth of the image!
 
-
 ```{julia}
+#| label: load-data-cubes
 #| echo: false
 #| output: false
-_data_path = joinpath(@__DIR__, "data", "kmeans", "cooked")
+_data_path = joinpath(dirname(Base.active_project()), "data", "kmeans", "cooked")
 R, G, B, N, S1, S2 = readlandsat(_data_path)
 ```
 
@@ -74,8 +76,8 @@ fig = Figure(resolution=(500, 480))
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[2,1], aspect=DataAspect())
 
-image!(ax_rgb, load(assetpath(rgb_cube)))
-image!(ax_veg, load(assetpath(veg_cube)))
+image!(ax_rgb, Images.load(Makie.assetpath(rgb_cube)))
+image!(ax_veg, Images.load(Makie.assetpath(veg_cube)))
 
 hidedecorations!(ax_rgb)
 hidedecorations!(ax_veg)
@@ -97,6 +99,7 @@ One way to do this is to calculate the normalized difference vegetation index, o
 
 
 ```{julia}
+#| label: get-ndvi-et-al
 #| echo: false
 #| output: false
 ndvi = @. (N - R) / (N + R)
@@ -117,7 +120,7 @@ We can look at the relationship between the NDVI and NDMI data [@fig-kmeans-hexb
 #| fig-cap: The pixels acquired from Landsat 9 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
 fig = Figure(resolution=(500,300))
 ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-hexbin!(ax, vec(ndvi), vec(ndmi), colormap=[:lightgrey, :black], bins=120)
+hexbin!(ax, vec(ndvi), vec(ndmi), colormap=cgrad(incandescent), bins=20)
 tightlimits!(ax)
 current_figure()
 ```
@@ -215,6 +218,7 @@ There are alternatives to this method, including silhouettes [@rousseeuw1987] an
 ### Initial run {#sec-kmeans-initial}
 
 ```{julia}
+#| label: perform-initial-clustering
 #| echo: false
 #| output: false
 using Clustering
@@ -224,17 +228,25 @@ clusters = kmeans(X, 3)
 Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using $k = 3$, we get the results presented in @fig-kmeans-initial-landscape.
 
 ```{julia}
+#| label: permute-cluster-dimensions
+#| echo: false
+#| output: false
+C = permutedims(reshape(assignments(clusters), size(ndvi)))
+```
+
+```{julia}
 #| label: fig-kmeans-initial-landscape
 #| echo: false
-#| fig-cap: After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, *i.e.* we want to see what the landscape would look like when divided into three categories. 
+#| fig-cap: caption
 
-C = permutedims(reshape(assignments(clusters), size(ndvi)))
-fig = Figure(resolution=(500, 240))
-ax_clust = Makie.Axis(fig[1,1], aspect=DataAspect())
-heatmap!(ax_clust, C; colormap=Makie.wong_colors()[1:3])
-hidedecorations!(ax_clust)
+fig = Figure(; resolution=(500, 240))
+ax = CairoMakie.Axis(fig[1,1]; aspect=DataAspect())
+heatmap!(ax, C; colormap=light[2:4])
+hidedecorations!(ax)
 current_figure()
 ```
+
+>  After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, *i.e.* we want to see what the landscape would look like when divided into three categories. 
 
 ::: column-margin
 In fact, take some time to think about how you would use $k$-means to come up with a way to remove pixels with only water from this image!
@@ -253,6 +265,7 @@ We will revisit the issue of tuning the hyper-parameters in more depth in @sec-t
 In order to produce @fig-kmeans-initial-landscape, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in @sec-kmeans-initial, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of $k$; we know that it is more than 3, but how much more?
 
 ```{julia}
+#| label: run-davies-bouldin
 #| echo: false
 #| output: false
 k_trial = 3:8
@@ -320,8 +333,8 @@ clusters = kmeans(X, k)
 C = reshape(assignments(clusters), size(ndvi))
 
 fig = Figure(resolution=(500, 240))
-ax_clust = Makie.Axis(fig[1,1], aspect=DataAspect())
-heatmap!(ax_clust, permutedims(C); colormap=Makie.wong_colors()[1:k])
+ax_clust = CairoMakie.Axis(fig[1,1], aspect=DataAspect())
+heatmap!(ax_clust, permutedims(C); colormap=light[2:(k+1)])
 hidedecorations!(ax_clust)
 current_figure()
 ```
@@ -367,8 +380,8 @@ By opposition to a model based on, for example, mixtures of Gaussians, the assig
 #| echo: false
 #| fig-cap: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
 fig = Figure(resolution=(500,300))
-ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-scatter!(ax, vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=Makie.wong_colors()[1:k])
+ax = CairoMakie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
+scatter!(ax, vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=light[2:(k+1)])
 tightlimits!(ax)
 current_figure()
 ```

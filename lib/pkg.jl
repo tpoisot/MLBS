@@ -10,7 +10,6 @@ using Distributions
 using Statistics
 
 using CairoMakie
-using GeoMakie
 set_theme!()
 update_theme!(
     backgroundcolor=:transparent,
@@ -23,6 +22,7 @@ update_theme!(
 
 using SpeciesDistributionToolkit
 
+import Images
 import Downloads
 
 using Random
