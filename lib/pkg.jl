@@ -10,8 +10,16 @@ using Distributions
 using Statistics
 
 using CairoMakie
-CairoMakie.activate!(; px_per_unit = 2)
 using GeoMakie
+set_theme!()
+update_theme!(
+    backgroundcolor=:transparent,
+    Figure=(; backgroundcolor=:transparent),
+    Axis=(
+        backgroundcolor=:white,
+    ),
+    CairoMakie=(; px_per_unit=2),
+)
 
 using SpeciesDistributionToolkit
 

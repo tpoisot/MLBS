@@ -193,7 +193,7 @@ There are two unknown quantities at this point. The first is the value of $P(+)$
 
 The most delicate problem is to figure out $P(x|c)$, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in $x$; as we work with continuous variables, we will rely on Gaussain NBC. In Gaussian NBC, we will consider that $x$ comes from a normal distribution $\mathcal{N}(\mu_{x,c},\sigma_{x,c})$, and therefore we simply need to evaluate the probability density function of this distribution at the point $x$. Other types of data are handled in the same way, with the difference that they use a different set of distributions.
 
-Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in @sec-gradientdescent, the learning phase is extremely quick: it only involves measuring the mean and standard deviation.
+Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in @sec-gradientdescent, the learning phase only involves a single epoch: measuring the mean and standard deviation.
 
 ## Application: a baseline model of the Corsican nuthatch
 
