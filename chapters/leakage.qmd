@@ -1,6 +1,8 @@
 # Data leakage {#sec-leakage}
 
-Data leakage is a concept that is, surprisingly, grosser than it sounds. The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models, which is to say (as we discussed in @sec-gradientdescent-trainedmodel), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
+Data leakage is a concept that is, if you can believe it, grosser than it sounds.
+
+The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models, which is to say (as we discussed in @sec-gradientdescent-trainedmodel), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
 
 ## Consequences of data leakage {#sec-leakage-consequences}
 
