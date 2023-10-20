@@ -4,13 +4,13 @@ In @sec-classification, we introduced a simple classifier trained on a dataset o
 
 There are two reasons to think about variable selection and feature engineering -- first, the variables we have may not all be predictive for the specific problem we are trying to solve; second, the variables may not be expressed in the correct "way" to solve our problem. This calls for a joint approach of selecting and transforming features. Before we do anything to our features (transformation or selection), we need to talk about data leakage.
 
-## What is data leakage? {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage}
+## What is data leakage? {#sec-leakage}
 
 Data leakage is a concept that is, if you can believe it, grosser than it sounds.
 
 The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models, which is to say (as we discussed in @sec-gradientdescent-trainedmodel), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
 
-### Consequences of data leakage {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences}
+### Consequences of data leakage {#sec-leakage-consequences}
 
 We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning [@nisbet2018]. Data leakage happens information "leaks" from the training conditions to the evaluation conditions; in other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time [@Peterson2018].
 
@@ -20,7 +20,7 @@ Because this is the behavior we want to simulate with a validation dataset, it i
 
 Congratulations! We have created data leakage! Because we are splitting our time series at random, the model will likely have been trained using data that date from *after* the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.
 
-### Avoiding data leakage {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid}
+### Avoiding data leakage {#sec-leakage-avoid}
 
 The most common advice given in order to prevent data leakage is the "learn/predict separation" [@kaufman2011]. Simply put, this means that whatever happens to the data used for training cannot be *simultaneously* applied to the data used for testing (or validation).
 
@@ -44,7 +44,7 @@ Treating the data preparation step as a part of the learning process, which is t
 
 ## Variable selection
 
-### The curse of dimensionality {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse}
+### The curse of dimensionality {#sec-predictors-curse}
 
 The number of variables we use for prediction is the number of dimensions of a problem. It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!
 
@@ -135,7 +135,7 @@ Cc0v, Cc0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,c0], folds)
 | Forward selection                                    | `{julia} length(f0)` | `{julia} round(mean(mcc.(Cf0v)); digits=3)` | `{julia} round(mean(ppv.(Cf0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
 | Forward selection with temperature and precipitation | `{julia} length(c0)` | `{julia} round(mean(mcc.(Cc0v)); digits=3)` | `{julia} round(mean(ppv.(Cc0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
 
-: Consequences of different variable selection approaches on the performance of the model
+: Consequences of different variable selection approaches on the performance of the model {#tbl-predictors-selection}
 
 Based on the results presented in **TBL**, the model trained on variables selected using forward selection gave the best results.
 
@@ -183,5 +183,19 @@ end
 ```
 
 ### Model selection
+
+```{julia}
+#| output: false
+#| echo: false
+_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
+modelpath = joinpath(_ptm_path, "sdm-step-1.jld")
+JLD.save(
+    modelpath,
+    "labels", trainlabels,
+    "features", trainfeatures,
+    "folds", folds,
+    "variables", f0
+)
+```
 
 ## Conclusion
