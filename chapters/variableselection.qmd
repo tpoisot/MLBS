@@ -28,7 +28,9 @@ Assume that we want to transform our data using a Principal Component Analysis (
 
 If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation. This mistake is extremely common in the species distribution literature [see *e.g.* @demarco2018].
 
-![Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.](../diagrams/data-leakage.png){#fig-predictors-leakage}
+![Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.]
+
+  [Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.]: ../diagrams/data-leakage.png {#variableselection-fig-predictors-leakage}
 
 The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$. This is illustrated in @fig-predictors-leakage.
 
@@ -55,6 +57,12 @@ The "curse of dimensionality" is the common term of everything breaking down whe
 Therefore, we need to approach the problem of "which variables to use" with a specific mindset: we want a lot of information for our model, but not so much that the space in which the predictors exist turns immense. There are techniques for this.
 
 ### Step-wise approaches to variable selection
+
+In order to try and decrease the dimensionality of a problem, we can attempt to come up with a method to decide which variables to include, or to remove, from a model. This practice is usually called "stepwise" selection, and is the topic of *intense* debate in ecology, although several studies point to the fact that there is rarely a best technique to select variables [@murtaugh2009], that the same data can usually be adequately described by competing models [@whittingham2006], and that classifiers can show high robustness to the inclusion of non-informative variables [@fox2017]. Situations in which variable selection has been shown top be useful is the case of model transfer [@petitpierre2016], or (when informed by ecological knowledge), the demonstration that classes of variables had no measurable impact on model performance [@thuiller2004].
+
+Why, so, should we select the variables we put in our models?
+
+The answer is simple: we seek to solve a specific problem in an optimal way, where "optimal" refers to the maximization of a performance measure we decided upon *a priori*. In our case, this is the MCC. Therefore, an ideal set of predictors is the one that, given our cross-validation strategy, maximizes our measure of performance.
 
 ### Removal of colinear variables
 
@@ -140,14 +148,14 @@ i0 = stepwisevif(trainfeatures, 10.0)
 Ci0v, Ci0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,i0], folds)
 ```
 
-| Model version                                        | Variables            | MCC                                         | PPV                                         | NPV                                        |
+| Model version                                        | Variables            | MCC                                         | PPV                                         | NPV                                         |
 |---------------|---------------|---------------|---------------|---------------|
-| Temperature, precipitation                           | 2                    | `{julia} round(mean(mcc.(C0v)); digits=3)`  | `{julia} round(mean(ppv.(C0v)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)` |
-| All variables                                        | 19                   | `{julia} round(mean(mcc.(CXv)); digits=3)`  | `{julia} round(mean(ppv.(CXv)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)` |
-| Backward selection                                   | `{julia} length(b0)` | `{julia} round(mean(mcc.(Cb0v)); digits=3)` | `{julia} round(mean(ppv.(Cb0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
-| Forward selection                                    | `{julia} length(f0)` | `{julia} round(mean(mcc.(Cf0v)); digits=3)` | `{julia} round(mean(ppv.(Cf0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
+| Temperature, precipitation                           | 2                    | `{julia} round(mean(mcc.(C0v)); digits=3)`  | `{julia} round(mean(ppv.(C0v)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)`  |
+| All variables                                        | 19                   | `{julia} round(mean(mcc.(CXv)); digits=3)`  | `{julia} round(mean(ppv.(CXv)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)`  |
+| Backward selection                                   | `{julia} length(b0)` | `{julia} round(mean(mcc.(Cb0v)); digits=3)` | `{julia} round(mean(ppv.(Cb0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)`  |
+| Forward selection                                    | `{julia} length(f0)` | `{julia} round(mean(mcc.(Cf0v)); digits=3)` | `{julia} round(mean(ppv.(Cf0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)`  |
 | Forward selection with temperature and precipitation | `{julia} length(c0)` | `{julia} round(mean(mcc.(Cc0v)); digits=3)` | `{julia} round(mean(ppv.(Cc0v)); digits=3)` | `{julia} round(mean(npv.(Cc0v)); digits=3)` |
-| Variance Inflation Factor | `{julia} length(i0)` | `{julia} round(mean(mcc.(Ci0v)); digits=3)` | `{julia} round(mean(ppv.(Ci0v)); digits=3)` | `{julia} round(mean(npv.(Ci0v)); digits=3)` |
+| Variance Inflation Factor                            | `{julia} length(i0)` | `{julia} round(mean(mcc.(Ci0v)); digits=3)` | `{julia} round(mean(ppv.(Ci0v)); digits=3)` | `{julia} round(mean(npv.(Ci0v)); digits=3)` |
 
 : Consequences of different variable selection approaches on the performance of the model {#tbl-predictors-selection}
 
