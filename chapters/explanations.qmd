@@ -15,3 +15,5 @@ biodiversity need sustained model uptake @weiskopf2022
 @mesgaran2014 mapping of most important covariates
 
 @lundberg2017 SHAP
+
+transfo in model = we can still apply these techniques instead of asking "what does PC1 = 0.4 mean"

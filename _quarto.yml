@@ -62,7 +62,7 @@ format:
     linestretch: 1.5
     grid:
       sidebar-width: 350px
-      body-width: 800px
+      body-width: 850px
       margin-width: 350px
       gutter-width: 2rem
   pdf:

@@ -64,6 +64,16 @@ Why, so, should we select the variables we put in our models?
 
 The answer is simple: we seek to solve a specific problem in an optimal way, where "optimal" refers to the maximization of a performance measure we decided upon *a priori*. In our case, this is the MCC. Therefore, an ideal set of predictors is the one that, given our cross-validation strategy, maximizes our measure of performance.
 
+In forward selection, assuming that we have $f$ features, we start by building $f$ models, each using one feature. For example, using the BioClim variables, $m_1$ would be attempting to predict presences and absences based only on temperature. Out of these models, we retain the variable given by $\text{argmax}_f \text{MCC}(m_f)$, where $\text{MCC}(m_f)$ is the average value of MCC for the $f$-th model on the validation datasets. This is the first variable we add to our set of selected variables. We then train $f-1$ models, and then again add the variable that leads to the best possible *increase* in the average value of the MCC. When we cannot find a remaining variable that would increase the performance of the model, we stop the process, and return the optimal set of variables. Forward selection can be constrained by, instead of starting from variables one by one, starting from a pre-selected set of variables that will always be included in the model.
+
+There are two important things to consider here. First, the  set of variables is only optimal under the assumptions of the stepwise selection process: the first variable is the one that boosts the predictive value of the model the most *on its own*, and the next variables *in the context of already selected variables*. Second, the variables are evaluated on the basis of their ability to *improve the performance of the model*; this does not imply that they are relevant to the ecological processes hapenning in the dataset. Infering mechanisms on the basis of variable selection if foolish.
+
+The opposite of forward selection is backward selection, in which we start from a complete set of variables, then remove the one with the *worst* impact on model performance, and keep proceeding until we cannot remove a variable without making the model worse. The set of variables that remain will be the optimal set of variables. In almost no cases will forward and backward selection agree on which set of variables is the best -- we have to settle this debate by either picking the model with the least parameters (the most parsimonious), or the one with the best performance.
+
+Why not evaluate all the combination of variables?
+
+Keep in mind that we do not know the number of variables we should use; therefore, for the 19 BioClim variables, we would have to evaluate $\sum_f \binom{19}{f}$, which turns out to be an *immense* quantity (for example, $\binom{19}{9}=92378$). For this reason, a complete enumeration of all variable combinations would be extremely wasteful.
+
 ### Removal of colinear variables
 
 Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a
@@ -74,9 +84,11 @@ Delicious. Finally some good fucking quantitative ecology.
 
 PCA (also does dimensionality reduction)
 
+One advantage of PCA is that it serves both as a way to remove colinearity, in that the principal components are orthogonal, and as a way to reduce the dimensionality of the problem as long as we decide on a threshold on the proportion of variance explained, and only retain the number of principal components needed to reach this threshold. 
+
 Whitening
 
-## Application: optimal variables for the *Sitta whiteheadi* model
+## Application: optimal variables for Corsican nuthatch
 
 ```{julia}
 #| echo: false
@@ -157,7 +169,7 @@ Ci0v, Ci0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,i0], folds)
 | Forward selection with temperature and precipitation | `{julia} length(c0)` | `{julia} round(mean(mcc.(Cc0v)); digits=3)` | `{julia} round(mean(ppv.(Cc0v)); digits=3)` | `{julia} round(mean(npv.(Cc0v)); digits=3)` |
 | Variance Inflation Factor                            | `{julia} length(i0)` | `{julia} round(mean(mcc.(Ci0v)); digits=3)` | `{julia} round(mean(ppv.(Ci0v)); digits=3)` | `{julia} round(mean(npv.(Ci0v)); digits=3)` |
 
-: Consequences of different variable selection approaches on the performance of the model {#tbl-predictors-selection}
+: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC, NPV, and PPV. {#tbl-predictors-selection}
 
 Based on the results presented in **TBL**, the model trained on variables selected using forward selection gave the best results.
 
