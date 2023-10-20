@@ -58,7 +58,7 @@ preview:
 
 format:
   html:
-    theme: litera
+    theme: flatly
     linestretch: 1.5
     grid:
       sidebar-width: 350px

@@ -27,7 +27,7 @@ The *testing* instances are used at the end of the process, to measure the perfo
 
 The *validation* data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.
 
-![Test](../diagrams/cross-validation.png){#fig-crossvalidation-overview}
+![Overview of the cross-validation process, illustrating two splits using the k-folds strategy (@sec-crossvalidation-kfolds). The testing dataset is not used until we are ready to evaluate the predicted performance of the model after we have trained the best possible model.](../diagrams/cross-validation.png){#fig-crossvalidation-overview}
 
 The difference between testing and validation is largely a difference of *intent*. When we want to provide an *a posteriori* assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let's look at each of these datasets in turn. The differences between these three datasets are summarized in @tbl-splits-models.
 
