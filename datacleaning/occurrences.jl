@@ -4,19 +4,18 @@ import CSV
 using SpeciesDistributionToolkit
 using CairoMakie
 
-spatial_extent = (left = 4.0, bottom = 55.0, right = 29.0, top = 72.0)
-args = (resolution = 5.0, )
+spatial_extent = (left = 8.412, bottom = 41.325, right = 9.662, top = 43.060)
+dataprovider = RasterData(CHELSA1, BioClim)
 
-dataprovider = RasterData(WorldClim2, BioClim)
-
-temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent..., args...)
+temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
 heatmap(temperature, colormap=:lajolla)
 
 # Data
-BIOX = [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)]
-SpeciesDistributionToolkit._write_geotiff("data/general/rangifer-layers.tiff", BIOX)
+BIOX = convert.(Float32, [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
+#LULC = convert.(Float32, [SimpleSDMPredictor(RasterData(EarthEnv, LandCover); full=true, layer = l, spatial_extent...) for l in layers(RasterData(EarthEnv, LandCover))])
+SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
-rangifer = taxon("Rangifer tarandus tarandus"; strict = false)
+sitta = taxon("Sitta whiteheadi"; strict = false)
 query = [
     "occurrenceStatus" => "PRESENT",
     "hasCoordinate" => true,
@@ -24,18 +23,16 @@ query = [
     "decimalLongitude" => (spatial_extent.left, spatial_extent.right),
     "limit" => 300,
 ]
-presences = occurrences(rangifer, query...)
-for i in 1:20
-    @info i
+presences = occurrences(sitta, query...)
+while length(presences) < count(presences)
     occurrences!(presences)
 end
 
 presencelayer = mask(temperature, presences, Bool)
 heatmap(presencelayer)
 
-background = pseudoabsencemask(WithinRadius, presencelayer; distance = 200.0)
-buffer = pseudoabsencemask(WithinRadius, presencelayer; distance = 50.0)
-bgmask = .!(background .| (.! buffer))
+background = pseudoabsencemask(DistanceToEvent, presencelayer)
+bgmask = background
 
 heatmap(bgmask)
 
@@ -45,12 +42,12 @@ heatmap(
     axis = (; aspect = DataAspect()),
     figure = (; resolution = (800, 500)),
 )
-heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = SpeciesDistributionToolkit.sample(bgmask, floor(Int, 0.5sum(presencelayer)))
+bgpoints = backgroundpoints((x -> x^1.2).(bgmask), round(Int, 0.8sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
+replace!(presencelayer, false => nothing)
 
 heatmap(
     temperature;
@@ -58,13 +55,12 @@ heatmap(
     axis = (; aspect = DataAspect()),
     figure = (; resolution = (800, 500)),
 )
-heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
-scatter!(presences; color = :black)
+#heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
+scatter!(keys(presencelayer); color = :black)
 scatter!(keys(bgpoints); color = :red)
 current_figure()
 
 # Get the data
-replace!(presencelayer, false => nothing)
 pr = keys(presencelayer)
 ab = keys(bgpoints)
 
@@ -82,4 +78,4 @@ df = DataFrame(latitude=lat, longitude=lon, presence=pre)
 for (i, l) in enumerate(layers(dataprovider))
     df[!,l] = biox[i]
 end
-CSV.write("data/general/rangifer-observations.csv", df)
+CSV.write("data/general/observations.csv", df)

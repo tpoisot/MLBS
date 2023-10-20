@@ -3,8 +3,8 @@ project:
   output-dir: docs
   execute-dir: project
 
-execute: 
-  freeze: auto
+execute:
+  freeze: true
 
 book:
   title: "Data Science for Biodiversity Scientists"

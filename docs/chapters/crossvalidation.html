@@ -229,7 +229,7 @@ div.csl-indent {
   <li><a href="#leave-p-out" id="toc-leave-p-out" class="nav-link" data-scroll-target="#leave-p-out"><span class="header-section-number">4.3.2</span> Leave-p-out</a></li>
   <li><a href="#leave-one-out" id="toc-leave-one-out" class="nav-link" data-scroll-target="#leave-one-out"><span class="header-section-number">4.3.3</span> Leave-one-out</a></li>
   <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">4.3.4</span> k-fold</a></li>
-  <li><a href="#monte-carlo" id="toc-monte-carlo" class="nav-link" data-scroll-target="#monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</a></li>
+  <li><a href="#sec-crossvalidation-montecarlo" id="toc-sec-crossvalidation-montecarlo" class="nav-link" data-scroll-target="#sec-crossvalidation-montecarlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</a></li>
   </ul></li>
   <li><a href="#application-when-do-cherry-blossom-bloom" id="toc-application-when-do-cherry-blossom-bloom" class="nav-link" data-scroll-target="#application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</a>
   <ul class="collapse">
@@ -401,8 +401,8 @@ Figure&nbsp;4.2: An illustration of a series of folds on a timeseries. The grey 
 </div>
 <p>The appropriate value of <span class="math inline">\(k\)</span> is often an unknown. It is common to use <span class="math inline">\(k = 10\)</span> as a starting point (tenfold cross-validation), but other values are justifiable based on data volume, or complexity of the model training, to name a few.</p>
 </section>
-<section id="monte-carlo" class="level3" data-number="4.3.5">
-<h3 data-number="4.3.5" class="anchored" data-anchor-id="monte-carlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</h3>
+<section id="sec-crossvalidation-montecarlo" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="sec-crossvalidation-montecarlo"><span class="header-section-number">4.3.5</span> Monte-Carlo</h3>
 <p>One limitation of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation <span class="citation" data-cites="roberts2017">(<a href="../references.html#ref-roberts2017" role="doc-biblioref">Roberts <em>et al.</em> 2017</a>)</span>. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.</p>
 <p>One issue with Monte-Carlo cross-validation is that we lose the guarantee that every observation will be used for training at least once (and similarly for validation). Trivially, this becomes less of an issue when we increase the number of replications, but then this suffers from the same issues as LpOCV, namely the unreasonable computational requirements.</p>
 </section>

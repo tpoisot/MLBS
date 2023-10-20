@@ -199,7 +199,7 @@ current_figure()
 
 The appropriate value of $k$ is often an unknown. It is common to use $k = 10$ as a starting point (tenfold cross-validation), but other values are justifiable based on data volume, or complexity of the model training, to name a few.
 
-### Monte-Carlo
+### Monte-Carlo {#sec-crossvalidation-montecarlo}
 
 One limitation of k-fold cross-validation is that the number of splits is limited by the amount of observations, especially if we want to ensure that there are enough samples in the validation data. To compensate for this, Monte-Carlo cross-validation is essentially the application (and averaging) of holdout validation an arbitrary number of times. Furthermore, the training and validation datasets can be constructed in order to account for specific constraints in the dataset, giving more flexibility than k-fold cross-validation [@roberts2017]. When the (computational) cost of training the model is high, and the dataset has specific structural constraints, Monte-Carlo cross-validation is a good way to generate data for hyperparameters tuning.
 
