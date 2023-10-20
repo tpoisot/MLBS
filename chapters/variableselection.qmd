@@ -172,15 +172,14 @@ Colorbar(fig[1,2], hm; tellheight=false)
 current_figure()
 ```
 
-###  Variable transformation
+### Variable transformation
 
 ```{julia}
-Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds; transformation=Whitening)
-@info mean(mcc.(Cv))
-Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds; transformation=PCA)
-@info mean(mcc.(Cv))
-Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
-@info mean(mcc.(Cv))
+for transformation in [nothing, PCA, Whitening]
+    x0 = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation=transformation)
+    Cx0v, Ccxt = crossvalidate(naivebayes, trainlabels, trainfeatures[:,x0], folds)
+    @info transformation, mean(mcc.(Cx0v))
+end
 ```
 
 ### Model selection

@@ -415,17 +415,16 @@ Figure&nbsp;6.1: Consequences of using the model with forward selection of varia
 </section>
 <section id="variable-transformation" class="level3" data-number="6.4.2">
 <h3 data-number="6.4.2" class="anchored" data-anchor-id="variable-transformation"><span class="header-section-number">6.4.2</span> Variable transformation</h3>
-<div id="70b3560d" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Cv, Ct <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures, folds; transformation<span class="op">=</span>Whitening)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cv))</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>Cv, Ct <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures, folds; transformation<span class="op">=</span>PCA)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cv))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>Cv, Ct <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures, folds)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cv))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="0f2d033e" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> transformation <span class="kw">in</span> [<span class="cn">nothing</span>, PCA, Whitening]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    x0 <span class="op">=</span> <span class="fu">forwardselection</span>(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation<span class="op">=</span>transformation)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    Cx0v, Ccxt <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures[<span class="op">:</span>,x0], folds)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@info</span> transformation, <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cx0v))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>[ Info: 0.834564721689295
-[ Info: 0.8155102760822984
-[ Info: 0.7939006962917837</code></pre>
+<pre><code>[ Info: (nothing, 0.8475122012187067)
+[ Info: (PCA, 0.7960082800779023)
+[ Info: (Whitening, 0.8046348666043028)</code></pre>
 </div>
 </div>
 </section>
