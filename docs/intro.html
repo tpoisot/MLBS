@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.386">
+<meta name="generator" content="quarto-1.4.429">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -167,32 +167,26 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/leakage.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./chapters/classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/explanations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -284,11 +278,11 @@ div.csl-indent {
 <p>In <a href="chapters/clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
 <p>In <a href="chapters/gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
 <p>In <a href="chapters/crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
-<p>In <a href="chapters/leakage.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
-<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
-<p>In <a href="chapters/variableselection.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.</p>
-<p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
-<p>In <a href="chapters/explanations.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-leakage</span>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
+<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-variable-selection</span>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.</p>
+<p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
+<p>In <a href="chapters/explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
 </section>
 <section id="some-rules-about-this-book" class="level2" data-number="1.3">
 <h2 data-number="1.3" class="anchored" data-anchor-id="some-rules-about-this-book"><span class="header-section-number">1.3</span> Some rules about this book</h2>

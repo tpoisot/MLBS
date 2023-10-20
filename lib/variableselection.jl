@@ -1,54 +1,47 @@
-function _run_on_folds(y, X, fold, model, performance, pool)
-    trn, vld = fold
-    foldmodel = model(y[trn], X[trn, pool])
-    foldvalid = vec(mapslices(foldmodel, X[vld, pool]; dims=2))
-    return performance(ConfusionMatrix(foldvalid, y[vld]))
-end
-
-function backwardselection(y, X, folds, model, performance)
-    available_variables = collect(axes(X, 2))
+function backwardselection(model, y, X, folds, perf, args...; kwargs...)
+    pool = collect(axes(X, 2))
     best_perf = -Inf
-    while ~isempty(available_variables)
-        scores = zeros(length(available_variables))
-        for i in eachindex(available_variables)
-            variable_pool = deleteat!(copy(available_variables), i)
-            scores[i] = mean([_run_on_folds(y, X, fold, model, performance, variable_pool) for fold in folds])
+    while ~isempty(pool)
+        scores = zeros(length(pool))
+        for i in eachindex(pool)
+            this_pool = deleteat!(copy(pool), i)
+            scores[i] = mean(perf.(first(crossvalidate(model, y, X[:,this_pool], folds, args...; kwargs...))))
         end
         best, i = findmax(scores)
         if best > best_perf
             best_perf = best
-            deleteat!(available_variables, i)
+            deleteat!(pool, i)
         else
             break
         end
     end
-    return available_variables
+    return pool
 end
 
-function constrainedselection(y, X, folds, model, performance, retained_variables)
-    available_variables = filter(p -> !(p in retained_variables), collect(axes(X, 2)))
+function constrainedselection(model, y, X, folds, pool, perf, args...; kwargs...)
+    on_top = filter(p -> !(p in pool), collect(axes(X, 2)))
     best_perf = -Inf
-    while ~isempty(available_variables)
-        scores = zeros(length(available_variables))
-        for i in eachindex(available_variables)
-            variable_pool = push!(copy(retained_variables), available_variables[i])
-            scores[i] = mean([_run_on_folds(y, X, fold, model, performance, variable_pool) for fold in folds])
+    while ~isempty(on_top)
+        scores = zeros(length(on_top))
+        for i in eachindex(on_top)
+            this_pool = push!(copy(pool), on_top[i])
+            scores[i] = mean(perf.(first(crossvalidate(model, y, X[:,this_pool], folds, args...; kwargs...))))
         end
         best, i = findmax(scores)
         if best > best_perf
             best_perf = best
-            push!(retained_variables, available_variables[i])
-            deleteat!(available_variables, i)
+            push!(pool, on_top[i])
+            deleteat!(on_top, i)
         else
             break
         end
     end
-    return retained_variables
+    return pool
 end
 
-function forwardselection(y, X, folds, model, performance)
-    retained_variables = Int64[]
-    constrainedselection(y, X, folds, model, performance, retained_variables)
+function forwardselection(model, y, X, folds, perf, args...; kwargs...)
+    pool = Int64[]
+    constrainedselection(model, y, X, folds, pool, perf, args...; kwargs...)
 end
 
 function bootstrap(y, X; n=50)

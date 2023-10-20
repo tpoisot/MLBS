@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.386">
+<meta name="generator" content="quarto-1.4.429">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 7&nbsp; Variable selection</title>
+<title>Data Science for Biodiversity Scientists - 6&nbsp; Variable selection and feature engineering</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -68,7 +122,7 @@ ul.task-list li input[type="checkbox"] {
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -77,7 +131,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/variableselection.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/variableselection.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -149,32 +203,26 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -193,16 +241,34 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-variableselection-curse" id="toc-sec-variableselection-curse" class="nav-link active" data-scroll-target="#sec-variableselection-curse"><span class="header-section-number">7.1</span> The curse of dimensionality</a></li>
+  <li><a href="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage" id="toc-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage" class="nav-link active" data-scroll-target="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage"><span class="header-section-number">6.1</span> What is data leakage?</a>
+  <ul class="collapse">
+  <li><a href="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences" id="toc-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences" class="nav-link" data-scroll-target="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences"><span class="header-section-number">6.1.1</span> Consequences of data leakage</a></li>
+  <li><a href="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid" id="toc-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid" class="nav-link" data-scroll-target="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid"><span class="header-section-number">6.1.2</span> Avoiding data leakage</a></li>
+  </ul></li>
+  <li><a href="#variable-selection" id="toc-variable-selection" class="nav-link" data-scroll-target="#variable-selection"><span class="header-section-number">6.2</span> Variable selection</a>
+  <ul class="collapse">
+  <li><a href="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse" id="toc-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse" class="nav-link" data-scroll-target="#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse"><span class="header-section-number">6.2.1</span> The curse of dimensionality</a></li>
+  <li><a href="#step-wise-approaches-to-variable-selection" id="toc-step-wise-approaches-to-variable-selection" class="nav-link" data-scroll-target="#step-wise-approaches-to-variable-selection"><span class="header-section-number">6.2.2</span> Step-wise approaches to variable selection</a></li>
+  <li><a href="#removal-of-colinear-variables" id="toc-removal-of-colinear-variables" class="nav-link" data-scroll-target="#removal-of-colinear-variables"><span class="header-section-number">6.2.3</span> Removal of colinear variables</a></li>
+  </ul></li>
+  <li><a href="#multivariate-transformations" id="toc-multivariate-transformations" class="nav-link" data-scroll-target="#multivariate-transformations"><span class="header-section-number">6.3</span> Multivariate transformations</a></li>
+  <li><a href="#application-optimal-variables-for-the-sitta-whiteheadi-model" id="toc-application-optimal-variables-for-the-sitta-whiteheadi-model" class="nav-link" data-scroll-target="#application-optimal-variables-for-the-sitta-whiteheadi-model"><span class="header-section-number">6.4</span> Application: optimal variables for the <em>Sitta whiteheadi</em> model</a>
+  <ul class="collapse">
+  <li><a href="#variable-selection-1" id="toc-variable-selection-1" class="nav-link" data-scroll-target="#variable-selection-1"><span class="header-section-number">6.4.1</span> Variable selection</a></li>
+  <li><a href="#variable-transformation" id="toc-variable-transformation" class="nav-link" data-scroll-target="#variable-transformation"><span class="header-section-number">6.4.2</span> Variable transformation</a></li>
+  <li><a href="#model-selection" id="toc-model-selection" class="nav-link" data-scroll-target="#model-selection"><span class="header-section-number">6.4.3</span> Model selection</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">6.5</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-variable-selection" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span></h1>
+<h1 class="title"><span id="sec-predictors" class="quarto-section-identifier"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></span></h1>
 </div>
 
 
@@ -219,12 +285,196 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="sec-variableselection-curse" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="sec-variableselection-curse"><span class="header-section-number">7.1</span> The curse of dimensionality</h2>
-<p>It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!</p>
-<p>The “curse of dimensionality” is the common term of everything breaking down when the dimensions of a problem increase. In our perspective, where we rely on the resemblance between features to make a prediction, increasing the dimensions of a problem means adding features, and it has important consequences on the distance between observations. Picture two points positioned at random on the unit interval: the average distance between them is 1/3. If we add one dimension, keeping two points but turning this line into a cube, the average distance would be about 1/2. For a cube, about 2/3. For <span class="math inline">\(n\)</span> dimensions, we can figure out that the average distance grows like <span class="math inline">\(\sqrt{n/6 + c}\)</span>, which is to say that when we add more dimensions, we make the average distance between two points go to infinity.</p>
+<p>In <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, we introduced a simple classifier trained on a dataset of presence and pseudo-absences of a species (<em>Sitta whiteheadi</em>), which we predicted using the mean annual temperature as well as the annual total precipitation. This choice of variables was motivated by our knowledge of the fact that most species tend to have some temperature and precipitation they are best suited to. But we can approach the exercise of selecting predictive variables in a far more formal way, and this will form the core of this chapter. Specifically, we will examine two related techniques: variable selection, and feature engineering.</p>
+<p>There are two reasons to think about variable selection and feature engineering – first, the variables we have may not all be predictive for the specific problem we are trying to solve; second, the variables may not be expressed in the correct “way” to solve our problem. This calls for a joint approach of selecting and transforming features. Before we do anything to our features (transformation or selection), we need to talk about data leakage.</p>
+<section id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage"><span class="header-section-number">6.1</span> What is data leakage?</h2>
+<p>Data leakage is a concept that is, if you can believe it, grosser than it sounds.</p>
+<p>The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly <em>will</em>, lead to bad models, which is to say (as we discussed in <a href="gradientdescent.html#sec-gradientdescent-trainedmodel" class="quarto-xref"><span>Section&nbsp;3.1</span></a>), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions <span class="citation" data-cites="amarasinghe2023">(<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">Amarasinghe <em>et al.</em> 2023</a>)</span>. As illustrated by <span class="citation" data-cites="stock2023">Stock <em>et al.</em> (<a href="../references.html#ref-stock2023" role="doc-biblioref">2023</a>)</span>, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.</p>
+<section id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences"><span class="header-section-number">6.1.1</span> Consequences of data leakage</h3>
+<p>We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning <span class="citation" data-cites="nisbet2018">(<a href="../references.html#ref-nisbet2018" role="doc-biblioref">Nisbet <em>et al.</em> 2018</a>)</span>. Data leakage happens information “leaks” from the training conditions to the evaluation conditions; in other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time <span class="citation" data-cites="Peterson2018">(<a href="../references.html#ref-Peterson2018" role="doc-biblioref">Peterson <em>et al.</em> 2018</a>)</span>.</p>
+<p>It is worth stopping for a moment to consider what these “real-life situations” are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are <em>applying</em> a model, we can start from the model <em>only</em>. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data. We have discussed this situation in <span class="quarto-unresolved-ref">?sec-crossvalidation-testing</span>: the test of a model is conducted on data that have never been used for training, because we want to evaluate its performance in the conditions where it will be applied.</p>
+<p>Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the testing data from the rest of the data. We can illustrate this with an example. Let’s say we want to work on a time series of population size, such as provided by the <em>BioTIME</em> project <span class="citation" data-cites="dornelas2018">(<a href="../references.html#ref-dornelas2018" role="doc-biblioref">Dornelas <em>et al.</em> 2018</a>)</span>. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to validate these models, and a last one for testing.</p>
+<p>Congratulations! We have created data leakage! Because we are splitting our time series at random, the model will likely have been trained using data that date from <em>after</em> the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.</p>
+</section>
+<section id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid"><span class="header-section-number">6.1.2</span> Avoiding data leakage</h3>
+<p>The most common advice given in order to prevent data leakage is the “learn/predict separation” <span class="citation" data-cites="kaufman2011">(<a href="../references.html#ref-kaufman2011" role="doc-biblioref">Kaufman <em>et al.</em> 2011</a>)</span>. Simply put, this means that whatever happens to the data used for training cannot be <em>simultaneously</em> applied to the data used for testing (or validation).</p>
+<p>Assume that we want to transform our data using a Principal Component Analysis (PCA; <span class="citation" data-cites="pearson1901">Pearson (<a href="../references.html#ref-pearson1901" role="doc-biblioref">1901</a>)</span>). Ecologists often think of PCA as a technique to explore data <span class="citation" data-cites="legendre2012">(<a href="../references.html#ref-legendre2012" role="doc-biblioref">Legendre &amp; Legendre 2012</a>)</span>, but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.</p>
+<p>If we have a dataset <span class="math inline">\(\mathbf{X}\)</span>, which we split into two components <span class="math inline">\(\mathbf{X}_0\)</span> for training ,and <span class="math inline">\(\mathbf{X}_1\)</span> for validation, there are two ways to use a PCA to transform these data. The first is <span class="math inline">\(\mathbf{T} = \mathbf{X}\mathbf{W}\)</span>, which uses the full dataset. When we predict the position of the validation data, we could use the transformation <span class="math inline">\(\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}\)</span>, but this would introduce data leakage: we have trained the transformation we apply to <span class="math inline">\(\mathbf{X}_1\)</span> using data that are already in <span class="math inline">\(\mathbf{X}_1\)</span>, and therefore we have not respected the learn/predict separation. This mistake is extremely common in the species distribution literature <span class="citation" data-cites="demarco2018">(see <em>e.g.</em> <a href="../references.html#ref-demarco2018" role="doc-biblioref">De Marco &amp; Nóbrega 2018</a>)</span>.</p>
+<p>The second (correct) way to handle this situation is to perform our PCA using <span class="math inline">\(\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0\)</span>, which is to say, the weights of our PCA are derived <em>only</em> from the training data. In this situation, whenever we project the data in the validation set using <span class="math inline">\(\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0\)</span>, we respect the learn/predict separation: the transformation of <span class="math inline">\(\mathbf{X}_1\)</span> is entirely independent from the data contained in <span class="math inline">\(\mathbf{X}_1\)</span>.</p>
+<section id="how-to-work-in-practice" class="level4" data-number="6.1.2.1">
+<h4 data-number="6.1.2.1" class="anchored" data-anchor-id="how-to-work-in-practice"><span class="header-section-number">6.1.2.1</span> How to work in practice?</h4>
+<p>Although avoiding data leakage is a tricky problem, there is a very specific mindset we can adopt that goes a long way towards not introducing it in our analyses, and it is as follows: <em>every data transformation step is a modeling step that is part of the learning process</em>. We do not, for example, apply a PCA and train the model on the projected variables – we feed raw data into a model, the first step of which is to perform this PCA for us.</p>
+<p>This approach works because everything that can be represented as numbers is a model that can be trained.</p>
+<p>If you want to transform a variable using the z-score, this is a model! It has two parameters that you can learn from the data, <span class="math inline">\(\mu\)</span> (the average of the variable) and <span class="math inline">\(\sigma\)</span> (its standard deviation). You can apply it to a data point <span class="math inline">\(y\)</span> with <span class="math inline">\(\hat y = (y - \mu)\sigma^{-1}\)</span>. Because this is a model, we need a dataset to learn these parameters from, and because we want to maintain the learn/predict separation, we will use the train dataset to get the values of <span class="math inline">\(\mu_0\)</span> and <span class="math inline">\(\sigma_0\)</span>. This way, when we want to get the z-score of a new observation, for example from the testing dataset, we can get it using <span class="math inline">\(\hat y_1 = (y_1 - \mu_0)\sigma_0^{-1}\)</span>. The data transformation is entirely coming from information that was part of the training set.</p>
+<p>One way to get the learn/predict transformation stupendously wrong is to transform our validation, testing, or prediction data using <span class="math inline">\(\hat y_1 = (y_1 - \mu_1)\sigma_1^{-1}\)</span>. This can be easily understood with an example. Assume that the variable <span class="math inline">\(y_0\)</span> is the temperature in our training dataset. We are interested in making a prediction in a world that is 2 degrees hotter, uniformly, which is to say that for whatever value of <span class="math inline">\(y_0\)</span>, the corresponding data point we use for prediction is <span class="math inline">\(y_1 = y_0 + 2\)</span>. If we take the z-score of this new value based on its own average and standard deviation, a temperature two degrees warmer in the prediction data will have the same z-score as its original value, or in other words, we have hidden the fact that there is a change in our predictors!</p>
+<p>Treating the data preparation step as a part of the learning process, which is to say that we learn every transformation on the training set, and retain this transformation as part of the prediction process, we are protecting ourselves against both data leakage <em>and</em> the hiding of relevant changes in our predictors.</p>
+</section>
+</section>
+</section>
+<section id="variable-selection" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="variable-selection"><span class="header-section-number">6.2</span> Variable selection</h2>
+<section id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse"><span class="header-section-number">6.2.1</span> The curse of dimensionality</h3>
+<p>The number of variables we use for prediction is the number of dimensions of a problem. It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!</p>
+<p>The “curse of dimensionality” is the common term of everything breaking down when the dimensions of a problem increase. In our perspective, where we rely on the resemblance between features to make a prediction, increasing the dimensions of a problem means adding features, and it has important consequences on the distance between observations. Picture two points positioned at random on the unit interval: the average distance between them is 1/3. If we add one dimension, keeping two points but turning this line into a cube, the average distance would be about 1/2. For a cube, about 2/3. For <span class="math inline">\(n\)</span> dimensions, we can figure out that the average distance grows like <span class="math inline">\(\sqrt{n/6 + c}\)</span>, which is to say that when we add more dimensions, we make the average distance between two points go to infinity. This effect is also affecting ecological studies <span class="citation" data-cites="smith2017">(<em>e.g.</em> <a href="../references.html#ref-smith2017" role="doc-biblioref">Smith <em>et al.</em> 2017</a>)</span>.</p>
+<p>Therefore, we need to approach the problem of “which variables to use” with a specific mindset: we want a lot of information for our model, but not so much that the space in which the predictors exist turns immense. There are techniques for this.</p>
+</section>
+<section id="step-wise-approaches-to-variable-selection" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="step-wise-approaches-to-variable-selection"><span class="header-section-number">6.2.2</span> Step-wise approaches to variable selection</h3>
+</section>
+<section id="removal-of-colinear-variables" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="removal-of-colinear-variables"><span class="header-section-number">6.2.3</span> Removal of colinear variables</h3>
+<p>Co-linearity of variables is challenging for all types of ecological models <span class="citation" data-cites="graham2003">(<a href="../references.html#ref-graham2003" role="doc-biblioref">Graham 2003</a>)</span>. In the case of species distribution models <span class="citation" data-cites="demarco2018">(<a href="../references.html#ref-demarco2018" role="doc-biblioref">De Marco &amp; Nóbrega 2018</a>)</span>, the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data <span class="citation" data-cites="dormann2012">(<a href="../references.html#ref-dormann2012" role="doc-biblioref">Dormann <em>et al.</em> 2012</a>)</span>. For this reason, it is a</p>
+</section>
+</section>
+<section id="multivariate-transformations" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="multivariate-transformations"><span class="header-section-number">6.3</span> Multivariate transformations</h2>
+<p>Delicious. Finally some good fucking quantitative ecology.</p>
+</section>
+<section id="application-optimal-variables-for-the-sitta-whiteheadi-model" class="level2 page-columns page-full" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="application-optimal-variables-for-the-sitta-whiteheadi-model"><span class="header-section-number">6.4</span> Application: optimal variables for the <em>Sitta whiteheadi</em> model</h2>
+<p>Before we start, we can re-establish the baseline performance of the model from <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>. In this (and the next) chapters, we will perform k-folds cross-validation (see <span class="quarto-unresolved-ref">?sec-crossvalidation-kfolds</span> for a refresher), using <span class="math inline">\(k=15\)</span>. This strategy gives an average MCC of 0.76, which represents our “target”: any model with a higher MCC will be “better” according to our criteria.</p>
+<p>In a sense, this initial model was <em>already</em> coming from a variable selection process, only we did not use a quantitative criteria to include variables. And so, it is a good idea to evaluate whether our model was worse than a model including <em>all</em> the variables. Running the NBC again using all 19 BioClim variables, we get an average MCC on the validation data of 0.794. This is a small increase, but an increase nevertheless – our dataset had information that was not captured by temperature and precipitation.</p>
+<p>In this section, we will start by evaluating the efficiency of different approaches to variable selection, then of variable transformation, then merge these two together to provide a model that is optimal with regards to the training data we have. In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>).</p>
+<section id="variable-selection-1" class="level3 page-columns page-full" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="variable-selection-1"><span class="header-section-number">6.4.1</span> Variable selection</h3>
+<table class="table">
+<caption>Consequences of different variable selection approaches on the performance of the model</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model version</th>
+<th>Variables</th>
+<th>MCC</th>
+<th>PPV</th>
+<th>NPV</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Temperature, precipitation</td>
+<td>2</td>
+<td>0.76</td>
+<td>0.901</td>
+<td>0.859</td>
+</tr>
+<tr class="even">
+<td>All variables</td>
+<td>19</td>
+<td>0.794</td>
+<td>0.922</td>
+<td>0.859</td>
+</tr>
+<tr class="odd">
+<td>Backward selection</td>
+<td>9</td>
+<td>0.846</td>
+<td>0.944</td>
+<td>0.859</td>
+</tr>
+<tr class="even">
+<td>Forward selection</td>
+<td>6</td>
+<td>0.848</td>
+<td>0.946</td>
+<td>0.859</td>
+</tr>
+<tr class="odd">
+<td>Forward selection with temperature and precipitation</td>
+<td>8</td>
+<td>0.83</td>
+<td>0.94</td>
+<td>0.859</td>
+</tr>
+</tbody>
+</table>
+<p>Based on the results presented in <strong>TBL</strong>, the model trained on variables selected using forward selection gave the best results.</p>
+<div id="cell-fig-predictors-rangediff" class="cell page-columns page-full" data-execution_count="8">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
+<div id="fig-predictors-rangediff" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-predictors-rangediff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="variableselection_files/figure-html/fig-predictors-rangediff-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-predictors-rangediff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Consequences of using the model with forward selection of variables on the predicted range of <em>Sitta whiteheadi</em>. The negative values represent range that was predicted by the original model but is not predicted by the optimized model, while the positive values represent new predictions. It is reinsuring to see that the overwhelming majority of the range is shared by both models.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="variable-transformation" class="level3" data-number="6.4.2">
+<h3 data-number="6.4.2" class="anchored" data-anchor-id="variable-transformation"><span class="header-section-number">6.4.2</span> Variable transformation</h3>
+<div id="70b3560d" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Cv, Ct <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures, folds; transformation<span class="op">=</span>Whitening)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cv))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>Cv, Ct <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures, folds; transformation<span class="op">=</span>PCA)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cv))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>Cv, Ct <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures, folds)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cv))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[ Info: 0.834564721689295
+[ Info: 0.8155102760822984
+[ Info: 0.7939006962917837</code></pre>
+</div>
+</div>
+</section>
+<section id="model-selection" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="model-selection"><span class="header-section-number">6.4.3</span> Model selection</h3>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6.5</span> Conclusion</h2>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
+Amarasinghe, K., Rodolfa, K.T., Lamba, H. &amp; Ghani, R. (2023). <a href="https://doi.org/10.1017/dap.2023.2">Explainable machine learning for public policy: Use cases, gaps, and research directions</a>. <em>Data &amp; Policy</em>, 5.
+</div>
+<div id="ref-demarco2018" class="csl-entry" role="listitem">
+De Marco, P. &amp; Nóbrega, C.C. (2018). <a href="https://doi.org/10.1371/journal.pone.0202403">Evaluating collinearity effects on species distribution models: An approach based on virtual species simulation</a>. <em>PLOS ONE</em>, 13, e0202403.
+</div>
+<div id="ref-dormann2012" class="csl-entry" role="listitem">
+Dormann, C.F., Elith, J., Bacher, S., Buchmann, C., Carl, G., Carré, G., <em>et al.</em> (2012). <a href="https://doi.org/10.1111/j.1600-0587.2012.07348.x">Collinearity: a review of methods to deal with it and a simulation study evaluating their performance</a>. <em>Ecography</em>, 36, 27–46.
+</div>
+<div id="ref-dornelas2018" class="csl-entry" role="listitem">
+Dornelas, M., Antão, L.H., Moyes, F., Bates, A.E., Magurran, A.E., Adam, D., <em>et al.</em> (2018). <a href="https://doi.org/10.1111/geb.12729">BioTIME: A database of biodiversity time series for the Anthropocene</a>. <em>Global Ecology and Biogeography</em>, 27, 760–786.
+</div>
+<div id="ref-graham2003" class="csl-entry" role="listitem">
+Graham, M.H. (2003). <a href="https://doi.org/10.1890/02-3114">CONFRONTING MULTICOLLINEARITY IN ECOLOGICAL MULTIPLE REGRESSION</a>. <em>Ecology</em>, 84, 2809–2815.
+</div>
+<div id="ref-kaufman2011" class="csl-entry" role="listitem">
+Kaufman, S., Rosset, S. &amp; Perlich, C. (2011). <a href="https://doi.org/10.1145/2020408.2020496">Leakage in data mining</a>. <em>Proceedings of the 17th ACM SIGKDD international conference on Knowledge discovery and data mining</em>.
+</div>
+<div id="ref-legendre2012" class="csl-entry" role="listitem">
+Legendre, P. &amp; Legendre, L. (2012). <em>Numerical ecology</em>. Developments in environmental modelling. Third English edition. Elsevier, Oxford, UK.
+</div>
+<div id="ref-nisbet2018" class="csl-entry" role="listitem">
+Nisbet, R., Miner, G., Yale, K., Elder, J.F. &amp; Peterson, A.F. (2018). <em>Handbook of statistical analysis and data mining applications</em>. Second edition. Academic Press, London.
+</div>
+<div id="ref-pearson1901" class="csl-entry" role="listitem">
+Pearson, K. (1901). <a href="https://doi.org/10.1080/14786440109462720">LIII. <span><em>On lines and planes of closest fit to systems of points in space</em></span></a>. <em>The London, Edinburgh, and Dublin Philosophical Magazine and Journal of Science</em>, 2, 559–572.
+</div>
+<div id="ref-Peterson2018" class="csl-entry" role="listitem">
+Peterson, A.T., Asase, A., Canhos, D., Souza, S. de &amp; Wieczorek, J. (2018). <a href="https://doi.org/10.3897/bdj.6.e26826">Data leakage and loss in biodiversity informatics</a>. <em>Biodiversity Data Journal</em>, 6.
+</div>
+<div id="ref-smith2017" class="csl-entry" role="listitem">
+Smith, M.L., Ruffley, M., Espíndola, A., Tank, D.C., Sullivan, J. &amp; Carstens, B.C. (2017). <a href="https://doi.org/10.1111/mec.14223">Demographic model selection using random forests and the site frequency spectrum</a>. <em>Molecular Ecology</em>, 26, 4562–4573.
+</div>
+<div id="ref-stock2023" class="csl-entry" role="listitem">
+Stock, A., Gregr, E.J. &amp; Chan, K.M.A. (2023). <a href="https://doi.org/10.1038/s41559-023-02162-1">Data leakage jeopardizes ecological applications of machine learning</a>. <em>Nature Ecology &amp; Evolution</em>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

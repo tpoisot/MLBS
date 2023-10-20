@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.386">
+<meta name="generator" content="quarto-1.4.429">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,7 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -172,32 +172,26 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -266,9 +260,9 @@ div.csl-indent {
 <section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
 <p>Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument <span class="citation" data-cites="morrison1999">(the model itself, see <em>e.g.</em> <a href="../references.html#ref-morrison1999" role="doc-biblioref">Morrison &amp; Morgan 1999</a>)</span>. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.</p>
-<p>As we will see in this chapter, then in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, and finally in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the <em>machine</em> we train in machine learning.</p>
+<p>As we will see in this chapter, then in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, and finally in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the <em>machine</em> we train in machine learning.</p>
 <p>Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we ended up with a machine (the trained <em>k</em>-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.</p>
-<p>For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to <em>explain</em> how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;9</span></a>), and is more related to explaining the process, the “outer core” of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?</p>
+<p>For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to <em>explain</em> how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>), and is more related to explaining the process, the “outer core” of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?</p>
 </section>
 <section id="sec-gradientdescent-problem" class="level2 page-columns page-full" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
@@ -311,17 +305,17 @@ Figure&nbsp;3.1: We have assumed that the relationship between <span class="math
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In data science, things often have multiple names. This is true of loss functions, and this will be even more true on other things later.</p>
 </div></div><p>This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in <a href="#tbl-gradientdescent-regressionloss" class="quarto-xref">Table&nbsp;<span>3.1</span></a>.</p>
-<div id="tbl-gradientdescent-regressionloss" data-tbl-colwidths="[25,25,50]" class="anchored">
+<div id="tbl-gradientdescent-regressionloss" class="anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-gradientdescent-regressionloss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.1: List of common loss functions for regression problems {tbl-colwidths='[25,25,50]'}
+Table&nbsp;3.1: List of common loss functions for regression problems
 </figcaption>
 <div aria-describedby="tbl-gradientdescent-regressionloss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="table">
 <colgroup>
-<col style="width: 47%">
-<col style="width: 26%">
-<col style="width: 26%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 50%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -411,7 +405,7 @@ p := p - \eta\times \nabla f(p) \,.
 <p>We will not get back to the problem exposed in <a href="#fig-gradient-data" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>, and use gradient descent to fit the parameters of the model defined as <span class="math inline">\(\hat y \approx \beta_0 + \beta_1 \times x\)</span>, where, using the notation introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>, <span class="math inline">\(\hat y\)</span> is the natural log of the number of interactions (what we want to predict), <span class="math inline">\(x\)</span> is the natural log of the species richness (our predictor), and <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are the parameters of the model.</p>
 <section id="the-things-we-wont-do" class="level3" data-number="3.4.1">
 <h3 data-number="3.4.1" class="anchored" data-anchor-id="the-things-we-wont-do"><span class="header-section-number">3.4.1</span> The things we won’t do</h3>
-<p>At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the units of species and interactions (after dealing with the natural log, of course). In addition, as we will see in <a href="leakage.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, applying a transformation to the data too soon can be a dangerous thing. We will have to live with raw features for a few more chapters.</p>
+<p>At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the units of species and interactions (after dealing with the natural log, of course). In addition, as we will see in <span class="quarto-unresolved-ref">?sec-leakage</span>, applying a transformation to the data too soon can be a dangerous thing. We will have to live with raw features for a few more chapters.</p>
 <p>In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these data points. We will get back to this practice (cross-validation) in a lot more details in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.</p>
 </section>
 <section id="starting-the-learning-process" class="level3" data-number="3.4.2">
@@ -433,7 +427,7 @@ Table&nbsp;3.2: This table shows the change in the model, as measured by the los
 </figcaption>
 <div aria-describedby="tbl-gradient-attempt-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display">
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<table class="cell table table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
 <tr class="header headerLastRow">
 <th style="text-align: right;" data-quarto-table-cell-role="th">Step</th>

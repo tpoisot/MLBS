@@ -57,7 +57,7 @@ The issue with this dataset as a validation dataset is that is does not matches 
 
 Validation is, in particular, very difficult when the dataset we use for training has extreme events [@bellocchi2010]. Similarly, the efficiency of validation datasets can be limited if it reflects the same biases as the training data [@martinez-meyer2005]. Recall that this validation dataset is used to decide on the ideal conditions to train the final model before testing (and eventually, deployment); it is, therefore, extremely important to get it right. A large number of techniques to split data [@søgaard2021; @vandergoot2021] use heuristics to minimize the risk of picking the wrong validation data.
 
-### Testing
+### Testing {#sec-crossvalidation-testing}
 
 The testing dataset is special. The model has *never* touched it. Not during training, and not for validation. For this reason, we can give it a very unique status: it is an analogue to data that are newly collected, and ready to be passed through the trained model in order to make a prediction.
 
@@ -152,7 +152,7 @@ Oh well.
 
 The leave-one-out cross-validation (LOOCV) is a special case of LpOCV with $p=1$. Note that it is a lot faster to run than LpOCV, because $\binom{n}{1}=n$, and so the validation step runs in $\mathcal{O}(n)$ (LpOCV runs in $\mathcal{O}(n!)$). LOOCV is also an *exhaustive* cross-validation technique, as every possible way to split the dataset will be used for training and evaluation.
 
-### k-fold
+### k-fold {#sec-crossvalidation-kfolds}
 
 One of the most frequent cross-validation scheme is k-fold cross-validation. Under this approach, the dataset is split into $k$ equal parts (and so when $k = n$, this is also equivalent to LOOCV). Like with LOOCV, one desirable property of k-fold cross-validation is that each observation is used *exactly* one time to evaluate the model , and *exactly* $k-1$ times to train it.
 

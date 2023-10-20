@@ -393,14 +393,18 @@ When comparing the prediction to the spatial distribution of occurrences (@fig-c
 ```{julia}
 #| echo: false
 #| output: false
-_ptm_path = joinpath(@__DIR__, "..", "ptm")
-modelpath = joinpath(_ptm_path, "sdm-initial.jld")
+_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
+if !ispath(_ptm_path)
+    mkdir(_ptm_path)
+end
+modelpath = joinpath(_ptm_path, "sdm-step-0.jld")
 y = select(raw, :presence).presence
 X = Matrix(select(raw, Not(:presence)))
 JLD.save(
     modelpath,
     "testing", (y[testing_idx], X[testing_idx,:]),
     "training", (y[training_idx], X[training_idx,:]),
+    "variables", [1, 12]
 )
 ```
 

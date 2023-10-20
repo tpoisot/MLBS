@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.386">
+<meta name="generator" content="quarto-1.4.429">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,7 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -172,32 +172,26 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../chapters/leakage.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Data leakage</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Variable selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Learning curves and moving thresholds</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -271,7 +265,7 @@ div.csl-indent {
 <p>When a model is trained, it has learned from the data, we have tuned its hyper-parameters to ensure that it learned with the best possible conditions, and we have applied a measure of performance <em>after</em> the entire process is complete, to communicate how well we expect our model to work. These three tasks require three different datasets, and this is the purpose of splitting our data into groups.</p>
 <p>One of the issues when reading about splitting data is that the terminology can be muddy. For example, what constitutes a testing and validation set can largely be a matter of perspective. In many instances, testing and validation are used interchangeably, especially when there is a single model involved. Nevertheless, it helps to settle on a few guidelines here, before going into the details of what each dataset constitutes and how to assemble it.</p>
 <p>The <em>training</em> instances are examples that are given to the model during the training process. This dataset has the least ambiguous definition. The training data is defined by subtraction, in a sense, as whatever is left of the original data after we set aside testing and validation sets.</p>
-<p>The <em>testing</em> instances are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in <a href="leakage.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>.</p>
+<p>The <em>testing</em> instances are used at the end of the process, to measure the performance of a trained model with tuned hyper-parameters. If the training data are the lectures, testing data are the final exam: we can measure the performance of the model on this dataset and report it as the model performance we can expect when applying the model to new data. There is a very important, chapter-long, caveat about this last point, related to the potential of information leak between datasets, which is covered in <span class="quarto-unresolved-ref">?sec-leakage</span>.</p>
 <p>The <em>validation</em> data are used in-between, as part of the training process. They are (possibly) a subset of the training data that we use internally to check the performance of the model, often in order to tune its hyper-parameters, or as a way to report on the over-fitting of the model during the training process.</p>
 <p>The difference between testing and validation is largely a difference of <em>intent</em>. When we want to provide an <em>a posteriori</em> assessment of the model performance, the dataset we use to determine this performance is a testing dataset. When we want to optimize some aspect of the model, the data we use for this are the validation data. With this high-level perspective in mind, let’s look at each of these datasets in turn. The differences between these three datasets are summarized in <a href="#tbl-splits-models" class="quarto-xref">Table&nbsp;<span>4.1</span></a>.</p>
 <div id="tbl-splits-models" class="anchored">
@@ -363,7 +357,7 @@ Figure&nbsp;4.1: The raw data show a negative relationship between the temperatu
 </section>
 <section id="strategies-to-split-data" class="level2 page-columns page-full" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="strategies-to-split-data"><span class="header-section-number">4.3</span> Strategies to split data</h2>
-<p>Before seeing examples of strategies for cross-validation, it is important to consider the high-level perspective of the way we will perform the entire training sequence. First, we need to keep a testing dataset. Depending on the problem, it may be <em>feasible</em> or <em>desirable</em> to use an external testing dataset <span class="citation" data-cites="homeyer2022">(<a href="../references.html#ref-homeyer2022" role="doc-biblioref">Homeyer <em>et al.</em> 2022</a>)</span>. In problems for which the volume of data is limited (the 99.99% of biodiversity applications that do not involve metagenomics of remote sensing), this is almost impossible, and therefore we need to resort to removing a proportion of the data. It means that collected data will never be used for training, which is not ideal, but what we gain in return is a fairer appraisal of the performance of the model, which is a really advantageous trade-off. When the testing data are removed, we can start splitting the rest of the data in testing and validation sets. This can involve two broad categories of families: exhaustive splits (all data are used for training and evaluation), and non-exhaustive splits (the opposite; for once, the terminology makes sense!).</p>
+<p>Before seeing examples of strategies for cross-validation, it is important to consider the high-level perspective of the way we will perform the entire training sequence. First, we need to keep a testing dataset. Depending on the problem, it may be <em>feasible</em> or <em>desirable</em> to use an external testing dataset <span class="citation" data-cites="homeyer2022">(<a href="../references.html#ref-homeyer2022" role="doc-biblioref">Homeyer <em>et al.</em> 2022</a>)</span>. In problems for which the volume of data is limited (the 99.99% of biodiversity applications that do not involve metagenomics of remote sensing), this is almost impossible, and therefore we need to resort to removing a proportion of the data. It means that collected data will never be used for training, which is not ideal, but what we gain in return is a fairer appraisal of the performance of the model, which is a really advantageous trade-off. When the testing data are removed, we can start splitting the rest of the data in training and validation sets. This can involve two broad categories of families: exhaustive splits (all data are used for training and evaluation), and non-exhaustive splits (the opposite; for once, the terminology makes sense!).</p>
 <section id="holdout" class="level3" data-number="4.3.1">
 <h3 data-number="4.3.1" class="anchored" data-anchor-id="holdout"><span class="header-section-number">4.3.1</span> Holdout</h3>
 <p>The holdout method is what we used in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, in which we randomly selected some observations to be part of the validation data (which was, in practice, a testing dataset in this example), and kept the rest to serve as the training data. Holdout cross-validation is possibly the simplest technique, but it suffers from a few drawbacks.</p>
@@ -410,7 +404,7 @@ Figure&nbsp;4.2: An illustration of a series of folds on a timeseries. The grey 
 <section id="application-when-do-cherry-blossom-bloom" class="level2 page-columns page-full" data-number="4.4">
 <h2 data-number="4.4" class="anchored" data-anchor-id="application-when-do-cherry-blossom-bloom"><span class="header-section-number">4.4</span> Application: when do cherry blossom bloom?</h2>
 <p>The model we will train for this section is really simple: <span class="math inline">\(\text{bloom day} = m \times \text{temperature} + b\)</span>. This is a linear model, and one with a nice, direct biological interpretation: the average (baseline) day of bloom is <span class="math inline">\(b\)</span>, and each degree of temperature expected in March adds <span class="math inline">\(m\)</span> days to the bloom date. At this point, we <em>might</em> start thinking about the distribution of the response, and what type of GLM we should used, but no. Not today. Today, we want to iterate quickly, and so we will start with a model that is exactly as simple as it needs to be: this is, in our case, linear regression.</p>
-<p>At this point, we may be tempted to think a little more deeply about the variables and the structure of the model, to express the bloom day as a departure from the expected value, and similarly with the temperature, using for example the <em>z</em>-score. This is a transformation we will apply starting from <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, but in order to apply it properly, we need to consider some elements that will be introduced in <a href="leakage.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>. For this reason, we will not apply any transformation to the data yet; feel free to revisit this exercise after reading through <a href="leakage.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>.</p>
+<p>At this point, we may be tempted to think a little more deeply about the variables and the structure of the model, to express the bloom day as a departure from the expected value, and similarly with the temperature, using for example the <em>z</em>-score. This is a transformation we will apply starting from <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, but in order to apply it properly, we need to consider some elements that will be introduced in <span class="quarto-unresolved-ref">?sec-leakage</span>. For this reason, we will not apply any transformation to the data yet; feel free to revisit this exercise after reading through <span class="quarto-unresolved-ref">?sec-leakage</span>.</p>
 <p>This approach (start from a model that is suspiciously simple) is a good thing, for more than a few reasons. First, it gives us a baseline to compare more complicated models against. Second, it means that we do not need to focus on the complexity of the code (and the model) when building a pipeline for the analysis. Finally, and most importantly, it gives us a result very rapidly, which enables a loop of iterative model refinement on a very short timescale. Additionally, at least for this example, the simple models often work well enough to support a discussion of the model and training process.</p>
 <section id="performance-evaluation" class="level3 page-columns page-full" data-number="4.4.1">
 <h3 data-number="4.4.1" class="anchored" data-anchor-id="performance-evaluation"><span class="header-section-number">4.4.1</span> Performance evaluation</h3>
@@ -438,7 +432,7 @@ Table&nbsp;4.2: TODO
 </figcaption>
 <div aria-describedby="tbl-splits-performance-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display">
-<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<table class="cell table table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
 <tr class="header headerLastRow">
 <th style="text-align: right;" data-quarto-table-cell-role="th">Dataset</th>

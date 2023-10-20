@@ -2,7 +2,49 @@
 
 In @sec-classification, we introduced a simple classifier trained on a dataset of presence and pseudo-absences of a species (*Sitta whiteheadi*), which we predicted using the mean annual temperature as well as the annual total precipitation. This choice of variables was motivated by our knowledge of the fact that most species tend to have some temperature and precipitation they are best suited to. But we can approach the exercise of selecting predictive variables in a far more formal way, and this will form the core of this chapter. Specifically, we will examine two related techniques: variable selection, and feature engineering.
 
-## The curse of dimensionality {#sec-predictors-curse}
+There are two reasons to think about variable selection and feature engineering -- first, the variables we have may not all be predictive for the specific problem we are trying to solve; second, the variables may not be expressed in the correct "way" to solve our problem. This calls for a joint approach of selecting and transforming features. Before we do anything to our features (transformation or selection), we need to talk about data leakage.
+
+## What is data leakage? {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage}
+
+Data leakage is a concept that is, if you can believe it, grosser than it sounds.
+
+The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models, which is to say (as we discussed in @sec-gradientdescent-trainedmodel), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
+
+### Consequences of data leakage {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-leakage-consequences}
+
+We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning [@nisbet2018]. Data leakage happens information "leaks" from the training conditions to the evaluation conditions; in other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time [@Peterson2018].
+
+It is worth stopping for a moment to consider what these "real-life situations" are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are *applying* a model, we can start from the model *only*. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data. We have discussed this situation in @sec-crossvalidation-testing: the test of a model is conducted on data that have never been used for training, because we want to evaluate its performance in the conditions where it will be applied.
+
+Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the testing data from the rest of the data. We can illustrate this with an example. Let's say we want to work on a time series of population size, such as provided by the *BioTIME* project [@dornelas2018]. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to validate these models, and a last one for testing.
+
+Congratulations! We have created data leakage! Because we are splitting our time series at random, the model will likely have been trained using data that date from *after* the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.
+
+### Avoiding data leakage {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-leakage-sec-leakage-avoid}
+
+The most common advice given in order to prevent data leakage is the "learn/predict separation" [@kaufman2011]. Simply put, this means that whatever happens to the data used for training cannot be *simultaneously* applied to the data used for testing (or validation).
+
+Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
+
+If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation. This mistake is extremely common in the species distribution literature [see *e.g.* @demarco2018].
+
+The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$.
+
+#### How to work in practice?
+
+Although avoiding data leakage is a tricky problem, there is a very specific mindset we can adopt that goes a long way towards not introducing it in our analyses, and it is as follows: *every data transformation step is a modeling step that is part of the learning process*. We do not, for example, apply a PCA and train the model on the projected variables -- we feed raw data into a model, the first step of which is to perform this PCA for us.
+
+This approach works because everything that can be represented as numbers is a model that can be trained.
+
+If you want to transform a variable using the z-score, this is a model! It has two parameters that you can learn from the data, $\mu$ (the average of the variable) and $\sigma$ (its standard deviation). You can apply it to a data point $y$ with $\hat y = (y - \mu)\sigma^{-1}$. Because this is a model, we need a dataset to learn these parameters from, and because we want to maintain the learn/predict separation, we will use the train dataset to get the values of $\mu_0$ and $\sigma_0$. This way, when we want to get the z-score of a new observation, for example from the testing dataset, we can get it using $\hat y_1 = (y_1 - \mu_0)\sigma_0^{-1}$. The data transformation is entirely coming from information that was part of the training set.
+
+One way to get the learn/predict transformation stupendously wrong is to transform our validation, testing, or prediction data using $\hat y_1 = (y_1 - \mu_1)\sigma_1^{-1}$. This can be easily understood with an example. Assume that the variable $y_0$ is the temperature in our training dataset. We are interested in making a prediction in a world that is 2 degrees hotter, uniformly, which is to say that for whatever value of $y_0$, the corresponding data point we use for prediction is $y_1 = y_0 + 2$. If we take the z-score of this new value based on its own average and standard deviation, a temperature two degrees warmer in the prediction data will have the same z-score as its original value, or in other words, we have hidden the fact that there is a change in our predictors!
+
+Treating the data preparation step as a part of the learning process, which is to say that we learn every transformation on the training set, and retain this transformation as part of the prediction process, we are protecting ourselves against both data leakage *and* the hiding of relevant changes in our predictors.
+
+## Variable selection
+
+### The curse of dimensionality {#variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-variableselection-sec-predictors-curse}
 
 The number of variables we use for prediction is the number of dimensions of a problem. It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!
 
@@ -10,15 +52,17 @@ The "curse of dimensionality" is the common term of everything breaking down whe
 
 Therefore, we need to approach the problem of "which variables to use" with a specific mindset: we want a lot of information for our model, but not so much that the space in which the predictors exist turns immense. There are techniques for this.
 
-## Step-wise approaches to variable selection
+### Step-wise approaches to variable selection
 
-## Removing colinear variables
+### Removal of colinear variables
+
+Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a
 
 ## Multivariate transformations
 
 Delicious. Finally some good fucking quantitative ecology.
 
-## Code
+## Application: optimal variables for the *Sitta whiteheadi* model
 
 ```{julia}
 #| echo: false
@@ -32,20 +76,113 @@ include(joinpath(_code_path, "vif.jl"))
 include(joinpath(_code_path, "splitters.jl"))
 include(joinpath(_code_path, "palettes.jl"))
 include(joinpath(_code_path, "crossvalidate.jl"))
+include(joinpath(_code_path, "variableselection.jl"))
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-_ptm_path = joinpath(@__DIR__, "..", "ptm")
-modelpath = joinpath(_ptm_path, "sdm-initial.jld")
+_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
+modelpath = joinpath(_ptm_path, "sdm-step-0.jld")
 ptm = JLD.load(modelpath)
 trainlabels, trainfeatures = ptm["training"]
-testlabels, testfeatures = ptm["testing"]
+v0 = ptm["variables"]
+m0 = naivebayes(trainlabels, trainfeatures[:,v0])
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
 folds = kfold(trainlabels, trainfeatures; k=15, permute=true)
+C0v, C0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,v0], folds)
+CXv, CXt = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
 ```
+
+Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
+
+In a sense, this initial model was *already* coming from a variable selection process, only we did not use a quantitative criteria to include variables. And so, it is a good idea to evaluate whether our model was worse than a model including *all* the variables. Running the NBC again using all 19 BioClim variables, we get an average MCC on the validation data of `{julia} round(mean(mcc.(CXv)); digits=3)`. This is a small increase, but an increase nevertheless -- our dataset had information that was not captured by temperature and precipitation.
+
+In this section, we will start by evaluating the efficiency of different approaches to variable selection, then of variable transformation, then merge these two together to provide a model that is optimal with regards to the training data we have. In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in @sec-classification).
+
+### Variable selection
+
+```{julia}
+#| echo: false
+#| output: false
+b0 = backwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
+Cb0v, Cb0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,b0], folds)
+```
+
+```{julia}
+#| echo: false
+#| output: false
+f0 = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
+Cf0v, Cf0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,f0], folds)
+```
+
+```{julia}
+#| echo: false
+#| output: false
+c0 = constrainedselection(naivebayes, trainlabels, trainfeatures, folds, [1,12], mcc)
+Cc0v, Cc0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,c0], folds)
+```
+
+| Model version                                        | Variables            | MCC                                         | PPV                                         | NPV                                        |
+|---------------|---------------|---------------|---------------|---------------|
+| Temperature, precipitation                           | 2                    | `{julia} round(mean(mcc.(C0v)); digits=3)`  | `{julia} round(mean(ppv.(C0v)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)` |
+| All variables                                        | 19                   | `{julia} round(mean(mcc.(CXv)); digits=3)`  | `{julia} round(mean(ppv.(CXv)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)` |
+| Backward selection                                   | `{julia} length(b0)` | `{julia} round(mean(mcc.(Cb0v)); digits=3)` | `{julia} round(mean(ppv.(Cb0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
+| Forward selection                                    | `{julia} length(f0)` | `{julia} round(mean(mcc.(Cf0v)); digits=3)` | `{julia} round(mean(ppv.(Cf0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
+| Forward selection with temperature and precipitation | `{julia} length(c0)` | `{julia} round(mean(mcc.(Cc0v)); digits=3)` | `{julia} round(mean(ppv.(Cc0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)` |
+
+: Consequences of different variable selection approaches on the performance of the model
+
+Based on the results presented in **TBL**, the model trained on variables selected using forward selection gave the best results.
+
+```{julia}
+#| output: false
+#| echo: false
+origmodel = naivebayes(trainlabels, trainfeatures[:,[1,12]])
+predictor = naivebayes(trainlabels, trainfeatures[:,f0])
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+npr = convert(Float64, similar(first(bio)))
+opr = convert(Float64, similar(first(bio)))
+Threads.@threads for k in keys(npr)
+    fx = [bio[i][k] for i in f0]
+    ox = [bio[i][k] for i in [1,12]]
+    npr[k] = predictor(fx)
+    opr[k] = origmodel(ox)
+end
+```
+
+```{julia}
+#| label: fig-predictors-rangediff
+#| echo: false
+#| fig-cap: Consequences of using the model with forward selection of variables on the predicted range of *Sitta whiteheadi*. The negative values represent range that was predicted by the original model but is not predicted by the optimized model, while the positive values represent new predictions. It is reinsuring to see that the overwhelming majority of the range is shared by both models.
+new_range = npr .> 0.5
+old_range = opr .> 0.5
+combined_range = new_range .| old_range
+range_diff = mask(combined_range, new_range .- old_range)
+fig = Figure()
+ax = Axis(fig[1,1,]; aspect=DataAspect())
+heatmap!(ax, combined_range, colormap=[:lightgrey, :lightgrey], alpha=0.7)
+hm = heatmap!(ax, range_diff; colormap = cgrad(sunset, 3, categorical=true))
+Colorbar(fig[1,2], hm; tellheight=false)
+current_figure()
+```
+
+###  Variable transformation
+
+```{julia}
+Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds; transformation=Whitening)
+@info mean(mcc.(Cv))
+Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds; transformation=PCA)
+@info mean(mcc.(Cv))
+Cv, Ct = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
+@info mean(mcc.(Cv))
+```
+
+### Model selection
+
+## Conclusion

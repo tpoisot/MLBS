@@ -41,7 +41,6 @@ book:
     - chapters/clustering.qmd
     - chapters/gradientdescent.qmd
     - chapters/crossvalidation.qmd
-    - chapters/leakage.qmd
     - chapters/classification.qmd
     - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
