@@ -24,6 +24,10 @@ Congratulations! We have created data leakage! Because we are splitting our time
 
 The most common advice given in order to prevent data leakage is the "learn/predict separation" [@kaufman2011]. Simply put, this means that whatever happens to the data used for training cannot be *simultaneously* applied to the data used for testing (or validation).
 
+::: content-margin
+A counter-example where performing the transformation *before* the analysis is when the transformation is explicitely sought out as an embedding, where we want to predict the position of instances in the embedded space, as in *.e.g.*@runghen2022.
+:::
+
 Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
 
 If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation. This mistake is extremely common in the species distribution literature [see *e.g.* @demarco2018].
