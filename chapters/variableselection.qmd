@@ -73,12 +73,12 @@ Congratulations! We have created data leakage! Because we are splitting our time
 The most common advice given in order to prevent data leakage is the "learn/predict separation" [@kaufman2011]. Simply put, this means that whatever happens to the data used for training cannot be *simultaneously* applied to the data used for testing (or validation).
 
 ::: content-margin
-A counter-example where performing the transformation *before* the analysis is when the transformation is explicitely sought out as an embedding, where we want to predict the position of instances in the embedded space, as in *.e.g.*\@runghen2022.
+A counter-example where performing the transformation *before* the analysis is when the transformation is explicitly sought out as an embedding, where we want to predict the position of instances in the embedded space, as in *.e.g.* @runghen2022.
 :::
 
 Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
 
-If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation. This mistake is extremely common in the species distribution literature [see *e.g.* @demarco2018].
+If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation. This way to introduce data leakage is extremely common in the species distribution literature [see *e.g.* @demarco2018].
 
 ![Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.]
 
@@ -260,12 +260,45 @@ current_figure()
 
 ### Variable transformation
 
+In the previous section, we observed that variable selection could in fact make the model a little better, 
+
 ```{julia}
-Cp0v, Cp0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,c0], folds; transformation=nothing)
-@info mean(mcc.(Cp0v))
+sel = ["Fwd." => forwardselection, "Backw." => backwardselection]
+trf = ["PCA" => PCA, "Whitening" => Whitening, "Raw data" => nothing]
+msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
+
+hed = "| Selection | Transformation | Variables |"
+sep = "|------|------|----|"
+for (k,v) in msrs
+    hed *= " $(k) |"
+    sep *= "------|"
+end
+tbl = [hed, sep]
+
+for (sk, sf) in sel
+    for (tk, tf) in trf
+        vs = sf(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation=tf)
+        Csv, Cst = crossvalidate(naivebayes, trainlabels, trainfeatures[:,vs], folds; transformation=tf)
+        row = "| $(sk) | $(tk) | $(length(vs)) |"
+        for (m, p) in msrs
+            v = round(mean(p.(Csv)); digits=3)
+            row *= " $(v) |"
+        end
+        push!(tbl, row)
+    end
+end
+
+push!(tbl, "\n: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictions-selection, and as we use the same folds for validation, can be directly compared. {#tbl-predictors-transformation}")
+try
+    display("text/markdown", join(tbl, "\n"))
+catch e
+end
+
 ```
 
+
 ### Model selection
+
 
 ```{julia}
 #| output: false

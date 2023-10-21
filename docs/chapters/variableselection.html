@@ -292,7 +292,7 @@ div.csl-indent {
 <h2 data-number="6.1" class="anchored" data-anchor-id="the-problem-optimal-set-of-bioclim-variables-for-the-corsican-nuthatch"><span class="header-section-number">6.1</span> The problem: optimal set of BioClim variables for the Corsican nuthatch</h2>
 <p>The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction <span class="citation" data-cites="booth2022">(<a href="../references.html#ref-booth2022" role="doc-biblioref">Booth 2022</a>)</span>; this is particularly true when working from the WorldClim version <span class="citation" data-cites="fick2017">(<a href="../references.html#ref-fick2017" role="doc-biblioref">Fick &amp; Hijmans 2017</a>)</span>, and not as problematic when using other data products like CHELSA <span class="citation" data-cites="karger2017">(<a href="../references.html#ref-karger2017" role="doc-biblioref">Karger <em>et al.</em> 2017</a>)</span>.</p>
 <p>The definitions of the 19 BioClim variables are given in <a href="#tbl-predictors-bioclim" class="quarto-xref">Table&nbsp;<span>6.1</span></a>. As we can see from this table, a number of variables are either derived from the same months, or direct (even sometimes additive) combinations of one another. For this reason, and because there are 19 variables, this is a good dataset to evaluate the use of variable selection and transformation.</p>
-<div id="5cc15682" class="cell" data-execution_count="2">
+<div id="2c607884" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div id="tbl-predictors-bioclim" class="anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -428,10 +428,10 @@ Table&nbsp;6.1: List of the 19 BioClim variables, including indications of their
 <h3 data-number="6.2.2" class="anchored" data-anchor-id="sec-leakage-avoid"><span class="header-section-number">6.2.2</span> Avoiding data leakage</h3>
 <p>The most common advice given in order to prevent data leakage is the “learn/predict separation” <span class="citation" data-cites="kaufman2011">(<a href="../references.html#ref-kaufman2011" role="doc-biblioref">Kaufman <em>et al.</em> 2011</a>)</span>. Simply put, this means that whatever happens to the data used for training cannot be <em>simultaneously</em> applied to the data used for testing (or validation).</p>
 <div class="content-margin">
-<p>A counter-example where performing the transformation <em>before</em> the analysis is when the transformation is explicitely sought out as an embedding, where we want to predict the position of instances in the embedded space, as in <em>.e.g.</em>@runghen2022.</p>
+<p>A counter-example where performing the transformation <em>before</em> the analysis is when the transformation is explicitly sought out as an embedding, where we want to predict the position of instances in the embedded space, as in <em>.e.g.</em> <span class="citation" data-cites="runghen2022">Runghen <em>et al.</em> (<a href="../references.html#ref-runghen2022" role="doc-biblioref">2022</a>)</span>.</p>
 </div>
 <p>Assume that we want to transform our data using a Principal Component Analysis (PCA; <span class="citation" data-cites="pearson1901">Pearson (<a href="../references.html#ref-pearson1901" role="doc-biblioref">1901</a>)</span>). Ecologists often think of PCA as a technique to explore data <span class="citation" data-cites="legendre2012">(<a href="../references.html#ref-legendre2012" role="doc-biblioref">Legendre &amp; Legendre 2012</a>)</span>, but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.</p>
-<p>If we have a dataset <span class="math inline">\(\mathbf{X}\)</span>, which we split into two components <span class="math inline">\(\mathbf{X}_0\)</span> for training ,and <span class="math inline">\(\mathbf{X}_1\)</span> for validation, there are two ways to use a PCA to transform these data. The first is <span class="math inline">\(\mathbf{T} = \mathbf{X}\mathbf{W}\)</span>, which uses the full dataset. When we predict the position of the validation data, we could use the transformation <span class="math inline">\(\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}\)</span>, but this would introduce data leakage: we have trained the transformation we apply to <span class="math inline">\(\mathbf{X}_1\)</span> using data that are already in <span class="math inline">\(\mathbf{X}_1\)</span>, and therefore we have not respected the learn/predict separation. This mistake is extremely common in the species distribution literature <span class="citation" data-cites="demarco2018">(see <em>e.g.</em> <a href="../references.html#ref-demarco2018" role="doc-biblioref">De Marco &amp; Nóbrega 2018</a>)</span>.</p>
+<p>If we have a dataset <span class="math inline">\(\mathbf{X}\)</span>, which we split into two components <span class="math inline">\(\mathbf{X}_0\)</span> for training ,and <span class="math inline">\(\mathbf{X}_1\)</span> for validation, there are two ways to use a PCA to transform these data. The first is <span class="math inline">\(\mathbf{T} = \mathbf{X}\mathbf{W}\)</span>, which uses the full dataset. When we predict the position of the validation data, we could use the transformation <span class="math inline">\(\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}\)</span>, but this would introduce data leakage: we have trained the transformation we apply to <span class="math inline">\(\mathbf{X}_1\)</span> using data that are already in <span class="math inline">\(\mathbf{X}_1\)</span>, and therefore we have not respected the learn/predict separation. This way to introduce data leakage is extremely common in the species distribution literature <span class="citation" data-cites="demarco2018">(see <em>e.g.</em> <a href="../references.html#ref-demarco2018" role="doc-biblioref">De Marco &amp; Nóbrega 2018</a>)</span>.</p>
 <div id="fig-predictors-leakage" class="quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-predictors-leakage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -491,12 +491,21 @@ Figure&nbsp;6.1: Overview of a data transformation pipeline that introduces data
 <p>In this section, we will start by evaluating the efficiency of different approaches to variable selection, then of variable transformation, then merge these two together to provide a model that is optimal with regards to the training data we have. In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>), as well as the accuracy and True-Skill Statistic (TSS). The TSS is defined as the sum of true positive and true negative rates, minus one, and is an alternative measure to the MCC (although it is more sensitive to some biases). Also several authors have advocated for the use of TSS <span class="citation" data-cites="allouche2006">(<a href="../references.html#ref-allouche2006" role="doc-biblioref">ALLOUCHE <em>et al.</em> 2006</a>)</span>, <span class="citation" data-cites="leroy2018">Leroy <em>et al.</em> (<a href="../references.html#ref-leroy2018" role="doc-biblioref">2018</a>)</span> have an interesting discussion of how the TSS is particularly sensitive to issues in the quality of (pseudo) absence data. For this reason, and based on the literature we covered in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, there is no strong argument against using MCC as our selection measure.</p>
 <section id="variable-selection-1" class="level3 page-columns page-full" data-number="6.5.1">
 <h3 data-number="6.5.1" class="anchored" data-anchor-id="variable-selection-1"><span class="header-section-number">6.5.1</span> Variable selection</h3>
-<div id="b6dad28f" class="cell" data-execution_count="9">
+<div id="c4c42c69" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div id="tbl-predictors-selection" class="anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-predictors-selection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Model</th>
@@ -510,7 +519,7 @@ Figure&nbsp;6.1: Overview of a data transformation pipeline that introduces data
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a></td>
+<td><a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> baseline</td>
 <td>2</td>
 <td>0.76</td>
 <td>0.859</td>
@@ -591,11 +600,133 @@ Figure&nbsp;6.2: Consequences of using the model with forward selection of varia
 </section>
 <section id="variable-transformation" class="level3" data-number="6.5.2">
 <h3 data-number="6.5.2" class="anchored" data-anchor-id="variable-transformation"><span class="header-section-number">6.5.2</span> Variable transformation</h3>
-<div id="fe9b6060" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Cp0v, Cp0t <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures[<span class="op">:</span>,c0], folds; transformation<span class="op">=</span><span class="cn">nothing</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">@info</span> <span class="fu">mean</span>(<span class="fu">mcc</span>.(Cp0v))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>[ Info: 0.8296279028400423</code></pre>
+<div id="7f487c10" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sel <span class="op">=</span> [<span class="st">"Fwd."</span> <span class="op">=&gt;</span> forwardselection, <span class="st">"Backw."</span> <span class="op">=&gt;</span> backwardselection]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>trf <span class="op">=</span> [<span class="st">"PCA"</span> <span class="op">=&gt;</span> PCA, <span class="st">"Whitening"</span> <span class="op">=&gt;</span> Whitening, <span class="st">"Raw data"</span> <span class="op">=&gt;</span> <span class="cn">nothing</span>]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>msrs <span class="op">=</span> [<span class="st">"MCC"</span> <span class="op">=&gt;</span> mcc, <span class="st">"NPV"</span> <span class="op">=&gt;</span> npv, <span class="st">"PPV"</span> <span class="op">=&gt;</span> ppv, <span class="st">"Acc."</span> <span class="op">=&gt;</span> accuracy, <span class="st">"TSS"</span> <span class="op">=&gt;</span> trueskill]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>hed <span class="op">=</span> <span class="st">"| Selection | Transformation | Variables |"</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sep <span class="op">=</span> <span class="st">"|------|------|----|"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k,v) <span class="kw">in</span> msrs</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    hed <span class="op">*=</span> <span class="st">" </span><span class="sc">$</span>(k)<span class="st"> |"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    sep <span class="op">*=</span> <span class="st">"------|"</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>tbl <span class="op">=</span> [hed, sep]</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (sk, sf) <span class="kw">in</span> sel</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (tk, tf) <span class="kw">in</span> trf</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        vs <span class="op">=</span> <span class="fu">sf</span>(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation<span class="op">=</span>tf)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        Csv, Cst <span class="op">=</span> <span class="fu">crossvalidate</span>(naivebayes, trainlabels, trainfeatures[<span class="op">:</span>,vs], folds; transformation<span class="op">=</span>tf)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> <span class="st">"| </span><span class="sc">$</span>(sk)<span class="st"> | </span><span class="sc">$</span>(tk)<span class="st"> | </span><span class="sc">$</span>(<span class="fu">length</span>(vs))<span class="st"> |"</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (m, p) <span class="kw">in</span> msrs</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            v <span class="op">=</span> <span class="fu">round</span>(<span class="fu">mean</span>(<span class="fu">p</span>.(Csv)); digits<span class="op">=</span><span class="fl">3</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            row <span class="op">*=</span> <span class="st">" </span><span class="sc">$</span>(v)<span class="st"> |"</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">end</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">push!</span>(tbl, row)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">push!</span>(tbl, <span class="st">"</span><span class="sc">\n</span><span class="st">: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictions-selection, and as we use the same folds for validation, can be directly compared. {#tbl-predictors-transformation}"</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>try</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">display</span>(<span class="st">"text/markdown"</span>, <span class="fu">join</span>(tbl, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>catch <span class="cn">e</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="tbl-predictors-transformation" class="anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-predictors-transformation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Selection</th>
+<th>Transformation</th>
+<th>Variables</th>
+<th>MCC</th>
+<th>NPV</th>
+<th>PPV</th>
+<th>Acc.</th>
+<th>TSS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fwd.</td>
+<td>PCA</td>
+<td>4</td>
+<td>0.853</td>
+<td>0.898</td>
+<td>0.952</td>
+<td>0.926</td>
+<td>0.855</td>
+</tr>
+<tr class="even">
+<td>Fwd.</td>
+<td>Whitening</td>
+<td>10</td>
+<td>0.877</td>
+<td>0.918</td>
+<td>0.956</td>
+<td>0.938</td>
+<td>0.878</td>
+</tr>
+<tr class="odd">
+<td>Fwd.</td>
+<td>Raw data</td>
+<td>6</td>
+<td>0.848</td>
+<td>0.901</td>
+<td>0.946</td>
+<td>0.924</td>
+<td>0.849</td>
+</tr>
+<tr class="even">
+<td>Backw.</td>
+<td>PCA</td>
+<td>13</td>
+<td>0.835</td>
+<td>0.888</td>
+<td>0.943</td>
+<td>0.918</td>
+<td>0.838</td>
+</tr>
+<tr class="odd">
+<td>Backw.</td>
+<td>Whitening</td>
+<td>15</td>
+<td>0.869</td>
+<td>0.913</td>
+<td>0.953</td>
+<td>0.934</td>
+<td>0.871</td>
+</tr>
+<tr class="even">
+<td>Backw.</td>
+<td>Raw data</td>
+<td>9</td>
+<td>0.846</td>
+<td>0.901</td>
+<td>0.944</td>
+<td>0.923</td>
+<td>0.847</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-predictors-transformation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.3: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in <span class="quarto-unresolved-ref">?tbl-predictions-selection</span>, and as we use the same folds for validation, can be directly compared.
+</figcaption>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -661,6 +792,9 @@ Peterson, A.T., Asase, A., Canhos, D., Souza, S. de &amp; Wieczorek, J. (2018). 
 </div>
 <div id="ref-petitpierre2016" class="csl-entry" role="listitem">
 Petitpierre, B., Broennimann, O., Kueffer, C., Daehler, C. &amp; Guisan, A. (2016). <a href="https://doi.org/10.1111/geb.12530">Selecting predictors to maximize the transferability of species distribution models: lessons from cross<span>-</span>continental plant invasions</a>. <em>Global Ecology and Biogeography</em>, 26, 275–287.
+</div>
+<div id="ref-runghen2022" class="csl-entry" role="listitem">
+Runghen, R., Stouffer, D.B. &amp; Dalla Riva, G.V. (2022). <a href="https://doi.org/10.1098/rsos.220079">Exploiting node metadata to predict interactions in bipartite networks using graph embedding and neural networks</a>. <em>Royal Society Open Science</em>, 9.
 </div>
 <div id="ref-smith2017" class="csl-entry" role="listitem">
 Smith, M.L., Ruffley, M., Espíndola, A., Tank, D.C., Sullivan, J. &amp; Carstens, B.C. (2017). <a href="https://doi.org/10.1111/mec.14223">Demographic model selection using random forests and the site frequency spectrum</a>. <em>Molecular Ecology</em>, 26, 4562–4573.
