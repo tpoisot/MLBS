@@ -299,7 +299,7 @@ end
 final_range = vpr .> 0.5
 inter_range = ipr .> 0.5
 old_range = opr .> 0.5
-rangediff(new, old) = mask(new .| old, new .- old)
+
 fig = Figure()
 ax1 = Axis(fig[1,1,]; aspect=DataAspect(), title="Selection")
 ax2 = Axis(fig[1,2,]; aspect=DataAspect(), title="Transformation")

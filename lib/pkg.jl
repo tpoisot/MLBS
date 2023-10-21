@@ -30,3 +30,5 @@ import Downloads
 
 using Random
 Random.seed!(12345)
+
+rangediff(new, old) = mask(new .| old, new .- old)

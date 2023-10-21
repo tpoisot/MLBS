@@ -32,3 +32,11 @@ function naivebayes(y::Vector{Bool}, X::Matrix{T}; presence=0.5, transformation=
     end
     return inner_predictor
 end
+
+function entropy(f)
+    p = [f, 1-f]
+    if minimum(p) == 0.0
+        return 0.0
+    end
+    return -sum(p .* log2.(p))
+end

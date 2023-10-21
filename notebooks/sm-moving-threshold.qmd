@@ -1,27 +1,3 @@
-# Supp. Mat. - moving threshold
-
-This follows the Naive Bayes module, and expands it to have a little more depth to it with priors and a probabilistic output; most of the setup code is shared with the NBC notebook, but duplication is fine as it makes the two notebooks independent.
-
-```{julia}
-_code_path = joinpath(@__DIR__, "..", "lib")
-include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusiontable.jl"))
-include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "splitters.jl"))
-```
-
-We load the data
-
-```{julia}
-_ptm_path = joinpath(@__DIR__, "..", "ptm")
-modelpath = joinpath(_ptm_path, "reindeer-varselected.jld")
-ptm = JLD.load(modelpath)
-trainlabels, trainfeatures = ptm["training"]
-testlabels, testfeatures = ptm["testing"]
-```
-
-MC CV
-
 ```{julia}
 thresholds = collect(LinRange(0.0, 1.0, 300))
 k = 10
