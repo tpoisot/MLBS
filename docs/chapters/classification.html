@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,7 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -179,7 +179,7 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable selection and feature engineering</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable preparation</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -404,9 +404,6 @@ Figure&nbsp;5.2: Overview of the scores for the Matthew’s correlation coeffici
 <p>The output of cross-validation is given in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> (and compared to the no-skill classifier in <a href="#tbl-classification-crossvalidation" class="quarto-xref">Table&nbsp;<span>5.1</span></a>). As we are satisfied with the model performance, we can re-train it using all the data (<em>but not the part used for testing</em>) in order to make our first series of predictions.</p>
 <div id="tbl-classification-crossvalidation" class="anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5.1: Overview of the data presented in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>, compared to the no-skill classifier.
-</figcaption>
 <div aria-describedby="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="table">
 <colgroup>
@@ -451,6 +448,9 @@ Table&nbsp;5.1: Overview of the data presented in <a href="#fig-classification-c
 </tbody>
 </table>
 </div>
+<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: Overview of the data presented in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>, compared to the no-skill classifier.
+</figcaption>
 </figure>
 </div>
 </section>

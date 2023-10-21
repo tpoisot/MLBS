@@ -1,8 +1,56 @@
-# Variable selection and feature engineering {#sec-predictors}
+# Variable preparation {#sec-predictors}
 
 In @sec-classification, we introduced a simple classifier trained on a dataset of presence and pseudo-absences of a species (*Sitta whiteheadi*), which we predicted using the mean annual temperature as well as the annual total precipitation. This choice of variables was motivated by our knowledge of the fact that most species tend to have some temperature and precipitation they are best suited to. But we can approach the exercise of selecting predictive variables in a far more formal way, and this will form the core of this chapter. Specifically, we will examine two related techniques: variable selection, and feature engineering.
 
 There are two reasons to think about variable selection and feature engineering -- first, the variables we have may not all be predictive for the specific problem we are trying to solve; second, the variables may not be expressed in the correct "way" to solve our problem. This calls for a joint approach of selecting and transforming features. Before we do anything to our features (transformation or selection), we need to talk about data leakage.
+
+## The problem: optimal set of BioClim variables for the Corsican nuthatch
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "confusion.jl"))
+include(joinpath(_code_path, "mocks.jl"))
+include(joinpath(_code_path, "nbc.jl"))
+include(joinpath(_code_path, "vif.jl"))
+include(joinpath(_code_path, "splitters.jl"))
+include(joinpath(_code_path, "palettes.jl"))
+include(joinpath(_code_path, "crossvalidate.jl"))
+include(joinpath(_code_path, "variableselection.jl"))
+```
+
+The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction [@booth2022]; this is particularly true when working from the WorldClim version [@fick2017], and not as problematic when using other data products like CHELSA [@karger2017].
+
+The definitions of the 19 BioClim variables are given in @tbl-predictors-bioclim. As we can see from this table, a number of variables are either derived from the same months, or direct (even sometimes additive) combinations of one another. For this reason, and because there are 19 variables, this is a good dataset to evaluate the use of variable selection and transformation.
+
+```{julia}
+#| echo: false
+provider = RasterData(CHELSA1, BioClim)
+tbl = ["| Layer | Description | Details |", "|-----|---------------|--------|"]
+for l in layers(provider)
+    key = l
+    value = layerdescriptions(provider)[key]
+    vparts = split(value, "("; limit=2)
+    desc = ""
+    if length(vparts) == 2
+        desc = "("*vparts[2]
+        if ~contains(desc, "BIO")
+            desc = desc[2:end-1]
+        end
+    
+    end
+    push!(tbl, "| $key | $(vparts[1]) | $(desc) |")
+end
+push!(tbl, "\n: List of the 19 BioClim variables, including indications of their calculation. The model we used in @sec-classification used BIO1 and BIO12. {#tbl-predictors-bioclim}")
+try
+    display("text/markdown", join(tbl, "\n"))
+catch e
+end
+```
+
+In this chapter, we will try to improve the model introduced in @sec-classification, by evaluating different methods to prepare our predictor variables.
 
 ## What is data leakage? {#sec-leakage}
 
@@ -25,7 +73,7 @@ Congratulations! We have created data leakage! Because we are splitting our time
 The most common advice given in order to prevent data leakage is the "learn/predict separation" [@kaufman2011]. Simply put, this means that whatever happens to the data used for training cannot be *simultaneously* applied to the data used for testing (or validation).
 
 ::: content-margin
-A counter-example where performing the transformation *before* the analysis is when the transformation is explicitely sought out as an embedding, where we want to predict the position of instances in the embedded space, as in *.e.g.*@runghen2022.
+A counter-example where performing the transformation *before* the analysis is when the transformation is explicitely sought out as an embedding, where we want to predict the position of instances in the embedded space, as in *.e.g.*\@runghen2022.
 :::
 
 Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
@@ -80,7 +128,7 @@ Keep in mind that we do not know the number of variables we should use; therefor
 
 ### Removal of colinear variables
 
-Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a
+Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there
 
 ## Multivariate transformations
 
@@ -93,21 +141,6 @@ One advantage of PCA is that it serves both as a way to remove colinearity, in t
 Whitening
 
 ## Application: optimal variables for Corsican nuthatch
-
-```{julia}
-#| echo: false
-#| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
-include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusion.jl"))
-include(joinpath(_code_path, "mocks.jl"))
-include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "vif.jl"))
-include(joinpath(_code_path, "splitters.jl"))
-include(joinpath(_code_path, "palettes.jl"))
-include(joinpath(_code_path, "crossvalidate.jl"))
-include(joinpath(_code_path, "variableselection.jl"))
-```
 
 ```{julia}
 #| echo: false
@@ -132,7 +165,7 @@ Before we start, we can re-establish the baseline performance of the model from 
 
 In a sense, this initial model was *already* coming from a variable selection process, only we did not use a quantitative criteria to include variables. And so, it is a good idea to evaluate whether our model was worse than a model including *all* the variables. Running the NBC again using all 19 BioClim variables, we get an average MCC on the validation data of `{julia} round(mean(mcc.(CXv)); digits=3)`. This is a small increase, but an increase nevertheless -- our dataset had information that was not captured by temperature and precipitation.
 
-In this section, we will start by evaluating the efficiency of different approaches to variable selection, then of variable transformation, then merge these two together to provide a model that is optimal with regards to the training data we have. In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in @sec-classification).
+In this section, we will start by evaluating the efficiency of different approaches to variable selection, then of variable transformation, then merge these two together to provide a model that is optimal with regards to the training data we have. In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in @sec-classification), as well as the accuracy and True-Skill Statistic (TSS). The TSS is defined as the sum of true positive and true negative rates, minus one, and is an alternative measure to the MCC (although it is more sensitive to some biases). Also several authors have advocated for the use of TSS [@allouche2006], @leroy2018 have an interesting discussion of how the TSS is particularly sensitive to issues in the quality of (pseudo) absence data. For this reason, and based on the literature we covered in @sec-classification, there is no strong argument against using MCC as our selection measure.
 
 ### Variable selection
 
@@ -164,16 +197,31 @@ i0 = stepwisevif(trainfeatures, 10.0)
 Ci0v, Ci0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,i0], folds)
 ```
 
-| Model version                                        | Variables            | MCC                                         | PPV                                         | NPV                                         |
-|---------------|---------------|---------------|---------------|---------------|
-| Temperature, precipitation                           | 2                    | `{julia} round(mean(mcc.(C0v)); digits=3)`  | `{julia} round(mean(ppv.(C0v)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)`  |
-| All variables                                        | 19                   | `{julia} round(mean(mcc.(CXv)); digits=3)`  | `{julia} round(mean(ppv.(CXv)); digits=3)`  | `{julia} round(mean(npv.(C0v)); digits=3)`  |
-| Backward selection                                   | `{julia} length(b0)` | `{julia} round(mean(mcc.(Cb0v)); digits=3)` | `{julia} round(mean(ppv.(Cb0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)`  |
-| Forward selection                                    | `{julia} length(f0)` | `{julia} round(mean(mcc.(Cf0v)); digits=3)` | `{julia} round(mean(ppv.(Cf0v)); digits=3)` | `{julia} round(mean(npv.(C0v)); digits=3)`  |
-| Forward selection with temperature and precipitation | `{julia} length(c0)` | `{julia} round(mean(mcc.(Cc0v)); digits=3)` | `{julia} round(mean(ppv.(Cc0v)); digits=3)` | `{julia} round(mean(npv.(Cc0v)); digits=3)` |
-| Variance Inflation Factor                            | `{julia} length(i0)` | `{julia} round(mean(mcc.(Ci0v)); digits=3)` | `{julia} round(mean(ppv.(Ci0v)); digits=3)` | `{julia} round(mean(npv.(Ci0v)); digits=3)` |
+```{julia}
+#| echo: false
+msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
+hed = "| Model | Variables |"
+sep = "|------|------|"
+for (k,v) in msrs
+    hed *= " $(k) |"
+    sep *= "------|"
+end
+tbl = [hed, sep]
+for (m, p) in ["@sec-classification baseline" => ([1,12], C0v), "All var." => (1:19, CXv), "Fwd." => (f0, Cf0v), "Fwd. (constr.)" => (c0, Cc0v), "Backw." => (b0, Cb0v), "VIF" => (i0, Ci0v)]
+    v, c = p
+    row = "| $(m) | $(length(v)) |"
+    for (pm, pf) in msrs
+        row *= " $(round(mean(pf.(c)); digits=3)) |"
+    end
+    push!(tbl, row)
+end
 
-: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC, NPV, and PPV. {#tbl-predictors-selection}
+push!(tbl, "\n: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC, NPV, PPV, accuracy, and True-Skill Statistic (TSS). {#tbl-predictors-selection}")
+try
+    display("text/markdown", join(tbl, "\n"))
+catch e
+end
+```
 
 Based on the results presented in **TBL**, the model trained on variables selected using forward selection gave the best results.
 

@@ -50,9 +50,6 @@ book:
 bibliography: references.bib
 csl: https://www.zotero.org/styles/ecology-letters
 
-fig-cap-location: margin
-tbl-cap-location: top
-
 preview:
   port: 4200
 
@@ -60,6 +57,8 @@ format:
   html:
     theme: flatly
     linestretch: 1.5
+    fig-cap-location: margin
+    tbl-cap-location: margin
     grid:
       sidebar-width: 350px
       body-width: 850px
@@ -67,6 +66,8 @@ format:
       gutter-width: 2rem
   pdf:
     documentclass: scrbook
+    fig-cap-location: margin
+    tbl-cap-location: top
     linkcolor: SteelBlue4
     fig-pos: 'bt'
     tbl-pos: 'bt'
