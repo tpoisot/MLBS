@@ -67,9 +67,11 @@ untuned = naivebayes(y, X; transformation=tf)
 ```
 
 ```{julia}
-T = LinRange(0.0, 1.0, 30)
+T = LinRange(0.0, 1.0, 150)
 CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)) for τ in T]...)
 BT = hcat([first(crossvalidate(bioclim, y, X, folds, τ)) for τ in T]...)
+τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
+τb = T[last(findmax(vec(mean(mcc.(BT); dims=1))))]
 ```
 
 ```{julia}
@@ -78,10 +80,7 @@ BT = hcat([first(crossvalidate(bioclim, y, X, folds, τ)) for τ in T]...)
 #| fig-cap: learning curve for the threshold
 series(T, mcc.(CT), solid_color=vibrant[1])
 lines!(T, vec(mean(mcc.(CT); dims=1)), color=vibrant[2], linewidth=5)
-τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
-τb = T[last(findmax(vec(mean(mcc.(BT); dims=1))))]
 scatter!(τ, maximum(vec(mean(mcc.(CT); dims=1))), color=vibrant[2], markersize=30)
-@info τ
 current_figure()
 ```
 
@@ -114,6 +113,7 @@ end
 for ax in [pr, roc]
     xlims!(ax, (0, 1))
     ylims!(ax, (0, 1))
+    scatter!(ax, 0.5, 0.5, color=:black)
 end
 
 current_figure()
