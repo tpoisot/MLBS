@@ -55,7 +55,7 @@ preview:
 
 format:
   html:
-    theme: flatly
+    theme: zephyr
     linestretch: 1.5
     fig-cap-location: margin
     tbl-cap-location: margin

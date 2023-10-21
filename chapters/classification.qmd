@@ -388,7 +388,7 @@ current_figure()
 
 ### What is an acceptable model?
 
-When comparing the prediction to the spatial distribution of occurrences (@fig-classification-range), it appears that the model identifies an area in the northwest where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the *purpose* of running this model -- if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model.
+When comparing the prediction to the spatial distribution of occurrences (@fig-classification-range), it appears that the model identifies an area in the northeast where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the *purpose* of running this model -- if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model.
 
 ```{julia}
 #| echo: false
