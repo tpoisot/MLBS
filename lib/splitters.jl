@@ -1,6 +1,12 @@
 using StatsBase
 using Random
 
+function leaveoneout(y, X)
+    @assert size(y,1) == size(X, 1)
+    positions = collect(axes(X, 1))
+    return [(setdiff(positions, i), i) for i in positions]
+end
+
 function holdout(y, X; proportion=0.2, permute=true)
     @assert size(y,1) == size(X, 1)
     sample_size = size(X, 1)
@@ -12,6 +18,11 @@ function holdout(y, X; proportion=0.2, permute=true)
     data_pos = positions[1:(sample_size-n_holdout-1)]
     hold_pos = positions[(sample_size-n_holdout):sample_size]
     return (data_pos, hold_pos)
+end
+
+function montecarlo(y, X; n=100, kwargs...)
+    @assert size(y,1) == size(X, 1)
+    return [holdout(y, X; kwargs...) for _ in 1:n]
 end
 
 function kfold(y, X; k=10, permute=true)
