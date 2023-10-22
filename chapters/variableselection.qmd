@@ -116,9 +116,13 @@ Why, so, should we select the variables we put in our models?
 
 The answer is simple: we seek to solve a specific problem in an optimal way, where "optimal" refers to the maximization of a performance measure we decided upon *a priori*. In our case, this is the MCC. Therefore, an ideal set of predictors is the one that, given our cross-validation strategy, maximizes our measure of performance.
 
+### Forward selection
+
 In forward selection, assuming that we have $f$ features, we start by building $f$ models, each using one feature. For example, using the BioClim variables, $m_1$ would be attempting to predict presences and absences based only on temperature. Out of these models, we retain the variable given by $\text{argmax}_f \text{MCC}(m_f)$, where $\text{MCC}(m_f)$ is the average value of MCC for the $f$-th model on the validation datasets. This is the first variable we add to our set of selected variables. We then train $f-1$ models, and then again add the variable that leads to the best possible *increase* in the average value of the MCC. When we cannot find a remaining variable that would increase the performance of the model, we stop the process, and return the optimal set of variables. Forward selection can be constrained by, instead of starting from variables one by one, starting from a pre-selected set of variables that will always be included in the model.
 
 There are two important things to consider here. First, the set of variables is only optimal under the assumptions of the stepwise selection process: the first variable is the one that boosts the predictive value of the model the most *on its own*, and the next variables *in the context of already selected variables*. Second, the variables are evaluated on the basis of their ability to *improve the performance of the model*; this does not imply that they are relevant to the ecological processes happening in the dataset. Infering mechanisms on the basis of variable selection is foolish [@tredennick2021].
+
+### Backward selection
 
 The opposite of forward selection is backward selection, in which we start from a complete set of variables, then remove the one with the *worst* impact on model performance, and keep proceeding until we cannot remove a variable without making the model worse. The set of variables that remain will be the optimal set of variables. In almost no cases will forward and backward selection agree on which set of variables is the best -- we have to settle this debate by either picking the model with the least parameters (the most parsimonious), or the one with the best performance.
 
@@ -134,11 +138,13 @@ Co-linearity of variables is challenging for all types of ecological models [@gr
 
 Delicious. Finally some good fucking quantitative ecology.
 
-PCA (also does dimensionality reduction)
+### PCA-based transforms
 
-One advantage of PCA is that it serves both as a way to remove colinearity, in that the principal components are orthogonal, and as a way to reduce the dimensionality of the problem as long as we decide on a threshold on the proportion of variance explained, and only retain the number of principal components needed to reach this threshold.
+Principal Component Analysis (PCA) is one of the most widely used multi-variate techniques in ecology, and is a very common technique to prepare variables in applied machine learning. One advantage of PCA is that it serves both as a way to remove colinearity, in that the principal components are orthogonal, and as a way to reduce the dimensionality of the problem as long as we decide on a threshold on the proportion of variance explained, and only retain the number of principal components needed to reach this threshold. For applications where the features are high-dimensional, PCA is a well established method to reduce dimensionality *and* extract more information in the selected principal components [@howley2005]. In PCA, the projection matrix $\mathbf{P}$ is applied to the data using $\mathbf{P}^\top(\mathbf{x}-\mathbf{\mu})$, where $\mathbf{x}$ is the feature matrix with means $\mathbf{\mu}$. Typically, the dimensions of $\mathbf{P}$ are *lower* than the dimensions of $\mathbf{x}$, resulting in fewer dimensions to the problem. Cutoffs on the dimensions of $\mathbf{P}$ are typically expressed as a proportion of the overall variance maintained after the projection. Variants of PCA include kernel PCA [@schölkopf1998], using a higher-dimensional space to improve the separability of classes, and probabilistic PCA [@tipping1999], which relies on modeling the data within a latent space with lower dimensionality.
 
-Whitening
+### Whitening transforms
+
+Another class of potentially very useful data transformations is whitening transforms, which belongs to the larger category of decorrelation methods. These methods do not perform any dimensionality reduction, but instead remove the covariance in the datasets. Whitening has proven to be particularly effective at improving the predictive ability of models applied to data with strong covariance structure [@koivunen1999]. In essence, given a matrix of features $\mathbf{x}$, with averages $\mathbf{\mu}$ and covariance $\mathbf{C}$, a whitening transform $\mathbf{W}$ is the *one of the matrices* that satisfies $\mathbf{W}^\top\mathbf{C}\mathbf{W} = \mathbf{I}$. In other words, the whitening transform results in a new set of features with unit variance and no covariance: the dimensionality of the problem remains the same but the new random variables are independent. Given any dataset with covariance matrix $\mathbf{C}$, if any $\mathbf{W}$ is a whitening transform, then so to are any matrices $\mathbf{W}\mathbf{R}$ where $\mathbf{R}$ performs a rotation with $\mathbf{R}^\top\mathbf{R} = \mathbf{I}$. The optimal whitening transform can be derived through a variety of ways [see *e.g.* @kessy2018]. The whitening transform is applied to the input vector using $\mathbf{W}^\top (\mathbf{x}-\mathbf{\mu})$: this results in new random variables that have a mean of 0, and unit variance. The new input vector after the transformation is therefore an instance of "white noise" [@vasseur2004].
 
 ## Application: optimal variables for Corsican nuthatch
 
@@ -229,7 +235,7 @@ Based on the results presented in **TBL**, the model trained on variables select
 
 ### Variable transformation
 
-In the previous section, we observed that variable selection could in fact make the model a little better, 
+In the previous section, we observed that variable selection could in fact make the model a little better,
 
 ```{julia}
 #| echo: false
@@ -266,9 +272,7 @@ end
 
 ```
 
-
 ### Model selection
-
 
 ```{julia}
 #| output: false
