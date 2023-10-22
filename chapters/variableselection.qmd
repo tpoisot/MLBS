@@ -116,9 +116,13 @@ Why, so, should we select the variables we put in our models?
 
 The answer is simple: we seek to solve a specific problem in an optimal way, where "optimal" refers to the maximization of a performance measure we decided upon *a priori*. In our case, this is the MCC. Therefore, an ideal set of predictors is the one that, given our cross-validation strategy, maximizes our measure of performance.
 
+### Forward selection
+
 In forward selection, assuming that we have $f$ features, we start by building $f$ models, each using one feature. For example, using the BioClim variables, $m_1$ would be attempting to predict presences and absences based only on temperature. Out of these models, we retain the variable given by $\text{argmax}_f \text{MCC}(m_f)$, where $\text{MCC}(m_f)$ is the average value of MCC for the $f$-th model on the validation datasets. This is the first variable we add to our set of selected variables. We then train $f-1$ models, and then again add the variable that leads to the best possible *increase* in the average value of the MCC. When we cannot find a remaining variable that would increase the performance of the model, we stop the process, and return the optimal set of variables. Forward selection can be constrained by, instead of starting from variables one by one, starting from a pre-selected set of variables that will always be included in the model.
 
 There are two important things to consider here. First, the set of variables is only optimal under the assumptions of the stepwise selection process: the first variable is the one that boosts the predictive value of the model the most *on its own*, and the next variables *in the context of already selected variables*. Second, the variables are evaluated on the basis of their ability to *improve the performance of the model*; this does not imply that they are relevant to the ecological processes happening in the dataset. Infering mechanisms on the basis of variable selection is foolish [@tredennick2021].
+
+### Backward selection
 
 The opposite of forward selection is backward selection, in which we start from a complete set of variables, then remove the one with the *worst* impact on model performance, and keep proceeding until we cannot remove a variable without making the model worse. The set of variables that remain will be the optimal set of variables. In almost no cases will forward and backward selection agree on which set of variables is the best -- we have to settle this debate by either picking the model with the least parameters (the most parsimonious), or the one with the best performance.
 
@@ -132,13 +136,13 @@ Co-linearity of variables is challenging for all types of ecological models [@gr
 
 ## Multivariate transformations
 
-Delicious. Finally some good fucking quantitative ecology.
+### PCA-based transforms
 
-PCA (also does dimensionality reduction)
+Principal Component Analysis (PCA) is one of the most widely used multi-variate techniques in ecology, and is a very common technique to prepare variables in applied machine learning. One advantage of PCA is that it serves both as a way to remove colinearity, in that the principal components are orthogonal, and as a way to reduce the dimensionality of the problem as long as we decide on a threshold on the proportion of variance explained, and only retain the number of principal components needed to reach this threshold. For applications where the features are high-dimensional, PCA is a well established method to reduce dimensionality *and* extract more information in the selected principal components [@howley2005]. In PCA, the projection matrix $\mathbf{P}$ is applied to the data using $\mathbf{P}^\top(\mathbf{x}-\mathbf{\mu})$, where $\mathbf{x}$ is the feature matrix with means $\mathbf{\mu}$. Typically, the dimensions of $\mathbf{P}$ are *lower* than the dimensions of $\mathbf{x}$, resulting in fewer dimensions to the problem. Cutoffs on the dimensions of $\mathbf{P}$ are typically expressed as a proportion of the overall variance maintained after the projection. Variants of PCA include kernel PCA [@schölkopf1998], using a higher-dimensional space to improve the separability of classes, and probabilistic PCA [@tipping1999], which relies on modeling the data within a latent space with lower dimensionality.
 
-One advantage of PCA is that it serves both as a way to remove colinearity, in that the principal components are orthogonal, and as a way to reduce the dimensionality of the problem as long as we decide on a threshold on the proportion of variance explained, and only retain the number of principal components needed to reach this threshold.
+### Whitening transforms
 
-Whitening
+Another class of potentially very useful data transformations is whitening transforms, which belongs to the larger category of decorrelation methods. These methods do not perform any dimensionality reduction, but instead remove the covariance in the datasets. Whitening has proven to be particularly effective at improving the predictive ability of models applied to data with strong covariance structure [@koivunen1999]. In essence, given a matrix of features $\mathbf{x}$, with averages $\mathbf{\mu}$ and covariance $\mathbf{C}$, a whitening transform $\mathbf{W}$ is the *one of the matrices* that satisfies $\mathbf{W}^\top\mathbf{C}\mathbf{W} = \mathbf{I}$. In other words, the whitening transform results in a new set of features with unit variance and no covariance: the dimensionality of the problem remains the same but the new random variables are independent. Given any dataset with covariance matrix $\mathbf{C}$, if any $\mathbf{W}$ is a whitening transform, then so to are any matrices $\mathbf{W}\mathbf{R}$ where $\mathbf{R}$ performs a rotation with $\mathbf{R}^\top\mathbf{R} = \mathbf{I}$. The optimal whitening transform can be derived through a variety of ways [see *e.g.* @kessy2018]. The whitening transform is applied to the input vector using $\mathbf{W}^\top (\mathbf{x}-\mathbf{\mu})$: this results in new random variables that have a mean of 0, and unit variance. The new input vector after the transformation is therefore an instance of "white noise" [@vasseur2004].
 
 ## Application: optimal variables for Corsican nuthatch
 
@@ -163,38 +167,33 @@ CXv, CXt = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
 
 Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
 
-In a sense, this initial model was *already* coming from a variable selection process, only we did not use a quantitative criteria to include variables. And so, it is a good idea to evaluate whether our model was worse than a model including *all* the variables. Running the NBC again using all 19 BioClim variables, we get an average MCC on the validation data of `{julia} round(mean(mcc.(CXv)); digits=3)`. This is a small increase, but an increase nevertheless -- our dataset had information that was not captured by temperature and precipitation.
+In a sense, this initial model was *already* coming from a variable selection process, only we did not use a quantitative criteria to include variables. And so, it is a good idea to evaluate how our model performed, relative to a model including *all* the variables. Running the NBC again using all 19 BioClim variables from @tbl-predictors-bioclim, we get an average MCC on the validation data of `{julia} round(mean(mcc.(CXv)); digits=3)`. This is a small increase, but an increase nevertheless -- our dataset had information that was not captured by temperature and precipitation. But this model with all the variables most likely includes extraneous information that does not help, or even hinders, the predictive ability of our model. Therefore, there is probably a better version of the model somewhere, that uses the optimal set of variables, potentially with the best possible transformation applied to them.
 
-In this section, we will start by evaluating the efficiency of different approaches to variable selection, then of variable transformation, then merge these two together to provide a model that is optimal with regards to the training data we have. In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in @sec-classification), as well as the accuracy and True-Skill Statistic (TSS). The TSS is defined as the sum of true positive and true negative rates, minus one, and is an alternative measure to the MCC (although it is more sensitive to some biases). Also several authors have advocated for the use of TSS [@allouche2006], @leroy2018 have an interesting discussion of how the TSS is particularly sensitive to issues in the quality of (pseudo) absence data. For this reason, and based on the literature we covered in @sec-classification, there is no strong argument against using MCC as our selection measure.
+In this section, we will start by evaluating the efficiency of different approaches to variable selection, then merge selection and transformation together to provide a model that is optimal with regards to the training data we have (the workflow is outlined in @fig-predictors-workflow). In order to evaluate the model, we will maintain the use of the MCC; in addition, we will report the PPV and NPV (like in @sec-classification), as well as the accuracy and True-Skill Statistic (TSS). The TSS is defined as the sum of true positive and true negative rates, minus one, and is an alternative measure to the MCC (although it is more sensitive to some biases). Although several authors have advocated for the use of TSS [@allouche2006], @leroy2018 have an interesting discussion of how the TSS is particularly sensitive to issues in the quality of (pseudo) absence data. For this reason, and based on the literature we covered in @sec-classification, there is no strong argument against using MCC as our selection measure.
 
-To prevent the risk of interpreting the list of variables that have been retained by the model, we will *not* make a list of which they are (yet). This is because, in order to discuss the relative importance of variables, we need to introduce a few more concepts and techniques, which will not happen until @sec-explanations; at this point, we will revisit the list of variables identified during the chapter, and compare their impact on model performance to their actual importance to explain predictions.
+::: column-margin
+In @sec-tuning, we will revisit the question of how the MCC is "better", and spend more time evaluating alternatives. For now, we can safely *assume* that MCC is the best.
+:::
+
+To prevent the risk of interpreting the list of variables that have been retained by the model, we will *not* make a list of which they are (yet). This is because, in order to discuss the relative importance of variables, we need to introduce a few more concepts and techniques, which will not happen until @sec-explanations; at this point, we will revisit the list of variables identified during this chapter, and compare their impact on model performance to their actual importance in explaining predictions.
+
+![Overview of the variable selection workflow; starting from a list of variables and a routine to select them, we will perform cross-validation and measure whether the model performance increases.]
+
+  [Overview of the variable selection workflow; starting from a list of variables and a routine to select them, we will perform cross-validation and measure whether the model performance increases.]: /diagrams/variable-selection.png {#fig-predictors-workflow fig-align="center"}
 
 ### Variable selection
+
+We will perform four different versions of stepwise variable selection. Forward, forward from a pre-selected set of two variables (temperature and precipitation), backward, and based on the Variance Inflation Factor (with a cutoff of 10). The results are presented in @tbl-predictors-selection.
 
 ```{julia}
 #| echo: false
 #| output: false
 b0 = backwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
 Cb0v, Cb0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,b0], folds)
-```
-
-```{julia}
-#| echo: false
-#| output: false
 f0 = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
 Cf0v, Cf0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,f0], folds)
-```
-
-```{julia}
-#| echo: false
-#| output: false
 c0 = constrainedselection(naivebayes, trainlabels, trainfeatures, folds, [1,12], mcc)
 Cc0v, Cc0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,c0], folds)
-```
-
-```{julia}
-#| echo: false
-#| output: false
 i0 = stepwisevif(trainfeatures, 10.0)
 Ci0v, Ci0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,i0], folds)
 ```
@@ -225,11 +224,11 @@ catch e
 end
 ```
 
-Based on the results presented in **TBL**, the model trained on variables selected using forward selection gave the best results.
+The best model is given by forward selection, although backwards selection also gives a very close performance. At this point, we may decide to keep these two strategies, and evaluate the effect of different transformations of the data.
 
 ### Variable transformation
 
-In the previous section, we observed that variable selection could in fact make the model a little better, 
+Based on the results from @tbl-predictors-selection, we retain forward and backwards selection as our two stepwise selection methods, and now apply an additional transformation (as in @fig-predictors-workflow) to the subset of the variables. The results are presented in @tbl-predictors-transformation. Based on these results, and using the MCC as the criteria for the "best" model, we see that combining forward selection with a whitening transform gives the best predictive performance. Note that the application of a transformation *does* change the result of variable selection, as evidences by the fact that the number of retained variables changes when we apply a transformation.
 
 ```{julia}
 #| echo: false
@@ -266,9 +265,11 @@ end
 
 ```
 
-
 ### Model selection
 
+In @tbl-predictors-selection and @tbl-predictions-transformation, we have evaluated a series of several modeling strategies, defined by a variable selection and transformation technique. Using the MCC as our reference for what constitutes the best model, we can now apply the model to the relevant set of predictors, in order to see how these refinements result in a new predicted range for the species.
+
+These results are presented in @fig-predictors-rangediff.
 
 ```{julia}
 #| output: false
@@ -295,21 +296,34 @@ end
 ```{julia}
 #| label: fig-predictors-rangediff
 #| echo: false
-#| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. The left panel shows the effect of moving from two predictors to the best set of variables identified with forward selection. The right panel then shows the effect of adding a data transformation step (Whitening) *and* a variable selection step, compared to variable selection alone. Note that the small area of predicted presence in the Capicorsu (the Northern tip) has disappeared with a better variable transformation.
+#| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
 final_range = vpr .> 0.5
 inter_range = ipr .> 0.5
 old_range = opr .> 0.5
+rangediff(new, old) = mask(new .| old, new .- old)
+fig = Figure(; resolution=(500,600))
+ax1 = Axis(fig[1,1]; aspect=DataAspect(), title="Initial")
+ax2 = Axis(fig[1,2]; aspect=DataAspect(), title="Final")
+ax3 = Axis(fig[2,1]; aspect=DataAspect(), title="Difference")
+heatmap!(ax1, old_range, colormap=vibrant[1:2])
+heatmap!(ax2, final_range, colormap=vibrant[1:2])
+heatmap!(ax3, final_range, colormap=[vibrant[1], vibrant[1]], alpha=0.7)
+rm_pal = cgrad(sunset, 3, categorical=true)
+heatmap!(ax3, rangediff(final_range, old_range); colormap = rm_pal)
 
-fig = Figure()
-ax1 = Axis(fig[1,1,]; aspect=DataAspect(), title="Selection")
-ax2 = Axis(fig[1,2,]; aspect=DataAspect(), title="Transformation")
-heatmap!(ax1, final_range, colormap=[:lightgrey, :lightgrey], alpha=0.7)
-heatmap!(ax2, final_range, colormap=[:lightgrey, :lightgrey], alpha=0.7)
-hm = heatmap!(ax1, rangediff(inter_range, old_range); colormap = Reverse(cgrad(nightfall, 3, categorical=true)))
-heatmap!(ax2, rangediff(final_range, inter_range); colormap = Reverse(cgrad(nightfall, 3, categorical=true)))
-Colorbar(fig[1,3], hm; tellheight=false, height=Relative(0.4))
+
+cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
+clab = ["Loss", "No change", "Gain"]
+Legend(fig[2,2], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
+
 current_figure()
 ```
+
+## Conclusion
+
+In this chapter, we have discussed the issues with dimensionality and data leakage, and established a methodology to reduce the number of dimensions (and possible re-project the variables) while maintaining the train/predict separation. This resulted in a model whose performance (as evaluated using the MCC) increased quite significantly, which resulted in the predicted range of *Sitta whiteheadi* changing in space.
+
+In @sec-tuning, we will finish to refine this model, by considering that the NBC is a probabilistic classifier, and tuning various hyper-parameters of the model using learning curves and thresholding. This will result in the final trained model, the behavior of which we will explore in @sec-explanations, to understand *how* the model makes predictions.
 
 ```{julia}
 #| output: false
@@ -325,5 +339,3 @@ JLD.save(
     "transformation", Whitening
 )
 ```
-
-## Conclusion
