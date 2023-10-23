@@ -1,6 +1,6 @@
 # Hyper-parameters tuning {#sec-tuning}
 
-In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of our model. We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct grid searches to tune several hyper-parameters at once.
+In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­@sec-classification and @sec-predictors. We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct grid searches to tune several hyper-parameters at once. In the process, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then try to *explain* in @sec-explanations.
 
 ```{julia}
 #| echo: false
@@ -9,6 +9,7 @@ _code_path = joinpath(dirname(Base.active_project()), "lib")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "confusion.jl"))
 include(joinpath(_code_path, "mocks.jl"))
+include(joinpath(_code_path, "bioclim.jl"))
 include(joinpath(_code_path, "nbc.jl"))
 include(joinpath(_code_path, "vif.jl"))
 include(joinpath(_code_path, "splitters.jl"))
@@ -16,6 +17,10 @@ include(joinpath(_code_path, "palettes.jl"))
 include(joinpath(_code_path, "crossvalidate.jl"))
 include(joinpath(_code_path, "variableselection.jl"))
 ```
+
+## A refresher on hyper-parameters
+
+In @sec-gradientdescent, we discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them.
 
 ## Classification based on probabilities
 
@@ -50,7 +55,6 @@ Some authors have used the MCC as a measure of optimality [@zhou2013], as it is 
 For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.
 
 ## Application: improved Corsican nuthatch model
-
 
 ```{julia}
 #| echo: false
