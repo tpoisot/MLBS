@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -241,14 +207,18 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#classification-based-on-probabilities" id="toc-classification-based-on-probabilities" class="nav-link active" data-scroll-target="#classification-based-on-probabilities"><span class="header-section-number">7.1</span> Classification based on probabilities</a>
+  <li><a href="#a-refresher-on-hyper-parameters" id="toc-a-refresher-on-hyper-parameters" class="nav-link active" data-scroll-target="#a-refresher-on-hyper-parameters"><span class="header-section-number">7.1</span> A refresher on hyper-parameters</a></li>
+  <li><a href="#classification-based-on-probabilities" id="toc-classification-based-on-probabilities" class="nav-link" data-scroll-target="#classification-based-on-probabilities"><span class="header-section-number">7.2</span> Classification based on probabilities</a>
   <ul class="collapse">
-  <li><a href="#the-roc-curve" id="toc-the-roc-curve" class="nav-link" data-scroll-target="#the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</a></li>
-  <li><a href="#the-pr-curve" id="toc-the-pr-curve" class="nav-link" data-scroll-target="#the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</a></li>
-  <li><a href="#cross-entropy-loss-and-other-classification-loss-functions" id="toc-cross-entropy-loss-and-other-classification-loss-functions" class="nav-link" data-scroll-target="#cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">7.1.3</span> Cross-entropy loss and other classification loss functions</a></li>
+  <li><a href="#the-roc-curve" id="toc-the-roc-curve" class="nav-link" data-scroll-target="#the-roc-curve"><span class="header-section-number">7.2.1</span> The ROC curve</a></li>
+  <li><a href="#the-pr-curve" id="toc-the-pr-curve" class="nav-link" data-scroll-target="#the-pr-curve"><span class="header-section-number">7.2.2</span> The PR curve</a></li>
+  <li><a href="#cross-entropy-loss-and-other-classification-loss-functions" id="toc-cross-entropy-loss-and-other-classification-loss-functions" class="nav-link" data-scroll-target="#cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">7.2.3</span> Cross-entropy loss and other classification loss functions</a></li>
   </ul></li>
-  <li><a href="#how-to-optimize-the-threshold" id="toc-how-to-optimize-the-threshold" class="nav-link" data-scroll-target="#how-to-optimize-the-threshold"><span class="header-section-number">7.2</span> How to optimize the threshold?</a></li>
-  <li><a href="#application-improved-corsican-nuthatch-model" id="toc-application-improved-corsican-nuthatch-model" class="nav-link" data-scroll-target="#application-improved-corsican-nuthatch-model"><span class="header-section-number">7.3</span> Application: improved Corsican nuthatch model</a></li>
+  <li><a href="#how-to-optimize-the-threshold" id="toc-how-to-optimize-the-threshold" class="nav-link" data-scroll-target="#how-to-optimize-the-threshold"><span class="header-section-number">7.3</span> How to optimize the threshold?</a></li>
+  <li><a href="#application-improved-corsican-nuthatch-model" id="toc-application-improved-corsican-nuthatch-model" class="nav-link" data-scroll-target="#application-improved-corsican-nuthatch-model"><span class="header-section-number">7.4</span> Application: improved Corsican nuthatch model</a>
+  <ul class="collapse">
+  <li><a href="#tuning-several-hyper-parameters-at-once" id="toc-tuning-several-hyper-parameters-at-once" class="nav-link" data-scroll-target="#tuning-several-hyper-parameters-at-once"><span class="header-section-number">7.4.1</span> Tuning several hyper-parameters at once</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -274,45 +244,42 @@ div.csl-indent {
 </header>
 
 
-<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­<a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>. We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct grid searches to tune several hyper-parameters at once.</p>
-<section id="classification-based-on-probabilities" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="classification-based-on-probabilities"><span class="header-section-number">7.1</span> Classification based on probabilities</h2>
+<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­<a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>. We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct grid searches to tune several hyper-parameters at once. In the process, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the “right” balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then try to <em>explain</em> in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
+<section id="a-refresher-on-hyper-parameters" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="a-refresher-on-hyper-parameters"><span class="header-section-number">7.1</span> A refresher on hyper-parameters</h2>
+<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where <em>hyper</em>-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is <em>controlling</em> the learning process, but is not itself modified through learning <span class="citation" data-cites="yang2020">(<a href="../references.html#ref-yang2020" role="doc-biblioref">Yang &amp; Shami 2020</a>)</span>. Hyper-parameters usually need to be determined <em>before</em> the training starts <span class="citation" data-cites="claesen2015">(<a href="../references.html#ref-claesen2015" role="doc-biblioref">Claesen &amp; De Moor 2015</a>)</span>, but there are various strategies to optimize them.</p>
+</section>
+<section id="classification-based-on-probabilities" class="level2 page-columns page-full" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="classification-based-on-probabilities"><span class="header-section-number">7.2</span> Classification based on probabilities</h2>
 <p>When first introducing classification in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either “present” or “absent”). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interesting in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.</p>
-<p>The idea behind the use of thresholds is simple: if the classifier output <span class="math inline">\(\hat y\)</span> is larger than (or equal to) the threshold value <span class="math inline">\(\tau\)</span>, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value <span class="math inline">\(\hat y\)</span> returned by the classifier be a probability. We can simply decide to pick <span class="math inline">\(\tau\)</span> somewhere in the support of the distribution of <span class="math inline">\(\hat y\)</span>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Note that the quantitative value returned by the classifier does not <em>need</em> to be a probability; it simply needs to be on an interval or ratio scale.</p>
+</div></div><p>The idea behind the use of thresholds is simple: if the classifier output <span class="math inline">\(\hat y\)</span> is larger than (or equal to) the threshold value <span class="math inline">\(\tau\)</span>, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value <span class="math inline">\(\hat y\)</span> returned by the classifier be a probability. We can simply decide to pick <span class="math inline">\(\tau\)</span> somewhere in the support of the distribution of <span class="math inline">\(\hat y\)</span>.</p>
 <p>The threshold to decide on a positive event is an hyper-parameter of the model. In the NBC we built in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, our decision rule was that <span class="math inline">\(p(+) &gt; p(-)\)</span>, which when all is said and done (but we will convince ourselves of this in <strong>TODO</strong>), means that we used <span class="math inline">\(\tau = 0.5\)</span>. But there is no reason to assume that the threshold needs to be one half. Maybe the model is overly sensitive to negatives. Maybe there is a slight issue with our training data that bias the model predictions. And for this reason, we have to look for the optimal value of <span class="math inline">\(\tau\)</span>.</p>
 <p>There are two important values for the threshold, at which we know the behavior of our model. The first is <span class="math inline">\(\tau = \text{min}(\hat y)\)</span>, for which the model <em>always</em> returns a negative answer; the second is, unsurprisingly, <span class="math inline">\(\tau = \text{max}(\hat y)\)</span>, where the model <em>always</em> returns a positive answer. Thinking of this behavior in terms of the measures on the confusion matrix, as we have introduced them in <strong>TODO</strong>, the smallest possible threshold gives only negatives, and the largest possible one gives only positives: they respectively maximize the false negatives and false positives rates.</p>
-<section id="the-roc-curve" class="level3" data-number="7.1.1">
-<h3 data-number="7.1.1" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</h3>
+<section id="the-roc-curve" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">7.2.1</span> The ROC curve</h3>
 <p>This is a behavior we can exploit, as increasing the threshold away from the minimum will lower the false negatives rate and increase the true positive rate, while decreasing the threshold away from the maximum will lower the false positives rate and increase the true negative rate. If we cross our fingers and knock on wood, there will be a point where the false events rates have decreased as much as possible, and the true events rates have increased as much as possible, and this corresponds to the optimal value of <span class="math inline">\(\tau\)</span> for our problem.</p>
 <p>We have just described the Receiver Operating Characteristic (ROC; <span class="citation" data-cites="fawcett2006">Fawcett (<a href="../references.html#ref-fawcett2006" role="doc-biblioref">2006</a>)</span>) curve! The ROC curve visualizes the false positive rate on the <span class="math inline">\(x\)</span> axis, and the true positive rate on the <span class="math inline">\(y\)</span> axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier <span class="citation" data-cites="hanley1982">(<a href="../references.html#ref-hanley1982" role="doc-biblioref">Hanley &amp; McNeil 1982</a>)</span>; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance.The ROC curve is a description of the model performance across all of the possible threshold values we investigated!</p>
 </section>
-<section id="the-pr-curve" class="level3" data-number="7.1.2">
-<h3 data-number="7.1.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</h3>
+<section id="the-pr-curve" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">7.2.2</span> The PR curve</h3>
 <p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions <span class="citation" data-cites="poisot2023">(<a href="../references.html#ref-poisot2023" role="doc-biblioref">Poisot <em>et al.</em> 2023</a>)</span>. For this reason, it is always advised to …</p>
 </section>
-<section id="cross-entropy-loss-and-other-classification-loss-functions" class="level3" data-number="7.1.3">
-<h3 data-number="7.1.3" class="anchored" data-anchor-id="cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">7.1.3</span> Cross-entropy loss and other classification loss functions</h3>
+<section id="cross-entropy-loss-and-other-classification-loss-functions" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="cross-entropy-loss-and-other-classification-loss-functions"><span class="header-section-number">7.2.3</span> Cross-entropy loss and other classification loss functions</h3>
 </section>
 </section>
-<section id="how-to-optimize-the-threshold" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">7.2</span> How to optimize the threshold?</h2>
+<section id="how-to-optimize-the-threshold" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">7.3</span> How to optimize the threshold?</h2>
 <p>In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example <span class="math inline">\([0.2, 0.8, 0.1, 0.5, 1.0]\)</span>. We then compare all of these values to an initial threshold, for example <span class="math inline">\(\tau = 0.05\)</span>, giving us a vector of Boolean values, in this case <span class="math inline">\([+, +, +, +, +]\)</span>. We can then compare this classified output to a series of validation labels, <em>e.g.</em> <span class="math inline">\([-, +, -, -, +]\)</span>, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.</p>
 <p>As we have discussed in <strong>TODO previous</strong>, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be <span class="citation" data-cites="Perkins2006 Unal2017">(<a href="../references.html#ref-Perkins2006" role="doc-biblioref">Perkins &amp; Schisterman 2006</a>; <a href="../references.html#ref-Unal2017" role="doc-biblioref">Unal 2017</a>)</span>. The usual recommendation is to use the True Skill Statistic, also known as Youden’s <span class="math inline">\(J\)</span> <span class="citation" data-cites="youden1950">(<a href="../references.html#ref-youden1950" role="doc-biblioref">Youden 1950</a>)</span>. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier <span class="citation" data-cites="perkins2005">(<a href="../references.html#ref-perkins2005" role="doc-biblioref">Perkins &amp; Schisterman 2005</a>)</span>. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions <span class="citation" data-cites="poisot2023a">(<a href="../references.html#ref-poisot2023a" role="doc-biblioref">Poisot 2023</a>)</span>.</p>
 <p>Some authors have used the MCC as a measure of optimality <span class="citation" data-cites="zhou2013">(<a href="../references.html#ref-zhou2013" role="doc-biblioref">Zhou &amp; Jakobsson 2013</a>)</span>, as it is maximized <em>only</em> when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, <span class="citation" data-cites="chicco2023">Chicco &amp; Jurman (<a href="../references.html#ref-chicco2023" role="doc-biblioref">2023</a>)</span> recommend that MCC should be used to pick the optimal threshold <em>regardless of the question</em>, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at <em>everything</em>, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss <span class="citation" data-cites="Jurman2012">(<a href="../references.html#ref-Jurman2012" role="doc-biblioref">Jurman <em>et al.</em> 2012</a>)</span>.</p>
 <p>For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.</p>
 </section>
-<section id="application-improved-corsican-nuthatch-model" class="level2 page-columns page-full" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="application-improved-corsican-nuthatch-model"><span class="header-section-number">7.3</span> Application: improved Corsican nuthatch model</h2>
-<div id="8dd40713" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="fu">LinRange</span>(<span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="fl">150</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>CT <span class="op">=</span> <span class="fu">hcat</span>([<span class="fu">first</span>(<span class="fu">crossvalidate</span>(naivebayes, y, X, folds, τ; transformation<span class="op">=</span>tf)) for τ <span class="kw">in</span> T]<span class="op">...</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>BT <span class="op">=</span> <span class="fu">hcat</span>([<span class="fu">first</span>(<span class="fu">crossvalidate</span>(bioclim, y, X, folds, τ)) for τ <span class="kw">in</span> T]<span class="op">...</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>τ <span class="op">=</span> T[<span class="fu">last</span>(<span class="fu">findmax</span>(<span class="fu">vec</span>(<span class="fu">mean</span>(<span class="fu">mcc</span>.(CT); dims<span class="op">=</span><span class="fl">1</span>))))]</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>τb <span class="op">=</span> T[<span class="fu">last</span>(<span class="fu">findmax</span>(<span class="fu">vec</span>(<span class="fu">mean</span>(<span class="fu">mcc</span>.(BT); dims<span class="op">=</span><span class="fl">1</span>))))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>0.026845637583892617</code></pre>
-</div>
-</div>
+<section id="application-improved-corsican-nuthatch-model" class="level2 page-columns page-full" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="application-improved-corsican-nuthatch-model"><span class="header-section-number">7.4</span> Application: improved Corsican nuthatch model</h2>
 <div id="cell-fig-tuning-threshold" class="cell page-columns page-full" data-execution_count="4">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="5">
 <div id="fig-tuning-threshold" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -341,11 +308,32 @@ Figure&nbsp;7.2: ROC and PR
 </div>
 </div>
 </div>
+<section id="tuning-several-hyper-parameters-at-once" class="level3 page-columns page-full" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="tuning-several-hyper-parameters-at-once"><span class="header-section-number">7.4.1</span> Tuning several hyper-parameters at once</h3>
+<p>In the previous section, we have assumed that the prior on occurrences <span class="math inline">\(P(+)\)</span> was one half, which is a decision we can revisit. But changing this value would probably require that we also change the threshold, and for this reason</p>
+<p>There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling <span class="citation" data-cites="huntington1998">(<a href="../references.html#ref-huntington1998" role="doc-biblioref">Huntington &amp; Lyrintzis 1998</a>)</span>, orthogonal sampling <span class="citation" data-cites="mckay1979">(<a href="../references.html#ref-mckay1979" role="doc-biblioref">McKay <em>et al.</em> 1979</a>)</span>, and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters.</p>
+<div id="cell-fig-tuning-both" class="cell page-columns page-full" data-execution_count="6">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="7">
+<div id="fig-tuning-both" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-both-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-both-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-both-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: learning curve for the threshold and prior
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
 <div id="ref-chicco2023" class="csl-entry" role="listitem">
 Chicco, D. &amp; Jurman, G. (2023). <a href="https://doi.org/10.1186/s13040-023-00322-4">The Matthews correlation coefficient&nbsp;(MCC) should replace the ROC&nbsp;AUC as the standard metric for assessing binary classification</a>. <em>BioData Mining</em>, 16.
+</div>
+<div id="ref-claesen2015" class="csl-entry" role="listitem">
+Claesen, M. &amp; De Moor, B. (2015). <a href="https://doi.org/10.48550/ARXIV.1502.02127">Hyperparameter search in machine learning</a>.
 </div>
 <div id="ref-fawcett2006" class="csl-entry" role="listitem">
 Fawcett, T. (2006). <a href="https://doi.org/10.1016/j.patrec.2005.10.010">An introduction to ROC analysis</a>. <em>Pattern Recognition Letters</em>, 27, 861–874.
@@ -353,8 +341,14 @@ Fawcett, T. (2006). <a href="https://doi.org/10.1016/j.patrec.2005.10.010">An in
 <div id="ref-hanley1982" class="csl-entry" role="listitem">
 Hanley, J.A. &amp; McNeil, B.J. (1982). <a href="https://doi.org/10.1148/radiology.143.1.7063747">The meaning and use of the area under a receiver operating characteristic (ROC) curve.</a> <em>Radiology</em>, 143, 29–36.
 </div>
+<div id="ref-huntington1998" class="csl-entry" role="listitem">
+Huntington, D.E. &amp; Lyrintzis, C.S. (1998). <a href="https://doi.org/10.1016/s0266-8920(97)00013-1">Improvements to and limitations of Latin hypercube sampling</a>. <em>Probabilistic Engineering Mechanics</em>, 13, 245–253.
+</div>
 <div id="ref-Jurman2012" class="csl-entry" role="listitem">
 Jurman, G., Riccadonna, S. &amp; Furlanello, C. (2012). <a href="https://doi.org/10.1371/journal.pone.0041882">A Comparison of MCC and CEN Error Measures in Multi-Class Prediction</a>. <em>PLoS ONE</em>, 7, e41882.
+</div>
+<div id="ref-mckay1979" class="csl-entry" role="listitem">
+McKay, M.D., Beckman, R.J. &amp; Conover, W.J. (1979). <a href="https://doi.org/10.2307/1268522">A comparison of three methods for selecting values of input variables in the analysis of output from a computer code</a>. <em>Technometrics</em>, 21, 239.
 </div>
 <div id="ref-perkins2005" class="csl-entry" role="listitem">
 Perkins, N.J. &amp; Schisterman, E.F. (2005). <a href="https://doi.org/10.1002/bimj.200410133">The Youden Index and the Optimal Cut-Point Corrected for Measurement Error</a>. <em>Biometrical Journal</em>, 47, 428–441.
@@ -371,6 +365,9 @@ Poisot, T., Ouellet, M.-A., Mollentze, N., Farrell, M.J., Becker, D.J., Brierley
 <div id="ref-Unal2017" class="csl-entry" role="listitem">
 Unal, I. (2017). <a href="https://doi.org/10.1155/2017/3762651">Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach</a>. <em>Computational and Mathematical Methods in Medicine</em>, 2017, 1–14.
 </div>
+<div id="ref-yang2020" class="csl-entry" role="listitem">
+Yang, L. &amp; Shami, A. (2020). <a href="https://doi.org/10.1016/j.neucom.2020.07.061">On hyperparameter optimization of machine learning algorithms: Theory and practice</a>. <em>Neurocomputing</em>, 415, 295–316.
+</div>
 <div id="ref-youden1950" class="csl-entry" role="listitem">
 Youden, W.J. (1950). <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3">Index for rating diagnostic tests</a>. <em>Cancer</em>, 3, 32–35.
 </div>
@@ -378,6 +375,7 @@ Youden, W.J. (1950). <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid
 Zhou, H. &amp; Jakobsson, E. (2013). <a href="https://doi.org/10.1371/journal.pone.0081100">Predicting Protein-Protein Interaction by the Mirrortree Method: Possibilities and Limitations</a>. <em>PLoS ONE</em>, 8, e81100.
 </div>
 </div>
+</section>
 </section>
 
 </main> <!-- /main -->

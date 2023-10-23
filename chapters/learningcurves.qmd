@@ -1,6 +1,8 @@
 # Hyper-parameters tuning {#sec-tuning}
 
-In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­@sec-classification and @sec-predictors. We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct grid searches to tune several hyper-parameters at once. In the process, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then try to *explain* in @sec-explanations.
+In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­@sec-classification and @sec-predictors.
+
+We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then try to *explain* in @sec-explanations.
 
 ```{julia}
 #| echo: false
@@ -18,13 +20,13 @@ include(joinpath(_code_path, "crossvalidate.jl"))
 include(joinpath(_code_path, "variableselection.jl"))
 ```
 
-## A refresher on hyper-parameters
-
-In @sec-gradientdescent, we discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them.
-
 ## Classification based on probabilities
 
 When first introducing classification in @sec-classification and @sec-predictors, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either "present" or "absent"). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interesting in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.
+
+::: column-margin
+Note that the quantitative value returned by the classifier does not *need* to be a probability; it simply needs to be on an interval or ratio scale.
+:::
 
 The idea behind the use of thresholds is simple: if the classifier output $\hat y$ is larger than (or equal to) the threshold value $\tau$, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value $\hat y$ returned by the classifier be a probability. We can simply decide to pick $\tau$ somewhere in the support of the distribution of $\hat y$.
 
@@ -71,20 +73,24 @@ untuned = naivebayes(y, X; transformation=tf)
 ```
 
 ```{julia}
-T = LinRange(0.0, 1.0, 150)
+#| echo: false
+#| output: false
+T = LinRange(0.0, 1.0, 250)
 CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)) for τ in T]...)
-BT = hcat([first(crossvalidate(bioclim, y, X, folds, τ)) for τ in T]...)
 τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
-τb = T[last(findmax(vec(mean(mcc.(BT); dims=1))))]
 ```
 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-threshold
 #| fig-cap: learning curve for the threshold
-series(T, mcc.(CT), solid_color=vibrant[1])
-lines!(T, vec(mean(mcc.(CT); dims=1)), color=vibrant[2], linewidth=5)
-scatter!(τ, maximum(vec(mean(mcc.(CT); dims=1))), color=vibrant[2], markersize=30)
+fig = Figure(; resolution=(600, 300))
+ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
+series!(ax, T, mcc.(CT), solid_color=light[1])
+lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=light[2], linewidth=2, linestyle=:dash)
+scatter!(ax, τ, maximum(vec(mean(mcc.(CT); dims=1))), color=light[2], markersize=20)
+xlims!(ax, (0., 1.))
+ylims!(ax, (0., 1.))
 current_figure()
 ```
 
@@ -123,12 +129,58 @@ end
 current_figure()
 ```
 
+### Fine-tuning the NBC prior
+
+In the previous section, we have assumed that the prior on occurrences $P(+)$ was one half, which is a decision we can revisit. But changing this value would probably require that we also change the threshold, and for this reason we need to optimize both hyperparameters at the same time. We present the results of a simple grid search in @fig-tuning-both.
+
+::: column-margin
+A grid search in an exhaustive sweep of all possible combinations of parameter values. In order to make the process more efficient, refined approaches like successive halvings [@jamieson2016] can be used.
+:::
+
+Based on these results, it appears that changing the value of the prior has very little impact on the best MCC we can achieve: the threshold is simply adjusted to reflect the fact that we assume occurrences to be increasingly likely. In this example, there is very little incentive for us to change the value of the prior, as it would have a very small effect on the overall performance of the model. For this reason, we will keep the previous model ($P(+) = 0.5$ and $\tau \approx  `{julia} round(τ; digits=2)`$) as the best one.
+
+Just because we decided to use a learning curve does not mean we *have* to change the hyper-parameters. Sometimes, this approach reveals that the value of an hyper-parameter is not really important to model performance, and we need to make a decision on what to do next. Here, although there are marginal changes in the value of the MCC, they do not feel significant enough to change the value of the prior.
+
+```{julia}
+#| echo: false
+#| label: fig-tuning-both
+#| fig-cap: learning curve for the threshold and prior
+fig = Figure(; resolution=(600, 400))
+ax = Axis(fig[1,1]; xlabel="P(+)", ylabel="MCC")
+
+T = LinRange(0.0, 1.0, 50)
+Pr = LinRange(0.2, 0.8, 20)
+Threads.@threads for pr in Pr
+    CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf, presence=pr)) for τ in T]...)
+    mccs = vec(mean(mcc.(CT); dims=1))
+    bm, bi = findmax(mccs)
+    scatter!(ax, pr, bm, color=T[bi], colorrange=(0., 1.), colormap=cgrad(iridescent), strokecolor=:black, strokewidth=1)
+end
+
+Colorbar(fig[1,2], colorrange=(0, 1), colormap=cgrad(iridescent), label="Optimal threshold")
+
+xlims!(ax, (0., 1.))
+ylims!(ax, (0.87, 0.89))
+
+current_figure()
+```
+
+### Comparison with another classifier
+
+```{julia}
+#| echo: false
+#| output: false
+T = LinRange(0.0, 1.0, 150)
+BT = hcat([first(crossvalidate(bioclim, y, ptm["features"], folds, τ)) for τ in T]...)
+τb = T[last(findmax(vec(mean(mcc.(BT); dims=1))))]
+```
+
 ```{julia}
 #| echo: false
 #| output: false
 Cv, Ct = crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)
-bCv, bCt = crossvalidate(bioclim, y, X, folds, τb)
 uCv, uCt = crossvalidate(naivebayes, y, X, folds; transformation=tf)
+bCv, bCt = crossvalidate(bioclim, y, ptm["features"], folds, τb)
 ```
 
 ```{julia}
@@ -140,16 +192,14 @@ bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; 
 
 pr = convert(Float64, similar(first(bio)))
 bs = convert(Float64, similar(first(bio)))
-bc = convert(Float64, similar(first(bio)))
-
-bcm = bioclim(y, X)
+en = convert(Float64, similar(first(bio)))
 
 submodels = [naivebayes(y, X[b,:]; transformation=tf) for b in bootstrap(y, X; n=500)]
 
 Threads.@threads for k in keys(pr)
     x = [bio[i][k] for i in axes(v, 1)]
     pr[k] = model(x)
-    bc[k] = bcm(x)
+    en[k] = entropy(pr[k])
     bs[k] = iqr([m(x) for m in submodels])
 end
 ```
