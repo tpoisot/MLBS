@@ -234,3 +234,19 @@ This is very promising! There are far more predictions on the diagonal (`{julia}
 In this chapter, we...
 
 In @sec-explanations, we will start asking "why"? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions.
+
+```{julia}
+#| output: false
+#| echo: false
+_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
+modelpath = joinpath(_ptm_path, "sdm-step-2.jld")
+JLD.save(
+    modelpath,
+    "labels", y,
+    "features", X,
+    "folds", folds,
+    "variables", v,
+    "transformation", Whitening,
+    "threshold", τ
+)
+```
