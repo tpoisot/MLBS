@@ -1,4 +1,3 @@
-
 function _generate_perm!(b1, b2, X, j)
     O = Random.shuffle(axes(X, 2))
     w = X[sample(axes(X, 1)), :]

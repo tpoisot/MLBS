@@ -16,6 +16,8 @@ biodiversity need sustained model uptake @weiskopf2022
 
 @lundberg2017 SHAP
 
+TODO 10.1186/s12911-021-01569-9
+
 transfo in model = we can still apply these techniques instead of asking "what does PC1 = 0.4 mean"
 
 ```{julia}
@@ -62,15 +64,15 @@ end
 ```{julia}
 #| label: fig-shapley-example
 #| fig-cap: Example of the contribution of the model variables to the prediction. The dashed line indicates the average prediction across all instances, and each arrow shows how the value of the feature for this instance moves the prediction, in an additive way. The length of each arrow is the Shapley value for this feature in this instance. The final prediction (in this case, how much higher/lower than the average) is given in a red cirle.
-idx = 1
-S = [shapley(model, X, idx, j; M=20000) for j in eachindex(v)]
+idx = 3
+S = [shapley(model, X, idx, j; M=2000) for j in eachindex(v)]
 P = [model(X[i,:]) for i in axes(X, 1)]
 p = P[idx]
 
 f = Figure()
 
 ax = Axis(f[1,1], yticks = (collect(length(v):-1:1), ["BIO$(i)" for i in v]))
-xlims!(ax, low=-0.5, high=0.5)
+xlims!(ax, low=-0.6, high=0.6)
 
 vlines!([0.0], color=:black, linestyle=:dash)
 
