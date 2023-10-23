@@ -22,7 +22,7 @@ include(joinpath(_code_path, "variableselection.jl"))
 
 ## Classification based on probabilities
 
-When first introducing classification in @sec-classification and @sec-predictors, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either "present" or "absent"). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interesting in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.
+When first introducing classification in @sec-classification and @sec-predictors, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either "present" or "absent"). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.
 
 ::: column-margin
 Note that the quantitative value returned by the classifier does not *need* to be a probability; it simply needs to be on an interval or ratio scale.
@@ -203,3 +203,34 @@ Threads.@threads for k in keys(pr)
     bs[k] = iqr([m(x) for m in submodels])
 end
 ```
+
+### Testing the final model
+
+As we are now considering that our model is adequately trained, we can finally apply it to the testing data we had set aside early in @sec-classification. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important. For this reason, we will also compare the model to BIOCLIM PLUS compare to validation performance on old model
+
+We are *not* applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of "we pick the best model as the one with the highest validation MCC", and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of $p$-hacking.
+
+```{julia}
+#| echo: false
+#| output: false
+ytest, Xtest = JLD.load(joinpath(_ptm_path, "sdm-step-0.jld"))["testing"]
+preds = vec(mapslices(model, Xtest[:,v], dims=2))
+C = ConfusionMatrix(preds, ytest, τ)
+```
+
+We can start by taking a look at the confusion matrix on the testing data:
+
+$$
+\begin{pmatrix}
+`{julia} C.tp` & `{julia} C.fp` \\
+`{julia} C.fn` & `{julia} C.tn`
+\end{pmatrix}
+$$
+
+This is very promising! There are far more predictions on the diagonal (`{julia} C.tp + C.tn`) than outside of it (`{julia} C.fp + C.fn`), which suggests an accurate classifier. But in order to really evaluate the model, we will report a little more information: TSS FOM FDI F1
+
+## Conclusion
+
+In this chapter, we...
+
+In @sec-explanations, we will start asking "why"? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions.
