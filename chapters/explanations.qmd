@@ -106,12 +106,33 @@ varimp ./= sum(varimp)
 vord = sortperm(varimp; rev=true)
 ```
 
+table with variable rank in selection
+
+```{julia}
+hdr = "| Variable | Selection rank | Importance rank | Rel. importance |"
+sep = "|-----|-----|-----|------|"
+tbl = [hdr, sep]
+for i in eachindex(v)
+    row = "| BIO$(v[i]) | $i | $(vord[i]) | $(round(Int, varimp[i]*100))% |"
+    push!(tbl, row)
+end
+push!(tbl, "\n: List of the $(length(v)) variables selected in @sec-predictors, ranked by their order of inclusion. Their rank in terms of importance, as well as relative importance, are also provided. {#tbl-explanations-importance}")
+try
+    display("text/markdown", join(tbl, "\n"))
+catch e
+end
+```
+
 variable importance plot
 
 ```{julia}
 fig = Figure()
-ax = Axis(fig[1,1])
-barplot!(ax, varimp[reverse(vord)], direction=:x, bar_labels = "BIO".*string.(v[reverse(vord)]), flip_labels_at = 0.05)
+ax = Axis(fig[1,1]; xlabel="Relative variable importance")
+barplot!(ax, varimp[reverse(vord)], direction=:x, bar_labels = "BIO".*string.(v[reverse(vord)]), flip_labels_at = 0.05, color=light[1])
+xlims!(ax, (0.0, maximum(varimp)*1.05))
+hideydecorations!(ax)
+hidexdecorations!(ax, grid=true, ticks=false, label=false, ticklabels=false)
+hidespines!(ax)
 current_figure()
 ```
 
