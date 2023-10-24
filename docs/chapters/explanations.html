@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -86,7 +120,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -204,7 +238,7 @@ div.csl-indent {
         
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -233,7 +267,308 @@ div.csl-indent {
 <p><span class="citation" data-cites="wadoux2023">Wadoux <em>et al.</em> (<a href="../references.html#ref-wadoux2023" role="doc-biblioref">2023</a>)</span> mapping of shapley values</p>
 <p><span class="citation" data-cites="mesgaran2014">Mesgaran <em>et al.</em> (<a href="../references.html#ref-mesgaran2014" role="doc-biblioref">2014</a>)</span> mapping of most important covariates</p>
 <p><span class="citation" data-cites="lundberg2017">Lundberg &amp; Lee (<a href="../references.html#ref-lundberg2017" role="doc-biblioref">2017</a>)</span> SHAP</p>
+<p>TODO 10.1186/s12911-021-01569-9</p>
 <p>transfo in model = we can still apply these techniques instead of asking “what does PC1 = 0.4 mean”</p>
+<p>model</p>
+<div id="cell-fig-shapley-example" class="cell page-columns page-full" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>idx <span class="op">=</span> <span class="fl">500</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> [<span class="fu">shapley</span>(model, X, idx, j; M<span class="op">=</span><span class="fl">20_000</span>) for j <span class="kw">in</span> <span class="fu">eachindex</span>(v)]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> [<span class="fu">model</span>(X[i,<span class="op">:</span>]) for i <span class="kw">in</span> <span class="fu">axes</span>(X, <span class="fl">1</span>)]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> P[idx]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>], yticks <span class="op">=</span> (<span class="fu">collect</span>(<span class="fu">length</span>(v)<span class="op">:-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span>), [<span class="st">"BIO</span><span class="sc">$</span>(i)<span class="st">"</span> for i <span class="kw">in</span> v]))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">xlims!</span>(ax, low<span class="op">=-</span><span class="fl">0.6</span>, high<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">vlines!</span>([<span class="fl">0.0</span>], color<span class="op">=:</span>black, linestyle<span class="op">=:</span>dash)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>starts <span class="op">=</span> <span class="fu">cumsum</span>(S) <span class="op">.-</span> S</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>elev <span class="op">=</span> <span class="fu">reverse</span>(<span class="fu">collect</span>(<span class="fu">axes</span>(S, <span class="fl">1</span>)))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ydir <span class="op">=</span> <span class="fu">zeros</span>(<span class="fu">length</span>(S))</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows!</span>(ax, starts, elev, S, ydir, align<span class="op">=:</span>tailhead)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax, starts, elev, color<span class="op">=:</span>black, markersize<span class="op">=</span><span class="fl">8</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax, [<span class="fu">p-mean</span>(P)], [<span class="fl">1</span>], color<span class="op">=:</span>transparent, strokecolor<span class="op">=:</span>red, strokewidth<span class="op">=</span><span class="fl">3</span>, markersize<span class="op">=</span><span class="fl">25</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="5">
+<div id="fig-shapley-example" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-shapley-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="explanations_files/figure-html/fig-shapley-example-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-shapley-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: Example of the contribution of the model variables to the prediction. The dashed line indicates the average prediction across all instances, and each arrow shows how the value of the feature for this instance moves the prediction, in an additive way. The length of each arrow is the Shapley value for this feature in this instance. The final prediction (in this case, how much higher/lower than the average) is given in a red cirle.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="b4296980" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> <span class="fu">similar</span>(X)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">Threads</span>.<span class="pp">@threads</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="fu">axes</span>(X, <span class="fl">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="fu">axes</span>(X, <span class="fl">2</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        S[i,j] <span class="op">=</span> <span class="fu">shapley</span>(model, X, i, j; M<span class="op">=</span><span class="fl">5000</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> [<span class="fu">model</span>(X[i,<span class="op">:</span>]) for i <span class="kw">in</span> <span class="fu">axes</span>(X, <span class="fl">1</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>1092-element Vector{Float64}:
+ 0.9972463693384794
+ 0.008781533008610303
+ 0.0006761345233352925
+ 0.9987965539472189
+ 0.9949924424572919
+ 0.0008516358409955275
+ 0.014535481991088301
+ 0.9994116662404252
+ 0.9997176879657867
+ 5.419240750766163e-6
+ 0.9186339688906179
+ 0.9988309295010993
+ 3.6417508322863238e-6
+ ⋮
+ 0.9813598799014225
+ 0.0010544029111560784
+ 0.5049265884993296
+ 0.4514071535254242
+ 0.04209187895732072
+ 0.9999998601294235
+ 0.14451860193642618
+ 0.9984961207131334
+ 0.9985171554331097
+ 0.00513740527624927
+ 0.10532733531981366
+ 0.782656710990545</code></pre>
+</div>
+</div>
+<p>variable importance</p>
+<div id="5bd96a8a" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>varimp <span class="op">=</span> <span class="fu">vec</span>(<span class="fu">sum</span>(<span class="fu">abs</span>.(S); dims<span class="op">=</span><span class="fl">1</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>varimp <span class="op">./=</span> <span class="fu">sum</span>(varimp)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>vord <span class="op">=</span> <span class="fu">sortperm</span>(varimp; rev<span class="op">=</span><span class="cn">true</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>10-element Vector{Int64}:
+  3
+  5
+  4
+  2
+  7
+ 10
+  8
+  1
+  6
+  9</code></pre>
+</div>
+</div>
+<p>table with variable rank in selection</p>
+<div id="c15e09e1" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hdr <span class="op">=</span> <span class="st">"| Variable | Selection rank | Importance rank | Rel. importance |"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sep <span class="op">=</span> <span class="st">"|-----|-----|-----|------|"</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tbl <span class="op">=</span> [hdr, sep]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="fu">eachindex</span>(v)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> <span class="st">"| BIO</span><span class="sc">$</span>(v[i])<span class="st"> | </span><span class="sc">$</span>i<span class="st"> | </span><span class="sc">$</span>(vord[i])<span class="st"> | </span><span class="sc">$</span>(<span class="fu">round</span>(<span class="dt">Int</span>, varimp[i]<span class="op">*</span><span class="fl">100</span>))<span class="st">% |"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">push!</span>(tbl, row)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">push!</span>(tbl, <span class="st">"</span><span class="sc">\n</span><span class="st">: List of the </span><span class="sc">$</span>(<span class="fu">length</span>(v))<span class="st"> variables selected in @sec-predictors, ranked by their order of inclusion. Their rank in terms of importance, as well as relative importance, are also provided. {#tbl-explanations-importance}"</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>try</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">display</span>(<span class="st">"text/markdown"</span>, <span class="fu">join</span>(tbl, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>catch <span class="cn">e</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="tbl-explanations-importance" class="anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<div aria-describedby="tbl-explanations-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Selection rank</th>
+<th>Importance rank</th>
+<th>Rel. importance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BIO6</td>
+<td>1</td>
+<td>3</td>
+<td>4%</td>
+</tr>
+<tr class="even">
+<td>BIO3</td>
+<td>2</td>
+<td>5</td>
+<td>12%</td>
+</tr>
+<tr class="odd">
+<td>BIO8</td>
+<td>3</td>
+<td>4</td>
+<td>23%</td>
+</tr>
+<tr class="even">
+<td>BIO13</td>
+<td>4</td>
+<td>2</td>
+<td>17%</td>
+</tr>
+<tr class="odd">
+<td>BIO16</td>
+<td>5</td>
+<td>7</td>
+<td>19%</td>
+</tr>
+<tr class="even">
+<td>BIO11</td>
+<td>6</td>
+<td>10</td>
+<td>4%</td>
+</tr>
+<tr class="odd">
+<td>BIO18</td>
+<td>7</td>
+<td>8</td>
+<td>10%</td>
+</tr>
+<tr class="even">
+<td>BIO15</td>
+<td>8</td>
+<td>1</td>
+<td>4%</td>
+</tr>
+<tr class="odd">
+<td>BIO19</td>
+<td>9</td>
+<td>6</td>
+<td>3%</td>
+</tr>
+<tr class="even">
+<td>BIO1</td>
+<td>10</td>
+<td>9</td>
+<td>5%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-explanations-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.1: List of the 10 variables selected in <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, ranked by their order of inclusion. Their rank in terms of importance, as well as relative importance, are also provided.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>variable importance plot</p>
+<div id="656cd725" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">Axis</span>(fig[<span class="fl">1</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"Relative variable importance"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot!</span>(ax, varimp[<span class="fu">reverse</span>(vord)], direction<span class="op">=:</span>x, bar_labels <span class="op">=</span> <span class="st">"BIO"</span><span class="op">.*</span><span class="fu">string</span>.(v[<span class="fu">reverse</span>(vord)]), flip_labels_at <span class="op">=</span> <span class="fl">0.05</span>, color<span class="op">=</span>light[<span class="fl">1</span>])</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">xlims!</span>(ax, (<span class="fl">0.0</span>, <span class="fu">maximum</span>(varimp)<span class="op">*</span><span class="fl">1.05</span>))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hideydecorations!</span>(ax)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">hidexdecorations!</span>(ax, grid<span class="op">=</span><span class="cn">true</span>, ticks<span class="op">=</span><span class="cn">false</span>, label<span class="op">=</span><span class="cn">false</span>, ticklabels<span class="op">=</span><span class="cn">false</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">hidespines!</span>(ax)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<p><img src="explanations_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>plots</p>
+<div id="6dac5480" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>(; resolution<span class="op">=</span>(<span class="fl">700</span>, <span class="fl">400</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>gl <span class="op">=</span> f[<span class="fl">1</span>,<span class="fl">1</span>] <span class="op">=</span> <span class="fu">GridLayout</span>()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>xmin, xmax <span class="op">=</span> <span class="fu">maximum</span>(<span class="fu">abs</span>.(<span class="fu">extrema</span>(S))) <span class="op">.*</span> (<span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>hbins <span class="op">=</span> <span class="fu">round</span>(xmin, digits<span class="op">=</span><span class="fl">2</span>)<span class="op">:</span><span class="fl">0.005</span><span class="op">:</span><span class="fu">round</span>(xmax, digits<span class="op">=</span><span class="fl">2</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">1</span>,<span class="fl">1</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">1</span>]])<span class="st">"</span>, xaxisposition<span class="op">=:</span>top)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">hist!</span>(ax1, S[<span class="op">:</span>,vord[<span class="fl">1</span>]], color<span class="op">=</span>bright[<span class="fl">1</span>], bins<span class="op">=</span>hbins)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">2</span>,<span class="fl">1</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">2</span>]])<span class="st">"</span>, yaxisposition<span class="op">=:</span>right)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">hist!</span>(ax2, S[<span class="op">:</span>,vord[<span class="fl">2</span>]], color<span class="op">=</span>bright[<span class="fl">1</span>], bins<span class="op">=</span>hbins)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>ax3 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">3</span>,<span class="fl">1</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">3</span>]])<span class="st">"</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">hist!</span>(ax3, S[<span class="op">:</span>,vord[<span class="fl">3</span>]], color<span class="op">=</span>bright[<span class="fl">1</span>], bins<span class="op">=</span>hbins)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>ax4 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">4</span>,<span class="fl">1</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">4</span>]])<span class="st">"</span>, yaxisposition<span class="op">=:</span>right)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">hist!</span>(ax4, S[<span class="op">:</span>,vord[<span class="fl">4</span>]], color<span class="op">=</span>bright[<span class="fl">1</span>], bins<span class="op">=</span>hbins)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu">hidexdecorations!</span>(ax2, grid<span class="op">=</span><span class="cn">false</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">hidexdecorations!</span>(ax3, grid<span class="op">=</span><span class="cn">false</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> [ax1, ax2, ax3, ax4]</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlims!</span>(ax, low<span class="op">=</span>xmin, high<span class="op">=</span>xmax)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylims!</span>(ax, low<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">vlines!</span>(ax, [<span class="fl">0.0</span>], color<span class="op">=:</span>black, linestyle<span class="op">=:</span>dash)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hideydecorations!</span>(ax, label<span class="op">=</span><span class="cn">false</span>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="fu">rowgap!</span>(gl, <span class="fl">0.0</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="fu">colgap!</span>(gl, <span class="fl">0.0</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<p><img src="explanations_files/figure-html/cell-10-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>partial responses</p>
+<div id="003bf152" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>args <span class="op">=</span> (color<span class="op">=</span>y, markersize<span class="op">=</span><span class="fl">3</span>, colorrange<span class="op">=</span>(<span class="fl">0</span>., <span class="fl">1</span>.), colormap<span class="op">=</span>vibrant[<span class="fl">1</span><span class="op">:</span><span class="fl">2</span>])</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">1</span>]])<span class="st">"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax1, X[<span class="op">:</span>,vord[<span class="fl">1</span>]], S[<span class="op">:</span>,vord[<span class="fl">1</span>]]; args<span class="op">...</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ylims!</span>(ax1, <span class="fu">maximum</span>(<span class="fu">abs</span>.(<span class="fu">extrema</span>(S[<span class="op">:</span>,vord[<span class="fl">1</span>]])))<span class="op">.*</span>(<span class="op">-</span><span class="fl">1.1</span>,<span class="fl">1.1</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">2</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">2</span>]])<span class="st">"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax2, X[<span class="op">:</span>,vord[<span class="fl">2</span>]], S[<span class="op">:</span>,vord[<span class="fl">2</span>]]; args<span class="op">...</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ylims!</span>(ax2, <span class="fu">maximum</span>(<span class="fu">abs</span>.(<span class="fu">extrema</span>(S[<span class="op">:</span>,vord[<span class="fl">2</span>]])))<span class="op">.*</span>(<span class="op">-</span><span class="fl">1.1</span>,<span class="fl">1.1</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>ax3 <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">3</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(v[vord[<span class="fl">3</span>]])<span class="st">"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax3, X[<span class="op">:</span>,vord[<span class="fl">3</span>]], S[<span class="op">:</span>,vord[<span class="fl">3</span>]]; args<span class="op">...</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ylims!</span>(ax3, <span class="fu">maximum</span>(<span class="fu">abs</span>.(<span class="fu">extrema</span>(S[<span class="op">:</span>,vord[<span class="fl">3</span>]])))<span class="op">.*</span>(<span class="op">-</span><span class="fl">1.1</span>,<span class="fl">1.1</span>))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>axm <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">2</span>]; aspect<span class="op">=</span><span class="fu">DataAspect</span>())</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">heatmap!</span>(axm, pr <span class="op">.&gt;=</span> τ, colormap<span class="op">=</span>vibrant[<span class="fl">1</span><span class="op">:</span><span class="fl">2</span>])</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="fu">hidedecorations!</span>(axm)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="fu">hidespines!</span>(axm)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>xmin, xmax <span class="op">=</span> <span class="fu">extrema</span>(S)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> [ax1, ax2, ax3]</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hlines!</span>(ax, [<span class="fl">0.0</span>], color<span class="op">=:</span>black, linestyle<span class="op">=:</span>dash)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<p><img src="explanations_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>map</p>
+<div id="65ee17f5" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>V <span class="op">=</span> [<span class="fu">convert</span>(<span class="dt">Float32</span>, <span class="fu">similar</span>(bio[<span class="fl">1</span>])) for i <span class="kw">in</span> <span class="fu">axes</span>(v, <span class="fl">1</span>)]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="bu">Threads</span>.<span class="pp">@threads</span> <span class="cf">for</span> k <span class="kw">in</span> <span class="fu">keys</span>(V[<span class="fl">1</span>])</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [b[k] for b <span class="kw">in</span> bio]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="fu">axes</span>(v, <span class="fl">1</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        V[i][k] <span class="op">=</span> <span class="fu">shapley</span>(model, X, x, i; M<span class="op">=</span><span class="fl">1000</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="55db39bd" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mostimp <span class="op">=</span> <span class="fu">mosaic</span>(x <span class="op">-&gt;</span> <span class="fu">argmax</span>(<span class="fu">abs</span>.(x)), V)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mostimp <span class="op">=</span> (x <span class="op">-&gt;</span> x <span class="op">&gt;=</span> <span class="fl">4.0</span> ? <span class="fl">4.0</span> <span class="op">:</span> x).(mostimp)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cmap <span class="op">=</span> muted[[<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">4</span>,<span class="fl">1</span>]]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>]; aspect<span class="op">=</span><span class="fu">DataAspect</span>())</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">heatmap!</span>(ax, mostimp, colormap<span class="op">=</span>cmap)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>cleg <span class="op">=</span> [<span class="fu">PolyElement</span>(color <span class="op">=</span> c, strokecolor <span class="op">=</span> <span class="op">:</span>transparent) for c <span class="kw">in</span> cmap]</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>clab <span class="op">=</span> [<span class="st">"BIO"</span><span class="op">.*</span><span class="fu">string</span>.(v[vord[<span class="fl">1</span><span class="op">:</span><span class="fl">3</span>]])<span class="op">...</span>, <span class="st">"Other"</span>]</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="fu">Legend</span>(f[<span class="fl">1</span>,<span class="fl">1</span>], cleg, clab; tellheight<span class="op">=</span><span class="cn">false</span>, tellwidth<span class="op">=</span><span class="cn">false</span>, halign<span class="op">=:</span>left, valign<span class="op">=:</span>top, margin<span class="op">=</span>(<span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>))</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<p><img src="explanations_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">

@@ -142,7 +142,7 @@ plots
 f = Figure(; resolution=(700, 400))
 gl = f[1,1] = GridLayout()
 
-xmin, xmax = maximum(abs.(extrema(S))) .* (-1, 1)
+xmin, xmax = maximum(abs.(extrema(S[:,vord[1:4]]))) .* (-1, 1)
 hbins = round(xmin, digits=2):0.005:round(xmax, digits=2)
 
 ax1 = Axis(gl[1,1]; ylabel="BIO $(v[vord[1]])", xaxisposition=:top)
@@ -190,6 +190,10 @@ axm = Axis(f[1:3,2]; aspect=DataAspect())
 heatmap!(axm, pr .>= τ, colormap=vibrant[1:2])
 hidedecorations!(axm)
 hidespines!(axm)
+
+cleg = [PolyElement(color = c, strokecolor = :transparent) for c in vibrant[1:2]]
+clab = ["Absent", "Present"]
+Legend(f[1:3,2], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10), framevisible=false)
 
 xmin, xmax = extrema(S)
 for ax in [ax1, ax2, ax3]
