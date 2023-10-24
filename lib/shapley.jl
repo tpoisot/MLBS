@@ -1,4 +1,4 @@
-function _generate_perm!(b1, b2, X, j)
+function _generate_perm!(b1, b2, X, x, j)
     O = Random.shuffle(axes(X, 2))
     w = X[sample(axes(X, 1)), :]
     i = only(indexin(j, O))
@@ -29,12 +29,17 @@ function shapley(model, X::Matrix{T1}, x::Vector{T2}, j; M=200, kwargs...) where
     b2 = copy(x)
 
     for m in axes(ϕ, 1)
-
         still_looking = true
+        tracker = 0
         while still_looking
-            _generate_perm!(b1, b2, X, j)
+            tracker += 1
+            _generate_perm!(b1, b2, X, x, j)
             ϕ[m] = model(b1) - model(b2)
             still_looking = isnan(ϕ[m])
+            if tracker == 100
+                ϕ[m] = NaN
+                still_looking = false
+            end
         end
     end
 
