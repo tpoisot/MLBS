@@ -64,8 +64,8 @@ end
 ```{julia}
 #| label: fig-shapley-example
 #| fig-cap: Example of the contribution of the model variables to the prediction. The dashed line indicates the average prediction across all instances, and each arrow shows how the value of the feature for this instance moves the prediction, in an additive way. The length of each arrow is the Shapley value for this feature in this instance. The final prediction (in this case, how much higher/lower than the average) is given in a red cirle.
-idx = 860 # 860 is a good neutral one
-S = [shapley(model, X, idx, j; M=1000) for j in eachindex(v)]
+idx = 500
+S = [shapley(model, X, idx, j; M=1_000) for j in eachindex(v)]
 P = [model(X[i,:]) for i in axes(X, 1)]
 p = P[idx]
 
@@ -92,7 +92,7 @@ current_figure()
 S = similar(X)
 Threads.@threads for i in axes(X, 1)
     for j in axes(X, 2)
-        S[i,j] = shapley(model, X, i, j; M=500)
+        S[i,j] = shapley(model, X, i, j; M=50)
     end
 end
 P = [model(X[i,:]) for i in axes(X, 1)]
@@ -176,7 +176,7 @@ V = [convert(Float32, similar(bio[1])) for i in axes(v, 1)]
 Threads.@threads for k in keys(V[1])
     x = [b[k] for b in bio]
     for i in axes(v, 1)
-        V[i][k] = shapley(model, X, x, i; M=500)
+        V[i][k] = shapley(model, X, x, i; M=50)
     end
 end
 ```
