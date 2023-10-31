@@ -148,8 +148,8 @@ Just because we decided to use a learning curve does not mean we *have* to chang
 fig = Figure(; resolution=(600, 400))
 ax = Axis(fig[1,1]; xlabel="P(+)", ylabel="MCC")
 
-T = LinRange(0.0, 1.0, 50)
-Pr = LinRange(0.2, 0.8, 20)
+T = LinRange(0.0, 1.0, 8)
+Pr = LinRange(0.2, 0.8, 3)
 Threads.@threads for pr in Pr
     CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf, presence=pr)) for τ in T]...)
     mccs = vec(mean(mcc.(CT); dims=1))
@@ -228,6 +228,18 @@ $$
 $$
 
 This is very promising! There are far more predictions on the diagonal (`{julia} C.tp + C.tn`) than outside of it (`{julia} C.fp + C.fn`), which suggests an accurate classifier. But in order to really evaluate the model, we will report a little more information: TSS FOM FDI F1
+
+### Reporting the final predictions
+
+
+```{julia}
+#| echo: false
+#| output: false
+f = Figure()
+ax = Axis(f[1,1], aspect=DataAspect())
+heatmap!(ax, pr .>= τ, colormap=vibrant[1:2])
+current_figure()
+```
 
 ## Conclusion
 
