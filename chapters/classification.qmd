@@ -5,14 +5,13 @@ In the previous chapters, we have focused on efforts on regression models, which
 ```{julia}
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "confusion.jl"))
 include(joinpath(_code_path, "mocks.jl"))
 include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "splitters.jl"))
 include(joinpath(_code_path, "palettes.jl"))
-include(joinpath(_code_path, "crossvalidate.jl"))
+include(joinpath(_code_path, "crossvalidation.jl"))
 ```
 
 ## The problem: distribution of an endemic species

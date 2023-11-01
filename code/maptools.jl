@@ -1,0 +1,1 @@
+rangediff(new, old) = mask(new .| old, new .- old)
