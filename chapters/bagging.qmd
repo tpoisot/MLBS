@@ -1,1 +1,93 @@
 # Bagging and ensembles {#sec-bagging}
+
+Trained models can have different biases
+
+want to pick the best answer over the space of many models
+
+require good models with different weaknesses
+
+general approach, can be made from same model or heterogeneous ensemble
+
+add a section on boosting to explain how it's different
+
+out of bag prediction != validation but conceptually similar
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "confusion.jl"))
+include(joinpath(_code_path, "nbc.jl"))
+include(joinpath(_code_path, "splitters.jl"))
+include(joinpath(_code_path, "palettes.jl"))
+include(joinpath(_code_path, "crossvalidate.jl"))
+include(joinpath(_code_path, "bootstrap.jl"))
+```
+
+load the model
+
+```{julia}
+#| echo: false
+#| output: false
+_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
+modelpath = joinpath(_ptm_path, "sdm-step-2.jld")
+ptm = JLD.load(modelpath)
+y = ptm["labels"]
+X = ptm["features"]
+folds = ptm["folds"]
+v = ptm["variables"]
+tf = ptm["transformation"]
+τ = ptm["threshold"]
+model = naivebayes(y, X; transformation=tf)
+```
+
+train bagged models
+
+```{julia}
+bags = bootstrap(y, X)
+models = [naivebayes(y[bag[1]], X[bag[1],:]; transformation=tf) for bag in bags]
+```
+
+validate each bagged
+
+```{julia}
+Ct, Cv = crossvalidate(naivebayes, y, X, bags; transformation=tf)
+models = models[sortperm(mcc.(Cv); rev=true)[1:10]]
+```
+
+ensemble
+
+```{julia}
+function ensemble(x, models)
+    ŷ = [models[i](x) for i in eachindex(models)]
+    return (median(ŷ), iqr(ŷ))
+end
+```
+
+```{julia}
+outputs = vec(mapslices(x -> ensemble(x, models), X; dims=2))
+pred = first.(outputs)
+varia = last.(outputs)
+```
+
+```{julia}
+T = LinRange(0.0, 1.0, 250)
+CT = hcat([first(crossvalidate(naivebayes, y, X, bags, τ; transformation=tf)) for τ in T]...)
+τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
+```
+
+```{julia}
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in v]
+
+pr = convert(Float64, similar(first(bio)))
+bs = convert(Float64, similar(first(bio)))
+
+trainedensemble = (x) -> ensemble(x, models)
+
+Threads.@threads for k in keys(pr)
+    x = [bio[i][k] for i in axes(v, 1)]
+    pr[k], bs[k] = trainedensemble(x)
+end
+```
