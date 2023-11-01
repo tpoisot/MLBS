@@ -3,6 +3,8 @@ import CSV
 using GLM
 using PrettyTables
 
+import StatsAPI
+
 using MultivariateStats
 
 import JLD

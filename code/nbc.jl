@@ -22,13 +22,13 @@ function train(::Type{GaussianNaiveBayes}, y, X; kwdef...)
     return train!(GaussianNaiveBayes(), y, X; kwdef...)
 end
 
-function predict(NBC::GaussianNaiveBayes, x::Vector{T}) where {T <: Number}
+function StatsAPI.predict(NBC::GaussianNaiveBayes, x::Vector{T}) where {T <: Number}
     p₊ = prod(pdf.(NBC.presences, x))
     p₋ = prod(pdf.(NBC.absences, x))
     pₓ = NBC.prior * p₊ + (1.0 - NBC.prior) * p₋
     return (p₊ * NBC.prior) / pₓ
 end
 
-function predict(NBC::GaussianNaiveBayes, X::Matrix{T}) where {T <: Number}
+function StatsAPI.predict(NBC::GaussianNaiveBayes, X::Matrix{T}) where {T <: Number}
     return vec(mapslices(x -> predict(NBC, x), X; dims = 1))
 end
