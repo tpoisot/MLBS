@@ -7,10 +7,9 @@ In the previous chapters, we have focused on efforts on regression models, which
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusion.jl"))
+include(joinpath(_code_path, "confusionmatrix.jl"))
 include(joinpath(_code_path, "mocks.jl"))
 include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "palettes.jl"))
 include(joinpath(_code_path, "crossvalidation.jl"))
 ```
 

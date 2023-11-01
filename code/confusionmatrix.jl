@@ -1,8 +1,8 @@
-struct ConfusionMatrix
-    tp::Int
-    tn::Int
-    fp::Int
-    fn::Int
+struct ConfusionMatrix{T <: Number}
+    tp::T
+    tn::T
+    fp::T
+    fn::T
 end
 
 function ConfusionMatrix(pred::Vector{Bool}, truth::Vector{Bool})

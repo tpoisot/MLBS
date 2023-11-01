@@ -1,42 +1,34 @@
-function naivebayes(y::Vector{Bool}, X::Matrix{T}; presence=0.5, transformation=nothing) where {T <: Number}
-    Xpos = X[findall(y),:]
-    Xneg = X[findall(.!y),:]
-    if transformation == MultivariateStats.PCA
-        pca = MultivariateStats.fit(PCA, permutedims(X))
-        pred_pos = vec(mapslices(x -> Normal(mean(x), std(x)), MultivariateStats.predict(pca, permutedims(Xpos)), dims=2))
-        pred_neg = vec(mapslices(x -> Normal(mean(x), std(x)), MultivariateStats.predict(pca, permutedims(Xneg)), dims=2))
-    end
-    if transformation == MultivariateStats.Whitening
-        wht = MultivariateStats.fit(Whitening, permutedims(X))
-        pred_pos = vec(mapslices(x -> Normal(mean(x), std(x)), MultivariateStats.transform(wht, permutedims(Xpos)), dims=2))
-        pred_neg = vec(mapslices(x -> Normal(mean(x), std(x)), MultivariateStats.transform(wht, permutedims(Xneg)), dims=2))
-    end
-    if isnothing(transformation)
-        pred_pos = vec(mapslices(x -> Normal(mean(x), std(x)), Xpos, dims=1))
-        pred_neg = vec(mapslices(x -> Normal(mean(x), std(x)), Xneg, dims=1))
-    end
-    function inner_predictor(v::Vector{TN}) where { TN <: Number }
-        if isnothing(transformation)
-            V = copy(v)
-        end
-        if transformation == MultivariateStats.PCA
-            V = MultivariateStats.predict(pca, v)
-        end
-        if transformation == MultivariateStats.Whitening
-            V = MultivariateStats.transform(wht, v)
-        end
-        is_pos = prod(pdf.(pred_pos, V))
-        is_neg = prod(pdf.(pred_neg, V))
-        evid = presence * is_pos + (1.0 - presence) * is_neg
-        return (presence * is_pos)/evid
-    end
-    return inner_predictor
+Base.@kwdef mutable struct GaussianNaiveBayes{T <: Number}
+    presences::Vector{Normal} = Normal[]
+    absences::Vector{Normal} = Normal[]
+    prior::T = 0.5
 end
 
-function entropy(f)
-    p = [f, 1-f]
-    if minimum(p) == 0.0
-        return 0.0
-    end
-    return -sum(p .* log2.(p))
+function train!(
+    NBC::GaussianNaiveBayes,
+    y::Vector{Bool},
+    X::Matrix{T};
+    prior=0.5
+) where {T <: Number}
+    X₊ = X[:, findall(y)]
+    X₋ = X[:, findall(.!y)]
+    NBC.presences = vec(mapslices(x -> Normal(mean(x), std(x)), X₊; dims = 2))
+    NBC.absences = vec(mapslices(x -> Normal(mean(x), std(x)), X₋; dims = 2))
+    NBC.prior = prior
+    return NBC
+end
+
+function train(::Type{GaussianNaiveBayes}, y, X; kwdef...)
+    return train!(GaussianNaiveBayes(), y, X; kwdef...)
+end
+
+function predict(NBC::GaussianNaiveBayes, x::Vector{T}) where {T <: Number}
+    p₊ = prod(pdf.(NBC.presences, x))
+    p₋ = prod(pdf.(NBC.absences, x))
+    pₓ = NBC.prior * p₊ + (1.0 - NBC.prior) * p₋
+    return (p₊ * NBC.prior) / pₓ
+end
+
+function predict(NBC::GaussianNaiveBayes, X::Matrix{T}) where {T <: Number}
+    return vec(mapslices(x -> predict(NBC, x), X; dims = 1))
 end

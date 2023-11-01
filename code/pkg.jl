@@ -23,6 +23,9 @@ update_theme!(;
     CairoMakie = (; px_per_unit = 2),
 )
 
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "palettes.jl"))
+
 using SpeciesDistributionToolkit
 
 import Images
@@ -38,4 +41,12 @@ function iqr(x)
     else
         return first(diff(quantile(filter(!isnan, x), [0.25, 0.75])))
     end
+end
+
+function entropy(f)
+    p = [f, 1 - f]
+    if minimum(p) == 0.0
+        return 0.0
+    end
+    return -sum(p .* log2.(p))
 end
