@@ -107,7 +107,7 @@ CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)) 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-threshold
-#| fig-cap: learning curve for the threshold
+#| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model.
 fig = Figure(; resolution=(600, 300))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
 series!(ax, T, mcc.(CT), solid_color=light[1])

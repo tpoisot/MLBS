@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -218,7 +218,10 @@ div.csl-indent {
   <ul class="collapse">
   <li><a href="#fine-tuning-the-nbc-prior" id="toc-fine-tuning-the-nbc-prior" class="nav-link" data-scroll-target="#fine-tuning-the-nbc-prior"><span class="header-section-number">7.3.1</span> Fine-tuning the NBC prior</a></li>
   <li><a href="#comparison-with-another-classifier" id="toc-comparison-with-another-classifier" class="nav-link" data-scroll-target="#comparison-with-another-classifier"><span class="header-section-number">7.3.2</span> Comparison with another classifier</a></li>
+  <li><a href="#testing-the-final-model" id="toc-testing-the-final-model" class="nav-link" data-scroll-target="#testing-the-final-model"><span class="header-section-number">7.3.3</span> Testing the final model</a></li>
+  <li><a href="#reporting-the-final-predictions" id="toc-reporting-the-final-predictions" class="nav-link" data-scroll-target="#reporting-the-final-predictions"><span class="header-section-number">7.3.4</span> Reporting the final predictions</a></li>
   </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7.4</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -248,7 +251,7 @@ div.csl-indent {
 <p>We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling <span class="citation" data-cites="huntington1998">(<a href="../references.html#ref-huntington1998" role="doc-biblioref">Huntington &amp; Lyrintzis 1998</a>)</span>, orthogonal sampling <span class="citation" data-cites="mckay1979">(<a href="../references.html#ref-mckay1979" role="doc-biblioref">McKay <em>et al.</em> 1979</a>)</span>, and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the “right” balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then try to <em>explain</em> in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
 <section id="classification-based-on-probabilities" class="level2 page-columns page-full" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="classification-based-on-probabilities"><span class="header-section-number">7.1</span> Classification based on probabilities</h2>
-<p>When first introducing classification in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either “present” or “absent”). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interesting in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.</p>
+<p>When first introducing classification in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either “present” or “absent”). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Note that the quantitative value returned by the classifier does not <em>need</em> to be a probability; it simply needs to be on an interval or ratio scale.</p>
@@ -330,6 +333,28 @@ Figure&nbsp;7.3: learning curve for the threshold and prior
 </section>
 <section id="comparison-with-another-classifier" class="level3" data-number="7.3.2">
 <h3 data-number="7.3.2" class="anchored" data-anchor-id="comparison-with-another-classifier"><span class="header-section-number">7.3.2</span> Comparison with another classifier</h3>
+</section>
+<section id="testing-the-final-model" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="testing-the-final-model"><span class="header-section-number">7.3.3</span> Testing the final model</h3>
+<p>As we are now considering that our model is adequately trained, we can finally apply it to the testing data we had set aside early in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important. For this reason, we will also compare the model to BIOCLIM PLUS compare to validation performance on old model</p>
+<p>We are <em>not</em> applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of “we pick the best model as the one with the highest validation MCC”, and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of <span class="math inline">\(p\)</span>-hacking.</p>
+<p>We can start by taking a look at the confusion matrix on the testing data:</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+153 &amp; 12 \\
+4 &amp; 105
+\end{pmatrix}
+\]</span></p>
+<p>This is very promising! There are far more predictions on the diagonal (258) than outside of it (16), which suggests an accurate classifier. But in order to really evaluate the model, we will report a little more information: TSS FOM FDI F1</p>
+</section>
+<section id="reporting-the-final-predictions" class="level3" data-number="7.3.4">
+<h3 data-number="7.3.4" class="anchored" data-anchor-id="reporting-the-final-predictions"><span class="header-section-number">7.3.4</span> Reporting the final predictions</h3>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7.4</span> Conclusion</h2>
+<p>In this chapter, we…</p>
+<p>In <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will start asking “why”? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions.</p>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
@@ -382,7 +407,6 @@ Youden, W.J. (1950). <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid
 Zhou, H. &amp; Jakobsson, E. (2013). <a href="https://doi.org/10.1371/journal.pone.0081100">Predicting Protein-Protein Interaction by the Mirrortree Method: Possibilities and Limitations</a>. <em>PLoS ONE</em>, 8, e81100.
 </div>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
