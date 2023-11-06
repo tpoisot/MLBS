@@ -58,6 +58,30 @@ For once, and after over 15 years of methodological discussion, it appears that 
 
 ## Application: improved Corsican nuthatch model
 
+### Making the NBC explicitely probabilistic
+
+In @sec-classification, we have expressed the probability that the NBC recommends a positive outcome as
+
+$$
+    P(+|x) = \frac{P(+)}{P(x)}P(x|+)\,,
+$$
+
+and noted that because $P(x)$ is constant across all classes, we could simplify this model as $P(+|x) \propto P(+)P(x|+)$. But because we know the only two possible classes are $+$ and $-$, we can figure out the expression for $P(x)$. Because we are dealing with probabilities, we know that $P(+|x)+P(-|x) = 1$. We can therefore re-write this as
+
+$$
+\frac{P(+)}{P(x)}P(x|+)+\frac{P(-)}{P(x)}P(x|-) = 1\,
+$$
+
+which after some reorganisation (and note that $P(-) = 1-P(+)$), results in 
+
+$$
+P(x) = P(+) P(x|+)+P(-) P(x|-) \,.
+$$
+
+This value $P(x)$ is the "evidence" in Bayesian parlance, and we can use this value explicitely to get the prediction for the probability associated to the class $+$ using the NBC.
+
+Note that we can see that using the approximate version we used so far (the prediction is positive if $P(+) P(x|+) > P(-) P(x|-)$) is equivalent to saying that the prediction is positive whenever $P(+|x) > \tau$ with $\tau = 0.5$. In the next sections, we will challenge the assumption that $0.5$ is the optimal value of $\tau$.
+
 ```{julia}
 #| echo: false
 #| output: false
