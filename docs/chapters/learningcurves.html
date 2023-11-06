@@ -216,10 +216,11 @@ div.csl-indent {
   <li><a href="#how-to-optimize-the-threshold" id="toc-how-to-optimize-the-threshold" class="nav-link" data-scroll-target="#how-to-optimize-the-threshold"><span class="header-section-number">7.2</span> How to optimize the threshold?</a></li>
   <li><a href="#application-improved-corsican-nuthatch-model" id="toc-application-improved-corsican-nuthatch-model" class="nav-link" data-scroll-target="#application-improved-corsican-nuthatch-model"><span class="header-section-number">7.3</span> Application: improved Corsican nuthatch model</a>
   <ul class="collapse">
-  <li><a href="#fine-tuning-the-nbc-prior" id="toc-fine-tuning-the-nbc-prior" class="nav-link" data-scroll-target="#fine-tuning-the-nbc-prior"><span class="header-section-number">7.3.1</span> Fine-tuning the NBC prior</a></li>
-  <li><a href="#comparison-with-another-classifier" id="toc-comparison-with-another-classifier" class="nav-link" data-scroll-target="#comparison-with-another-classifier"><span class="header-section-number">7.3.2</span> Comparison with another classifier</a></li>
-  <li><a href="#testing-the-final-model" id="toc-testing-the-final-model" class="nav-link" data-scroll-target="#testing-the-final-model"><span class="header-section-number">7.3.3</span> Testing the final model</a></li>
-  <li><a href="#reporting-the-final-predictions" id="toc-reporting-the-final-predictions" class="nav-link" data-scroll-target="#reporting-the-final-predictions"><span class="header-section-number">7.3.4</span> Reporting the final predictions</a></li>
+  <li><a href="#making-the-nbc-explicitely-probabilistic" id="toc-making-the-nbc-explicitely-probabilistic" class="nav-link" data-scroll-target="#making-the-nbc-explicitely-probabilistic"><span class="header-section-number">7.3.1</span> Making the NBC explicitely probabilistic</a></li>
+  <li><a href="#fine-tuning-the-nbc-prior" id="toc-fine-tuning-the-nbc-prior" class="nav-link" data-scroll-target="#fine-tuning-the-nbc-prior"><span class="header-section-number">7.3.2</span> Fine-tuning the NBC prior</a></li>
+  <li><a href="#comparison-with-another-classifier" id="toc-comparison-with-another-classifier" class="nav-link" data-scroll-target="#comparison-with-another-classifier"><span class="header-section-number">7.3.3</span> Comparison with another classifier</a></li>
+  <li><a href="#testing-the-final-model" id="toc-testing-the-final-model" class="nav-link" data-scroll-target="#testing-the-final-model"><span class="header-section-number">7.3.4</span> Testing the final model</a></li>
+  <li><a href="#reporting-the-final-predictions" id="toc-reporting-the-final-predictions" class="nav-link" data-scroll-target="#reporting-the-final-predictions"><span class="header-section-number">7.3.5</span> Reporting the final predictions</a></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7.4</span> Conclusion</a></li>
   </ul>
@@ -280,6 +281,22 @@ div.csl-indent {
 </section>
 <section id="application-improved-corsican-nuthatch-model" class="level2 page-columns page-full" data-number="7.3">
 <h2 data-number="7.3" class="anchored" data-anchor-id="application-improved-corsican-nuthatch-model"><span class="header-section-number">7.3</span> Application: improved Corsican nuthatch model</h2>
+<section id="making-the-nbc-explicitely-probabilistic" class="level3 page-columns page-full" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="making-the-nbc-explicitely-probabilistic"><span class="header-section-number">7.3.1</span> Making the NBC explicitely probabilistic</h3>
+<p>In <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, we have expressed the probability that the NBC recommends a positive outcome as</p>
+<p><span class="math display">\[
+    P(+|x) = \frac{P(+)}{P(x)}P(x|+)\,,
+\]</span></p>
+<p>and noted that because <span class="math inline">\(P(x)\)</span> is constant across all classes, we could simplify this model as <span class="math inline">\(P(+|x) \propto P(+)P(x|+)\)</span>. But because we know the only two possible classes are <span class="math inline">\(+\)</span> and <span class="math inline">\(-\)</span>, we can figure out the expression for <span class="math inline">\(P(x)\)</span>. Because we are dealing with probabilities, we know that <span class="math inline">\(P(+|x)+P(-|x) = 1\)</span>. We can therefore re-write this as</p>
+<p><span class="math display">\[
+\frac{P(+)}{P(x)}P(x|+)+\frac{P(-)}{P(x)}P(x|-) = 1\,
+\]</span></p>
+<p>which after some reorganisation (and note that <span class="math inline">\(P(-) = 1-P(+)\)</span>), results in</p>
+<p><span class="math display">\[
+P(x) = P(+) P(x|+)+P(-) P(x|-) \,.
+\]</span></p>
+<p>This value <span class="math inline">\(P(x)\)</span> is the “evidence” in Bayesian parlance, and we can use this value explicitely to get the prediction for the probability associated to the class <span class="math inline">\(+\)</span> using the NBC.</p>
+<p>Note that we can see that using the approximate version we used so far (the prediction is positive if <span class="math inline">\(P(+) P(x|+) &gt; P(-) P(x|-)\)</span>) is equivalent to saying that the prediction is positive whenever <span class="math inline">\(P(+|x) &gt; \tau\)</span> with <span class="math inline">\(\tau = 0.5\)</span>. In the next sections, we will challenge the assumption that <span class="math inline">\(0.5\)</span> is the optimal value of <span class="math inline">\(\tau\)</span>.</p>
 <div id="cell-fig-tuning-threshold" class="cell page-columns page-full" data-execution_count="4">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="5">
 <div id="fig-tuning-threshold" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -288,7 +305,7 @@ div.csl-indent {
 <img src="learningcurves_files/figure-html/fig-tuning-threshold-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7.1: learning curve for the threshold
+Figure&nbsp;7.1: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model.
 </figcaption>
 </figure>
 </div>
@@ -308,8 +325,9 @@ Figure&nbsp;7.2: ROC and PR
 </div>
 </div>
 </div>
-<section id="fine-tuning-the-nbc-prior" class="level3 page-columns page-full" data-number="7.3.1">
-<h3 data-number="7.3.1" class="anchored" data-anchor-id="fine-tuning-the-nbc-prior"><span class="header-section-number">7.3.1</span> Fine-tuning the NBC prior</h3>
+</section>
+<section id="fine-tuning-the-nbc-prior" class="level3 page-columns page-full" data-number="7.3.2">
+<h3 data-number="7.3.2" class="anchored" data-anchor-id="fine-tuning-the-nbc-prior"><span class="header-section-number">7.3.2</span> Fine-tuning the NBC prior</h3>
 <p>In the previous section, we have assumed that the prior on occurrences <span class="math inline">\(P(+)\)</span> was one half, which is a decision we can revisit. But changing this value would probably require that we also change the threshold, and for this reason we need to optimize both hyperparameters at the same time. We present the results of a simple grid search in <a href="#fig-tuning-both" class="quarto-xref">Figure&nbsp;<span>7.3</span></a>.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
@@ -331,11 +349,11 @@ Figure&nbsp;7.3: learning curve for the threshold and prior
 </div>
 </div>
 </section>
-<section id="comparison-with-another-classifier" class="level3" data-number="7.3.2">
-<h3 data-number="7.3.2" class="anchored" data-anchor-id="comparison-with-another-classifier"><span class="header-section-number">7.3.2</span> Comparison with another classifier</h3>
+<section id="comparison-with-another-classifier" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="comparison-with-another-classifier"><span class="header-section-number">7.3.3</span> Comparison with another classifier</h3>
 </section>
-<section id="testing-the-final-model" class="level3" data-number="7.3.3">
-<h3 data-number="7.3.3" class="anchored" data-anchor-id="testing-the-final-model"><span class="header-section-number">7.3.3</span> Testing the final model</h3>
+<section id="testing-the-final-model" class="level3" data-number="7.3.4">
+<h3 data-number="7.3.4" class="anchored" data-anchor-id="testing-the-final-model"><span class="header-section-number">7.3.4</span> Testing the final model</h3>
 <p>As we are now considering that our model is adequately trained, we can finally apply it to the testing data we had set aside early in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important. For this reason, we will also compare the model to BIOCLIM PLUS compare to validation performance on old model</p>
 <p>We are <em>not</em> applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of “we pick the best model as the one with the highest validation MCC”, and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of <span class="math inline">\(p\)</span>-hacking.</p>
 <p>We can start by taking a look at the confusion matrix on the testing data:</p>
@@ -347,8 +365,8 @@ Figure&nbsp;7.3: learning curve for the threshold and prior
 \]</span></p>
 <p>This is very promising! There are far more predictions on the diagonal (258) than outside of it (16), which suggests an accurate classifier. But in order to really evaluate the model, we will report a little more information: TSS FOM FDI F1</p>
 </section>
-<section id="reporting-the-final-predictions" class="level3" data-number="7.3.4">
-<h3 data-number="7.3.4" class="anchored" data-anchor-id="reporting-the-final-predictions"><span class="header-section-number">7.3.4</span> Reporting the final predictions</h3>
+<section id="reporting-the-final-predictions" class="level3" data-number="7.3.5">
+<h3 data-number="7.3.5" class="anchored" data-anchor-id="reporting-the-final-predictions"><span class="header-section-number">7.3.5</span> Reporting the final predictions</h3>
 </section>
 </section>
 <section id="conclusion" class="level2" data-number="7.4">
