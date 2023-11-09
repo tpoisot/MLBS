@@ -1,19 +1,20 @@
-using DataFrames
+_code_path = joinpath(dirname(Base.active_project()), "code")
+
 import CSV
-using GLM
-using PrettyTables
-
-import StatsAPI
-
-using MultivariateStats
-
+import Downloads
+import Images
 import JLD
-
+import Random
+import StatsAPI
+using CairoMakie
+using DataFrames
 using Distributions
-
+using GLM
+using MultivariateStats
+using PrettyTables
+using SpeciesDistributionToolkit
 using Statistics
 
-using CairoMakie
 set_theme!()
 CairoMakie.activate!(; type = "png")
 update_theme!(;
@@ -25,15 +26,8 @@ update_theme!(;
     CairoMakie = (; px_per_unit = 2),
 )
 
-_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "palettes.jl"))
 
-using SpeciesDistributionToolkit
-
-import Images
-import Downloads
-
-import Random
 rng = Random.default_rng()
 Random.seed!(rng, 12345)
 
