@@ -14,10 +14,7 @@ mutable struct PredictionPipeline
 end
 
 PredictionPipeline(x...) = PredictionPipeline([x...])
-PredictionPipeline(x) = PredictionPipeline([x])
-Base.getindex(p::PredictionPipeline, i...) = PredictionPipeline(getindex(p.steps, i...))
-Base.lastindex(p::PredictionPipeline) = lastindex(p.steps)
-Base.length(p::PredictionPipeline) = length(p.steps)
+Base.getindex(p::PredictionPipeline, i) = getindex(p.steps, i)
 
 function StatsAPI.predict(p::PredictionPipeline, x::Vector{T}) where {T <: Number}
     prediction = predict(p.steps[1], x)
@@ -30,18 +27,3 @@ end
 function StatsAPI.predict(p::PredictionPipeline, X::Matrix{T}) where {T <: Number}
     return vec(mapslices(x -> predict(p, x), X; dims = 1))
 end
-
-#= test data =#
-y = rand(Bool, 100)
-X = rand(Float64, (4, length(y)))
-for i in eachindex(y)
-    if y[i]
-        X[:,i] = 2X[:,i]
-    end
-end
-
-mod = train(GaussianNaiveBayes, y, X)
-
-pip = PredictionPipeline(mod, Thresholder())
-
-predict(pip, X)
