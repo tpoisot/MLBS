@@ -82,13 +82,13 @@ $$
 \frac{P(+)}{P(x)}P(x|+)+\frac{P(-)}{P(x)}P(x|-) = 1\,
 $$
 
-which after some reorganisation (and note that $P(-) = 1-P(+)$), results in
+which after some reorganization (and note that $P(-) = 1-P(+)$), results in
 
 $$
 P(x) = P(+) P(x|+)+P(-) P(x|-) \,.
 $$
 
-This value $P(x)$ is the "evidence" in Bayesian parlance, and we can use this value explicitely to get the prediction for the probability associated to the class $+$ using the NBC.
+This value $P(x)$ is the "evidence" in Bayesian parlance, and we can use this value explicitly to get the prediction for the probability associated to the class $+$ using the NBC.
 
 Note that we can see that using the approximate version we used so far (the prediction is positive if $P(+) P(x|+) > P(-) P(x|-)$) is equivalent to saying that the prediction is positive whenever $P(+|x) > \tau$ with $\tau = 0.5$. In the next sections, we will challenge the assumption that $0.5$ is the optimal value of $\tau$.
 
@@ -114,10 +114,12 @@ CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)) 
 τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
 ```
 
+In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(τ; digits=3)$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
+
 ```{julia}
 #| echo: false
 #| label: fig-tuning-threshold
-#| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model.
+#| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
 fig = Figure(; resolution=(600, 300))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
 series!(ax, T, mcc.(CT), solid_color=light[1])
@@ -127,6 +129,8 @@ xlims!(ax, (0., 1.))
 ylims!(ax, (0., 1.))
 current_figure()
 ```
+
+### How good is the model?
 
 ```{julia}
 #| echo: false
