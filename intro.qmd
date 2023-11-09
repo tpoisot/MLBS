@@ -10,7 +10,7 @@ There are, broadly speaking, two situations in which reading this book is useful
 These are examples of books I like. I found them comprehensive and engaging. They may not work for you.
 :::
 
-A wonderful introduction to the mathematics behind machine learning can be found in @deisenroth2020, which provides stunning visualization of mathematical concepts. @yau2015 is a particularly useful book about the ways to visualize data in a meaningful way. **TK**
+A wonderful introduction to the mathematics behind machine learning can be found in @deisenroth2020, which provides stunning visualization of mathematical concepts. @yau2015 is a particularly useful book about the ways to visualize data in a meaningful way. [@watt2020] **TK**
 
 When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible quantity of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.
 
