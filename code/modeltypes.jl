@@ -13,6 +13,12 @@ mutable struct PredictionPipeline
     steps::Vector{<:AbstractPredictionStep}
 end
 
+PredictionPipeline(x...) = PredictionPipeline([x...])
+PredictionPipeline(x) = PredictionPipeline([x])
+Base.getindex(p::PredictionPipeline, i...) = PredictionPipeline(getindex(p.steps, i...))
+Base.lastindex(p::PredictionPipeline) = lastindex(p.steps)
+Base.length(p::PredictionPipeline) = length(p.steps)
+
 function StatsAPI.predict(p::PredictionPipeline, x::Vector{T}) where {T <: Number}
     prediction = predict(p.steps[1], x)
     for step in p.steps[2:end]
@@ -36,6 +42,6 @@ end
 
 mod = train(GaussianNaiveBayes, y, X)
 
-pip = PredictionPipeline([mod, Thresholder()])
+pip = PredictionPipeline(mod, Thresholder())
 
 predict(pip, X)
