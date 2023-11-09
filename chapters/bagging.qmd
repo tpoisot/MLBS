@@ -1,1 +1,97 @@
 # Bagging and ensembles {#sec-bagging}
+
+In @sec-tuning, ...
+
+In this section, we are going to take several steps back, in order to reduce the complexity of the model we will investigate. Specifically, we 
+
+## A digression: mistakes and disagreements
+
+## Non-parametric boostrap
+
+statistical intuition
+
+out of bag
+
+## Bagging
+
+Bagging is conceptually different from cross-validation, which we discussed in @sec-crossvalidation. The purpose of cross-validation is to test the performance of a model on unseen data. But what if the proportion of unseen data we used for validation is not adequate? What if the sample of validation data is not representative of the overall population? Bagging (*boostrap aggregating*) helps with these issues, by asking a slightly different question: assuming that all of our training instances are drawn from a population (in the statistical sense), how good is our model at predicting the part of the population that was not represented in our training sample?
+
+Of course, we never get access to the true population from which training instances are drawn, and this is why we rely on bootstrap. By performing sampling with replacement, bootstrap provides an approximation of the performance of ...
+
+But this is only a statistical reason to use bootstrap; there are additional benefits, some of which relate to the digression that opened this chapter: it is unlikely that a model will learn all the right things on a training dataset. Chances are that different models ...
+
+kappa
+
+## Application: 
+
+make a split
+
+boostrap to show possible effect of split
+
+model averaging
+
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "confusion.jl"))
+include(joinpath(_code_path, "mocks.jl"))
+include(joinpath(_code_path, "nbc.jl"))
+include(joinpath(_code_path, "vif.jl"))
+include(joinpath(_code_path, "splitters.jl"))
+include(joinpath(_code_path, "palettes.jl"))
+include(joinpath(_code_path, "crossvalidate.jl"))
+include(joinpath(_code_path, "variableselection.jl"))
+```
+
+```{julia}
+#| echo: false
+#| output: false
+_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
+modelpath = joinpath(_ptm_path, "sdm-step-0.jld")
+ptm = JLD.load(modelpath)
+y, X = ptm["training"]
+hold = holdout(y, X)
+v0 = forwardselection(naivebayes, y, X, [hold], mcc)
+X = X[:,v0]
+model = naivebayes(y[hold[1]], X[hold[1],:])
+cv0 = crossvalidate(naivebayes, y, X, [hold])
+Cv = cv0[1][1]
+Ct = cv0[2][1]
+```
+
+```{julia}
+bags = bootstrap(y[hold[1]], X[hold[1],:]; n=50)
+```
+
+```{julia}
+cv = crossvalidate(naivebayes, y[hold[1]], X[hold[1],:], bags)
+learners = [naivebayes(y[hold[1]][b[1]], X[hold[1],:][b[1],:]) for b in bags]
+```
+
+```{julia}
+yhat = vec(mapslices(x -> median([learner(x) for learner in learners] .> 0.5), X[hold[2],:]; dims=2))
+C = ConfusionMatrix(yhat, y[hold[2]])
+scatter(tpr.(cv[1]), ppv.(cv[1]))
+scatter!([tpr(C)], [ppv(C)])
+current_figure()
+```
+
+```{julia}
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in v0]
+```
+
+```{julia}
+#| echo: false
+#| output: false
+un = convert(Float64, similar(first(bio)))
+pr = convert(Float64, similar(first(bio)))
+Threads.@threads for k in keys(pr)
+    x = [b[k] for b in bio]
+    pr[k] = model(x)
+    un[k] = mean([(m(x)>0.5)==(model(x)>0.5) for m in learners])
+end
+```

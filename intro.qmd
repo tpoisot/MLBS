@@ -40,6 +40,8 @@ In @sec-leakage, we discuss data leakage, where it comes from, and how to preven
 
 In @sec-classification, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.
 
+In @sec-confusion, we will explore additional ways in which we can refine the contents of our confusion matrix, either to reflect the reality of our data, or to emphasize some priorities when making predictions.
+
 In @sec-variable-selection, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.
 
 In @sec-tuning, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.

@@ -51,5 +51,11 @@ end
 
 function bootstrap(y, X; n=50)
     @assert size(y,1) == size(X, 1)
-    return [sample(1:size(X, 1), size(X, 1), replace=true) for i in 1:n]
+    bags = []
+    for i in 1:n
+        inbag = sample(1:size(X, 1), size(X, 1), replace=true)
+        outbag = setdiff(1:size(X, 1), inbag)
+        push!(bags, (inbag, outbag))
+    end
+    return bags
 end

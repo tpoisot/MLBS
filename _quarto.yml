@@ -44,6 +44,7 @@ book:
     - chapters/classification.qmd
     - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
+    - chapters/bagging.qmd
     - chapters/explanations.qmd
     - references.qmd
 
