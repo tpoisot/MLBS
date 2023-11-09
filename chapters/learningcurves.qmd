@@ -2,7 +2,7 @@
 
 In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­@sec-classification and @sec-predictors.
 
-We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then try to *explain* in @sec-explanations.
+We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then *explain* in @sec-explanations.
 
 ```{julia}
 #| echo: false
@@ -20,7 +20,7 @@ include(joinpath(_code_path, "crossvalidate.jl"))
 include(joinpath(_code_path, "variableselection.jl"))
 ```
 
-## Classification based on probabilities
+## Classification based on probabilities {#sec-learningcurves-threshold}
 
 When first introducing classification in @sec-classification and @sec-predictors, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either "present" or "absent"). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.
 
@@ -30,9 +30,9 @@ Note that the quantitative value returned by the classifier does not *need* to b
 
 The idea behind the use of thresholds is simple: if the classifier output $\hat y$ is larger than (or equal to) the threshold value $\tau$, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value $\hat y$ returned by the classifier be a probability. We can simply decide to pick $\tau$ somewhere in the support of the distribution of $\hat y$.
 
-The threshold to decide on a positive event is an hyper-parameter of the model. In the NBC we built in @sec-classification, our decision rule was that $p(+) > p(-)$, which when all is said and done (but we will convince ourselves of this in **TODO**), means that we used $\tau = 0.5$. But there is no reason to assume that the threshold needs to be one half. Maybe the model is overly sensitive to negatives. Maybe there is a slight issue with our training data that bias the model predictions. And for this reason, we have to look for the optimal value of $\tau$.
+The threshold to decide on a positive event is an hyper-parameter of the model. In the NBC we built in @sec-classification, our decision rule was that $p(+) > p(-)$, which when all is said and done (but we will convince ourselves of this in @sec-learningcurves-probabilistic), means that we used $\tau = 0.5$. But there is no reason to assume that the threshold needs to be one half. Maybe the model is overly sensitive to negatives. Maybe there is a slight issue with our training data that bias the model predictions. And for this reason, we have to look for the optimal value of $\tau$.
 
-There are two important values for the threshold, at which we know the behavior of our model. The first is $\tau = \text{min}(\hat y)$, for which the model *always* returns a negative answer; the second is, unsurprisingly, $\tau = \text{max}(\hat y)$, where the model *always* returns a positive answer. Thinking of this behavior in terms of the measures on the confusion matrix, as we have introduced them in **TODO**, the smallest possible threshold gives only negatives, and the largest possible one gives only positives: they respectively maximize the false negatives and false positives rates.
+There are two important values for the threshold, at which we know the behavior of our model. The first is $\tau = \text{min}(\hat y)$, for which the model *always* returns a negative answer; the second is, unsurprisingly, $\tau = \text{max}(\hat y)$, where the model *always* returns a positive answer. Thinking of this behavior in terms of the measures on the confusion matrix, as we have introduced them in @sec-classification, the smallest possible threshold gives only negatives, and the largest possible one gives only positives: they respectively maximize the false negatives and false positives rates.
 
 ### The ROC curve
 
@@ -42,15 +42,25 @@ We have just described the Receiver Operating Characteristic (ROC; @fawcett2006)
 
 ### The PR curve
 
-One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions [@poisot2023]. For this reason, it is always advised to ...
+One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions [@poisot2023]. In addition, although a good model will have a high ROC-AUC, a bad model can get a high ROC-AUC too [@Halligan2015]; this means that ROC-AUC alone is not enough to select a model.
 
-### Cross-entropy loss and other classification loss functions
+An alternative to ROC is the PR (for precision-recall) curve, in which the positive predictive value is plotted against the true-positive rate; in other words, the PR curve (and therefore the PR-AUC) quantify whether a classifier makes reliable positive predictions, both in terms of these predictions being associated to actual positive outcomes (true-positive rate) and not associated to actual negative outcomes (positive predictive value). Because the PR curve uses the positive predictive values, it captures information that is similar to the ROC curve, but is in general more informative [@Saito2015].
+
+### A note on cross-entropy loss
+
+In @sec-gradientdescent, we used loss functions to measure the progress of our learning algorithm. Unsurprisingly, loss functions exist for classification tasks too. One of the most common is the cross-entropy (or log-loss), which is defined as
+
+$$
+−\left[y \times \text{log}\ p+(1−y)\times \text{log}\ (1−p)\right] \,,
+$$
+
+where $y$ is the actual class, and $p$ is the probability associated to the positive class. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. Which is to say that log-loss measures how much information about $y$ is conveyed by $p$. In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of learning.
 
 ## How to optimize the threshold?
 
 In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.
 
-As we have discussed in **TODO previous**, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
+As we have discussed in @sec-learningcurves-threshold, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
 
 Some authors have used the MCC as a measure of optimality [@zhou2013], as it is maximized *only* when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, @chicco2023 recommend that MCC should be used to pick the optimal threshold *regardless of the question*, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at *everything*, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss [@Jurman2012].
 
@@ -58,7 +68,7 @@ For once, and after over 15 years of methodological discussion, it appears that 
 
 ## Application: improved Corsican nuthatch model
 
-### Making the NBC explicitely probabilistic
+### Making the NBC explicitly probabilistic {#sec-learningcurves-probabilistic}
 
 In @sec-classification, we have expressed the probability that the NBC recommends a positive outcome as
 
@@ -72,7 +82,7 @@ $$
 \frac{P(+)}{P(x)}P(x|+)+\frac{P(-)}{P(x)}P(x|-) = 1\,
 $$
 
-which after some reorganisation (and note that $P(-) = 1-P(+)$), results in 
+which after some reorganisation (and note that $P(-) = 1-P(+)$), results in
 
 $$
 P(x) = P(+) P(x|+)+P(-) P(x|-) \,.
@@ -161,7 +171,7 @@ In the previous section, we have assumed that the prior on occurrences $P(+)$ wa
 A grid search in an exhaustive sweep of all possible combinations of parameter values. In order to make the process more efficient, refined approaches like successive halvings [@jamieson2016] can be used.
 :::
 
-Based on these results, it appears that changing the value of the prior has very little impact on the best MCC we can achieve: the threshold is simply adjusted to reflect the fact that we assume occurrences to be increasingly likely. In this example, there is very little incentive for us to change the value of the prior, as it would have a very small effect on the overall performance of the model. For this reason, we will keep the previous model ($P(+) = 0.5$ and $\tau \approx  `{julia} round(τ; digits=2)`$) as the best one.
+Based on these results, it appears that changing the value of the prior has very little impact on the best MCC we can achieve: the threshold is simply adjusted to reflect the fact that we assume occurrences to be increasingly likely. In this example, there is very little incentive for us to change the value of the prior, as it would have a very small effect on the overall performance of the model. For this reason, we will keep the previous model ($P(+) = 0.5$ and $\tau \approx `{julia} round(τ; digits=2)`$) as the best one.
 
 Just because we decided to use a learning curve does not mean we *have* to change the hyper-parameters. Sometimes, this approach reveals that the value of an hyper-parameter is not really important to model performance, and we need to make a decision on what to do next. Here, although there are marginal changes in the value of the MCC, they do not feel significant enough to change the value of the prior.
 
@@ -254,7 +264,6 @@ $$
 This is very promising! There are far more predictions on the diagonal (`{julia} C.tp + C.tn`) than outside of it (`{julia} C.fp + C.fn`), which suggests an accurate classifier. But in order to really evaluate the model, we will report a little more information: TSS FOM FDI F1
 
 ### Reporting the final predictions
-
 
 ```{julia}
 #| echo: false
