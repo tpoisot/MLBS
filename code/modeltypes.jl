@@ -6,6 +6,7 @@ Base.@kwdef mutable struct Thresholder <: AbstractPredictionStep
     cutoff::Float64 = 0.5
 end
 
+train!(thr::Thresholder, x...) = thr # This is a no-op as we will tune it externally
 StatsAPI.predict(thr::Thresholder, x::T) where {T <: Float64} = x >= thr.cutoff
 StatsAPI.predict(thr::Thresholder, x::Vector{T}) where {T <: Float64} = x .>= thr.cutoff
 
