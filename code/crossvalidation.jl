@@ -1,31 +1,28 @@
-function crossvalidate(model, y, X, folds, args...; kwargs...)
+function crossvalidate(sdm, y, X, folds, args...; classify=false, kwargs...)
     Cv = zeros(ConfusionMatrix, length(folds))
     Ct = zeros(ConfusionMatrix, length(folds))
     for (i, f) in enumerate(folds)
         trn, val = f
-        foldmodel = model(y[trn], X[trn, :]; kwargs...)
-        foldpred = vec(mapslices(foldmodel, X[val, :]; dims = 2))
-        Cv[i] = ConfusionMatrix(foldpred, y[val], args...)
-        ontrn = vec(mapslices(foldmodel, X[trn, :]; dims = 2))
+        train!(sdm, y[trn], X[:,trn]; kwargs...)
+        pred = predict(sdm, X[:,val]; classify=classify)
+        Cv[i] = ConfusionMatrix(pred, y[val], args...)
+        ontrn = predict(sdm, X[:,trn]; classify=classify)
         Ct[i] = ConfusionMatrix(ontrn, y[trn], args...)
     end
     return Cv, Ct
 end
 
-using StatsBase
-using Random
-
 function leaveoneout(y, X)
-    @assert size(y, 1) == size(X, 1)
-    positions = collect(axes(X, 1))
+    @assert size(y, 1) == size(X, 2)
+    positions = collect(axes(X, 2))
     return [(setdiff(positions, i), i) for i in positions]
 end
 
 function holdout(y, X; proportion = 0.2, permute = true)
-    @assert size(y, 1) == size(X, 1)
-    sample_size = size(X, 1)
+    @assert size(y, 1) == size(X, 2)
+    sample_size = size(X, 2)
     n_holdout = round(Int, proportion * sample_size)
-    positions = collect(axes(X, 1))
+    positions = collect(axes(X, 2))
     if permute
         Random.shuffle!(positions)
     end
@@ -35,15 +32,15 @@ function holdout(y, X; proportion = 0.2, permute = true)
 end
 
 function montecarlo(y, X; n = 100, kwargs...)
-    @assert size(y, 1) == size(X, 1)
+    @assert size(y, 1) == size(X, 2)
     return [holdout(y, X; kwargs...) for _ in 1:n]
 end
 
 function kfold(y, X; k = 10, permute = true)
-    @assert size(y, 1) == size(X, 1)
-    sample_size = size(X, 1)
+    @assert size(y, 1) == size(X, 2)
+    sample_size = size(X, 2)
     @assert k <= sample_size
-    positions = collect(axes(X, 1))
+    positions = collect(axes(X, 2))
     if permute
         Random.shuffle!(positions)
     end

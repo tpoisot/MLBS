@@ -4,7 +4,6 @@ import CSV
 import Downloads
 import Images
 import JLD
-import Random
 import StatsAPI
 using CairoMakie
 using DataFrames
@@ -14,6 +13,8 @@ using MultivariateStats
 using PrettyTables
 using SpeciesDistributionToolkit
 using Statistics
+using StatsBase
+using Random
 
 set_theme!()
 CairoMakie.activate!(; type = "png")

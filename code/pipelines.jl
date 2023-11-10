@@ -44,12 +44,14 @@ mutable struct SDM
     threshold::SDMThresholder
 end
 
-function train!(sdm::SDM, y, X)
+function train!(sdm::SDM, y, X; classify=true)
     train!(sdm.transformer, X)
     X₁ = predict(sdm.transformer, X)
     train!(sdm.classifier, y, X₁)
     ŷ = predict(sdm.classifier, X₁)
-    train!(sdm.threshold, y, ŷ)
+    if classify
+        train!(sdm.threshold, y, ŷ)
+    end
     return sdm
 end
 
@@ -63,6 +65,7 @@ function StatsAPI.predict(sdm::SDM, X; classify=true)
     end
 end
 
+#=
 # Demo data
 
 X = rand(Float64, 4, 100)
@@ -73,3 +76,4 @@ model = SDM(ZScore(), NBC(), Thresholder())
 train!(model)
 yhat = predict(model, X; classify=false)
 ConfusionMatrix(yhat, y) |> mcc
+=#
