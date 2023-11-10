@@ -2,6 +2,8 @@ abstract type SDMTransformer end
 abstract type SDMClassifier end
 abstract type SDMThresholder end
 
+# Thresholder
+
 Base.@kwdef mutable struct Thresholder{T <: Number} <: SDMThresholder
     cutoff::T=0.5
 end
@@ -13,9 +15,13 @@ function train!(thr::Thresholder, y, yhat)
 end
 StatsAPI.predict(thr::Thresholder, X) = X .>= thr.cutoff
 
+# No transformation
+
 struct RawData <: SDMTransformer end
 train!(::Type{RawData}, args...) = nothing
 StatsAPI.predict(::Type{RawData}, X) = X
+
+# z-score
 
 Base.@kwdef mutable struct ZScore <: SDMTransformer
     μ::AbstractArray = zeros(1)
@@ -29,6 +35,8 @@ end
 function StatsAPI.predict(zs::ZScore, x::AbstractArray)
     (x .- zs.μ)./(zs.σ)
 end
+
+# SDM pipeline
 
 mutable struct SDM
     transformer::SDMTransformer
@@ -56,6 +64,7 @@ function StatsAPI.predict(sdm::SDM, X; classify=true)
 end
 
 # Demo data
+
 X = rand(Float64, 4, 100)
 y = rand(Bool, size(X, 2))
 X[:,findall(y)] .+= 0.25
