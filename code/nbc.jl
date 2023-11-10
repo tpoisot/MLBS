@@ -1,4 +1,4 @@
-Base.@kwdef mutable struct GaussianNaiveBayes{T <: Number} <: AbstractClassifier
+Base.@kwdef mutable struct GaussianNaiveBayes{T <: Number} <: SDMClassifier
     presences::Vector{Normal} = Normal[]
     absences::Vector{Normal} = Normal[]
     prior::T = 0.5
