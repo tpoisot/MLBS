@@ -69,7 +69,7 @@ X = rand(Float64, 4, 100)
 y = rand(Bool, size(X, 2))
 X[:,findall(y)] .+= 0.25
 
-model = SDM(ZScore(), GaussianNaiveBayes(), Thresholder())
+model = SDM(ZScore(), NBC(), Thresholder())
 train!(model)
 yhat = predict(model, X; classify=false)
 ConfusionMatrix(yhat, y) |> mcc
