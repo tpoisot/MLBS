@@ -31,3 +31,17 @@ $toc-active-border: $lab-blue;
 $toc-inactive-border: $grey-light;
 
 /*-- scss:rules --*/
+.content {
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'PT Serif', sans-serif;
+        color: $lab-green-dark;
+    }
+    .title {
+        padding-bottom: 5em;
+    }
+    .chapter-number, .header-section-number {
+        color: $grey-medium;
+        font-family: $font-family-sans-serif;
+        font-weight: 400;
+    }
+}

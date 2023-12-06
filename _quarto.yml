@@ -10,9 +10,11 @@ metadata-files:
 execute:
   freeze: true
 
+filters:
+  - section-bibliographies
+
 bibliography: references.bib
-csl: https://www.zotero.org/styles/ecology-letters
+reference-section-title: References
+citeproc: true
 
-preview:
-  port: 4200
-
+#csl: https://www.zotero.org/styles/ecology-letters
