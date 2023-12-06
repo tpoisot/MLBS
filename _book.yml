@@ -1,0 +1,42 @@
+book:
+  title: "Machine Learning for Biodiversity Scientists"
+  subtitle: "A principled and opinionated primer"
+  page-navigation: false
+  back-to-top-navigation: true
+  page-footer: "This work is licensed under the [CC BY-NC 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/)" 
+  language: en-CA
+  license: cc-by-nc
+  repo-url: https://github.com/tpoisot/MLBS
+  repo-actions: [source, issue]
+  downloads: [pdf, epub]
+  search:
+    location: sidebar
+    type: overlay
+    collapse-after: 1
+    limit: 10
+    copy-button: true
+  sidebar:
+    style: docked
+    border: true
+  author:
+    - name: "Timothée Poisot"
+      orcid: 0000-0002-0735-5184
+      email: timothee.poisot@umontreal.ca
+      affiliations:
+        - name: Université de Montréal
+          department: Sciences Biologiques
+          city: Montréal
+          region: QC
+          country: Canada
+  date: last-modified
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - chapters/clustering.qmd
+    - chapters/gradientdescent.qmd
+    - chapters/crossvalidation.qmd
+    - chapters/classification.qmd
+    - chapters/variableselection.qmd
+    - chapters/learningcurves.qmd
+    - chapters/explanations.qmd
+    - references.qmd
