@@ -8,7 +8,7 @@ book:
   license: cc-by-nc
   repo-url: https://github.com/tpoisot/MLBS
   repo-actions: [source, issue]
-  downloads: [pdf, epub]
+  downloads: [pdf]
   search:
     location: sidebar
     type: overlay
@@ -39,3 +39,5 @@ book:
     - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
     - chapters/explanations.qmd
+  appendices:
+    - appendices/instructornotes.qmd
