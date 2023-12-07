@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 7&nbsp; Hyper-parameters tuning</title>
+<title>Machine Learning for Biodiversity Scientists - 7&nbsp; Hyper-parameters tuning</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -88,7 +88,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating slimcontent">
+<body class="nav-sidebar docked slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -109,28 +109,13 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Data Science for Biodiversity Scientists</a> 
-        <div class="sidebar-tools-main">
-    <div class="dropdown">
-      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.pdf">
-              <i class="bi bi-bi-file-pdf pe-1"></i>
-            Download PDF
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.epub">
-              <i class="bi bi-bi-journal pe-1"></i>
-            Download ePub
-            </a>
-          </li>
-      </ul>
-    </div>
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -191,20 +176,31 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
    
   <ul>
   <li><a href="#sec-learningcurves-threshold" id="toc-sec-learningcurves-threshold" class="nav-link active" data-scroll-target="#sec-learningcurves-threshold"><span class="header-section-number">7.1</span> Classification based on probabilities</a>
@@ -222,8 +218,9 @@ div.csl-indent {
   <li><a href="#testing-and-visualizing-the-final-model" id="toc-testing-and-visualizing-the-final-model" class="nav-link" data-scroll-target="#testing-and-visualizing-the-final-model"><span class="header-section-number">7.3.4</span> Testing and visualizing the final model</a></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7.4</span> Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/learningcurves.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
@@ -247,8 +244,8 @@ div.csl-indent {
 </header>
 
 
-<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where <em>hyper</em>-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is <em>controlling</em> the learning process, but is not itself modified through learning <span class="citation" data-cites="yang2020">(<a href="../references.html#ref-yang2020" role="doc-biblioref">Yang &amp; Shami 2020</a>)</span>. Hyper-parameters usually need to be determined <em>before</em> the training starts <span class="citation" data-cites="claesen2015">(<a href="../references.html#ref-claesen2015" role="doc-biblioref">Claesen &amp; De Moor 2015</a>)</span>, but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­<a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>.</p>
-<p>We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling <span class="citation" data-cites="huntington1998">(<a href="../references.html#ref-huntington1998" role="doc-biblioref">Huntington &amp; Lyrintzis 1998</a>)</span>, orthogonal sampling <span class="citation" data-cites="mckay1979">(<a href="../references.html#ref-mckay1979" role="doc-biblioref">McKay <em>et al.</em> 1979</a>)</span>, and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the “right” balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then <em>explain</em> in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
+<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where <em>hyper</em>-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is <em>controlling</em> the learning process, but is not itself modified through learning <span class="citation" data-cites="yang2020">(<a href="#ref-yang2020" role="doc-biblioref">Yang and Shami 2020</a>)</span>. Hyper-parameters usually need to be determined <em>before</em> the training starts <span class="citation" data-cites="claesen2015">(<a href="#ref-claesen2015" role="doc-biblioref">Claesen and De Moor 2015</a>)</span>, but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­<a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>.</p>
+<p>We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling <span class="citation" data-cites="huntington1998">(<a href="#ref-huntington1998" role="doc-biblioref">Huntington and Lyrintzis 1998</a>)</span>, orthogonal sampling <span class="citation" data-cites="mckay1979">(<a href="#ref-mckay1979" role="doc-biblioref">McKay, Beckman, and Conover 1979</a>)</span>, and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the “right” balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then <em>explain</em> in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
 <section id="sec-learningcurves-threshold" class="level2 page-columns page-full" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="sec-learningcurves-threshold"><span class="header-section-number">7.1</span> Classification based on probabilities</h2>
 <p>When first introducing classification in <a href="classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter&nbsp;6</span></a>, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either “present” or “absent”). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.</p>
@@ -261,12 +258,12 @@ div.csl-indent {
 <section id="the-roc-curve" class="level3" data-number="7.1.1">
 <h3 data-number="7.1.1" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</h3>
 <p>This is a behavior we can exploit, as increasing the threshold away from the minimum will lower the false negatives rate and increase the true positive rate, while decreasing the threshold away from the maximum will lower the false positives rate and increase the true negative rate. If we cross our fingers and knock on wood, there will be a point where the false events rates have decreased as much as possible, and the true events rates have increased as much as possible, and this corresponds to the optimal value of <span class="math inline">\(\tau\)</span> for our problem.</p>
-<p>We have just described the Receiver Operating Characteristic (ROC; <span class="citation" data-cites="fawcett2006">Fawcett (<a href="../references.html#ref-fawcett2006" role="doc-biblioref">2006</a>)</span>) curve! The ROC curve visualizes the false positive rate on the <span class="math inline">\(x\)</span> axis, and the true positive rate on the <span class="math inline">\(y\)</span> axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier <span class="citation" data-cites="hanley1982">(<a href="../references.html#ref-hanley1982" role="doc-biblioref">Hanley &amp; McNeil 1982</a>)</span>; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance.The ROC curve is a description of the model performance across all of the possible threshold values we investigated!</p>
+<p>We have just described the Receiver Operating Characteristic (ROC; <span class="citation" data-cites="fawcett2006">Fawcett (<a href="#ref-fawcett2006" role="doc-biblioref">2006</a>)</span>) curve! The ROC curve visualizes the false positive rate on the <span class="math inline">\(x\)</span> axis, and the true positive rate on the <span class="math inline">\(y\)</span> axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier <span class="citation" data-cites="hanley1982">(<a href="#ref-hanley1982" role="doc-biblioref">Hanley and McNeil 1982</a>)</span>; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance.The ROC curve is a description of the model performance across all of the possible threshold values we investigated!</p>
 </section>
 <section id="the-pr-curve" class="level3" data-number="7.1.2">
 <h3 data-number="7.1.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</h3>
-<p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions <span class="citation" data-cites="poisot2023">(<a href="../references.html#ref-poisot2023" role="doc-biblioref">Poisot <em>et al.</em> 2023</a>)</span>. In addition, although a good model will have a high ROC-AUC, a bad model can get a high ROC-AUC too <span class="citation" data-cites="Halligan2015">(<a href="../references.html#ref-Halligan2015" role="doc-biblioref">Halligan <em>et al.</em> 2015</a>)</span>; this means that ROC-AUC alone is not enough to select a model.</p>
-<p>An alternative to ROC is the PR (for precision-recall) curve, in which the positive predictive value is plotted against the true-positive rate; in other words, the PR curve (and therefore the PR-AUC) quantify whether a classifier makes reliable positive predictions, both in terms of these predictions being associated to actual positive outcomes (true-positive rate) and not associated to actual negative outcomes (positive predictive value). Because the PR curve uses the positive predictive values, it captures information that is similar to the ROC curve, but is in general more informative <span class="citation" data-cites="Saito2015">(<a href="../references.html#ref-Saito2015" role="doc-biblioref">Saito &amp; Rehmsmeier 2015</a>)</span>.</p>
+<p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions <span class="citation" data-cites="poisot2023">(<a href="#ref-poisot2023" role="doc-biblioref">Poisot et al. 2023</a>)</span>. In addition, although a good model will have a high ROC-AUC, a bad model can get a high ROC-AUC too <span class="citation" data-cites="Halligan2015">(<a href="#ref-Halligan2015" role="doc-biblioref">Halligan, Altman, and Mallett 2015</a>)</span>; this means that ROC-AUC alone is not enough to select a model.</p>
+<p>An alternative to ROC is the PR (for precision-recall) curve, in which the positive predictive value is plotted against the true-positive rate; in other words, the PR curve (and therefore the PR-AUC) quantify whether a classifier makes reliable positive predictions, both in terms of these predictions being associated to actual positive outcomes (true-positive rate) and not associated to actual negative outcomes (positive predictive value). Because the PR curve uses the positive predictive values, it captures information that is similar to the ROC curve, but is in general more informative <span class="citation" data-cites="Saito2015">(<a href="#ref-Saito2015" role="doc-biblioref">Saito and Rehmsmeier 2015</a>)</span>.</p>
 </section>
 <section id="a-note-on-cross-entropy-loss" class="level3" data-number="7.1.3">
 <h3 data-number="7.1.3" class="anchored" data-anchor-id="a-note-on-cross-entropy-loss"><span class="header-section-number">7.1.3</span> A note on cross-entropy loss</h3>
@@ -280,8 +277,8 @@ div.csl-indent {
 <section id="how-to-optimize-the-threshold" class="level2" data-number="7.2">
 <h2 data-number="7.2" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">7.2</span> How to optimize the threshold?</h2>
 <p>In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example <span class="math inline">\([0.2, 0.8, 0.1, 0.5, 1.0]\)</span>. We then compare all of these values to an initial threshold, for example <span class="math inline">\(\tau = 0.05\)</span>, giving us a vector of Boolean values, in this case <span class="math inline">\([+, +, +, +, +]\)</span>. We can then compare this classified output to a series of validation labels, <em>e.g.</em> <span class="math inline">\([-, +, -, -, +]\)</span>, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.</p>
-<p>As we have discussed in <a href="#sec-learningcurves-threshold" class="quarto-xref"><span>Section&nbsp;7.1</span></a>, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be <span class="citation" data-cites="Perkins2006 Unal2017">(<a href="../references.html#ref-Perkins2006" role="doc-biblioref">Perkins &amp; Schisterman 2006</a>; <a href="../references.html#ref-Unal2017" role="doc-biblioref">Unal 2017</a>)</span>. The usual recommendation is to use the True Skill Statistic, also known as Youden’s <span class="math inline">\(J\)</span> <span class="citation" data-cites="youden1950">(<a href="../references.html#ref-youden1950" role="doc-biblioref">Youden 1950</a>)</span>. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier <span class="citation" data-cites="perkins2005">(<a href="../references.html#ref-perkins2005" role="doc-biblioref">Perkins &amp; Schisterman 2005</a>)</span>. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions <span class="citation" data-cites="poisot2023a">(<a href="../references.html#ref-poisot2023a" role="doc-biblioref">Poisot 2023</a>)</span>.</p>
-<p>Some authors have used the MCC as a measure of optimality <span class="citation" data-cites="zhou2013">(<a href="../references.html#ref-zhou2013" role="doc-biblioref">Zhou &amp; Jakobsson 2013</a>)</span>, as it is maximized <em>only</em> when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, <span class="citation" data-cites="chicco2023">Chicco &amp; Jurman (<a href="../references.html#ref-chicco2023" role="doc-biblioref">2023</a>)</span> recommend that MCC should be used to pick the optimal threshold <em>regardless of the question</em>, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at <em>everything</em>, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss <span class="citation" data-cites="Jurman2012">(<a href="../references.html#ref-Jurman2012" role="doc-biblioref">Jurman <em>et al.</em> 2012</a>)</span>.</p>
+<p>As we have discussed in <a href="#sec-learningcurves-threshold" class="quarto-xref"><span>Section&nbsp;7.1</span></a>, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be <span class="citation" data-cites="Perkins2006 Unal2017">(<a href="#ref-Perkins2006" role="doc-biblioref">Perkins and Schisterman 2006</a>; <a href="#ref-Unal2017" role="doc-biblioref">Unal 2017</a>)</span>. The usual recommendation is to use the True Skill Statistic, also known as Youden’s <span class="math inline">\(J\)</span> <span class="citation" data-cites="youden1950">(<a href="#ref-youden1950" role="doc-biblioref">Youden 1950</a>)</span>. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier <span class="citation" data-cites="perkins2005">(<a href="#ref-perkins2005" role="doc-biblioref">Perkins and Schisterman 2005</a>)</span>. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions <span class="citation" data-cites="poisot2023a">(<a href="#ref-poisot2023a" role="doc-biblioref">Poisot 2023</a>)</span>.</p>
+<p>Some authors have used the MCC as a measure of optimality <span class="citation" data-cites="zhou2013">(<a href="#ref-zhou2013" role="doc-biblioref">Zhou and Jakobsson 2013</a>)</span>, as it is maximized <em>only</em> when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, <span class="citation" data-cites="chicco2023">Chicco and Jurman (<a href="#ref-chicco2023" role="doc-biblioref">2023</a>)</span> recommend that MCC should be used to pick the optimal threshold <em>regardless of the question</em>, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at <em>everything</em>, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss <span class="citation" data-cites="Jurman2012">(<a href="#ref-Jurman2012" role="doc-biblioref">Jurman, Riccadonna, and Furlanello 2012</a>)</span>.</p>
 <p>For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.</p>
 </section>
 <section id="application-improved-corsican-nuthatch-model" class="level2 page-columns page-full" data-number="7.3">
@@ -358,7 +355,7 @@ Figure&nbsp;7.3: ROC and PR curve for each fold, calculated on the validation da
 <p>Based on these results, it appears that changing the value of the prior has very little impact on the best MCC we can achieve: the threshold is simply adjusted to reflect the fact that we assume occurrences to be increasingly likely. In this example, there is very little incentive for us to change the value of the prior, as it would have a very small effect on the overall performance of the model. For this reason, we will keep the previous model (<span class="math inline">\(P(+) = 0.5\)</span> and <span class="math inline">\(\tau \approx 0.43\)</span>) as the best one.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>A grid search in an exhaustive sweep of all possible combinations of parameter values. In order to make the process more efficient, refined approaches like successive halvings <span class="citation" data-cites="jamieson2016">(<a href="../references.html#ref-jamieson2016" role="doc-biblioref">Jamieson &amp; Talwalkar 2016</a>)</span> can be used.</p>
+<p>A grid search in an exhaustive sweep of all possible combinations of parameter values. In order to make the process more efficient, refined approaches like successive halvings <span class="citation" data-cites="jamieson2016">(<a href="#ref-jamieson2016" role="doc-biblioref">Jamieson and Talwalkar 2016</a>)</span> can be used.</p>
 </div></div><p>Just because we decided to use a learning curve does not mean we <em>have</em> to change the hyper-parameters. Sometimes, this approach reveals that the value of an hyper-parameter is not really important to model performance, and we need to make a decision on what to do next. Here, although there are marginal changes in the value of the MCC, they do not feel significant enough to change the value of the prior.</p>
 <div id="cell-fig-tuning-both" class="cell page-columns page-full" data-execution_count="7">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="10">
@@ -409,60 +406,63 @@ Figure&nbsp;7.5: Predicted range of <em>Sitta whiteheadi</em> (left) and associa
 <p>In this chapter, we have refined a model by adopting a principled approach to establishing hyper-parameters. This resulted in a final trained model, which we applied to produce the final prediction of the distribution of <em>Sitta whiteheadi</em>. In <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will start asking “why”? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-chicco2023" class="csl-entry" role="listitem">
-Chicco, D. &amp; Jurman, G. (2023). <a href="https://doi.org/10.1186/s13040-023-00322-4">The Matthews correlation coefficient&nbsp;(MCC) should replace the ROC&nbsp;AUC as the standard metric for assessing binary classification</a>. <em>BioData Mining</em>, 16.
+Chicco, Davide, and Giuseppe Jurman. 2023. <span>“The Matthews Correlation Coefficient&nbsp;(MCC) Should Replace the ROC&nbsp;AUC as the Standard Metric for Assessing Binary Classification.”</span> <em>BioData Mining</em> 16 (1). <a href="https://doi.org/10.1186/s13040-023-00322-4">https://doi.org/10.1186/s13040-023-00322-4</a>.
 </div>
 <div id="ref-claesen2015" class="csl-entry" role="listitem">
-Claesen, M. &amp; De Moor, B. (2015). <a href="https://doi.org/10.48550/ARXIV.1502.02127">Hyperparameter search in machine learning</a>.
+Claesen, Marc, and Bart De Moor. 2015. <span>“Hyperparameter Search in Machine Learning.”</span> <a href="https://doi.org/10.48550/ARXIV.1502.02127">https://doi.org/10.48550/ARXIV.1502.02127</a>.
 </div>
 <div id="ref-fawcett2006" class="csl-entry" role="listitem">
-Fawcett, T. (2006). <a href="https://doi.org/10.1016/j.patrec.2005.10.010">An introduction to ROC analysis</a>. <em>Pattern Recognition Letters</em>, 27, 861–874.
+Fawcett, Tom. 2006. <span>“An Introduction to ROC Analysis.”</span> <em>Pattern Recognition Letters</em> 27 (8): 861–74. <a href="https://doi.org/10.1016/j.patrec.2005.10.010">https://doi.org/10.1016/j.patrec.2005.10.010</a>.
 </div>
 <div id="ref-Halligan2015" class="csl-entry" role="listitem">
-Halligan, S., Altman, D.G. &amp; Mallett, S. (2015). <a href="https://doi.org/10.1007/s00330-014-3487-0">Disadvantages of using the area under the receiver operating characteristic curve to assess imaging tests: A discussion and proposal for an alternative approach</a>. <em>European Radiology</em>, 25, 932–939.
+Halligan, Steve, Douglas G. Altman, and Susan Mallett. 2015. <span>“Disadvantages of Using the Area Under the Receiver Operating Characteristic Curve to Assess Imaging Tests: A Discussion and Proposal for an Alternative Approach.”</span> <em>European Radiology</em> 25 (4): 932–39. <a href="https://doi.org/10.1007/s00330-014-3487-0">https://doi.org/10.1007/s00330-014-3487-0</a>.
 </div>
 <div id="ref-hanley1982" class="csl-entry" role="listitem">
-Hanley, J.A. &amp; McNeil, B.J. (1982). <a href="https://doi.org/10.1148/radiology.143.1.7063747">The meaning and use of the area under a receiver operating characteristic (ROC) curve.</a> <em>Radiology</em>, 143, 29–36.
+Hanley, J A, and B J McNeil. 1982. <span>“The Meaning and Use of the Area Under a Receiver Operating Characteristic (ROC) Curve.”</span> <em>Radiology</em> 143 (1): 29–36. <a href="https://doi.org/10.1148/radiology.143.1.7063747">https://doi.org/10.1148/radiology.143.1.7063747</a>.
 </div>
 <div id="ref-huntington1998" class="csl-entry" role="listitem">
-Huntington, D.E. &amp; Lyrintzis, C.S. (1998). <a href="https://doi.org/10.1016/s0266-8920(97)00013-1">Improvements to and limitations of Latin hypercube sampling</a>. <em>Probabilistic Engineering Mechanics</em>, 13, 245–253.
+Huntington, D. E., and C. S. Lyrintzis. 1998. <span>“Improvements to and Limitations of Latin Hypercube Sampling.”</span> <em>Probabilistic Engineering Mechanics</em> 13 (4): 245–53. <a href="https://doi.org/10.1016/s0266-8920(97)00013-1">https://doi.org/10.1016/s0266-8920(97)00013-1</a>.
 </div>
 <div id="ref-jamieson2016" class="csl-entry" role="listitem">
-Jamieson, K. &amp; Talwalkar, A. (2016). <a href="https://proceedings.mlr.press/v51/jamieson16.html">Non-stochastic best arm identification and hyperparameter optimization</a>. In: <em>Proceedings of the 19th international conference on artificial intelligence and statistics</em>, Proceedings of machine learning research (eds. Gretton, A. &amp; Robert, C.C.). PMLR, Cadiz, Spain, pp. 240–248.
+Jamieson, Kevin, and Ameet Talwalkar. 2016. <span>“Non-Stochastic Best Arm Identification and Hyperparameter Optimization.”</span> In <em>Proceedings of the 19th International Conference on Artificial Intelligence and Statistics</em>, edited by Arthur Gretton and Christian C. Robert, 51:240–48. Proceedings of Machine Learning Research. Cadiz, Spain: PMLR. <a href="https://proceedings.mlr.press/v51/jamieson16.html">https://proceedings.mlr.press/v51/jamieson16.html</a>.
 </div>
 <div id="ref-Jurman2012" class="csl-entry" role="listitem">
-Jurman, G., Riccadonna, S. &amp; Furlanello, C. (2012). <a href="https://doi.org/10.1371/journal.pone.0041882">A Comparison of MCC and CEN Error Measures in Multi-Class Prediction</a>. <em>PLoS ONE</em>, 7, e41882.
+Jurman, Giuseppe, Samantha Riccadonna, and Cesare Furlanello. 2012. <span>“A Comparison of MCC and CEN Error Measures in Multi-Class Prediction.”</span> Edited by Giuseppe Biondi-Zoccai. <em>PLoS ONE</em> 7 (8): e41882. <a href="https://doi.org/10.1371/journal.pone.0041882">https://doi.org/10.1371/journal.pone.0041882</a>.
 </div>
 <div id="ref-mckay1979" class="csl-entry" role="listitem">
-McKay, M.D., Beckman, R.J. &amp; Conover, W.J. (1979). <a href="https://doi.org/10.2307/1268522">A comparison of three methods for selecting values of input variables in the analysis of output from a computer code</a>. <em>Technometrics</em>, 21, 239.
+McKay, M. D., R. J. Beckman, and W. J. Conover. 1979. <span>“A Comparison of Three Methods for Selecting Values of Input Variables in the Analysis of Output from a Computer Code.”</span> <em>Technometrics</em> 21 (2): 239. <a href="https://doi.org/10.2307/1268522">https://doi.org/10.2307/1268522</a>.
 </div>
 <div id="ref-perkins2005" class="csl-entry" role="listitem">
-Perkins, N.J. &amp; Schisterman, E.F. (2005). <a href="https://doi.org/10.1002/bimj.200410133">The Youden Index and the Optimal Cut-Point Corrected for Measurement Error</a>. <em>Biometrical Journal</em>, 47, 428–441.
+Perkins, Neil J., and Enrique F. Schisterman. 2005. <span>“The Youden Index and the Optimal Cut-Point Corrected for Measurement Error.”</span> <em>Biometrical Journal</em> 47 (4): 428–41. <a href="https://doi.org/10.1002/bimj.200410133">https://doi.org/10.1002/bimj.200410133</a>.
 </div>
 <div id="ref-Perkins2006" class="csl-entry" role="listitem">
-Perkins, N.J. &amp; Schisterman, E.F. (2006). <a href="https://doi.org/10.1093/aje/kwj063">The Inconsistency of <span>“</span>Optimal<span>”</span> Cutpoints Obtained using Two Criteria based on the Receiver Operating Characteristic Curve</a>. <em>American Journal of Epidemiology</em>, 163, 670–675.
+———. 2006. <span>“The Inconsistency of <span>“</span>Optimal<span>”</span> Cutpoints Obtained Using Two Criteria Based on the Receiver Operating Characteristic Curve.”</span> <em>American Journal of Epidemiology</em> 163 (7): 670–75. <a href="https://doi.org/10.1093/aje/kwj063">https://doi.org/10.1093/aje/kwj063</a>.
 </div>
 <div id="ref-poisot2023a" class="csl-entry" role="listitem">
-Poisot, T. (2023). <a href="https://doi.org/10.1111/2041-210x.14071">Guidelines for the prediction of species interactions through binary classification</a>. <em>Methods in Ecology and Evolution</em>, 14, 1333–1345.
+Poisot, Timothée. 2023. <span>“Guidelines for the Prediction of Species Interactions Through Binary Classification.”</span> <em>Methods in Ecology and Evolution</em> 14 (5): 1333–45. <a href="https://doi.org/10.1111/2041-210x.14071">https://doi.org/10.1111/2041-210x.14071</a>.
 </div>
 <div id="ref-poisot2023" class="csl-entry" role="listitem">
-Poisot, T., Ouellet, M.-A., Mollentze, N., Farrell, M.J., Becker, D.J., Brierley, L., <em>et al.</em> (2023). <a href="https://doi.org/10.1016/j.patter.2023.100738">Network embedding unveils the hidden interactions in the mammalian virome</a>. <em>Patterns</em>, 4, 100738.
+Poisot, Timothée, Marie-Andrée Ouellet, Nardus Mollentze, Maxwell J. Farrell, Daniel J. Becker, Liam Brierley, Gregory F. Albery, Rory J. Gibb, Stephanie N. Seifert, and Colin J. Carlson. 2023. <span>“Network Embedding Unveils the Hidden Interactions in the Mammalian Virome.”</span> <em>Patterns</em> 4 (6): 100738. <a href="https://doi.org/10.1016/j.patter.2023.100738">https://doi.org/10.1016/j.patter.2023.100738</a>.
 </div>
 <div id="ref-Saito2015" class="csl-entry" role="listitem">
-Saito, T. &amp; Rehmsmeier, M. (2015). <a href="https://doi.org/10.1371/journal.pone.0118432">The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets</a>. <em>PLOS ONE</em>, 10, e0118432.
+Saito, Takaya, and Marc Rehmsmeier. 2015. <span>“The Precision-Recall Plot Is More Informative Than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets.”</span> Edited by Guy Brock. <em>PLOS ONE</em> 10 (3): e0118432. <a href="https://doi.org/10.1371/journal.pone.0118432">https://doi.org/10.1371/journal.pone.0118432</a>.
 </div>
 <div id="ref-Unal2017" class="csl-entry" role="listitem">
-Unal, I. (2017). <a href="https://doi.org/10.1155/2017/3762651">Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach</a>. <em>Computational and Mathematical Methods in Medicine</em>, 2017, 1–14.
+Unal, Ilker. 2017. <span>“Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach.”</span> <em>Computational and Mathematical Methods in Medicine</em> 2017: 1–14. <a href="https://doi.org/10.1155/2017/3762651">https://doi.org/10.1155/2017/3762651</a>.
 </div>
 <div id="ref-yang2020" class="csl-entry" role="listitem">
-Yang, L. &amp; Shami, A. (2020). <a href="https://doi.org/10.1016/j.neucom.2020.07.061">On hyperparameter optimization of machine learning algorithms: Theory and practice</a>. <em>Neurocomputing</em>, 415, 295–316.
+Yang, Li, and Abdallah Shami. 2020. <span>“On Hyperparameter Optimization of Machine Learning Algorithms: Theory and Practice.”</span> <em>Neurocomputing</em> 415 (November): 295–316. <a href="https://doi.org/10.1016/j.neucom.2020.07.061">https://doi.org/10.1016/j.neucom.2020.07.061</a>.
 </div>
 <div id="ref-youden1950" class="csl-entry" role="listitem">
-Youden, W.J. (1950). <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3">Index for rating diagnostic tests</a>. <em>Cancer</em>, 3, 32–35.
+Youden, W. J. 1950. <span>“Index for Rating Diagnostic Tests.”</span> <em>Cancer</em> 3 (1): 32–35. <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3">https://doi.org/10.1002/1097-0142(1950)3:1&lt;32::aid-cncr2820030106&gt;3.0.co;2-3</a>.
 </div>
 <div id="ref-zhou2013" class="csl-entry" role="listitem">
-Zhou, H. &amp; Jakobsson, E. (2013). <a href="https://doi.org/10.1371/journal.pone.0081100">Predicting Protein-Protein Interaction by the Mirrortree Method: Possibilities and Limitations</a>. <em>PLoS ONE</em>, 8, e81100.
+Zhou, Hua, and Eric Jakobsson. 2013. <span>“Predicting Protein-Protein Interaction by the Mirrortree Method: Possibilities and Limitations.”</span> Edited by Raja Jothi. <em>PLoS ONE</em> 8 (12): e81100. <a href="https://doi.org/10.1371/journal.pone.0081100">https://doi.org/10.1371/journal.pone.0081100</a>.
 </div>
 </div>
 </section>

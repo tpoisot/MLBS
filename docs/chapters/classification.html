@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 5&nbsp; Supervised classification</title>
+<title>Machine Learning for Biodiversity Scientists - 5&nbsp; Supervised classification</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -91,7 +91,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating slimcontent">
+<body class="nav-sidebar docked slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -112,28 +112,13 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Data Science for Biodiversity Scientists</a> 
-        <div class="sidebar-tools-main">
-    <div class="dropdown">
-      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.pdf">
-              <i class="bi bi-bi-file-pdf pe-1"></i>
-            Download PDF
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.epub">
-              <i class="bi bi-bi-journal pe-1"></i>
-            Download ePub
-            </a>
-          </li>
-      </ul>
-    </div>
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -194,20 +179,31 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
    
   <ul>
   <li><a href="#the-problem-distribution-of-an-endemic-species" id="toc-the-problem-distribution-of-an-endemic-species" class="nav-link active" data-scroll-target="#the-problem-distribution-of-an-endemic-species"><span class="header-section-number">5.1</span> The problem: distribution of an endemic species</a></li>
@@ -232,8 +228,9 @@ div.csl-indent {
   <li><a href="#what-is-an-acceptable-model" id="toc-what-is-an-acceptable-model" class="nav-link" data-scroll-target="#what-is-an-acceptable-model"><span class="header-section-number">5.4.5</span> What is an acceptable model?</a></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5.5</span> Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/classification.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
@@ -260,12 +257,12 @@ div.csl-indent {
 <p>In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <span class="quarto-unresolved-ref">?sec-variable-selection</span>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
 <section id="the-problem-distribution-of-an-endemic-species" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="the-problem-distribution-of-an-endemic-species"><span class="header-section-number">5.1</span> The problem: distribution of an endemic species</h2>
-<p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, <em>Sitta whiteheadi</em>. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as “vulnerable to extinction” by the International Union for the Conservation of Nature. <span class="citation" data-cites="barbet-massin2011">Barbet-Massin &amp; Jiguet (<a href="../references.html#ref-barbet-massin2011" role="doc-biblioref">2011</a>)</span> nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.</p>
-<p>Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith &amp; Leathwick (<a href="../references.html#ref-elith2009" role="doc-biblioref">2009</a>)</span>), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery <em>et al.</em> (<a href="../references.html#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="crossvalidation.html#sec-crossvalidation-fitness" class="quarto-xref"><span>Section&nbsp;4.4.3</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="../references.html#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita <em>et al.</em> 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious our data science practices when fitting a species distribution model is important: <span class="citation" data-cites="cholletramampiandra2023">Chollet Ramampiandra <em>et al.</em> (<a href="../references.html#ref-cholletramampiandra2023" role="doc-biblioref">2023</a>)</span> make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.</p>
+<p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, <em>Sitta whiteheadi</em>. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as “vulnerable to extinction” by the International Union for the Conservation of Nature. <span class="citation" data-cites="barbet-massin2011">Barbet-Massin and Jiguet (<a href="#ref-barbet-massin2011" role="doc-biblioref">2011</a>)</span> nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.</p>
+<p>Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith and Leathwick (<a href="#ref-elith2009" role="doc-biblioref">2009</a>)</span>), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery et al. (<a href="#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="crossvalidation.html#sec-crossvalidation-fitness" class="quarto-xref"><span>Section&nbsp;4.4.3</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita et al. 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious our data science practices when fitting a species distribution model is important: <span class="citation" data-cites="cholletramampiandra2023">Chollet Ramampiandra et al. (<a href="#ref-cholletramampiandra2023" role="doc-biblioref">2023</a>)</span> make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.</p>
 <p>Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.</p>
-<p>We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants <span class="citation" data-cites="clapham1935">(<a href="../references.html#ref-clapham1935" role="doc-biblioref">Clapham <em>et al.</em> 1935</a>)</span> and animals <span class="citation" data-cites="whittaker1962">(<a href="../references.html#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span>, to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start <span class="citation" data-cites="berteaux2014">(<a href="../references.html#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span>.</p>
-<p>Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>. We need information about where the species has <em>not</em> been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="../references.html#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin <em>et al.</em> 2012</a>; <a href="../references.html#ref-hanberry2012" role="doc-biblioref">Hanberry <em>et al.</em> 2012</a>)</span>. All of these data points come in the form <span class="math inline">\((\text{lat.}, \text{lon.}, y)\)</span>, which give a position in space, as well as <span class="math inline">\(y = \{+,-\}\)</span> (the species is present or absent!) at this position.</p>
-<p>To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the CHELSA2 dataset <span class="citation" data-cites="karger2017">(<a href="../references.html#ref-karger2017" role="doc-biblioref">Karger <em>et al.</em> 2017</a>)</span>, at a resolution of 30 seconds of arc. WorldClim2 <span class="citation" data-cites="fick2017">(<a href="../references.html#ref-fick2017" role="doc-biblioref">Fick &amp; Hijmans 2017</a>)</span> is also appropriate, but is known to have some artifacts.</p>
+<p>We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants <span class="citation" data-cites="clapham1935">(<a href="#ref-clapham1935" role="doc-biblioref">Clapham et al. 1935</a>)</span> and animals <span class="citation" data-cites="whittaker1962">(<a href="#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span>, to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start <span class="citation" data-cites="berteaux2014">(<a href="#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span>.</p>
+<p>Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>. We need information about where the species has <em>not</em> been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="#ref-hanberry2012" role="doc-biblioref">Hanberry, He, and Palik 2012</a>; <a href="#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin et al. 2012</a>)</span>. All of these data points come in the form <span class="math inline">\((\text{lat.}, \text{lon.}, y)\)</span>, which give a position in space, as well as <span class="math inline">\(y = \{+,-\}\)</span> (the species is present or absent!) at this position.</p>
+<p>To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the CHELSA2 dataset <span class="citation" data-cites="karger2017">(<a href="#ref-karger2017" role="doc-biblioref">Karger et al. 2017</a>)</span>, at a resolution of 30 seconds of arc. WorldClim2 <span class="citation" data-cites="fick2017">(<a href="#ref-fick2017" role="doc-biblioref">Fick and Hijmans 2017</a>)</span> is also appropriate, but is known to have some artifacts.</p>
 <p>The predictive task we want to complete is to get a predicted presence or absence <span class="math inline">\(\hat y = \{+,-\}\)</span>, from a vector <span class="math inline">\(\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]\)</span>. This specific task is called classification, and we will now introduce some elements of theory.</p>
 </section>
 <section id="what-is-classification" class="level2 page-columns page-full" data-number="5.2">
@@ -274,7 +271,7 @@ div.csl-indent {
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>When working on <span class="math inline">\(\{+,-\}\)</span> outcomes, we are specifically performing <em>binary</em> classification. Classification can be applied to more than two levels.</p>
-</div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="../references.html#ref-perl2022" role="doc-biblioref">Perl <em>et al.</em> 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
+</div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="#ref-perl2022" role="doc-biblioref">Perl et al. 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
 <section id="separability" class="level3 page-columns page-full" data-number="5.2.1">
 <h3 data-number="5.2.1" class="anchored" data-anchor-id="separability"><span class="header-section-number">5.2.1</span> Separability</h3>
 <p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <span class="quarto-unresolved-ref">?sec-variableselection-curse</span>, simply adding more predictors is not necessarily the right thing to do.</p>
@@ -344,7 +341,7 @@ b^2 &amp; b(1-b)\\
 </section>
 <section id="the-naive-bayes-classifier" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="the-naive-bayes-classifier"><span class="header-section-number">5.3</span> The Naive Bayes Classifier</h2>
-<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is built on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works <em>at all</em> is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="../references.html#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability can be somewhat unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case [there are, in fact, several papers questioning <em>why</em> NBC works so well; see <em>e.g.</em> <span class="citation" data-cites="kupervasser2014">Kupervasser (<a href="../references.html#ref-kupervasser2014" role="doc-biblioref">2014</a>)</span>].</p>
+<p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is built on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works <em>at all</em> is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="#ref-hand2001" role="doc-biblioref">Hand and Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability can be somewhat unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the case [there are, in fact, several papers questioning <em>why</em> NBC works so well; see <em>e.g.</em> <span class="citation" data-cites="kupervasser2014">Kupervasser (<a href="#ref-kupervasser2014" role="doc-biblioref">2014</a>)</span>].</p>
 <section id="how-the-nbc-works" class="level3" data-number="5.3.1">
 <h3 data-number="5.3.1" class="anchored" data-anchor-id="how-the-nbc-works"><span class="header-section-number">5.3.1</span> How the NBC works</h3>
 <p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>, what is the most likely class if the temperature is 12°C? We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(12^\circ C | +) &gt; P(12^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 12^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 12°C.</p>
@@ -379,12 +376,12 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 </section>
 <section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="5.4.2">
 <h3 data-number="5.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">5.4.2</span> Performance evaluation of the model</h3>
-<p>In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model <em>before</em> reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following <span class="citation" data-cites="chicco2020">Chicco &amp; Jurman (<a href="../references.html#ref-chicco2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Jurman2012">Jurman <em>et al.</em> (<a href="../references.html#ref-Jurman2012" role="doc-biblioref">2012</a>)</span>, we will use the Matthew’s Correlation Coefficient (MCC) as the “main” measure to evaluate the performance of a model (we will return to other alternative measures in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>).</p>
+<p>In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model <em>before</em> reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following <span class="citation" data-cites="chicco2020">Chicco and Jurman (<a href="#ref-chicco2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Jurman2012">Jurman, Riccadonna, and Furlanello (<a href="#ref-Jurman2012" role="doc-biblioref">2012</a>)</span>, we will use the Matthew’s Correlation Coefficient (MCC) as the “main” measure to evaluate the performance of a model (we will return to other alternative measures in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>).</p>
 <p>The MCC is defined as</p>
 <p><span class="math display">\[
 \frac{\text{TP}\times \text{TN} - \text{FP}\times \text{FN}}{\sqrt{(\text{TP}+\text{FP})\times (\text{TP}+\text{FN})\times (\text{TN}+\text{FP})\times (\text{TN}+\text{FN})}} \,.
 \]</span></p>
-<p>The MCC is a correlation coefficient (specifically, the Pearson product-moment correlation on a contingency table; <span class="citation" data-cites="powers2020">Powers (<a href="../references.html#ref-powers2020" role="doc-biblioref">2020</a>)</span>), meaning that it returns values in <span class="math inline">\([-1, 1]\)</span>. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.</p>
+<p>The MCC is a correlation coefficient (specifically, the Pearson product-moment correlation on a contingency table; <span class="citation" data-cites="powers2020">Powers (<a href="#ref-powers2020" role="doc-biblioref">2020</a>)</span>), meaning that it returns values in <span class="math inline">\([-1, 1]\)</span>. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.</p>
 <p>In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively <span class="math inline">\(\text{TP}/(\text{TP}+\text{FP})\)</span> and <span class="math inline">\(\text{TN}/(\text{TN}+\text{FN})\)</span>, measure how likely a prediction of, respectively, presence and absence, are. These range in <span class="math inline">\([0,1]\)</span>, and values of one indicate a better performance of the model.</p>
 <p>Why not pick one of these instead of the MCC? Well, all modeling is compromise; we don’t want a model to become too good at predicting absences, to the point where prediction about presences would become meaningless. Selecting models on the basis of a measure that only emphasizes one outcome is a risk that we shouldn’t be willing to take. For this reason, measures that are good at optimizing the value of a negative and a positive predictions are far better representations of the performance of a model. The MCC does just this.</p>
 <div id="cell-fig-classification-crossvalidation" class="cell page-columns page-full" data-execution_count="6">
@@ -506,60 +503,63 @@ Figure&nbsp;5.4: Occurence data (left), prediction of presences in space (middle
 <p>In this chapter, we introduced the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurrence, in which we predicted the potential presence of the species using temperature and classification. Through cross-validation, we confirmed that this model gave a good enough performance (<a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>), looked at the decisions that were being made by the trained model (<a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>5.3</span></a>), and finally mapped the prediction and their uncertainty in space (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>). In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-barbet-massin2011" class="csl-entry" role="listitem">
-Barbet-Massin, M. &amp; Jiguet, F. (2011). <a href="https://doi.org/10.1371/journal.pone.0018228">Back from a Predicted Climatic Extinction of an Island Endemic: A Future for the Corsican Nuthatch</a>. <em>PLoS ONE</em>, 6, e18228.
+Barbet-Massin, Morgane, and Frédéric Jiguet. 2011. <span>“Back from a Predicted Climatic Extinction of an Island Endemic: A Future for the Corsican Nuthatch.”</span> Edited by João Pinto. <em>PLoS ONE</em> 6 (3): e18228. <a href="https://doi.org/10.1371/journal.pone.0018228">https://doi.org/10.1371/journal.pone.0018228</a>.
 </div>
 <div id="ref-barbet-massin2012" class="csl-entry" role="listitem">
-Barbet-Massin, M., Jiguet, F., Albert, C.H. &amp; Thuiller, W. (2012). <a href="https://doi.org/10.1111/j.2041-210x.2011.00172.x">Selecting pseudo-absences for species distribution models: how, where and how many?</a> <em>Methods in Ecology and Evolution</em>, 3, 327–338.
+Barbet-Massin, Morgane, Frédéric Jiguet, Cécile Hélène Albert, and Wilfried Thuiller. 2012. <span>“Selecting Pseudo-Absences for Species Distribution Models: How, Where and How Many?”</span> <em>Methods in Ecology and Evolution</em> 3 (2): 327–38. <a href="https://doi.org/10.1111/j.2041-210x.2011.00172.x">https://doi.org/10.1111/j.2041-210x.2011.00172.x</a>.
 </div>
 <div id="ref-beery2021" class="csl-entry" role="listitem">
-Beery, S., Cole, E., Parker, J., Perona, P. &amp; Winner, K. (2021). <a href="https://doi.org/10.1145/3460112.3471966">Species distribution modeling for machine learning practitioners: A review</a>. <em>ACM SIGCAS Conference on Computing and Sustainable Societies (COMPASS)</em>.
+Beery, Sara, Elijah Cole, Joseph Parker, Pietro Perona, and Kevin Winner. 2021. <span>“Species Distribution Modeling for Machine Learning Practitioners: A Review.”</span> <em>ACM SIGCAS Conference on Computing and Sustainable Societies (COMPASS)</em>, June. <a href="https://doi.org/10.1145/3460112.3471966">https://doi.org/10.1145/3460112.3471966</a>.
 </div>
 <div id="ref-berteaux2014" class="csl-entry" role="listitem">
-Berteaux, D. (2014). <em><a href="https://doi.org/10.1353/book35753">Changements climatiques et biodiversité du québec</a></em>. Presses de l’Université du Québec.
+Berteaux, Dominique. 2014. <em>Changements Climatiques Et Biodiversité Du Québec</em>. Presses de l’Université du Québec. <a href="https://doi.org/10.1353/book35753">https://doi.org/10.1353/book35753</a>.
 </div>
 <div id="ref-chicco2020" class="csl-entry" role="listitem">
-Chicco, D. &amp; Jurman, G. (2020). <a href="https://doi.org/10.1186/s12864-019-6413-7">The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation</a>. <em>BMC Genomics</em>, 21.
+Chicco, Davide, and Giuseppe Jurman. 2020. <span>“The Advantages of the Matthews Correlation Coefficient (MCC) over F1 Score and Accuracy in Binary Classification Evaluation.”</span> <em>BMC Genomics</em> 21 (1). <a href="https://doi.org/10.1186/s12864-019-6413-7">https://doi.org/10.1186/s12864-019-6413-7</a>.
 </div>
 <div id="ref-cholletramampiandra2023" class="csl-entry" role="listitem">
-Chollet Ramampiandra, E., Scheidegger, A., Wydler, J. &amp; Schuwirth, N. (2023). <a href="https://doi.org/10.1016/j.ecolmodel.2023.110353">A comparison of machine learning and statistical species distribution models: Quantifying overfitting supports model interpretation</a>. <em>Ecological Modelling</em>, 481, 110353.
+Chollet Ramampiandra, Emma, Andreas Scheidegger, Jonas Wydler, and Nele Schuwirth. 2023. <span>“A Comparison of Machine Learning and Statistical Species Distribution Models: Quantifying Overfitting Supports Model Interpretation.”</span> <em>Ecological Modelling</em> 481 (July): 110353. <a href="https://doi.org/10.1016/j.ecolmodel.2023.110353">https://doi.org/10.1016/j.ecolmodel.2023.110353</a>.
 </div>
 <div id="ref-clapham1935" class="csl-entry" role="listitem">
-Clapham, A.R., Raunkiaer, C., Gilbert-Carter, H., Tansley, A.G. &amp; Fausboll. (1935). <a href="https://doi.org/10.2307/2256153">The life forms of plants and statistical plant geography.</a> <em>The Journal of Ecology</em>, 23, 247.
+Clapham, A. R., C. Raunkiaer, H. Gilbert-Carter, A. G. Tansley, and Fausboll. 1935. <span>“The Life Forms of Plants and Statistical Plant Geography.”</span> <em>The Journal of Ecology</em> 23 (1): 247. <a href="https://doi.org/10.2307/2256153">https://doi.org/10.2307/2256153</a>.
 </div>
 <div id="ref-elith2009" class="csl-entry" role="listitem">
-Elith, J. &amp; Leathwick, J.R. (2009). <a href="https://doi.org/10.1146/annurev.ecolsys.110308.120159">Species Distribution Models: Ecological Explanation and Prediction Across Space and Time</a>. <em>Annual Review of Ecology, Evolution, and Systematics</em>, 40, 677–697.
+Elith, Jane, and John R. Leathwick. 2009. <span>“Species Distribution Models: Ecological Explanation and Prediction Across Space and Time.”</span> <em>Annual Review of Ecology, Evolution, and Systematics</em> 40 (1): 677–97. <a href="https://doi.org/10.1146/annurev.ecolsys.110308.120159">https://doi.org/10.1146/annurev.ecolsys.110308.120159</a>.
 </div>
 <div id="ref-fick2017" class="csl-entry" role="listitem">
-Fick, S.E. &amp; Hijmans, R.J. (2017). <a href="https://doi.org/10.1002/joc.5086">WorldClim 2: new 1<span>-</span>km spatial resolution climate surfaces for global land areas</a>. <em>International Journal of Climatology</em>, 37, 4302–4315.
+Fick, Stephen E., and Robert J. Hijmans. 2017. <span>“WorldClim 2: New 1<span>-</span>Km Spatial Resolution Climate Surfaces for Global Land Areas.”</span> <em>International Journal of Climatology</em> 37 (12): 4302–15. <a href="https://doi.org/10.1002/joc.5086">https://doi.org/10.1002/joc.5086</a>.
 </div>
 <div id="ref-guillera-arroita2015" class="csl-entry" role="listitem">
-Guillera-Arroita, G., Lahoz-Monfort, J.J., Elith, J., Gordon, A., Kujala, H., Lentini, P.E., <em>et al.</em> (2015). <a href="https://doi.org/10.1111/geb.12268">Is my species distribution model fit for purpose? Matching data and models to applications</a>. <em>Global Ecology and Biogeography</em>, 24, 276–292.
+Guillera-Arroita, Gurutzeta, José J. Lahoz-Monfort, Jane Elith, Ascelin Gordon, Heini Kujala, Pia E. Lentini, Michael A. McCarthy, Reid Tingley, and Brendan A. Wintle. 2015. <span>“Is My Species Distribution Model Fit for Purpose? Matching Data and Models to Applications.”</span> <em>Global Ecology and Biogeography</em> 24 (3): 276–92. <a href="https://doi.org/10.1111/geb.12268">https://doi.org/10.1111/geb.12268</a>.
 </div>
 <div id="ref-hanberry2012" class="csl-entry" role="listitem">
-Hanberry, B.B., He, H.S. &amp; Palik, B.J. (2012). <a href="https://doi.org/10.1371/journal.pone.0044486">Pseudoabsence Generation Strategies for Species Distribution Models</a>. <em>PLoS ONE</em>, 7, e44486.
+Hanberry, Brice B., Hong S. He, and Brian J. Palik. 2012. <span>“Pseudoabsence Generation Strategies for Species Distribution Models.”</span> Edited by Robert Planque. <em>PLoS ONE</em> 7 (8): e44486. <a href="https://doi.org/10.1371/journal.pone.0044486">https://doi.org/10.1371/journal.pone.0044486</a>.
 </div>
 <div id="ref-hand2001" class="csl-entry" role="listitem">
-Hand, D.J. &amp; Yu, K. (2001). <a href="https://doi.org/10.2307/1403452">Idiot’s bayes: Not so stupid after all?</a> <em>International Statistical Review / Revue Internationale de Statistique</em>, 69, 385.
+Hand, David J., and Keming Yu. 2001. <span>“Idiot’s Bayes: Not so Stupid After All?”</span> <em>International Statistical Review / Revue Internationale de Statistique</em> 69 (3): 385. <a href="https://doi.org/10.2307/1403452">https://doi.org/10.2307/1403452</a>.
 </div>
 <div id="ref-Jurman2012" class="csl-entry" role="listitem">
-Jurman, G., Riccadonna, S. &amp; Furlanello, C. (2012). <a href="https://doi.org/10.1371/journal.pone.0041882">A Comparison of MCC and CEN Error Measures in Multi-Class Prediction</a>. <em>PLoS ONE</em>, 7, e41882.
+Jurman, Giuseppe, Samantha Riccadonna, and Cesare Furlanello. 2012. <span>“A Comparison of MCC and CEN Error Measures in Multi-Class Prediction.”</span> Edited by Giuseppe Biondi-Zoccai. <em>PLoS ONE</em> 7 (8): e41882. <a href="https://doi.org/10.1371/journal.pone.0041882">https://doi.org/10.1371/journal.pone.0041882</a>.
 </div>
 <div id="ref-karger2017" class="csl-entry" role="listitem">
-Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., <em>et al.</em> (2017). <a href="https://doi.org/10.1038/sdata.2017.122">Climatologies at high resolution for the earth<span>’</span>s land surface areas</a>. <em>Scientific Data</em>, 4.
+Karger, Dirk Nikolaus, Olaf Conrad, Jürgen Böhner, Tobias Kawohl, Holger Kreft, Rodrigo Wilber Soria-Auza, Niklaus E. Zimmermann, H. Peter Linder, and Michael Kessler. 2017. <span>“Climatologies at High Resolution for the Earth<span>’</span>s Land Surface Areas.”</span> <em>Scientific Data</em> 4 (1). <a href="https://doi.org/10.1038/sdata.2017.122">https://doi.org/10.1038/sdata.2017.122</a>.
 </div>
 <div id="ref-kupervasser2014" class="csl-entry" role="listitem">
-Kupervasser, O. (2014). <a href="https://doi.org/10.1134/s1054661814010088">The mysterious optimality of Naive Bayes: Estimation of the probability in the system of <span>“</span>classifiers<span>”</span></a>. <em>Pattern Recognition and Image Analysis</em>, 24, 1–10.
+Kupervasser, O. 2014. <span>“The Mysterious Optimality of Naive Bayes: Estimation of the Probability in the System of <span>“</span>Classifiers<span>”</span>.”</span> <em>Pattern Recognition and Image Analysis</em> 24 (1): 1–10. <a href="https://doi.org/10.1134/s1054661814010088">https://doi.org/10.1134/s1054661814010088</a>.
 </div>
 <div id="ref-perl2022" class="csl-entry" role="listitem">
-Perl, R.G.B., Avidor, E., Roll, U., Malka, Y., Geffen, E. &amp; Gafny, S. (2022). <a href="https://doi.org/10.1002/edn3.276">Using eDNA presence/non<span>-</span>detection data to characterize the abiotic and biotic habitat requirements of a rare, elusive amphibian</a>. <em>Environmental DNA</em>, 4, 642–653.
+Perl, Ronith Gila Bina, Ella Avidor, Uri Roll, Yoram Malka, Eli Geffen, and Sarig Gafny. 2022. <span>“Using eDNA Presence/Non<span>-</span>Detection Data to Characterize the Abiotic and Biotic Habitat Requirements of a Rare, Elusive Amphibian.”</span> <em>Environmental DNA</em> 4 (3): 642–53. <a href="https://doi.org/10.1002/edn3.276">https://doi.org/10.1002/edn3.276</a>.
 </div>
 <div id="ref-powers2020" class="csl-entry" role="listitem">
-Powers, D.M.W. (2020). <a href="https://doi.org/10.48550/ARXIV.2010.16061">Evaluation: From precision, recall and f-measure to ROC, informedness, markedness and correlation</a>. <em>arXiv</em>.
+Powers, David M. W. 2020. <span>“Evaluation: From Precision, Recall and f-Measure to ROC, Informedness, Markedness and Correlation.”</span> <em>arXiv</em>. <a href="https://doi.org/10.48550/ARXIV.2010.16061">https://doi.org/10.48550/ARXIV.2010.16061</a>.
 </div>
 <div id="ref-whittaker1962" class="csl-entry" role="listitem">
-Whittaker, R.H. (1962). <a href="https://doi.org/10.1007/bf02860872">Classification of natural communities</a>. <em>The Botanical Review</em>, 28, 1–239.
+Whittaker, Robert H. 1962. <span>“Classification of Natural Communities.”</span> <em>The Botanical Review</em> 28 (1): 1–239. <a href="https://doi.org/10.1007/bf02860872">https://doi.org/10.1007/bf02860872</a>.
 </div>
 </div>
 </section>
