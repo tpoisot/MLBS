@@ -21,8 +21,9 @@ end
 
 function train!(ensemble::Bagging, y, X; kwargs...)
     Threads.@threads for m in eachindex(ensemble.models)
-        train!(ensemble.models[m], y, X[:, bags[m][1]]; kwargs...)
+        train!(ensemble.models[m], y, X[:, ensemble.bags[m][1]]; kwargs...)
     end
+    train!(ensemble.model, y, X; kwargs...)
     return ensemble
 end
 

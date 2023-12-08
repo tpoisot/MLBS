@@ -9,16 +9,16 @@ There are two reasons to think about variable selection and feature engineering 
 ```{julia}
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusion.jl"))
-include(joinpath(_code_path, "mocks.jl"))
-include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "vif.jl"))
-include(joinpath(_code_path, "splitters.jl"))
-include(joinpath(_code_path, "palettes.jl"))
-include(joinpath(_code_path, "crossvalidate.jl"))
-include(joinpath(_code_path, "variableselection.jl"))
+include(joinpath(_code_path, "minisdm/confusionmatrix.jl"))
+include(joinpath(_code_path, "minisdm/mocks.jl"))
+include(joinpath(_code_path, "minisdm/nbc.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+include(joinpath(_code_path, "minisdm/vif.jl"))
+include(joinpath(_code_path, "minisdm/crossvalidation.jl"))
+include(joinpath(_code_path, "minisdm/show.jl"))
+include(joinpath(_code_path, "minisdm/variableselection.jl"))
 ```
 
 The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction [@booth2022]; this is particularly true when working from the WorldClim version [@fick2017], and not as problematic when using other data products like CHELSA [@karger2017].
@@ -149,20 +149,26 @@ Another class of potentially very useful data transformations is whitening trans
 ```{julia}
 #| echo: false
 #| output: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-0.jld")
-ptm = JLD.load(modelpath)
-trainlabels, trainfeatures = ptm["training"]
-v0 = ptm["variables"]
-m0 = naivebayes(trainlabels, trainfeatures[:,v0])
+modelpath = joinpath(_models_path, "sdm-step-0.jld2")
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+end;
+
+JLD2.jldopen(modelpath, "r") do file
+    global v0 = file["variables"]
+end;
+
+model = SDM(ZScore(), NBC(), Thresholder())
+train!(model, y, X[v0,:]; classify=false)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-folds = kfold(trainlabels, trainfeatures; k=15, permute=true)
-C0v, C0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,v0], folds)
-CXv, CXt = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
+folds = kfold(y, X[v0,:]; k=15, permute=true)
+C0v, C0t = crossvalidate(model, y, X[v0,:], folds)
+CXv, CXt = crossvalidate(model, y, X, folds)
 ```
 
 Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
@@ -188,14 +194,14 @@ We will perform four different versions of stepwise variable selection. Forward,
 ```{julia}
 #| echo: false
 #| output: false
-b0 = backwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
-Cb0v, Cb0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,b0], folds)
-f0 = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
-Cf0v, Cf0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,f0], folds)
-c0 = constrainedselection(naivebayes, trainlabels, trainfeatures, folds, [1,12], mcc)
-Cc0v, Cc0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,c0], folds)
-i0 = stepwisevif(trainfeatures, 10.0)
-Ci0v, Ci0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,i0], folds)
+b0 = backwardselection(model, y, X, folds, mcc)
+Cb0v, Cb0t = crossvalidate(model, y, X[b0,:], folds)
+f0 = forwardselection(model, y, X, folds, mcc)
+Cf0v, Cf0t = crossvalidate(model, y, X[f0,:], folds)
+c0 = constrainedselection(model, y, X, folds, [1,12], mcc)
+Cc0v, Cc0t = crossvalidate(model, y, X[c0,:], folds)
+i0 = stepwisevif(X, 10.0)
+Ci0v, Ci0t = crossvalidate(model, y, X[i0,:], folds)
 ```
 
 ```{julia}
