@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -86,7 +86,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar docked">
+<body class="nav-sidebar docked slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -159,13 +159,13 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable preparation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Selecting variables</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hyper-parameters tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -222,7 +222,7 @@ div.csl-indent {
 <div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/intro.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -246,10 +246,10 @@ div.csl-indent {
 <p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning; there are many good papers giving overviews of some applications of data science to biological problems; and there are, of course, thousands of tutorials about how to write code (some of them are good!).</p>
 <p>But one thing that students commonly called for was an attempt to tie concepts together, and to explain when and how human decisions were required in ML approaches <span class="citation" data-cites="sulmont2019">(<a href="#ref-sulmont2019" role="doc-biblioref">Sulmont, Patitsas, and Cooperstock 2019</a>)</span>. This is this attempt.</p>
 <p>There are, broadly speaking, two situations in which reading this book is useful. The first is when you are done reading some general books about machine learning, and want to see how it can be applied to problems that are more specific to biodiversity research; the second is when you have a working understanding of biodiversity research, and want a stepping stone into the machine learning literature. Note that there is no scenario where you <em>stop</em> after reading this book – this is by design. The purpose of this book is to give a practical overview of “how data science for biodiversity happens”, and this needs to be done in parallel to even more fundamental readings.</p>
-<div class="content-margin">
+
+<div class="no-row-height column-margin column-container"><div class="">
 <p>These are examples of books I like. I found them comprehensive and engaging. They may not work for you.</p>
-</div>
-<p>A wonderful introduction to the mathematics behind machine learning can be found in <span class="citation" data-cites="deisenroth2020">Deisenroth, Faisal, and Ong (<a href="#ref-deisenroth2020" role="doc-biblioref">2020</a>)</span>, which provides stunning visualization of mathematical concepts. <span class="citation" data-cites="yau2015">Yau (<a href="#ref-yau2015" role="doc-biblioref">2015</a>)</span> is a particularly useful book about the ways to visualize data in a meaningful way. <strong>TK</strong></p>
+</div></div><p>A wonderful introduction to the mathematics behind machine learning can be found in <span class="citation" data-cites="deisenroth2020">Deisenroth, Faisal, and Ong (<a href="#ref-deisenroth2020" role="doc-biblioref">2020</a>)</span>, which provides stunning visualization of mathematical concepts. <span class="citation" data-cites="yau2015">Yau (<a href="#ref-yau2015" role="doc-biblioref">2015</a>)</span> is a particularly useful book about the ways to visualize data in a meaningful way. <span class="citation" data-cites="watt2020">Watt, Borhani, and Katsaggelos (<a href="#ref-watt2020" role="doc-biblioref">2020</a>)</span> is a solid introduction to the underlying theory of applied machine learning. For ecologists, <span class="citation" data-cites="dietze2017">Dietze (<a href="#ref-dietze2017" role="doc-biblioref">2017</a>)</span> is a comprehensive, and still highly readable, treaty on the problems associated to forecasting. The best way to decide on which book to read is often to look at the books that your colleagues have also read; being able to work through material collectively is useful, and knowing that you can practice the craft of data science within a community will make your learning more effective.</p>
 <p>When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible quantity of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.</p>
 <p>note on the meaning of colors</p>
 <section id="core-concepts-in-data-science" class="level2" data-number="1.1">
@@ -333,6 +333,9 @@ Bodmer, Walter, R. A. Bailey, Brian Charlesworth, Adam Eyre-Walker, Vernon Farew
 <div id="ref-deisenroth2020" class="csl-entry" role="listitem">
 Deisenroth, Marc Peter, A. Aldo Faisal, and Cheng Soon Ong. 2020. <span>“Mathematics for Machine Learning,”</span> February. <a href="https://doi.org/10.1017/9781108679930">https://doi.org/10.1017/9781108679930</a>.
 </div>
+<div id="ref-dietze2017" class="csl-entry" role="listitem">
+Dietze, Michael. 2017. <span>“Ecological Forecasting,”</span> May. <a href="https://doi.org/10.1515/9781400885459">https://doi.org/10.1515/9781400885459</a>.
+</div>
 <div id="ref-fisher1936" class="csl-entry" role="listitem">
 Fisher, R. A. 1936. <span>“The Use Of Multiple Measurements In Taxonomic Problems.”</span> <em>Annals of Eugenics</em> 7 (2): 179–88. <a href="https://doi.org/10.1111/j.1469-1809.1936.tb02137.x">https://doi.org/10.1111/j.1469-1809.1936.tb02137.x</a>.
 </div>
@@ -347,6 +350,9 @@ Sulmont, Elisabeth, Elizabeth Patitsas, and Jeremy R. Cooperstock. 2019. <span>�
 </div>
 <div id="ref-unwin2021" class="csl-entry" role="listitem">
 Unwin, Antony, and Kim Kleinman. 2021. <span>“The Iris Data Set: In Search of the Source of <span><em>Virginica</em></span>.”</span> <em>Significance</em> 18 (6): 26–29. <a href="https://doi.org/10.1111/1740-9713.01589">https://doi.org/10.1111/1740-9713.01589</a>.
+</div>
+<div id="ref-watt2020" class="csl-entry" role="listitem">
+Watt, Jeremy, Reza Borhani, and Aggelos Katsaggelos. 2020. <span>“Machine Learning Refined,”</span> January. <a href="https://doi.org/10.1017/9781108690935">https://doi.org/10.1017/9781108690935</a>.
 </div>
 <div id="ref-yau2015" class="csl-entry" role="listitem">
 Yau, Nathan. 2015. <span>“Visualize This,”</span> October. <a href="https://doi.org/10.1002/9781118722213">https://doi.org/10.1002/9781118722213</a>.

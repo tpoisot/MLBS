@@ -6,11 +6,11 @@ But one thing that students commonly called for was an attempt to tie concepts t
 
 There are, broadly speaking, two situations in which reading this book is useful. The first is when you are done reading some general books about machine learning, and want to see how it can be applied to problems that are more specific to biodiversity research; the second is when you have a working understanding of biodiversity research, and want a stepping stone into the machine learning literature. Note that there is no scenario where you *stop* after reading this book -- this is by design. The purpose of this book is to give a practical overview of "how data science for biodiversity happens", and this needs to be done in parallel to even more fundamental readings.
 
-::: content-margin
+::: column-margin
 These are examples of books I like. I found them comprehensive and engaging. They may not work for you.
 :::
 
-A wonderful introduction to the mathematics behind machine learning can be found in @deisenroth2020, which provides stunning visualization of mathematical concepts. @yau2015 is a particularly useful book about the ways to visualize data in a meaningful way. [@watt2020] **TK**
+A wonderful introduction to the mathematics behind machine learning can be found in @deisenroth2020, which provides stunning visualization of mathematical concepts. @yau2015 is a particularly useful book about the ways to visualize data in a meaningful way. @watt2020 is a solid introduction to the underlying theory of applied machine learning. For ecologists, @dietze2017 is a comprehensive, and still highly readable, treaty on the problems associated to forecasting. The best way to decide on which book to read is often to look at the books that your colleagues have also read; being able to work through material collectively is useful, and knowing that you can practice the craft of data science within a community will make your learning more effective.
 
 When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible quantity of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.
 
