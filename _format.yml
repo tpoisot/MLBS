@@ -1,0 +1,30 @@
+format:
+  html:
+    theme: [cosmo, resources/scss/global.scss]
+    linestretch: 1.7
+    fig-cap-location: margin
+    tbl-cap-location: margin
+    toc-title: "Chapter overview"
+    toc-expand: false
+  pdf:
+    documentclass: scrbook
+    papersize: letter
+    fig-cap-location: bottom
+    tbl-cap-location: top
+    geometry:
+      - left=0.7in
+      - textwidth=5.2in
+      - marginparsep=0.2in
+      - marginparwidth=1.7in
+    linkcolor: SteelBlue4
+    colorlinks: true
+    fig-pos: 'pbt'
+    tbl-pos: 'bt'
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    number-depth: 3
+    mainfont: TeX Gyre Termes
+    mathfont: TeX Gyre Termes
+    sansfont: TeX Gyre Heros
+    monofont: TeX Gyre Cursor

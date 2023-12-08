@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 2&nbsp; Clustering</title>
+<title>Machine Learning for Biodiversity Scientists - 2&nbsp; Clustering</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,7 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -91,7 +91,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating slimcontent">
+<body class="nav-sidebar docked slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -112,28 +112,13 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Data Science for Biodiversity Scientists</a> 
-        <div class="sidebar-tools-main">
-    <div class="dropdown">
-      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.pdf">
-              <i class="bi bi-bi-file-pdf pe-1"></i>
-            Download PDF
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.epub">
-              <i class="bi bi-bi-journal pe-1"></i>
-            Download ePub
-            </a>
-          </li>
-      </ul>
-    </div>
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -179,13 +164,13 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable preparation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Selecting variables</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hyper-parameters tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -194,20 +179,31 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
    
   <ul>
   <li><a href="#a-digression-which-birds-are-red" id="toc-a-digression-which-birds-are-red" class="nav-link active" data-scroll-target="#a-digression-which-birds-are-red"><span class="header-section-number">2.1</span> A digression: which birds are red?</a></li>
@@ -227,8 +223,9 @@ div.csl-indent {
   <li><a href="#clustering-with-optimal-number-of-classes" id="toc-clustering-with-optimal-number-of-classes" class="nav-link" data-scroll-target="#clustering-with-optimal-number-of-classes"><span class="header-section-number">2.4.3</span> Clustering with optimal number of classes</a></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">2.5</span> Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/clustering.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
@@ -258,15 +255,15 @@ div.csl-indent {
 <p>Before diving in, it is a good idea to ponder a simple case. We can divide everything in just two categories: things with red feathers, and things without red feathers. An example of a thing with red feathers is the Northern Cardinal (<em>Cardinalis cardinalis</em>), and things without red feathers are the iMac G3, Haydn’s string quartets, and of course the Northern Cardinal (<em>Cardinalis cardinalis</em>).</p>
 <p>See, biodiversity data science is complicated, because it tends to rely on the assumption that we can categorize the natural world, and the natural world (mostly in response to natural selection) comes up with ways to be, well, diverse and hard to categorize. In the Northern Cardinal, this is shown in males having red feathers, and females having mostly brown feathers. Before moving forward, we need to consider ways to solve this issue, as this issue will come up <em>all the time.</em></p>
 <p>The first mistake we have made is that the scope of objects we want to classify, which we will describe as the “domain” of our classification, is much too broad: there are few legitimate applications where we will have a dataset with Northern Cardinals, iMac G3s, and Haydn’s string quartets. Picking a reasonable universe of classes would have solved our problem a little. For example, among the things that do not have red feathers are the Mourning Dove, the Kentucky Warbler, and the House Sparrow.</p>
-<p>The second mistake that we have made is improperly defining our classes; bird species exhibit sexual dimorphism (not in an interesting way, like wrasses, but let’s give them some credit for trying). Assuming that there is such a thing as <em>a</em> Northern Cardinal is not necessarily a reasonable assumption! And yet, the assumption that a single label is a valid representation of non-monomorphic populations is a surprisingly common one, with actual consequences for the performance of image classification algorithms <span class="citation" data-cites="luccioni2023">(<a href="../references.html#ref-luccioni2023" role="doc-biblioref">Luccioni &amp; Rolnick 2023</a>)</span>. This assumption reveals a lot about our biases: male specimens are over-represented in museum collections, for example <span class="citation" data-cites="cooper2019">(<a href="../references.html#ref-cooper2019" role="doc-biblioref">Cooper <em>et al.</em> 2019</a>)</span>. In a lot of species, we would need to split the taxonomic unit into multiple groups in order to adequately describe them.</p>
+<p>The second mistake that we have made is improperly defining our classes; bird species exhibit sexual dimorphism (not in an interesting way, like wrasses, but let’s give them some credit for trying). Assuming that there is such a thing as <em>a</em> Northern Cardinal is not necessarily a reasonable assumption! And yet, the assumption that a single label is a valid representation of non-monomorphic populations is a surprisingly common one, with actual consequences for the performance of image classification algorithms <span class="citation" data-cites="luccioni2023">(<a href="#ref-luccioni2023" role="doc-biblioref">Luccioni and Rolnick 2023</a>)</span>. This assumption reveals a lot about our biases: male specimens are over-represented in museum collections, for example <span class="citation" data-cites="cooper2019">(<a href="#ref-cooper2019" role="doc-biblioref">Cooper et al. 2019</a>)</span>. In a lot of species, we would need to split the taxonomic unit into multiple groups in order to adequately describe them.</p>
 <p>The third mistake we have made is using predictors that are too vague. The “presence of red feathers” is not a predictor that can easily discriminate between the Northen Cardinal (yes for males, sometimes for females), the House Finch (a little for males, no for females), and the Red-Winged Black Bird (a little for males, no for females). In fact, it cannot really capture the difference between red feathers for the male House Finch (head and breast) and the male Red Winged Black Bird (wings, as the name suggests).</p>
-<p>The final mistake we have made is in assuming that “red” is relevant as a predictor. In a wonderful paper, <span class="citation" data-cites="cooney2022">Cooney <em>et al.</em> (<a href="../references.html#ref-cooney2022" role="doc-biblioref">2022</a>)</span> have converted the color of birds into a bird-relevant colorimetric space, revealing a clear latitudinal trend in the ways bird colors, as perceived by other birds, are distributed. This analysis, incidentally, splits all species into males and females. The use of a color space that accounts for the way colors are perceived is a fantastic example of why data science puts domain knowledge front and center.</p>
+<p>The final mistake we have made is in assuming that “red” is relevant as a predictor. In a wonderful paper, <span class="citation" data-cites="cooney2022">Cooney et al. (<a href="#ref-cooney2022" role="doc-biblioref">2022</a>)</span> have converted the color of birds into a bird-relevant colorimetric space, revealing a clear latitudinal trend in the ways bird colors, as perceived by other birds, are distributed. This analysis, incidentally, splits all species into males and females. The use of a color space that accounts for the way colors are perceived is a fantastic example of why data science puts domain knowledge front and center.</p>
 <p>Deciding which variables are going to be accounted for, how the labels will be defined, and what is considered to be within or outside the scope of the classification problem is <em>difficult</em>. It requires domain knowledge (you must know a few things about birds in order to establish criteria to classify birds), and knowledge of how the classification methods operate (in order to have just the right amount of overlap between features in order to provide meaningful estimates of distance).</p>
 </section>
 <section id="the-problem-classifying-pixels-from-an-image" class="level2 page-columns page-full" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="the-problem-classifying-pixels-from-an-image"><span class="header-section-number">2.2</span> The problem: classifying pixels from an image</h2>
 <p>Throughout this chapter, we will work on a single image – we may initially balk at the idea that an image is data, but it is! Specifically, an image is a series of instances (the pixels), each described by their position in a multidimensional colorimetric space. Greyscale images have one dimension, and images in color will have three: their red, green, and blue channels. Not only are images data, this specific dataset is going to be far larger than many of the datasets we will work on in practice: the number of pixels we work with is given by the product of the width, height, and depth of the image!</p>
-<p>In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene <span class="citation" data-cites="vermote2016">(<a href="../references.html#ref-vermote2016" role="doc-biblioref">Vermote <em>et al.</em> 2016</a>)</span>, for which we have access to 9 different bands.</p>
+<p>In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene <span class="citation" data-cites="vermote2016">(<a href="#ref-vermote2016" role="doc-biblioref">Vermote et al. 2016</a>)</span>, for which we have access to 9 different bands.</p>
 <table class="table">
 <caption>Overview of the bands in a Landsat 9 scene. The data from this chapter were downloaded from <a href="https://landsatlook.usgs.gov">LandsatLook</a>.</caption>
 <thead>
@@ -341,14 +338,14 @@ Figure&nbsp;2.1: The Landsat 9 data are combined into the “Natural Color” im
 </div>
 </div>
 </div>
-<p>In <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we compare the natural color reconstruction (top) to a false color composite. All of the panels in <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: <em>what we measure defines what we can see</em>. In order to tell something ecologically meaningful about this place, we need to look at it in the “right” way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale <span class="citation" data-cites="gonzalez2023">(<a href="../references.html#ref-gonzalez2023" role="doc-biblioref">Gonzalez <em>et al.</em> 2023</a>)</span>, there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily right for all problems.</p>
+<p>In <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, we compare the natural color reconstruction (top) to a false color composite. All of the panels in <a href="#fig-kmeans-composites" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: <em>what we measure defines what we can see</em>. In order to tell something ecologically meaningful about this place, we need to look at it in the “right” way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale <span class="citation" data-cites="gonzalez2023">(<a href="#ref-gonzalez2023" role="doc-biblioref">Gonzalez et al. 2023</a>)</span>, there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily right for all problems.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of variable selection and feature engineering in <span class="quarto-unresolved-ref">?sec-variable-selection</span>.</p>
 </div></div><p>So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the <em>right</em> data. In fact, they may not hold information that is relevant to our question <em>at all</em>; or worse, they can hold more noise than signal. The area we will work on in this chapter is a very small crop of a Landsat 9 scene, taken on path 14 and row 28, early in late June 2023. It shows the western tip of the island of Montréal, as well as Lake Saint-Louis to the south (not actually a lake), Lake Deux-Montages to the north (not actually a lake either), and a small part of Oka national park. This is an interesting area because it has a high variety of environments: large bodies of water, forested areas (bright green in the composite), densely urbanized places (bright purple and white in the composite), less densely urbanized (green-brown), and cropland to the western tip of the island.</p>
 <p>But can we classify these different environments starting in an ecologically relevant way? Based on our knowledge of plants, we can start thinking about this question in a different way. Specifically, “can we guess that a pixel contains plants?”, and “can we guess at how much water there is in a pixel?”. Thankfully, ecologists, whose hobbies include (i) guesswork and (ii) plants, have ways to answer these questions rather accurately.</p>
-<p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="../references.html#ref-kennedy2020" role="doc-biblioref">Kennedy &amp; Burbach 2020</a>)</span>. NDVI is derived from the band data (NIR - Red), and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water; Green - NIR) and NDMI (moisture; NIR - SWIR1) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI). Other commonly used indices based on Landsat 9 data include the NBR (Normalized Burned Ratio), for which high values are suggestive of a history of intense fire <span class="citation" data-cites="roy2006">(<a href="../references.html#ref-roy2006" role="doc-biblioref">Roy <em>et al.</em> 2006</a> have challenged the idea that this measure is relevant immediately post-fire)</span>, and the NDBI (Normalized Difference Built-up Index) for urban areas.</p>
-<p>We can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time <span class="citation" data-cites="zheng2021">(<a href="../references.html#ref-zheng2021" role="doc-biblioref">Zheng <em>et al.</em> 2021</a>)</span>. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds <span class="citation" data-cites="mcfeeters2013">(<a href="../references.html#ref-mcfeeters2013" role="doc-biblioref">McFeeters 2013</a>)</span>.</p>
+<p>One way to do this is to calculate the normalized difference vegetation index, or NDVI <span class="citation" data-cites="kennedy2020">(<a href="#ref-kennedy2020" role="doc-biblioref">Kennedy and Burbach 2020</a>)</span>. NDVI is derived from the band data (NIR - Red), and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water; Green - NIR) and NDMI (moisture; NIR - SWIR1) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI). Other commonly used indices based on Landsat 9 data include the NBR (Normalized Burned Ratio), for which high values are suggestive of a history of intense fire <span class="citation" data-cites="roy2006">(<a href="#ref-roy2006" role="doc-biblioref">Roy, Boschetti, and Trigg 2006</a> have challenged the idea that this measure is relevant immediately post-fire)</span>, and the NDBI (Normalized Difference Built-up Index) for urban areas.</p>
+<p>We can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time <span class="citation" data-cites="zheng2021">(<a href="#ref-zheng2021" role="doc-biblioref">Zheng et al. 2021</a>)</span>. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds <span class="citation" data-cites="mcfeeters2013">(<a href="#ref-mcfeeters2013" role="doc-biblioref">McFeeters 2013</a>)</span>.</p>
 <div id="cell-fig-kmeans-hexbin" class="cell page-columns page-full" data-execution_count="5">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="6">
 <div id="fig-kmeans-hexbin" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -408,7 +405,7 @@ Figure&nbsp;2.2: The pixels acquired from Landsat 9 exist in a space with many d
 <p>Repeating a step multiple times in a row is called an iterative process, and we will see a <em>lot</em> of them.</p>
 </div></div><p>Once we have applied <a href="#eq-clustering-centroid-update" class="quarto-xref">Equation&nbsp;<span>2.3</span></a> to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.</p>
 <p>But until when?</p>
-<p>Finding the optimal solution for a set of points is an NP-hard problem <span class="citation" data-cites="aloise2009">(<a href="../references.html#ref-aloise2009" role="doc-biblioref">Aloise <em>et al.</em> 2009</a>)</span>, which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is <em>global</em> and not <em>local</em>.</p>
+<p>Finding the optimal solution for a set of points is an NP-hard problem <span class="citation" data-cites="aloise2009">(<a href="#ref-aloise2009" role="doc-biblioref">Aloise et al. 2009</a>)</span>, which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is <em>global</em> and not <em>local</em>.</p>
 <p>A global optimum is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is <em>greedy</em>, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum.</p>
 <p>In order to get the best possible solution, it is therefore common to run <em>k</em>-means multiple times for a given <span class="math inline">\(k\)</span>, and to pick the positions of the centroids that give the best overall fit.</p>
 </section>
@@ -417,14 +414,14 @@ Figure&nbsp;2.2: The pixels acquired from Landsat 9 exist in a space with many d
 <p>One question that is left un-answered is the value of <span class="math inline">\(k\)</span>. How do we decide on the number of clusters?</p>
 <p>There are two solutions here. One is to have an <em>a priori</em> knowledge of the number of classes. For example, if the purpose of clustering is to create groups for some specific task, there might be an upper/lower bound to the number of tasks you are willing to consider. The other solution is to run the algorithm in a way that optimizes the number of clusters for us.</p>
 <p>This second solution turns out to be rather simple with <em>k</em>-means. We need to change the value of <span class="math inline">\(k\)</span>, run it on the same dataset several times, and then pick the solution that was <em>optimal</em>. But this is not trivial. Simply using <a href="#eq-clustering-variance" class="quarto-xref">Equation&nbsp;<span>2.2</span></a> would lead to always preferring many clusters. After all, each point in its own cluster would get a pretty low variance!</p>
-<p>For this reason, we use measures of optimality that are a little more refined. One of them is the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> method, which is built around a simple idea: an assignment of instances to clusters is good if the instances within a cluster are not too far away from the centroids, and the centroids are as far away from one another as possible.</p>
+<p>For this reason, we use measures of optimality that are a little more refined. One of them is the <span class="citation" data-cites="davies1979">Davies and Bouldin (<a href="#ref-davies1979" role="doc-biblioref">1979</a>)</span> method, which is built around a simple idea: an assignment of instances to clusters is good if the instances within a cluster are not too far away from the centroids, and the centroids are as far away from one another as possible.</p>
 <p>The Davies-Bouldin measure is striking in its simplicity. From a series of points and their assigned clusters, we only need to compute two things. The first is a vector <span class="math inline">\(\mathbf{s}\)</span>, which holds the average distance between the points and their centroids (this is the <span class="math inline">\(\left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2\)</span> term in <a href="#eq-clustering-onepoint" class="quarto-xref">Equation&nbsp;<span>2.1</span></a>, so this measure still relates directly to the variance); the second is a matrix <span class="math inline">\(\mathbf{M}\)</span>, which measures the distances <em>between</em> the centroids.</p>
 <p>These two information are combined in a matrix <span class="math inline">\(\mathbf{R}\)</span>, wherein <span class="math inline">\(\mathbf{R}_{ij} = (s_i + s_j)/\mathbf{M}_{ij}\)</span>. The interpretation of this term is quite simply: is the average distance <em>within</em> clusters <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> much larger compared to the distance <em>between</em> these clusters. This is, in a sense, a measure of the stress that these two clusters impose on the entire system. In order to turn this matrix into a single value, we calculate the maximum value (ignoring the diagonal!) for each row: this is a measure of the <em>maximal</em> amount of stress in which a cluster is involved. By averaging these values across all clusters, we have a measure of the quality of the assignment, that can be compared for multiple values of <span class="math inline">\(k\)</span>.</p>
 <p>Note that this approach protects us against the each-point-in-its-cluster situation: in this scenario, the distance between clusters would decrease really rapidly, meaning that the values in <span class="math inline">\(\mathbf{R}\)</span> would <em>increase</em>; the Davies-Bouldin measure indicates a better clustering when the values are <em>lower</em>.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In fact, there is very little enumeration of techniques in this book. The important point is to understand how all of the pieces fit together, not to make a census of all possible pieces.</p>
-</div></div><p>There are alternatives to this method, including silhouettes <span class="citation" data-cites="rousseeuw1987">(<a href="../references.html#ref-rousseeuw1987" role="doc-biblioref">Rousseeuw 1987</a>)</span> and the technique of <span class="citation" data-cites="dunn1974">Dunn (<a href="../references.html#ref-dunn1974" role="doc-biblioref">1974</a>)</span>. The question of optimizing the number of clusters goes back several decades <span class="citation" data-cites="thorndike1953">(<a href="../references.html#ref-thorndike1953" role="doc-biblioref">Thorndike 1953</a>)</span>, and it still actively studied. What matter is less to give a comprehensive overview of all the measures: the message here is to pick one that works (and can be justified) for your specific problem!</p>
+</div></div><p>There are alternatives to this method, including silhouettes <span class="citation" data-cites="rousseeuw1987">(<a href="#ref-rousseeuw1987" role="doc-biblioref">Rousseeuw 1987</a>)</span> and the technique of <span class="citation" data-cites="dunn1974">Dunn (<a href="#ref-dunn1974" role="doc-biblioref">1974</a>)</span>. The question of optimizing the number of clusters goes back several decades <span class="citation" data-cites="thorndike1953">(<a href="#ref-thorndike1953" role="doc-biblioref">Thorndike 1953</a>)</span>, and it still actively studied. What matter is less to give a comprehensive overview of all the measures: the message here is to pick one that works (and can be justified) for your specific problem!</p>
 </section>
 </section>
 <section id="application-optimal-clustering-of-the-satellite-image-data" class="level2 page-columns page-full" data-number="2.4">
@@ -452,7 +449,7 @@ Figure&nbsp;2.3: caption
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In fact, take some time to think about how you would use <span class="math inline">\(k\)</span>-means to come up with a way to remove pixels with only water from this image!</p>
-</div></div><p>It is always a good idea to look at the first results and state the obvious. Here, for example, we can say that water is easy to identify. In fact, removing open water pixels from images is an interesting image analysis challenge <span class="citation" data-cites="mondejar2019">(<a href="../references.html#ref-mondejar2019" role="doc-biblioref">Mondejar &amp; Tongco 2019</a>)</span>, and because we used an index that specifically identifies water bodies (NDWI), it is not surprising that there is an entire cluster that seems to be associated with water. But if we take a better look, it appears that there groups of pixels that represent dense urban areas that are classified with the water pixels. When looking at the landscape in a space with three dimensions, it looks like separating densely built-up environment and water is difficult.</p>
+</div></div><p>It is always a good idea to look at the first results and state the obvious. Here, for example, we can say that water is easy to identify. In fact, removing open water pixels from images is an interesting image analysis challenge <span class="citation" data-cites="mondejar2019">(<a href="#ref-mondejar2019" role="doc-biblioref">Mondejar and Tongco 2019</a>)</span>, and because we used an index that specifically identifies water bodies (NDWI), it is not surprising that there is an entire cluster that seems to be associated with water. But if we take a better look, it appears that there groups of pixels that represent dense urban areas that are classified with the water pixels. When looking at the landscape in a space with three dimensions, it looks like separating densely built-up environment and water is difficult.</p>
 <p>This might seem like an idle observation, but this is not the case! It means that when working on vegetation-related questions, we will likely need at least one cluster for water, and one cluster for built-up areas. This is helpful information, because we can already think about how many classes of vegetation we are willing to accept, and add (at least) two clusters to capture other types of cover.</p>
 </section>
 <section id="optimal-number-of-pixels" class="level3 page-columns page-full" data-number="2.4.2">
@@ -461,7 +458,7 @@ Figure&nbsp;2.3: caption
 <div class="no-row-height column-margin column-container"><div class="">
 <p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>.</p>
 </div></div><p>In order to produce <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in <a href="#sec-kmeans-initial" class="quarto-xref"><span>Section&nbsp;2.4.1</span></a>, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of <span class="math inline">\(k\)</span>; we know that it is more than 3, but how much more?</p>
-<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies &amp; Bouldin (<a href="../references.html#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. More than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
+<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies and Bouldin (<a href="#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. More than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
 <div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="10">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
 <div id="fig-kmeans-tuning" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -509,7 +506,7 @@ Figure&nbsp;2.5: Results of the landscape clustering with k=5 clusters. This num
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-clustering-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display">
-<table class="cell table table-sm table-striped small" data-quarto-postprocess="true">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
 <thead>
 <tr class="header headerLastRow">
 <th style="text-align: right;" data-quarto-table-cell-role="th">Cluster</th>
@@ -569,7 +566,7 @@ Table&nbsp;2.1: Summary of the values for the centers of the optimal clusters fo
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In fact, this behavior makes <em>k</em>-means excellent at creating color palettes from images! Cases in point, <a href="https://github.com/karthik/wesanderson">Karthik Ram’s Wes Anderson palettes</a>, and <a href="https://github.com/dill/beyonce">David Lawrence Miller’s Beyoncé palettes</a>. Let it never again be said that ecologists should not be trusted with machine learning methods.</p>
 </div></div><p>The area of the space of parameters covered by each cluster in represented in <a href="#fig-kmeans-clustering" class="quarto-xref">Figure&nbsp;<span>2.6</span></a>, and this result is actually not surprising, if we spend some time thinking about how <em>k</em>-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.</p>
-<p>By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for quantization <span class="citation" data-cites="gray1984">(<a href="../references.html#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
+<p>By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for quantization <span class="citation" data-cites="gray1984">(<a href="#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
 <div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="13">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="14">
 <div id="fig-kmeans-clustering" class="quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -591,54 +588,57 @@ Figure&nbsp;2.6: Visualisation of the clustering output as a function of the NDV
 <p>In this chapter, we have used the <em>k</em>-means algorithm to create groups in a large dataset that had no labels, <em>i.e.</em> the points were not assigned to a class. By picking the features we wanted to cluster the point, we were able to highlight specific aspects of the landscape. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we will start adding labels to our data, and shift our attention from classification to regression problems.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-aloise2009" class="csl-entry" role="listitem">
-Aloise, D., Deshpande, A., Hansen, P. &amp; Popat, P. (2009). <a href="https://doi.org/10.1007/s10994-009-5103-0">NP-hardness of Euclidean sum-of-squares clustering</a>. <em>Machine Learning</em>, 75, 245–248.
+Aloise, Daniel, Amit Deshpande, Pierre Hansen, and Preyas Popat. 2009. <span>“NP-Hardness of Euclidean Sum-of-Squares Clustering.”</span> <em>Machine Learning</em> 75 (2): 245–48. <a href="https://doi.org/10.1007/s10994-009-5103-0">https://doi.org/10.1007/s10994-009-5103-0</a>.
 </div>
 <div id="ref-cooney2022" class="csl-entry" role="listitem">
-Cooney, C.R., He, Y., Varley, Z.K., Nouri, L.O., Moody, C.J.A., Jardine, M.D., <em>et al.</em> (2022). <a href="https://doi.org/10.1038/s41559-022-01714-1">Latitudinal gradients in avian colourfulness</a>. <em>Nature Ecology &amp; Evolution</em>, 6, 622–629.
+Cooney, Christopher R., Yichen He, Zoë K. Varley, Lara O. Nouri, Christopher J. A. Moody, Michael D. Jardine, András Liker, Tamás Székely, and Gavin H. Thomas. 2022. <span>“Latitudinal Gradients in Avian Colourfulness.”</span> <em>Nature Ecology &amp; Evolution</em> 6 (5): 622–29. <a href="https://doi.org/10.1038/s41559-022-01714-1">https://doi.org/10.1038/s41559-022-01714-1</a>.
 </div>
 <div id="ref-cooper2019" class="csl-entry" role="listitem">
-Cooper, N., Bond, A.L., Davis, J.L., Portela Miguez, R., Tomsett, L. &amp; Helgen, K.M. (2019). <a href="https://doi.org/10.1098/rspb.2019.2025">Sex biases in bird and mammal natural history collections</a>. <em>Proceedings of the Royal Society B: Biological Sciences</em>, 286, 20192025.
+Cooper, Natalie, Alexander L. Bond, Joshua L. Davis, Roberto Portela Miguez, Louise Tomsett, and Kristofer M. Helgen. 2019. <span>“Sex Biases in Bird and Mammal Natural History Collections.”</span> <em>Proceedings of the Royal Society B: Biological Sciences</em> 286 (1913): 20192025. <a href="https://doi.org/10.1098/rspb.2019.2025">https://doi.org/10.1098/rspb.2019.2025</a>.
 </div>
 <div id="ref-davies1979" class="csl-entry" role="listitem">
-Davies, D.L. &amp; Bouldin, D.W. (1979). <a href="https://doi.org/10.1109/tpami.1979.4766909">A cluster separation measure</a>. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, PAMI-1, 224–227.
+Davies, David L., and Donald W. Bouldin. 1979. <span>“A Cluster Separation Measure.”</span> <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em> PAMI-1 (2): 224–27. <a href="https://doi.org/10.1109/tpami.1979.4766909">https://doi.org/10.1109/tpami.1979.4766909</a>.
 </div>
 <div id="ref-dunn1974" class="csl-entry" role="listitem">
-Dunn, J.C. (1974). <a href="https://doi.org/10.1080/01969727408546059">Well-Separated Clusters and Optimal Fuzzy Partitions</a>. <em>Journal of Cybernetics</em>, 4, 95–104.
+Dunn, J. C. 1974. <span>“Well-Separated Clusters and Optimal Fuzzy Partitions.”</span> <em>Journal of Cybernetics</em> 4 (1): 95–104. <a href="https://doi.org/10.1080/01969727408546059">https://doi.org/10.1080/01969727408546059</a>.
 </div>
 <div id="ref-gonzalez2023" class="csl-entry" role="listitem">
-Gonzalez, A., Vihervaara, P., Balvanera, P., Bates, A.E., Bayraktarov, E., Bellingham, P.J., <em>et al.</em> (2023). <a href="https://doi.org/10.1038/s41559-023-02171-0">A global biodiversity observing system to unite monitoring and guide action</a>. <em>Nature Ecology &amp; Evolution</em>.
+Gonzalez, Andrew, Petteri Vihervaara, Patricia Balvanera, Amanda E. Bates, Elisa Bayraktarov, Peter J. Bellingham, Andreas Bruder, et al. 2023. <span>“A Global Biodiversity Observing System to Unite Monitoring and Guide Action.”</span> <em>Nature Ecology &amp; Evolution</em>, August. <a href="https://doi.org/10.1038/s41559-023-02171-0">https://doi.org/10.1038/s41559-023-02171-0</a>.
 </div>
 <div id="ref-gray1984" class="csl-entry" role="listitem">
-Gray, R. (1984). <a href="https://doi.org/10.1109/massp.1984.1162229">Vector quantization</a>. <em>IEEE ASSP Magazine</em>, 1, 4–29.
+Gray, R. 1984. <span>“Vector Quantization.”</span> <em>IEEE ASSP Magazine</em> 1 (2): 4–29. <a href="https://doi.org/10.1109/massp.1984.1162229">https://doi.org/10.1109/massp.1984.1162229</a>.
 </div>
 <div id="ref-kennedy2020" class="csl-entry" role="listitem">
-Kennedy, S. &amp; Burbach, M. (2020). <a href="https://doi.org/10.1353/gpr.2020.0016">Great Plains Ranchers Managing for Vegetation Heterogeneity: A Multiple Case Study</a>. <em>Great Plains Research</em>, 30, 137–148.
+Kennedy, Stephanie, and Mark Burbach. 2020. <span>“Great Plains Ranchers Managing for Vegetation Heterogeneity: A Multiple Case Study.”</span> <em>Great Plains Research</em> 30 (2): 137–48. <a href="https://doi.org/10.1353/gpr.2020.0016">https://doi.org/10.1353/gpr.2020.0016</a>.
 </div>
 <div id="ref-luccioni2023" class="csl-entry" role="listitem">
-Luccioni, A.S. &amp; Rolnick, D. (2023). <a href="https://doi.org/10.1609/aaai.v37i12.26682">Bugs in the data: How ImageNet misrepresents biodiversity</a>. <em>Proceedings of the AAAI Conference on Artificial Intelligence</em>, 37, 14382–14390.
+Luccioni, Alexandra Sasha, and David Rolnick. 2023. <span>“Bugs in the Data: How ImageNet Misrepresents Biodiversity.”</span> <em>Proceedings of the AAAI Conference on Artificial Intelligence</em> 37 (12): 14382–90. <a href="https://doi.org/10.1609/aaai.v37i12.26682">https://doi.org/10.1609/aaai.v37i12.26682</a>.
 </div>
 <div id="ref-mcfeeters2013" class="csl-entry" role="listitem">
-McFeeters, S. (2013). <a href="https://doi.org/10.3390/rs5073544">Using the Normalized Difference Water Index (NDWI) within a Geographic Information System to Detect Swimming Pools for Mosquito Abatement: A Practical Approach</a>. <em>Remote Sensing</em>, 5, 3544–3561.
+McFeeters, Stuart. 2013. <span>“Using the Normalized Difference Water Index (NDWI) Within a Geographic Information System to Detect Swimming Pools for Mosquito Abatement: A Practical Approach.”</span> <em>Remote Sensing</em> 5 (7): 3544–61. <a href="https://doi.org/10.3390/rs5073544">https://doi.org/10.3390/rs5073544</a>.
 </div>
 <div id="ref-mondejar2019" class="csl-entry" role="listitem">
-Mondejar, J.P. &amp; Tongco, A.F. (2019). <a href="https://doi.org/10.1186/s42834-019-0016-5">Near infrared band of Landsat 8 as water index: a case study around Cordova and Lapu-Lapu City, Cebu, Philippines</a>. <em>Sustainable Environment Research</em>, 29.
+Mondejar, Jeremy P., and Alejandro F. Tongco. 2019. <span>“Near Infrared Band of Landsat 8 as Water Index: A Case Study Around Cordova and Lapu-Lapu City, Cebu, Philippines.”</span> <em>Sustainable Environment Research</em> 29 (1). <a href="https://doi.org/10.1186/s42834-019-0016-5">https://doi.org/10.1186/s42834-019-0016-5</a>.
 </div>
 <div id="ref-rousseeuw1987" class="csl-entry" role="listitem">
-Rousseeuw, P.J. (1987). <a href="https://doi.org/10.1016/0377-0427(87)90125-7">Silhouettes: A graphical aid to the interpretation and validation of cluster analysis</a>. <em>Journal of Computational and Applied Mathematics</em>, 20, 53–65.
+Rousseeuw, Peter J. 1987. <span>“Silhouettes: A Graphical Aid to the Interpretation and Validation of Cluster Analysis.”</span> <em>Journal of Computational and Applied Mathematics</em> 20 (November): 53–65. <a href="https://doi.org/10.1016/0377-0427(87)90125-7">https://doi.org/10.1016/0377-0427(87)90125-7</a>.
 </div>
 <div id="ref-roy2006" class="csl-entry" role="listitem">
-Roy, D.P., Boschetti, L. &amp; Trigg, S.N. (2006). <a href="https://doi.org/10.1109/lgrs.2005.858485">Remote Sensing of Fire Severity: Assessing the Performance of the Normalized Burn Ratio</a>. <em>IEEE Geoscience and Remote Sensing Letters</em>, 3, 112–116.
+Roy, D. P., L. Boschetti, and S. N. Trigg. 2006. <span>“Remote Sensing of Fire Severity: Assessing the Performance of the Normalized Burn Ratio.”</span> <em>IEEE Geoscience and Remote Sensing Letters</em> 3 (1): 112–16. <a href="https://doi.org/10.1109/lgrs.2005.858485">https://doi.org/10.1109/lgrs.2005.858485</a>.
 </div>
 <div id="ref-thorndike1953" class="csl-entry" role="listitem">
-Thorndike, R.L. (1953). <a href="https://doi.org/10.1007/bf02289263">Who belongs in the family?</a> <em>Psychometrika</em>, 18, 267–276.
+Thorndike, Robert L. 1953. <span>“Who Belongs in the Family?”</span> <em>Psychometrika</em> 18 (4): 267–76. <a href="https://doi.org/10.1007/bf02289263">https://doi.org/10.1007/bf02289263</a>.
 </div>
 <div id="ref-vermote2016" class="csl-entry" role="listitem">
-Vermote, E., Justice, C., Claverie, M. &amp; Franch, B. (2016). <a href="https://doi.org/10.1016/j.rse.2016.04.008">Preliminary analysis of the performance of the Landsat 8/OLI land surface reflectance product</a>. <em>Remote Sensing of Environment</em>, 185, 46–56.
+Vermote, Eric, Chris Justice, Martin Claverie, and Belen Franch. 2016. <span>“Preliminary Analysis of the Performance of the Landsat 8/OLI Land Surface Reflectance Product.”</span> <em>Remote Sensing of Environment</em> 185 (November): 46–56. <a href="https://doi.org/10.1016/j.rse.2016.04.008">https://doi.org/10.1016/j.rse.2016.04.008</a>.
 </div>
 <div id="ref-zheng2021" class="csl-entry" role="listitem">
-Zheng, Y., Zhou, Q., He, Y., Wang, C., Wang, X. &amp; Wang, H. (2021). <a href="https://doi.org/10.3390/rs13040766">An Optimized Approach for Extracting Urban Land Based on Log-Transformed DMSP-OLS Nighttime Light, NDVI, and NDWI</a>. <em>Remote Sensing</em>, 13, 766.
+Zheng, Yuanmao, Qiang Zhou, Yuanrong He, Cuiping Wang, Xiaorong Wang, and Haowei Wang. 2021. <span>“An Optimized Approach for Extracting Urban Land Based on Log-Transformed DMSP-OLS Nighttime Light, NDVI, and NDWI.”</span> <em>Remote Sensing</em> 13 (4): 766. <a href="https://doi.org/10.3390/rs13040766">https://doi.org/10.3390/rs13040766</a>.
 </div>
 </div>
 </section>

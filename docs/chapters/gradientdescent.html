@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 3&nbsp; Gradient descent</title>
+<title>Machine Learning for Biodiversity Scientists - 3&nbsp; Gradient descent</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,7 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -91,7 +91,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating slimcontent">
+<body class="nav-sidebar docked slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -112,28 +112,13 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Data Science for Biodiversity Scientists</a> 
-        <div class="sidebar-tools-main">
-    <div class="dropdown">
-      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.pdf">
-              <i class="bi bi-bi-file-pdf pe-1"></i>
-            Download PDF
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.epub">
-              <i class="bi bi-bi-journal pe-1"></i>
-            Download ePub
-            </a>
-          </li>
-      </ul>
-    </div>
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -179,13 +164,13 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable preparation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Selecting variables</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hyper-parameters tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -194,20 +179,31 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
    
   <ul>
   <li><a href="#sec-gradientdescent-trainedmodel" id="toc-sec-gradientdescent-trainedmodel" class="nav-link active" data-scroll-target="#sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</a></li>
@@ -230,8 +226,9 @@ div.csl-indent {
   </ul></li>
   <li><a href="#a-note-on-regularization" id="toc-a-note-on-regularization" class="nav-link" data-scroll-target="#a-note-on-regularization"><span class="header-section-number">3.5</span> A note on regularization</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">3.6</span> Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/gradientdescent.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content page-columns page-full" id="quarto-document-content">
@@ -259,7 +256,7 @@ div.csl-indent {
 <p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
 <section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
-<p>Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument <span class="citation" data-cites="morrison1999">(the model itself, see <em>e.g.</em> <a href="../references.html#ref-morrison1999" role="doc-biblioref">Morrison &amp; Morgan 1999</a>)</span>. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.</p>
+<p>Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument <span class="citation" data-cites="morrison1999">(the model itself, see <em>e.g.</em> <a href="#ref-morrison1999" role="doc-biblioref">Morrison and Morgan 1999</a>)</span>. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.</p>
 <p>As we will see in this chapter, then in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, and finally in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the <em>machine</em> we train in machine learning.</p>
 <p>Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we ended up with a machine (the trained <em>k</em>-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.</p>
 <p>For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to <em>explain</em> how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>), and is more related to explaining the process, the “outer core” of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?</p>
@@ -267,10 +264,10 @@ div.csl-indent {
 <section id="sec-gradientdescent-problem" class="level2 page-columns page-full" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
 <p>One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years.</p>
-<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen &amp; Briand (<a href="../references.html#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
-<p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="../references.html#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
-<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="../references.html#ref-brose2004" role="doc-biblioref">Brose <em>et al.</em> 2004</a>)</span>.</p>
-<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="../references.html#ref-macdonald2020" role="doc-biblioref">MacDonald <em>et al.</em> 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
+<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen and Briand (<a href="#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
+<p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
+<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="#ref-brose2004" role="doc-biblioref">Brose et al. 2004</a>)</span>.</p>
+<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="#ref-macdonald2020" role="doc-biblioref">MacDonald, Banville, and Poisot 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
 <p>In <a href="#fig-gradient-data" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>, we can check that there is a linear relationship between the natural log of the number of species and the natural log of the number of links. This is not surprising! If we assume that <span class="math inline">\(L \approx b\times S^a\)</span>, then we can take the log of both sides, and we get <span class="math inline">\(\text{log}\, L \approx a \times \text{log}\, S + \text{log}\,b\)</span>. This is linear model, and so we can estimate its parameters using linear regression!</p>
 <div id="cell-fig-gradient-data" class="cell page-columns page-full" data-execution_count="3">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="4">
@@ -305,14 +302,14 @@ Figure&nbsp;3.1: We have assumed that the relationship between <span class="math
 <div class="no-row-height column-margin column-container"><div class="">
 <p>In data science, things often have multiple names. This is true of loss functions, and this will be even more true on other things later.</p>
 </div></div><p>This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in <a href="#tbl-gradientdescent-regressionloss" class="quarto-xref">Table&nbsp;<span>3.1</span></a>.</p>
-<div id="tbl-gradientdescent-regressionloss" class="anchored">
+<div id="tbl-gradientdescent-regressionloss" class="anchored" data-tbl-colwidths="[25,25,50]">
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-gradientdescent-regressionloss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="table">
 <colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 50%">
+<col style="width: 47%">
+<col style="width: 26%">
+<col style="width: 26%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -346,7 +343,7 @@ Figure&nbsp;3.1: We have assumed that the relationship between <span class="math
 </table>
 </div>
 <figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-gradientdescent-regressionloss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3.1: List of common loss functions for regression problems
+Table&nbsp;3.1: List of common loss functions for regression problems {tbl-colwidths='[25,25,50]'}
 </figcaption>
 </figure>
 </div>
@@ -369,7 +366,7 @@ p
 \frac{\partial f}{\partial b}(p)
 \end{bmatrix}\,.
 \tag{3.3}\]</span></span></p>
-<p>This indicates how changes in <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> will <em>increase</em> the error. In order to have a more explicit formulation, all we have to do is figure out an expression for both of the partial derivatives. In practice, we can let auto-differentiation software calculate the gradient for us <span class="citation" data-cites="innes2018">(<a href="../references.html#ref-innes2018" role="doc-biblioref">Innes 2018</a>)</span>; these packages are now advanced enough that they can take the gradient of code directly.</p>
+<p>This indicates how changes in <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> will <em>increase</em> the error. In order to have a more explicit formulation, all we have to do is figure out an expression for both of the partial derivatives. In practice, we can let auto-differentiation software calculate the gradient for us <span class="citation" data-cites="innes2018">(<a href="#ref-innes2018" role="doc-biblioref">Innes 2018</a>)</span>; these packages are now advanced enough that they can take the gradient of code directly.</p>
 <p>Solving <span class="math inline">\((\partial f / \partial m)(p)\)</span> and <span class="math inline">\((\partial f / \partial c)(p)\)</span> is easy enough:</p>
 <p><span id="eq-gradientdescent-gradientexplicit"><span class="math display">\[
 \nabla f\left(
@@ -424,7 +421,7 @@ p := p - \eta\times \nabla f(p) \,.
 <figure class="quarto-float quarto-float-tbl figure">
 <div aria-describedby="tbl-gradient-attempt-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display">
-<table class="cell table table-sm table-striped small" data-quarto-postprocess="true">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
 <thead>
 <tr class="header headerLastRow">
 <th style="text-align: right;" data-quarto-table-cell-role="th">Step</th>
@@ -589,24 +586,27 @@ f(p) = \text{loss} + \lambda \times g(\beta) \,,
 <p>In this chapter, we have used a dataset of species richness and number of interactions to start exploring the practice of machine learning. We defined a model (a linear regression), and based about assumptions about how to get closer to ideal parameters, we used the technique of gradient descent to estimate the best possible relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span>. In order to provide a fair evaluation of the performance of this model, we kept a part of the dataset hidden from it while training. In <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, we will explore this last point in great depth, by introducing the concept of cross-validation, testing set, and performance evaluation.</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-brose2004" class="csl-entry" role="listitem">
-Brose, U., Ostling, A., Harrison, K. &amp; Martinez, N.D. (2004). <a href="https://doi.org/10.1038/nature02297">Unified spatial scaling of species and their trophic interactions</a>. <em>Nature</em>, 428, 167–171.
+Brose, Ulrich, Annette Ostling, Kateri Harrison, and Neo D. Martinez. 2004. <span>“Unified Spatial Scaling of Species and Their Trophic Interactions.”</span> <em>Nature</em> 428 (6979): 167–71. <a href="https://doi.org/10.1038/nature02297">https://doi.org/10.1038/nature02297</a>.
 </div>
 <div id="ref-cohen1984" class="csl-entry" role="listitem">
-Cohen, J.E. &amp; Briand, F. (1984). Trophic links of community food webs. <em>Proc Natl Acad Sci U S A</em>, 81, 4105–4109.
+Cohen, J. E., and F. Briand. 1984. <span>“Trophic Links of Community Food Webs.”</span> <em>Proc Natl Acad Sci U S A</em> 81 (13): 4105–9.
 </div>
 <div id="ref-innes2018" class="csl-entry" role="listitem">
-Innes, M. (2018). <a href="https://doi.org/10.48550/ARXIV.1810.07951">Don’t unroll adjoint: Differentiating SSA-form programs</a>.
+Innes, Michael. 2018. <span>“Don’t Unroll Adjoint: Differentiating SSA-Form Programs.”</span> <a href="https://doi.org/10.48550/ARXIV.1810.07951">https://doi.org/10.48550/ARXIV.1810.07951</a>.
 </div>
 <div id="ref-macdonald2020" class="csl-entry" role="listitem">
-MacDonald, A.A.M., Banville, F. &amp; Poisot, T. (2020). <a href="https://doi.org/10.1016/j.patter.2020.100079">Revisiting the links-species scaling relationship in food webs</a>. <em>Patterns</em>, 1.
+MacDonald, Arthur Andrew Meahan, Francis Banville, and Timothée Poisot. 2020. <span>“Revisiting the Links-Species Scaling Relationship in Food Webs.”</span> <em>Patterns</em> 1 (0). <a href="https://doi.org/10.1016/j.patter.2020.100079">https://doi.org/10.1016/j.patter.2020.100079</a>.
 </div>
 <div id="ref-martinez1992" class="csl-entry" role="listitem">
-Martinez, N.D. (1992). <a href="http://www.jstor.org/stable/2462337">Constant connectance in community food webs</a>. <em>The American Naturalist</em>, 139, 1208–1218.
+Martinez, Néo D. 1992. <span>“Constant Connectance in Community Food Webs.”</span> <em>The American Naturalist</em> 139 (6): 1208–18. <a href="http://www.jstor.org/stable/2462337">http://www.jstor.org/stable/2462337</a>.
 </div>
 <div id="ref-morrison1999" class="csl-entry" role="listitem">
-Morrison, M. &amp; Morgan, M.S. (1999). <a href="https://doi.org/10.1017/cbo9780511660108.003">Models as mediating instruments</a>. Cambridge University Press, pp. 10–37.
+Morrison, Margaret, and Mary S. Morgan. 1999. <span>“Models as Mediating Instruments.”</span> In, 10–37. Cambridge University Press. <a href="https://doi.org/10.1017/cbo9780511660108.003">https://doi.org/10.1017/cbo9780511660108.003</a>.
 </div>
 </div>
 </section>

@@ -1,0 +1,50 @@
+/*-- scss:uses --*/
+@import url("https://fonts.googleapis.com/css2?family=PT+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=PT+Serif&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=PT+Mono&display=swap");
+
+/*-- scss:defaults --*/
+$font-family-sans-serif: "PT Sans", sans-serif;
+$font-family-monospace: "PT Mono", monospace;
+$grid-body-width: 800px !default;
+$font-size-base: 1.1rem;
+$font-size-root: 0.9rem;
+$h1-font-size: $font-size-base * calc(2.1  * 0.75) !default; /* 2.5 */
+$h2-font-size: $font-size-base * calc(1.7    * 0.75) !default; /* 2 */
+$h3-font-size: $font-size-base * calc(1.4 * 0.75) !default; /* 1.75 */
+
+/*-- scss:palette --*/
+$lab-green-dark: rgba(17, 79, 84, 1);
+$lab-green-light: rgba(29, 130, 101, 1);
+$lab-blue: rgba(46, 83, 133, 1);
+$grey-medium: rgba(211, 208, 203, 1);
+$grey-light: rgba(231, 229, 223, 1);
+
+$link-color: $lab-green-light;
+$body-color: black;
+$popover-bg: $grey-light;
+
+$primary: $lab-blue;
+
+$toc-color: $lab-blue;
+$toc-active-border: $lab-blue;
+$toc-inactive-border: $grey-light;
+
+/*-- scss:rules --*/
+.content {
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'PT Serif', sans-serif;
+        color: $lab-green-dark;
+    }
+    .title {
+        padding-bottom: 5em;
+    }
+    h2 {
+        padding-top: 2em;
+    }
+    .chapter-number, .header-section-number {
+        color: $grey-medium;
+        font-family: $font-family-sans-serif;
+        font-weight: 400;
+    }
+}

@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.4.386">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Data Science for Biodiversity Scientists - 8&nbsp; Explaining predictions</title>
+<title>Machine Learning for Biodiversity Scientists - 8&nbsp; Explaining predictions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -86,7 +86,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar docked">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -107,28 +107,13 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../">Data Science for Biodiversity Scientists</a> 
-        <div class="sidebar-tools-main">
-    <div class="dropdown">
-      <a href="" title="Download" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download"><i class="bi bi-download"></i></a>
-      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.pdf">
-              <i class="bi bi-bi-file-pdf pe-1"></i>
-            Download PDF
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item sidebar-tools-main-item" href="../Data-Science-for-Biodiversity-Scientists.epub">
-              <i class="bi bi-bi-journal pe-1"></i>
-            Download ePub
-            </a>
-          </li>
-      </ul>
-    </div>
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
     <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
 </div>
     </div>
@@ -174,13 +159,13 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable preparation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Selecting variables</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hyper-parameters tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -189,19 +174,36 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
   </div>
 </li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
+   
+  <ul>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link active" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/explanations.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -226,39 +228,42 @@ div.csl-indent {
 
 
 <p>In this chapter, we will</p>
-<p>navigate the accuracy-explainability for public policy <span class="citation" data-cites="bell2022">Bell <em>et al.</em> (<a href="../references.html#ref-bell2022" role="doc-biblioref">2022</a>)</span></p>
-<p>what is explainable differs between stakeholders <span class="citation" data-cites="amarasinghe2023">Amarasinghe <em>et al.</em> (<a href="../references.html#ref-amarasinghe2023" role="doc-biblioref">2023</a>)</span></p>
-<p>biodiversity need sustained model uptake <span class="citation" data-cites="weiskopf2022">Weiskopf <em>et al.</em> (<a href="../references.html#ref-weiskopf2022" role="doc-biblioref">2022</a>)</span></p>
-<p><span class="citation" data-cites="strumbelj2013">Štrumbelj &amp; Kononenko (<a href="../references.html#ref-strumbelj2013" role="doc-biblioref">2013</a>)</span> monte carlo approximation of shapley values</p>
-<p><span class="citation" data-cites="wadoux2023">Wadoux <em>et al.</em> (<a href="../references.html#ref-wadoux2023" role="doc-biblioref">2023</a>)</span> mapping of shapley values</p>
-<p><span class="citation" data-cites="mesgaran2014">Mesgaran <em>et al.</em> (<a href="../references.html#ref-mesgaran2014" role="doc-biblioref">2014</a>)</span> mapping of most important covariates</p>
-<p><span class="citation" data-cites="lundberg2017">Lundberg &amp; Lee (<a href="../references.html#ref-lundberg2017" role="doc-biblioref">2017</a>)</span> SHAP</p>
+<p>navigate the accuracy-explainability for public policy <span class="citation" data-cites="bell2022">Bell et al. (<a href="#ref-bell2022" role="doc-biblioref">2022</a>)</span></p>
+<p>what is explainable differs between stakeholders <span class="citation" data-cites="amarasinghe2023">Amarasinghe et al. (<a href="#ref-amarasinghe2023" role="doc-biblioref">2023</a>)</span></p>
+<p>biodiversity need sustained model uptake <span class="citation" data-cites="weiskopf2022">Weiskopf et al. (<a href="#ref-weiskopf2022" role="doc-biblioref">2022</a>)</span></p>
+<p><span class="citation" data-cites="strumbelj2013">Štrumbelj and Kononenko (<a href="#ref-strumbelj2013" role="doc-biblioref">2013</a>)</span> monte carlo approximation of shapley values</p>
+<p><span class="citation" data-cites="wadoux2023">Wadoux, Saby, and Martin (<a href="#ref-wadoux2023" role="doc-biblioref">2023</a>)</span> mapping of shapley values</p>
+<p><span class="citation" data-cites="mesgaran2014">Mesgaran, Cousens, and Webber (<a href="#ref-mesgaran2014" role="doc-biblioref">2014</a>)</span> mapping of most important covariates</p>
+<p><span class="citation" data-cites="lundberg2017">Lundberg and Lee (<a href="#ref-lundberg2017" role="doc-biblioref">2017</a>)</span> SHAP</p>
 <p>transfo in model = we can still apply these techniques instead of asking “what does PC1 = 0.4 mean”</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
-Amarasinghe, K., Rodolfa, K.T., Lamba, H. &amp; Ghani, R. (2023). <a href="https://doi.org/10.1017/dap.2023.2">Explainable machine learning for public policy: Use cases, gaps, and research directions</a>. <em>Data &amp; Policy</em>, 5.
+Amarasinghe, Kasun, Kit T. Rodolfa, Hemank Lamba, and Rayid Ghani. 2023. <span>“Explainable Machine Learning for Public Policy: Use Cases, Gaps, and Research Directions.”</span> <em>Data &amp; Policy</em> 5. <a href="https://doi.org/10.1017/dap.2023.2">https://doi.org/10.1017/dap.2023.2</a>.
 </div>
 <div id="ref-bell2022" class="csl-entry" role="listitem">
-Bell, A., Solano-Kamaiko, I., Nov, O. &amp; Stoyanovich, J. (2022). <a href="https://doi.org/10.1145/3531146.3533090">It<span>’</span>s just not that simple: An empirical study of the accuracy-explainability trade-off in machine learning for public policy</a>. <em>2022 ACM Conference on Fairness, Accountability, and Transparency</em>.
+Bell, Andrew, Ian Solano-Kamaiko, Oded Nov, and Julia Stoyanovich. 2022. <span>“It<span>’</span>s Just Not That Simple: An Empirical Study of the Accuracy-Explainability Trade-Off in Machine Learning for Public Policy.”</span> <em>2022 ACM Conference on Fairness, Accountability, and Transparency</em>, June. <a href="https://doi.org/10.1145/3531146.3533090">https://doi.org/10.1145/3531146.3533090</a>.
 </div>
 <div id="ref-lundberg2017" class="csl-entry" role="listitem">
-Lundberg, S.M. &amp; Lee, S.-I. (2017). <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf">A unified approach to interpreting model predictions</a>. In: <em>Advances in neural information processing systems</em> (eds. Guyon, I., Luxburg, U.V., Bengio, S., Wallach, H., Fergus, R., Vishwanathan, S., et al.). Curran Associates, Inc.
+Lundberg, Scott M, and Su-In Lee. 2017. <span>“A Unified Approach to Interpreting Model Predictions.”</span> In <em>Advances in Neural Information Processing Systems</em>, edited by I. Guyon, U. Von Luxburg, S. Bengio, H. Wallach, R. Fergus, S. Vishwanathan, and R. Garnett. Vol. 30. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf">https://proceedings.neurips.cc/paper_files/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf</a>.
 </div>
 <div id="ref-mesgaran2014" class="csl-entry" role="listitem">
-Mesgaran, M.B., Cousens, R.D. &amp; Webber, B.L. (2014). <a href="https://doi.org/10.1111/ddi.12209">Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models</a>. <em>Diversity and Distributions</em>, 20, 1147–1159.
+Mesgaran, Mohsen B., Roger D. Cousens, and Bruce L. Webber. 2014. <span>“Here Be Dragons: A Tool for Quantifying Novelty Due to Covariate Range and Correlation Change When Projecting Species Distribution Models.”</span> Edited by Janet Franklin. <em>Diversity and Distributions</em> 20 (10): 1147–59. <a href="https://doi.org/10.1111/ddi.12209">https://doi.org/10.1111/ddi.12209</a>.
 </div>
 <div id="ref-strumbelj2013" class="csl-entry" role="listitem">
-Štrumbelj, E. &amp; Kononenko, I. (2013). <a href="https://doi.org/10.1007/s10115-013-0679-x">Explaining prediction models and individual predictions with feature contributions</a>. <em>Knowledge and Information Systems</em>, 41, 647–665.
+Štrumbelj, Erik, and Igor Kononenko. 2013. <span>“Explaining Prediction Models and Individual Predictions with Feature Contributions.”</span> <em>Knowledge and Information Systems</em> 41 (3): 647–65. <a href="https://doi.org/10.1007/s10115-013-0679-x">https://doi.org/10.1007/s10115-013-0679-x</a>.
 </div>
 <div id="ref-wadoux2023" class="csl-entry" role="listitem">
-Wadoux, A.M.J.-C., Saby, N.P.A. &amp; Martin, M.P. (2023). <a href="https://doi.org/10.5194/soil-9-21-2023">Shapley values reveal the drivers of soil organic carbon stock prediction</a>. <em>SOIL</em>, 9, 21–38.
+Wadoux, Alexandre M. J.-C., Nicolas P. A. Saby, and Manuel P. Martin. 2023. <span>“Shapley Values Reveal the Drivers of Soil Organic Carbon Stock Prediction.”</span> <em>SOIL</em> 9 (1): 21–38. <a href="https://doi.org/10.5194/soil-9-21-2023">https://doi.org/10.5194/soil-9-21-2023</a>.
 </div>
 <div id="ref-weiskopf2022" class="csl-entry" role="listitem">
-Weiskopf, S.R., Harmáčková, Z.V., Johnson, C.G., Londoño-Murcia, M.C., Miller, B.W., Myers, B.J.E., <em>et al.</em> (2022). <a href="https://doi.org/10.1016/j.envsoft.2022.105318">Increasing the uptake of ecological model results in policy decisions to improve biodiversity outcomes</a>. <em>Environmental Modelling &amp; Software</em>, 149, 105318.
+Weiskopf, Sarah R., Zuzana V. Harmáčková, Ciara G. Johnson, María Cecilia Londoño-Murcia, Brian W. Miller, Bonnie J. E. Myers, Laura Pereira, et al. 2022. <span>“Increasing the Uptake of Ecological Model Results in Policy Decisions to Improve Biodiversity Outcomes.”</span> <em>Environmental Modelling &amp; Software</em> 149 (March): 105318. <a href="https://doi.org/10.1016/j.envsoft.2022.105318">https://doi.org/10.1016/j.envsoft.2022.105318</a>.
 </div>
 </div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

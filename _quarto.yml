@@ -3,77 +3,18 @@ project:
   output-dir: docs
   execute-dir: project
 
+metadata-files:
+  - _book.yml
+  - _format.yml
+
 execute:
   freeze: true
 
-book:
-  title: "Data Science for Biodiversity Scientists"
-  subtitle: "An introduction to concepts and practices"
-  page-navigation: false
-  back-to-top-navigation: true
-  page-footer: "This work is licensed under the [CC BY-NC 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/)" 
-  language: en-CA
-  license: cc-by-nc
-  search:
-    location: sidebar
-    type: overlay
-    collapse-after: 1
-    limit: 10
-    copy-button: true
-  sidebar:
-    style: floating
-    border: false
-  downloads: [pdf, epub]
-  author:
-    - name: "Timothée Poisot"
-      orcid: 0000-0002-0735-5184
-      email: timothee.poisot@umontreal.ca
-      affiliations:
-        - name: Université de Montréal
-          department: Sciences Biologiques
-          city: Montréal
-          region: QC
-          country: Canada
-  date: last-modified
-  chapters:
-    - index.qmd
-    - intro.qmd
-    - chapters/clustering.qmd
-    - chapters/gradientdescent.qmd
-    - chapters/crossvalidation.qmd
-    - chapters/classification.qmd
-    - chapters/variableselection.qmd
-    - chapters/learningcurves.qmd
-    - chapters/explanations.qmd
-    - references.qmd
+filters:
+  - section-bibliographies
 
 bibliography: references.bib
-csl: https://www.zotero.org/styles/ecology-letters
+reference-section-title: References
+citeproc: true
 
-preview:
-  port: 4200
-
-format:
-  html:
-    theme: zephyr
-    linestretch: 1.5
-    fig-cap-location: margin
-    tbl-cap-location: margin
-    grid:
-      sidebar-width: 350px
-      body-width: 850px
-      margin-width: 350px
-      gutter-width: 2rem
-  pdf:
-    documentclass: scrbook
-    fig-cap-location: margin
-    tbl-cap-location: top
-    linkcolor: SteelBlue4
-    fig-pos: 'bt'
-    tbl-pos: 'bt'
-    toc: true
-    toc-depth: 2
-    mainfont: TeX Gyre Termes
-    mathfont: TeX Gyre Termes
-    sansfont: TeX Gyre Heros
-    monofont: TeX Gyre Cursor
+#csl: https://www.zotero.org/styles/ecology-letters
