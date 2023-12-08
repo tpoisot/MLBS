@@ -1,4 +1,4 @@
-# Hyper-parameters tuning {#sec-tuning}
+# Tuning hyper-parameters {#sec-tuning}
 
 In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­@sec-classification and @sec-predictors.
 
