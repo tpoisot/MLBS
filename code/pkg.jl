@@ -1,16 +1,12 @@
 _code_path = joinpath(dirname(Base.active_project()), "code")
 
-import CSV
-import Downloads
-import Images
-import JLD
+import JLD2
 import StatsAPI
 using CairoMakie
-using DataFrames
+import GeoMakie
 using Distributions
 using GLM
 using MultivariateStats
-using PrettyTables
 using SpeciesDistributionToolkit
 using Statistics
 using StatsBase
@@ -31,19 +27,3 @@ include(joinpath(_code_path, "palettes.jl"))
 
 rng = Random.default_rng()
 Random.seed!(rng, 12345)
-
-function iqr(x)
-    if all(isnan.(x))
-        return 0.0
-    else
-        return first(diff(quantile(filter(!isnan, x), [0.25, 0.75])))
-    end
-end
-
-function entropy(f)
-    p = [f, 1 - f]
-    if minimum(p) == 0.0
-        return 0.0
-    end
-    return -sum(p .* log2.(p))
-end

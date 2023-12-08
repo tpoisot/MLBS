@@ -1,9 +1,9 @@
-function rscale(Y; q=(0.01, 0.99))
+function rscale(Y; q = (0.01, 0.99))
     m, M = quantile(vec(Y), q)
-    return Images.clamp01.((Y .- m)./(M - m))
+    return Images.clamp01.((Y .- m) ./ (M - m))
 end
 
-function colorcube(R, G, B; natural=false)
+function colorcube(R, G, B; natural = false)
     cube = zeros(eltype(B), (3, size(permutedims(B))...))
 
     if natural
@@ -16,11 +16,11 @@ function colorcube(R, G, B; natural=false)
         qB = rscale(B)
     end
 
-    cube[1,:,:] .= permutedims(qR)
-    cube[2,:,:] .= permutedims(qG)
-    cube[3,:,:] .= permutedims(qB)
+    cube[1, :, :] .= permutedims(qR)
+    cube[2, :, :] .= permutedims(qG)
+    cube[3, :, :] .= permutedims(qB)
 
-    tfile = tempname()*".png"
+    tfile = tempname() * ".png"
     save(tfile, map(Images.clamp01nan, Images.colorview(Images.RGB, cube)))
     return tfile
 end

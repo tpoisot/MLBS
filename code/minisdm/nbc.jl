@@ -8,7 +8,7 @@ function train!(
     nbc::NBC,
     y::Vector{Bool},
     X::Matrix{T};
-    prior=0.5
+    prior = 0.5,
 ) where {T <: Number}
     X₊ = X[:, findall(y)]
     X₋ = X[:, findall(.!y)]

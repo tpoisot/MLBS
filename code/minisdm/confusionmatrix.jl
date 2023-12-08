@@ -21,6 +21,18 @@ function ConfusionMatrix(pred::Vector{T}, truth::Vector{Bool}) where {T <: Numbe
     return ConfusionMatrix(pred, truth, 0.5)
 end
 
+function ConfusionMatrix(pred::BitVector, args...)
+    return ConfusionMatrix(convert(Vector{Bool}, pred), args...)
+end
+
+function ConfusionMatrix(pred::BitVector, truth::BitVector, args...)
+    return ConfusionMatrix(
+        convert(Vector{Bool}, pred),
+        convert(Vector{Bool}, truth),
+        args...,
+    )
+end
+
 function Base.Matrix(c::ConfusionMatrix)
     return [c.tp c.fp; c.fn c.tn]
 end
@@ -43,16 +55,20 @@ f1(M::ConfusionMatrix) = 2 * (ppv(M) * tpr(M)) / (ppv(M) + tpr(M))
 trueskill(M::ConfusionMatrix) = tpr(M) + tnr(M) - 1.0
 markedness(M::ConfusionMatrix) = ppv(M) + npv(M) - 1.0
 dor(M::ConfusionMatrix) = plr(M) / nlr(M)
+
 function κ(M::ConfusionMatrix)
     return 2.0 * (M.tp * M.tn - M.fn * M.fp) /
            ((M.tp + M.fp) * (M.fp + M.tn) + (M.tp + M.fn) * (M.fn + M.tn))
 end
+
 function mcc(M::ConfusionMatrix)
-    ret = (M.tp*M.tn-M.fp*M.fn)/sqrt((M.tp+M.fp)*(M.tp+M.fn)*(M.tn+M.fp)*(M.tn+M.fn))
+    ret =
+        (M.tp * M.tn - M.fp * M.fn) /
+        sqrt((M.tp + M.fp) * (M.tp + M.fn) * (M.tn + M.fp) * (M.tn + M.fn))
     return isnan(ret) ? 0.0 : ret
 end
 
-function auc(x::Array{T}, y::Array{T}) where {T<:Number}
+function auc(x::Array{T}, y::Array{T}) where {T <: Number}
     S = zero(Float64)
     for i in 2:length(x)
         S += (x[i] - x[i - 1]) * (y[i] + y[i - 1]) * 0.5

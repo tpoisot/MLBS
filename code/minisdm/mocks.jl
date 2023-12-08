@@ -9,7 +9,6 @@ function noskill(labels::Vector{Bool})
 end
 
 function coinflip(labels::Vector{Bool})
-    n = length(labels)
     p = mean(labels)
     tp = 1 / 2 * p
     tn = 1 / 2 * p
