@@ -1,4 +1,6 @@
 _code_path = joinpath(dirname(Base.active_project()), "code")
+_data_path = joinpath(dirname(Base.active_project()), "data")
+_models_path = joinpath(dirname(Base.active_project()), "models")
 
 import JLD2
 import StatsAPI
