@@ -9,7 +9,6 @@ As we mentioned in the introduction, a core idea of data science is that things 
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "colorcube.jl"))
-include(joinpath(_code_path, "landsat.jl"))
 include(joinpath(_code_path, "daviesbouldin.jl"))
 include(joinpath(_code_path, "palettes.jl"))
 ```
@@ -71,9 +70,9 @@ If we were to invent a time machine, and go stand directly under Landsat 9 at th
 ```{julia}
 #| label: fig-kmeans-composites
 #| echo: false
-#| fig-cap: The Landsat 9 data are combined into the "Natural Color" image, in which the red, green, and blue bands are mapped to their respective channels (left). The other composites is a 6-5-4 image meant to show differences between urban areas, vegetations, and crops. Note that the true-color composite is slightly distored compared to the colors of the landscape we expect; this is because natural colors are difficult to reproduce accurately.
-rgb_cube = colorcube(R, G, B; natural=true)
-veg_cube = colorcube(S1, N, R)
+#| fig-cap: The Landsat 8 data are combined into the "Natural Color" image, in which the red, green, and blue bands are mapped to their respective channels (left). The other composites is a 6-5-4 image meant to show differences between urban areas, vegetations, and crops. Note that the true-color composite is slightly distored compared to the colors of the landscape we expect; this is because natural colors are difficult to reproduce accurately.
+rgb_cube = colorcube(R, G, B)
+veg_cube = colorcube(SWIR1, NIR, R)
 
 fig = Figure(resolution=(500, 480))
 
@@ -112,10 +111,10 @@ NDVI = NVI(NIR, R)
 NDWI = NVI(G, NIR)
 NDMI = NVI(NIR, SWIR1)
 
-X = zeros(Float32, (3, prod(size(ndvi))...))
-X[1,:] .= vec(ndvi)
-X[2,:] .= vec(ndwi)
-X[3,:] .= vec(ndmi)
+X = zeros(Float32, (3, prod(size(NDVI))...))
+X[1,:] .= values(NDVI)
+X[2,:] .= values(NDWI)
+X[3,:] .= values(NDMI)
 ```
 
 We can look at the relationship between the NDVI and NDMI data [@fig-kmeans-hexbin]. For example, NDMI values around -0.1 are [low-canopy cover with low water stress](https://eos.com/make-an-analysis/ndmi/); NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time [@zheng2021]. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds [@mcfeeters2013].
@@ -126,7 +125,7 @@ We can look at the relationship between the NDVI and NDMI data [@fig-kmeans-hexb
 #| fig-cap: The pixels acquired from Landsat 9 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
 fig = Figure(resolution=(500,300))
 ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-hexbin!(ax, vec(ndvi), vec(ndmi), colormap=cgrad(incandescent), bins=20)
+hexbin!(ax, NDVI, NDMI, colormap=cgrad(incandescent), bins=20)
 tightlimits!(ax)
 current_figure()
 ```
@@ -237,7 +236,7 @@ Before we do anything else, we need to run our algorithm with a random pick of h
 #| label: permute-cluster-dimensions
 #| echo: false
 #| output: false
-C = permutedims(reshape(assignments(clusters), size(ndvi)))
+C = permutedims(reshape(assignments(clusters), size(NDVI)))
 ```
 
 ```{julia}
