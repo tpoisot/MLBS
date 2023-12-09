@@ -1,5 +1,5 @@
 # Types to fit
-types_to_train = [:PCA, :PPCA, :KernelPCA, :Whitening, :MDS, :MetricMDS]
+types_to_train = [:PCA, :PPCA, :KernelPCA, :Whitening]
 types_with_transform = [:Whitening]
 
 Base.@kwdef mutable struct MultivariateTransform{T} <: SDMTransformer
