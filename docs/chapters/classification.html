@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.386">
+<meta name="generator" content="quarto-1.4.429">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,7 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -254,7 +254,7 @@ div.csl-indent {
 </header>
 
 
-<p>In the previous chapters, we have focused our efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <span class="quarto-unresolved-ref">?sec-variable-selection</span>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
+<p>In the previous chapters, we have focused on efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <span class="quarto-unresolved-ref">?sec-variable-selection</span>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
 <section id="the-problem-distribution-of-an-endemic-species" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="the-problem-distribution-of-an-endemic-species"><span class="header-section-number">5.1</span> The problem: distribution of an endemic species</h2>
 <p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, <em>Sitta whiteheadi</em>. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as “vulnerable to extinction” by the International Union for the Conservation of Nature. <span class="citation" data-cites="barbet-massin2011">Barbet-Massin and Jiguet (<a href="#ref-barbet-massin2011" role="doc-biblioref">2011</a>)</span> nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.</p>
@@ -420,27 +420,27 @@ Figure&nbsp;5.2: Overview of the scores for the Matthew’s correlation coeffici
 <tbody>
 <tr class="odd">
 <td>Accuracy</td>
-<td>0.885</td>
-<td>0.875</td>
+<td>0.879</td>
+<td>0.882</td>
 <td>0.505</td>
 </tr>
 <tr class="even">
 <td>NPV</td>
-<td>0.883</td>
-<td>0.875</td>
+<td>0.857</td>
+<td>0.861</td>
 <td>0.449</td>
 </tr>
 <tr class="odd">
 <td>PPV</td>
-<td>0.89</td>
-<td>0.878</td>
+<td>0.899</td>
+<td>0.9</td>
 <td>0.551</td>
 </tr>
 <tr class="even">
 <td>MCC</td>
-<td>0.769</td>
-<td>0.749</td>
-<td>-0.0</td>
+<td>0.757</td>
+<td>0.762</td>
+<td>0.0</td>
 </tr>
 </tbody>
 </table>
@@ -469,7 +469,7 @@ Figure&nbsp;5.3: Overview of the decision boundary between the positive (blue) a
 </div>
 </div>
 <p>The output of this simulation is given in <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>5.3</span></a>. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.</p>
-<p>The line that separates the two classes is usually referred to as the “decision boundary” of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.</p>
+<p>The line that separates the two classes is usually refered to as the “decision boundary” of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>Take a minute to think about which places are more likely to have lower temperatures on an island. Is there an additional layer of geospatial information we could add that would be informative?</p>
@@ -486,7 +486,7 @@ Figure&nbsp;5.3: Overview of the decision boundary between the positive (blue) a
 <img src="classification_files/figure-html/fig-classification-range-output-1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.4: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the uncertainty in the prediction derived from bootstrap replicates (right). As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of <em>Sitta whiteheadi</em>.
+Figure&nbsp;5.4: Occurence data (left), prediction of presences in space (middle), with the uncertainty in the prediction derived from bootstrap replicates (right). As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of <em>Sitta whiteheadi</em>.
 </figcaption>
 </figure>
 </div>
@@ -495,7 +495,7 @@ Figure&nbsp;5.4: Occurence data (left; presences are in orange and pseudo-absenc
 </section>
 <section id="what-is-an-acceptable-model" class="level3" data-number="5.4.5">
 <h3 data-number="5.4.5" class="anchored" data-anchor-id="what-is-an-acceptable-model"><span class="header-section-number">5.4.5</span> What is an acceptable model?</h3>
-<p>When comparing the prediction to the spatial distribution of occurrences (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>), it appears that the model identifies an area in the northeast where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the <em>purpose</em> of running this model – if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model.</p>
+<p>When comparing the prediction to the spatial distribution of occurrences (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>), it appears that the model identifies an area in the northwest where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the <em>purpose</em> of running this model – if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model.</p>
 </section>
 </section>
 <section id="conclusion" class="level2" data-number="5.5">
