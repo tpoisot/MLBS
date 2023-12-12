@@ -24,7 +24,6 @@ ul.task-list li input[type="checkbox"] {
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
-  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -256,7 +255,7 @@ div.csl-indent {
 <p>Doing do will require to introduce several new concepts, and so the “correct” way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in <a href="#sec-gradientdescent-problem" class="quarto-xref"><span>Section&nbsp;3.2</span></a>) is very simple; in fact, the empirical data looks more fake than many simulated datasets!</p>
 <section id="sec-gradientdescent-trainedmodel" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-gradientdescent-trainedmodel"><span class="header-section-number">3.1</span> A digression: what is a trained model?</h2>
-<p>Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument <span class="citation" data-cites="morrison1999">(the model itself, see <em>e.g.</em> <a href="#ref-morrison1999" role="doc-biblioref">Morrison and Morgan 1999</a>)</span>. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.</p>
+<p>Models are data. When a model is trained, it represents a series of measurements (its parameters), taken on a representation of the natural world (the training data), through a specific instrument <span class="citation" data-cites="morrison1999">(the model itself, see <em>e.g.</em> <a href="#ref-morrison1999" role="doc-biblioref">Morrison &amp; Morgan, 1999</a>)</span>. A trained model is, therefore, capturing our understanding of a specific situation we encountered. We need to be very precise when defining what, exactly, a model describes. In fact, we need to take a step back and try to figure out where the model stops.</p>
 <p>As we will see in this chapter, then in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, and finally in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, the fact of training a model means that there is a back and forth between the algorithm we train, the data we use for training, and the criteria we set to define the performance of the trained model. The algorithm bound to its dataset is the <em>machine</em> we train in machine learning.</p>
 <p>Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In <a href="clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we ended up with a machine (the trained <em>k</em>-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.</p>
 <p>For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to <em>explain</em> how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>), and is more related to explaining the process, the “outer core” of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?</p>
@@ -264,10 +263,10 @@ div.csl-indent {
 <section id="sec-gradientdescent-problem" class="level2 page-columns page-full" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="sec-gradientdescent-problem"><span class="header-section-number">3.2</span> The problem: how many interactions in a food web?</h2>
 <p>One of the earliest observation that ecologists made about food webs is that when there are more species, there are more interactions. A remarkably insightful crowd, food web ecologists. Nevertheless, it turns out that this apparently simple question had received a few different answers over the years.</p>
-<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen and Briand (<a href="#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
+<p>The initial model was proposed by <span class="citation" data-cites="cohen1984">Cohen &amp; Briand (<a href="#ref-cohen1984" role="doc-biblioref">1984</a>)</span>: the number of interactions <span class="math inline">\(L\)</span> scales linearly with the number of species <span class="math inline">\(S\)</span>. After all, we can assume that when averaging over many consumers, there will be an average diversity of resources they consume, and so the number of interactions could be expressed as <span class="math inline">\(L \approx b\times S\)</span>.</p>
 <p>Not so fast, said <span class="citation" data-cites="martinez1992">Martinez (<a href="#ref-martinez1992" role="doc-biblioref">1992</a>)</span>. When we start looking a food webs with more species, the increase of <span class="math inline">\(L\)</span> with regards to <span class="math inline">\(S\)</span> is superlinear. Thinking in ecological terms, maybe we can argue that consumers are flexible, and that instead of sampling a set number of resources, they will sample a set proportion of the number of consumer-resource combinations (of which there are <span class="math inline">\(S^2\)</span>). In this interpretation, <span class="math inline">\(L \approx b\times S^2\)</span>.</p>
-<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="#ref-brose2004" role="doc-biblioref">Brose et al. 2004</a>)</span>.</p>
-<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="#ref-macdonald2020" role="doc-biblioref">MacDonald, Banville, and Poisot 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
+<p>But the square term can be relaxed; and there is no reason not to assume a power law, with <span class="math inline">\(L\approx b\times S^a\)</span>. This last formulation has long been accepted as the most workable one, because it is possible to approximate values of its parameters using other ecological processes <span class="citation" data-cites="brose2004">(<a href="#ref-brose2004" role="doc-biblioref">Brose et al., 2004</a>)</span>.</p>
+<p>The “reality” (<em>i.e.</em> the relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(L\)</span> that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula <span class="citation" data-cites="macdonald2020">(<a href="#ref-macdonald2020" role="doc-biblioref">MacDonald et al., 2020</a>)</span>. But for the purpose of this chapter, figuring out the values of <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> from empirical data is a very instructive exercise.</p>
 <p>In <a href="#fig-gradient-data" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>, we can check that there is a linear relationship between the natural log of the number of species and the natural log of the number of links. This is not surprising! If we assume that <span class="math inline">\(L \approx b\times S^a\)</span>, then we can take the log of both sides, and we get <span class="math inline">\(\text{log}\, L \approx a \times \text{log}\, S + \text{log}\,b\)</span>. This is linear model, and so we can estimate its parameters using linear regression!</p>
 <div id="cell-fig-gradient-data" class="cell page-columns page-full" data-execution_count="3">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="4">
@@ -366,7 +365,7 @@ p
 \frac{\partial f}{\partial b}(p)
 \end{bmatrix}\,.
 \tag{3.3}\]</span></span></p>
-<p>This indicates how changes in <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> will <em>increase</em> the error. In order to have a more explicit formulation, all we have to do is figure out an expression for both of the partial derivatives. In practice, we can let auto-differentiation software calculate the gradient for us <span class="citation" data-cites="innes2018">(<a href="#ref-innes2018" role="doc-biblioref">Innes 2018</a>)</span>; these packages are now advanced enough that they can take the gradient of code directly.</p>
+<p>This indicates how changes in <span class="math inline">\(m\)</span> and <span class="math inline">\(b\)</span> will <em>increase</em> the error. In order to have a more explicit formulation, all we have to do is figure out an expression for both of the partial derivatives. In practice, we can let auto-differentiation software calculate the gradient for us <span class="citation" data-cites="innes2018">(<a href="#ref-innes2018" role="doc-biblioref">Innes, 2018</a>)</span>; these packages are now advanced enough that they can take the gradient of code directly.</p>
 <p>Solving <span class="math inline">\((\partial f / \partial m)(p)\)</span> and <span class="math inline">\((\partial f / \partial c)(p)\)</span> is easy enough:</p>
 <p><span id="eq-gradientdescent-gradientexplicit"><span class="math display">\[
 \nabla f\left(
@@ -589,24 +588,24 @@ f(p) = \text{loss} + \lambda \times g(\beta) \,,
 </section>
 <section id="bibliography" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-brose2004" class="csl-entry" role="listitem">
-Brose, Ulrich, Annette Ostling, Kateri Harrison, and Neo D. Martinez. 2004. <span>“Unified Spatial Scaling of Species and Their Trophic Interactions.”</span> <em>Nature</em> 428 (6979): 167–71. <a href="https://doi.org/10.1038/nature02297">https://doi.org/10.1038/nature02297</a>.
+Brose U., Ostling A., Harrison K. &amp; Martinez N.D. 2004. <a href="https://doi.org/10.1038/nature02297">Unified spatial scaling of species and their trophic interactions</a>. Nature. <strong>428</strong>: 167–171.
 </div>
 <div id="ref-cohen1984" class="csl-entry" role="listitem">
-Cohen, J. E., and F. Briand. 1984. <span>“Trophic Links of Community Food Webs.”</span> <em>Proc Natl Acad Sci U S A</em> 81 (13): 4105–9.
+Cohen J.E. &amp; Briand F. 1984. Trophic links of community food webs. Proc Natl Acad Sci U S A. <strong>81</strong>: 4105–4109.
 </div>
 <div id="ref-innes2018" class="csl-entry" role="listitem">
-Innes, Michael. 2018. <span>“Don’t Unroll Adjoint: Differentiating SSA-Form Programs.”</span> <a href="https://doi.org/10.48550/ARXIV.1810.07951">https://doi.org/10.48550/ARXIV.1810.07951</a>.
+Innes M. 2018. <a href="https://doi.org/10.48550/ARXIV.1810.07951">Don’t unroll adjoint: Differentiating SSA-form programs</a>.
 </div>
 <div id="ref-macdonald2020" class="csl-entry" role="listitem">
-MacDonald, Arthur Andrew Meahan, Francis Banville, and Timothée Poisot. 2020. <span>“Revisiting the Links-Species Scaling Relationship in Food Webs.”</span> <em>Patterns</em> 1 (0). <a href="https://doi.org/10.1016/j.patter.2020.100079">https://doi.org/10.1016/j.patter.2020.100079</a>.
+MacDonald A.A.M., Banville F. &amp; Poisot T. 2020. <a href="https://doi.org/10.1016/j.patter.2020.100079">Revisiting the links-species scaling relationship in food webs</a>. Patterns. <strong>1</strong>:
 </div>
 <div id="ref-martinez1992" class="csl-entry" role="listitem">
-Martinez, Néo D. 1992. <span>“Constant Connectance in Community Food Webs.”</span> <em>The American Naturalist</em> 139 (6): 1208–18. <a href="http://www.jstor.org/stable/2462337">http://www.jstor.org/stable/2462337</a>.
+Martinez N.D. 1992. <a href="http://www.jstor.org/stable/2462337">Constant connectance in community food webs</a>. The American Naturalist. <strong>139</strong>: 1208–1218.
 </div>
 <div id="ref-morrison1999" class="csl-entry" role="listitem">
-Morrison, Margaret, and Mary S. Morgan. 1999. <span>“Models as Mediating Instruments.”</span> In, 10–37. Cambridge University Press. <a href="https://doi.org/10.1017/cbo9780511660108.003">https://doi.org/10.1017/cbo9780511660108.003</a>.
+Morrison M. &amp; Morgan M.S. 1999. <a href="https://doi.org/10.1017/cbo9780511660108.003">Models as mediating instruments</a>. pp. 10–37. Cambridge University Press,
 </div>
 </div>
 </section>

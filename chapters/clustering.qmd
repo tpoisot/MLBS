@@ -48,7 +48,7 @@ SWIR2 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengi
 In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 8 scene [@vermote2016], for which we have access to many different bands.
 
 | Band   | Measure                         | Notes                                           |
-|------------------|---------------------|----------------------------------|
+|------------------|---------------------|---------------------------------|
 | 1      | Aerosol                         | Good proxy for Chl. in oceans                   |
 | 2      | Visible blue                    |                                                 |
 | 3      | Visible green                   |                                                 |
@@ -59,9 +59,7 @@ In fact, we are going to use an image with many dimensions: the data in this cha
 | 9      | Cirrus band                     | Can pick up high and thin clouds                |
 | 10, 11 | Thermal infrared                |                                                 |
 
-: Overview of the bands in a Landsat 8 scene. The data from this chapter were downloaded from [LandsatLook].
-
-  [LandsatLook]: https://landsatlook.usgs.gov
+: Overview of the bands in a Landsat 8 scene. The data from this chapter were downloaded from the Google Earth Engine API.
 
 By using the data present in the channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).
 
@@ -101,7 +99,7 @@ current_figure()
 In @fig-kmeans-composites, we compare the natural color reconstruction (top) to a false color composite. All of the panels in @fig-kmeans-composites represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: *what we measure defines what we can see*. In order to tell something ecologically meaningful about this place, we need to look at it in the "right" way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale [@gonzalez2023], there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily right for all problems.
 
 ::: column-margin
-We will revisit the issue of variable selection and feature engineering in @sec-variable-selection.
+We will revisit the issue of variable selection and feature engineering in @sec-predictors.
 :::
 
 So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the *right* data. In fact, they may not hold information that is relevant to our question *at all*; or worse, they can hold more noise than signal. The area we will work on in this chapter is a very small crop of a Landsat 8 scene, showing a median of the images with no cloud, for the year 2017, at a 25m resolution, for the southernmost part of Corsica. This is an interesting area because it has a high variety of environments: large bodies of water, forested areas, urban areas, and at least one airport.
@@ -154,7 +152,7 @@ In order to understand the theory underlying *k*-means, we will work backwards f
 ### Inputs and parameters
 
 ::: column-margin
-Throughout this book, we will use $\mathbf{X}$ to note the matrix of features, and $\mathbf{y}$ to note the vector of labels. Instances are columns of the features matrix, noted $\mathbf{x}_i$.
+Throughout this book, we will use $\mathbf{X}$ to note the matrix of features, and $\mathbf{y}$ to note the vector of labels. Instances are columns of the matrix of features, and noted $\mathbf{x}_i$. When we need to represent a vector $\mathbf{v}$ as a row vector, it will be noted $\mathbf{v}^\top$.
 :::
 
 In *k*-means, a set of observations $\mathbf{x}_i$ are assigned to a set of classes $\mathbf{C}$, also called the clusters. All $\mathbf{x}_i$ are vectors with the same dimension (we will call it $f$, for *features*), and we can think of our observations as a matrix of features $\mathbf{X}$ of size $(f, n)$, with $f$ features and $n$ observations (the columns of this matrix).
@@ -164,7 +162,7 @@ The number of classes of $\mathbf{C}$ is $|\mathbf{C}| = k$, and $k$ is an hyper
 ### Assigning instances to classes
 
 ::: column-margin
-The correct distance measure to use depends on what is appropriate for the data!
+The correct distance measure to use depends on what is appropriate for the data! See for example @dove2023 for time-series, or @legendre2014 for community composition data.
 :::
 
 Instances are assigned to the class for which the distance between themselves and the centroid of this class is lower than the distance between themselves and the centroid of any other class. To phrase it differently, the class membership of an instance $\mathbf{x}_i$ is given by
@@ -262,7 +260,7 @@ C = permutedims(reshape(assignments(clusters), size(NDVI)))
 #| fig-cap: After iterating the k-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, i.e. we want to see what the landscape would look like when divided into three categories.
 fig = Figure(; resolution=(500, 240))
 ax = CairoMakie.Axis(fig[1,1]; aspect=DataAspect())
-heatmap!(ax, C; colormap=light[1:3])
+heatmap!(ax, C; colormap=medium[1:3])
 hidedecorations!(ax)
 current_figure()
 ```
@@ -292,7 +290,7 @@ Note that we will play a little trick on our data here. We know from @fig-kmeans
 #| echo: false
 #| output: false
 msk = convert(Bool, similar(NDVI))
-msk.grid[findall(isone, permutedims(C))] .= true
+msk.grid[findall(isequal(C[1]), permutedims(C))] .= true # We know the first pixel in C is water
 replace!(msk, true => nothing)
 replace!(msk, false => true)
 
@@ -397,7 +395,7 @@ The relative size of the clusters (as well as the position of their centroids) i
 ```{julia}
 #| label: clustering-centers
 #| echo: false
-tbl = ["| Cluster | Cover | NDVI | NDWI | NDMI | NBR |", "|-----|--------|-------|------|--|"]
+tbl = ["| Cluster | Cover | NDVI | NDWI | NDMI | NBR |", "|-----|-----|---|-------|------|--|"]
 ctr = clusters.centers
 for cluster in axes(ctr, 2)
     cover = round(Int, count(clusters.assignments .== cluster)/length(clusters.assignments)*100)
@@ -418,14 +416,14 @@ catch e
 end
 ```
 
+The area of the space of parameters covered by each cluster in represented in @fig-kmeans-clustering, and this result is actually not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.
+
 ::: column-margin
 This behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes], and [David Lawrence Miller's Beyoncé palettes]. Let it never again be said that ecologists should not be trusted with machine learning techniques.
 :::
 
   [Karthik Ram's Wes Anderson palettes]: https://github.com/karthik/wesanderson
   [David Lawrence Miller's Beyoncé palettes]: https://github.com/dill/beyonce
-
-The area of the space of parameters covered by each cluster in represented in @fig-kmeans-clustering, and this result is actually not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.
 
 By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in *k*-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes *k*-means closer to (or at least most efficient as) a method for quantization [@gray1984].
 
@@ -444,13 +442,15 @@ current_figure()
 
 Yes.
 
-Well, it depends. Deciding what we mean by "a model" is actually an interesting question to ponder. When we apply *k*-means to the data, it brings us additional information, specifically the class to which we can assign the different pixels. This is creating novel information from the data, and this should be sufficient to accept that *k*-means is a model.
+Well, it depends.
 
-But maybe we espouse a more ambitious definition of a model, and we are specifically looking for a model that can makes prediction on data that we had not previously used. In that case, *k*-means still qualifies. Imagine, for a moment, a new pixel. This is a little unrealistic as, unless some unforeseen geological events took place, all of the pixels we could describe today for this dataset already existed in 2017. But imagine we changed the bounding box of the scene, and we now have spectral data for a few thousand pixels we had not previously observed.
+Deciding what we mean by "a model" is actually an interesting question to ponder. When we apply *k*-means to the data, it brings us additional information, specifically the class to which we can assign the different pixels. This is creating novel information from the data, and this should be sufficient to accept that *k*-means is a model.
+
+But maybe we espouse a more ambitious definition of a model, and we are specifically looking for a model that can makes prediction on data that we had not previously used. In that case, *k*-means still qualifies. Imagine, for a moment, a new pixel. This is a little unrealistic as, unless some unforeseen geological events took place, all of the pixels we could describe today for this dataset already existed in 2017. But imagine we changed the bounding box of the scene: we now have spectral data for a few thousand pixels we had not previously observed.
 
 We do not need to run *k*-means again to classify these pixels. Because *k*-means is trained when we have established the number and position of the centroids, we can now simply figure out which cluster the new point belongs to, which is done using @eq-clustering-onepoint.
 
-Both "what is a model" and "what is a new datapoint" are important questions to think about; they will come back often in this book, notably in @sec-crossvalidation. It is always idea, at the end of a chapter, to stop and think for a moment about what our model is, what problems it can solve, and what it would mean to use it on new data. In doing so, you will naturally start thinking about the place of each model in the broader problem of "how do I make data make sense?".
+Both "what is a model" and "what is a new datapoint" are important questions to think about, and there are often edge cases to the answers we can bring. They will come back often in this book, notably in @sec-crossvalidation. It is always a good idea, at the end of a chapter, to stop and think for a moment about what our model *really* is. What problems can it can solve? What would it would mean to use this model on new data? In doing so, you will naturally start thinking about the place of each model in the broader problem of "how do I make my data make sense?".
 
 ## Conclusion
 

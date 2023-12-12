@@ -34,4 +34,4 @@ update_theme!(;
 include(joinpath(_code_path, "palettes.jl"))
 
 rng = Random.default_rng()
-Random.seed!(rng, 12345)
+Random.seed!(rng, 42069)

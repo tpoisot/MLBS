@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Timothée Poisot">
-<meta name="dcterms.date" content="2023-12-11">
+<meta name="dcterms.date" content="2023-12-12">
 
 <title>Machine Learning for Biodiversity Scientists</title>
 <style>
@@ -26,7 +26,6 @@ ul.task-list li input[type="checkbox"] {
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
-  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -238,7 +237,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 11, 2023</p>
+      <p class="date">December 12, 2023</p>
     </div>
   </div>
   
@@ -253,11 +252,11 @@ div.csl-indent {
 <section id="preface" class="level1 unnumbered page-columns page-full">
 <h1 class="unnumbered">Preface</h1>
 <p>Machine learning is now an established methodology to study biodiversity, and this is a problem.</p>
-<p>This may be an opportunity when it comes to advancing our knowledge of biodiversity, and in particular when it comes to translating this knowledge into action <span class="citation" data-cites="tuia2022">(<a href="#ref-tuia2022" role="doc-biblioref">Tuia et al. 2022</a>)</span>; but make no mistake, this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field in order to remain professionally relevant <span class="citation" data-cites="ellwood2019">(<a href="#ref-ellwood2019" role="doc-biblioref">Ellwood et al. 2019</a>)</span>. And as luck would have it, there are easier fields to master than machine learning. The point of this book, therefore, is to provide an introduction to fundamental concepts in data science, from the perspective of a biodiversity scientist, by using examples corresponding to real-world use-cases of these techniques.</p>
+<p>This may be an opportunity when it comes to advancing our knowledge of biodiversity, and in particular when it comes to translating this knowledge into action <span class="citation" data-cites="tuia2022">(<a href="#ref-tuia2022" role="doc-biblioref">Tuia et al., 2022</a>)</span>; but make no mistake, this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field in order to remain professionally relevant <span class="citation" data-cites="ellwood2019">(<a href="#ref-ellwood2019" role="doc-biblioref">Ellwood et al., 2019</a>)</span>. And as luck would have it, there are easier fields to master than machine learning. The point of this book, therefore, is to provide an introduction to fundamental concepts in data science, from the perspective of a biodiversity scientist, by using examples corresponding to real-world use-cases of these techniques.</p>
 <p>But what do we mean by <em>machine learning</em> and <em>data science</em>? Most science, after all, relies on data in some capacity. What falls under the umbrella of <em>data science</em> is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. <em>Machine learning</em> is a series of techniques (or, more precisely, a high-level approach to these techniques) through which we conduct our data science activities. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered. This entire process is driven by (or, even, subject to) domain knowledge. There is no such thing as data science, at least not in a vacuum: there is data science as a methodology applied to a specific domain.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>Think of data science as being its own epistemology <span class="citation" data-cites="desai2022">(<a href="#ref-desai2022" role="doc-biblioref">Desai et al. 2022</a>)</span>, and machine learning as one methodology we can apply to work within this context.</p>
+<p>Think of data science as being its own epistemology <span class="citation" data-cites="desai2022">(<a href="#ref-desai2022" role="doc-biblioref">Desai et al., 2022</a>)</span>, and machine learning as one methodology we can apply to work within this context.</p>
 </div></div><p>Before we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret: data <em>science</em> is a little bit of a misnomer. In order to understand why, I need (or at least, I really want) to talk about cooking.</p>
 <p>To become a good cook, there are general techniques one <em>must</em> master, which we apply to specific steps in recipes; these recipes draw from a common cultural or local repertoire and cultural specifics (but the evolution of recipes is remarkably convergent – most cuisines have a <em>mirepoix</em>, bread, and beer). Finally, there is the product, <em>i.e.</em> the unique dish that you have cooked. And so it is for data science too: we can abstract a series of processes and guidelines, think about their application within the context of our specific field, study system, or line and research, and all of this will shape the final data product we can serve.</p>
 <p>When writing this preface, I turned to my shelf of cookbooks, and picked my two favorites: Robuchon’s <em>The Complete Robuchon</em> (a no-nonsense list of hundreds of recipes with no place for improvisation), and Bianco’s <em>Pizza, Pasta, and Other Food I Like</em> (a short volume with very few pizza and pasta, and wonderful discussions about the importance of humility, creativity, and generosity). Data science, if it were cooking, would feel a lot like the second. Deviation from the rules is often justifiable if you feel like it. But this improvisation requires good skills, a clear mental map of the problem, a defined vision of what these deviations will let you achieve, and a library of patterns that you can draw from.</p>
@@ -267,15 +266,15 @@ div.csl-indent {
 </section>
 <section id="bibliography" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-desai2022" class="csl-entry" role="listitem">
-Desai, Jules, David Watson, Vincent Wang, Mariarosaria Taddeo, and Luciano Floridi. 2022. <span>“The Epistemological Foundations of Data Science: A Critical Review.”</span> <em>Synthese</em> 200 (6). <a href="https://doi.org/10.1007/s11229-022-03933-2">https://doi.org/10.1007/s11229-022-03933-2</a>.
+Desai J., Watson D., Wang V., Taddeo M. &amp; Floridi L. 2022. <a href="https://doi.org/10.1007/s11229-022-03933-2">The epistemological foundations of data science: a critical review</a>. Synthese. <strong>200</strong>:
 </div>
 <div id="ref-ellwood2019" class="csl-entry" role="listitem">
-Ellwood, Elizabeth R, Jocelyn Anne Sessa, Joel K Abraham, Amber E Budden, Natalie Douglas, Robert Guralnick, Erica Krimmel, et al. 2019. <span>“Biodiversity Science and the Twenty-First Century Workforce.”</span> <em>BioScience</em> 70 (2): 119–21. <a href="https://doi.org/10.1093/biosci/biz147">https://doi.org/10.1093/biosci/biz147</a>.
+Ellwood E.R., Sessa J.A., Abraham J.K., Budden A.E., Douglas N., Guralnick R., Krimmel E., Langen T., Linton D., Phillips M., Soltis P.S., Studer M., White L.D., Williams J. &amp; Monfils A.K. 2019. <a href="https://doi.org/10.1093/biosci/biz147">Biodiversity Science and the Twenty-First Century Workforce</a>. BioScience. <strong>70</strong>: 119–121.
 </div>
 <div id="ref-tuia2022" class="csl-entry" role="listitem">
-Tuia, Devis, Benjamin Kellenberger, Sara Beery, Blair R. Costelloe, Silvia Zuffi, Benjamin Risse, Alexander Mathis, et al. 2022. <span>“Perspectives in Machine Learning for Wildlife Conservation.”</span> <em>Nature Communications</em> 13 (1): 792. <a href="https://doi.org/10.1038/s41467-022-27980-y">https://doi.org/10.1038/s41467-022-27980-y</a>.
+Tuia D., Kellenberger B., Beery S., Costelloe B.R., Zuffi S., Risse B., Mathis A., Mathis M.W., Langevelde F. van, Burghardt T., Kays R., Klinck H., Wikelski M., Couzin I.D., Horn G. van, Crofoot M.C., Stewart C.V. &amp; Berger-Wolf T. 2022. <a href="https://doi.org/10.1038/s41467-022-27980-y">Perspectives in machine learning for wildlife conservation</a>. Nature Communications. <strong>13</strong>: 792.
 </div>
 </div>
 </section>
