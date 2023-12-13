@@ -4,9 +4,9 @@ function crossvalidate(sdm, folds; kwargs...)
     models = [deepcopy(sdm) for _ in Base.OneTo(Threads.nthreads())]
     Threads.@threads for i in eachindex(folds)
         trn, val = folds[i]
-        train!(models[i]; training=trn, kwargs...)
-        pred = predict(models[i], X[:, val]; threshold = false)
-        ontrn = predict(models[i], X[:, trn]; threshold = false)
+        train!(models[Threads.threadid()]; training=trn, kwargs...)
+        pred = predict(models[Threads.threadid()], X[:, val]; threshold = false)
+        ontrn = predict(models[Threads.threadid()], X[:, trn]; threshold = false)
         Cv[i] = ConfusionMatrix(pred, y[val], sdm.τ)
         Ct[i] = ConfusionMatrix(ontrn, y[trn], sdm.τ)
     end
