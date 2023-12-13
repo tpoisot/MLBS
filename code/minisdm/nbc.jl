@@ -1,4 +1,4 @@
-Base.@kwdef mutable struct NBC <: SDMClassifier
+Base.@kwdef mutable struct NBC <: Classifier
     presences::Vector{Normal} = Normal[]
     absences::Vector{Normal} = Normal[]
     prior::Float64 = 0.5

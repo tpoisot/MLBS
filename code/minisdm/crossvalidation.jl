@@ -1,14 +1,13 @@
-function crossvalidate(sdm, y, X, folds, args...; kwargs...)
+function crossvalidate(sdm, folds; kwargs...)
     Cv = zeros(ConfusionMatrix, length(folds))
     Ct = zeros(ConfusionMatrix, length(folds))
     Threads.@threads for i in eachindex(folds)
         trn, val = folds[i]
-        train!(sdm, y[trn], X[:, trn]; kwargs...)
-        pred = predict(sdm, X[:, val]; classify = false)
-        ontrn = predict(sdm, X[:, trn]; classify = false)
-        thr = sdm.threshold.cutoff
-        Cv[i] = ConfusionMatrix(pred, y[val], thr)
-        Ct[i] = ConfusionMatrix(ontrn, y[trn], thr)
+        train!(sdm; training=trn, kwargs...)
+        pred = predict(sdm, X[:, val]; threshold = false)
+        ontrn = predict(sdm, X[:, trn]; threshold = false)
+        Cv[i] = ConfusionMatrix(pred, y[val], sdm.τ)
+        Ct[i] = ConfusionMatrix(ontrn, y[trn], sdm.τ)
     end
     return Cv, Ct
 end

@@ -1,10 +1,8 @@
-import LinearAlgebra
-
 # Types to fit
 types_to_train = [:PCA, :PPCA, :KernelPCA, :Whitening]
 types_with_transform = [:Whitening]
 
-Base.@kwdef mutable struct MultivariateTransform{T} <: SDMTransformer
+Base.@kwdef mutable struct MultivariateTransform{T} <: Transformer
     trf::T = StatsAPI.fit(T, Matrix(LinearAlgebra.I(2).*1.0))
 end
 

@@ -7,13 +7,8 @@ In the previous chapters, we have focused our efforts on regression models, whic
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/confusionmatrix.jl"))
 include(joinpath(_code_path, "minisdm/pipelines.jl"))
-include(joinpath(_code_path, "minisdm/nbc.jl"))
-include(joinpath(_code_path, "minisdm/mocks.jl"))
-include(joinpath(_code_path, "minisdm/crossvalidation.jl"))
-include(joinpath(_code_path, "minisdm/bootstrap.jl"))
-include(joinpath(_code_path, "minisdm/show.jl"))
+#include(joinpath(_code_path, "minisdm/show.jl"))
 ```
 
 ## The problem: distribution of an endemic species
@@ -58,7 +53,6 @@ testingpath = joinpath(_models_path, "sdm-testing-data.jld2")
 trainingpath = joinpath(_models_path, "sdm-training-data.jld2")
 JLD2.jldsave(testingpath; y=ty, X=tX)
 JLD2.jldsave(trainingpath; y=y, X=X)
-X = X[[1,12],:]
 ```
 
 The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
@@ -248,8 +242,8 @@ In order to see how good our model really is, we will also compare its performan
 #| output: false
 Cnoskill = noskill(y)
 folds = montecarlo(y, X; n=100)
-model = SDM(RawData(), NBC(), Thresholder())
-Cv, Ct = crossvalidate(model, y, X, folds)
+model = SDM(RawData(), NBC(), 0.5, X, y, [1, 12])
+Cv, Ct = crossvalidate(model, folds)
 ```
 
 ### Performance evaluation of the model
@@ -309,14 +303,17 @@ The output of cross-validation is given in @fig-classification-crossvalidation (
 ```{julia}
 #| echo: false
 #| output: false
-train!(model, y, X)
-model.threshold.cutoff = 0.5
+train!(model)
+model.τ = 0.5
 air = LinRange(extrema(occdata.BIO1)..., 250)
 prc = LinRange(extrema(occdata.BIO12)..., 250)
 SRF = zeros(Float64, (length(air), length(prc)))
 for i in axes(air, 1)
     for j in axes(prc, 1)
-        SRF[i,j] = predict(model, [air[i], prc[j]])
+        mck = zeros(19)
+        mck[1] = air[i]
+        mck[12] = prc[j]
+        SRF[i,j] = predict(model, mck)
     end
 end
 ```
@@ -358,7 +355,7 @@ It is interesting to compare @fig-classification-decision with, for example, the
 #| echo: false
 #| output: false
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in [1, 12]]
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 ```
 
 We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of *Sitta whiteheadi*. This result is reported in @fig-classification-range. Because we have used training data for which we know the labels, we can also map the *outcome* of applying the model, which it so say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.
@@ -369,7 +366,7 @@ We can now go through all of the pixels in the island of Corsica, and apply the 
 pr = convert(Float64, similar(first(bio)))
 Threads.@threads for k in keys(pr)
     x = [b[k] for b in bio]
-    pr[k] = predict(model, x; classify=true)
+    pr[k] = predict(model, x; threshold=true)
 end
 ```
 
@@ -391,7 +388,7 @@ heatmap!(ax0, pr, colormap=[light[1]])
 scatter!(ax0, coordinates.longitude[trn], coordinates.latitude[trn], color=coordinates.presence[trn], colormap=[:black, vibrant[2]], markersize=4)
 
 heatmap!(ax2, pr, colormap=[light[1]])
-prd = predict(model, X; classify=true)
+prd = predict(model, X; threshold=true)
 grd = coordinates.presence[trn]
 
 TP = findall(prd .& grd)
