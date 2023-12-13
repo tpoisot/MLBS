@@ -58,9 +58,9 @@ function StatsAPI.predict(sdm::SDM; kwargs...)
     return StatsAPI.predict(sdm::SDM, sdm.X; kwargs...)
 end
 
-function reset!(sdm::SDM)
+function reset!(sdm::SDM; τ=0.5)
     sdm.v = collect(axes(sdm.X, 1))
-    sdm.τ = 0.5
+    sdm.τ = τ
     return sdm
 end
 

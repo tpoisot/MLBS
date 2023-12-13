@@ -2,11 +2,11 @@ using GLM
 
 vif(m) = 1 / (1 - r²(m))
 
-function stepwisevif!(model::SDM, threshold)
+function stepwisevif!(model::SDM, threshold; kwargs...)
     return stepwisevif!(model, model.v, threshold)
 end
 
-function stepwisevif!(model::SDM, threshold)
+function stepwisevif!(model::SDM, threshold; kwargs...)
     Xv = model.X[model.v,:]
     X = (Xv .- mean(Xv; dims = 2)) ./ std(Xv; dims = 2)
     vifs = zeros(Float64, length(model.v))
@@ -18,5 +18,5 @@ function stepwisevif!(model::SDM, threshold)
     drop = last(findmax(vifs))
     popat!(model.v, drop)
     #@info "Variables remaining: $(model.v)"
-    return stepwisevif!(model, threshold)
+    return stepwisevif!(model, threshold; kwargs...)
 end

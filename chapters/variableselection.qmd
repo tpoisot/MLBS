@@ -202,24 +202,24 @@ We will perform four different versions of stepwise variable selection. Forward,
 #| echo: false
 #| output: false
 reset!(model)
-backwardselection!(model, folds)
+backwardselection!(model, folds; threshold=false)
 b0 = predictors(model)
-Cb0v, Cb0t = crossvalidate(model, folds)
+Cb0v, Cb0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-forwardselection!(model, folds)
+forwardselection!(model, folds; threshold=false)
 f0 = predictors(model)
-Cf0v, Cf0t = crossvalidate(model, folds)
+Cf0v, Cf0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-constrainedselection!(model, folds, [1,12])
+constrainedselection!(model, folds, [1,12]; threshold=false)
 c0 = predictors(model)
-Cc0v, Cc0t = crossvalidate(model, folds)
+Cc0v, Cc0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-stepwisevif!(model, 10.0)
+stepwisevif!(model, 10.0; threshold=false)
 i0 = predictors(model)
-Ci0v, Ci0t = crossvalidate(model, folds)
+Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 ```
 
 ```{julia}
@@ -270,14 +270,11 @@ tbl = [hed, sep]
 
 for (sk, sf) in sel
     for (tk, tf) in trf
-        @info sf
         mod = SDM(tf(), NBC(), 0.5, X, y, v0)
         reset!(mod)
-        @info tf
-        sf(mod, folds)
+        sf(mod, folds; threshold=false)
         vs = predictors(mod)
-        @info size(X)
-        Csv, Cst = crossvalidate(mod, folds)
+        Csv, Cst = crossvalidate(mod, folds; threshold=false)
         row = "| $(sk) | $(tk) | $(length(vs)) |"
         for (m, p) in msrs
             v = round(mean(p.(Csv)); digits=3)
@@ -304,22 +301,22 @@ These results are presented in @fig-predictors-rangediff.
 ```{julia}
 #| output: false
 #| echo: false
-origmodel = naivebayes(trainlabels, trainfeatures[:,[1,12]])
-intermodel = naivebayes(trainlabels, trainfeatures[:,f0])
-vf = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation=Whitening)
-finalmodel = naivebayes(trainlabels, trainfeatures[:,vf]; transformation=Whitening)
+origmodel = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+train!(origmodel; threshold=false)
+
+finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
+forwardselection!(finalmodel, folds; threshold=false)
+train!(finalmodel; threshold=false)
+
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 opr = convert(Float64, similar(first(bio)))
-ipr = convert(Float64, similar(first(bio)))
 vpr = convert(Float64, similar(first(bio)))
+
 Threads.@threads for k in keys(opr)
-    ox = [bio[i][k] for i in [1,12]]
-    ix = [bio[i][k] for i in f0]
-    fx = [bio[i][k] for i in vf]
-    opr[k] = origmodel(ox)
-    ipr[k] = intermodel(ix)
-    vpr[k] = finalmodel(fx)
+    preds = [bio[i][k] for i in 1:19]
+    opr[k] = predict(origmodel, preds)
+    vpr[k] = predict(finalmodel, preds)
 end
 ```
 
@@ -328,7 +325,6 @@ end
 #| echo: false
 #| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
 final_range = vpr .> 0.5
-inter_range = ipr .> 0.5
 old_range = opr .> 0.5
 rangediff(new, old) = mask(new .| old, new .- old)
 fig = Figure(; resolution=(500,600))
@@ -338,13 +334,20 @@ ax3 = Axis(fig[2,1]; aspect=DataAspect(), title="Difference")
 heatmap!(ax1, old_range, colormap=vibrant[1:2])
 heatmap!(ax2, final_range, colormap=vibrant[1:2])
 heatmap!(ax3, final_range, colormap=[vibrant[1], vibrant[1]], alpha=0.7)
-rm_pal = cgrad(sunset, 3, categorical=true)
+rm_pal = cgrad(reverse(nightfall), 3, categorical=true)
 heatmap!(ax3, rangediff(final_range, old_range); colormap = rm_pal)
 
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
 clab = ["Loss", "No change", "Gain"]
 Legend(fig[2,2], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
+
+for ax in [ax1, ax2, ax3]
+    ax.xticklabelpad = 0
+    ax.yticklabelpad = 0
+    hidedecorations!(ax)
+    hidespines!(ax)
+end
 
 current_figure()
 ```

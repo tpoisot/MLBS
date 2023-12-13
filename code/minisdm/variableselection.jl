@@ -1,3 +1,8 @@
+function noselection!(model, folds; verbose::Bool = false, kwargs...)
+    model.v = collect(axes(model.X, 1))
+    return model
+end
+
 function backwardselection!(model, folds; verbose::Bool = false, kwargs...)
     pool = collect(axes(model.X, 1))
     best_perf = -Inf
