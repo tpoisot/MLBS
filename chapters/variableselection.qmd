@@ -12,12 +12,14 @@ There are two reasons to think about variable selection and feature engineering 
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "minisdm/confusionmatrix.jl"))
-include(joinpath(_code_path, "minisdm/mocks.jl"))
-include(joinpath(_code_path, "minisdm/nbc.jl"))
 include(joinpath(_code_path, "minisdm/pipelines.jl"))
-include(joinpath(_code_path, "minisdm/vif.jl"))
+include(joinpath(_code_path, "minisdm/nbc.jl"))
+include(joinpath(_code_path, "minisdm/transformations.jl"))
+include(joinpath(_code_path, "minisdm/mocks.jl"))
 include(joinpath(_code_path, "minisdm/crossvalidation.jl"))
+include(joinpath(_code_path, "minisdm/bootstrap.jl"))
 include(joinpath(_code_path, "minisdm/show.jl"))
+include(joinpath(_code_path, "minisdm/vif.jl"))
 include(joinpath(_code_path, "minisdm/variableselection.jl"))
 ```
 
@@ -159,7 +161,7 @@ JLD2.jldopen(modelpath, "r") do file
     global v0 = file["variables"]
 end;
 
-model = SDM(ZScore(), NBC(), Thresholder())
+model = SDM(RawData(), NBC(), Thresholder())
 train!(model, y, X[v0,:]; classify=false)
 ```
 
@@ -239,7 +241,7 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 ```{julia}
 #| echo: false
 sel = ["Fwd." => forwardselection, "Backw." => backwardselection]
-trf = ["PCA" => PCA, "Whitening" => Whitening, "Raw data" => nothing]
+trf = ["PCA" => MultivariateTransform{PCA}, "Whitening" => MultivariateTransform{Whitening}, "Raw data" => RawData]
 msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
 
 hed = "| Selection | Transformation | Variables |"
@@ -252,8 +254,12 @@ tbl = [hed, sep]
 
 for (sk, sf) in sel
     for (tk, tf) in trf
-        vs = sf(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation=tf)
-        Csv, Cst = crossvalidate(naivebayes, trainlabels, trainfeatures[:,vs], folds; transformation=tf)
+        @info "mod"
+        mod = SDM(tf(), NBC(), Thresholder())
+        @info "varsel"
+        vs = sf(mod, y, X, folds, mcc)
+        @info size(X)
+        Csv, Cst = crossvalidate(mod, y, X[vs,:], folds)
         row = "| $(sk) | $(tk) | $(length(vs)) |"
         for (m, p) in msrs
             v = round(mean(p.(Csv)); digits=3)

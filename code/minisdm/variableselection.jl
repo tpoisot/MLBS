@@ -5,7 +5,7 @@ function backwardselection(
     folds,
     perf,
     args...;
-    verbose::Bool = true,
+    verbose::Bool = false,
     kwargs...,
 )
     pool = collect(axes(X, 1))
@@ -47,7 +47,7 @@ function constrainedselection(
     pool,
     perf,
     args...;
-    verbose::Bool = true,
+    verbose::Bool = false,
     kwargs...,
 )
     on_top = filter(p -> !(p in pool), collect(axes(X, 1)))
