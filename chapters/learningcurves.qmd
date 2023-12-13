@@ -7,17 +7,9 @@ We will illustrate this using an approach called moving-threshold classification
 ```{julia}
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusion.jl"))
-include(joinpath(_code_path, "mocks.jl"))
-include(joinpath(_code_path, "bioclim.jl"))
-include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "vif.jl"))
-include(joinpath(_code_path, "splitters.jl"))
-include(joinpath(_code_path, "palettes.jl"))
-include(joinpath(_code_path, "crossvalidate.jl"))
-include(joinpath(_code_path, "variableselection.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
 ```
 
 ## Classification based on probabilities {#sec-learningcurves-threshold}
@@ -97,23 +89,28 @@ Note that we can see that using the approximate version we used so far (the pred
 ```{julia}
 #| echo: false
 #| output: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-1.jld")
-ptm = JLD.load(modelpath)
-y = ptm["labels"]
-X = ptm["features"][:,ptm["variables"]]
-folds = ptm["folds"]
-v = ptm["variables"]
-tf = ptm["transformation"]
-untuned = naivebayes(y, X; transformation=tf)
+modelpath = joinpath(_models_path, "sdm-step-1.jld2")
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+end;
+
+JLD2.jldopen(modelpath, "r") do file
+    global v0 = file["variables"]
+    global tr = file["transformation"]
+    global folds = file["folds"]
+end;
+
+model = SDM(tr(), NBC(), 0.5, X, y, v0)
+train!(model; threshold=false)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-T = LinRange(0.0, 1.0, 250)
-CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)) for τ in T]...)
-τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
+T = LinRange(0.0, 1.0, 70)
+CT = hcat([first(crossvalidate(model, folds; τ=τ, threshold=false)) for τ in T]...)
+model.τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
 ```
 
 In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
@@ -122,11 +119,11 @@ In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1
 #| echo: false
 #| label: fig-tuning-threshold
 #| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
-fig = Figure(; resolution=(700, 300))
+fig = Figure(; resolution=(500, 300))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
 series!(ax, T, mcc.(CT), solid_color=light[1])
 lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=light[2], linewidth=2, linestyle=:dash)
-scatter!(ax, τ, maximum(vec(mean(mcc.(CT); dims=1))), color=light[2], markersize=20)
+scatter!(ax, model.τ, maximum(vec(mean(mcc.(CT); dims=1))), color=light[2], markersize=20)
 xlims!(ax, (0., 1.))
 ylims!(ax, (0., 1.))
 current_figure()
@@ -138,13 +135,13 @@ To do so, we can look at the distribution of probabilities returned by the NBC, 
 #| echo: false
 #| label: fig-tuning-probabilities
 #| fig-cap: Probabilities assigned to each pixel (bottom), color-coded by their value in the validation set (top scatterplots). The NBC is making a lot of recommendations very close to 0 or very close to 1, and for this reason, positioning the threshold anywhere in the middle of the range would give almost similar results in terms of the MCC.
-P = vec(mapslices(untuned, X; dims=2))
-f = Figure(; resolution=(700, 300))
+P = predict(model; threshold=false)
+f = Figure(; resolution=(500, 300))
 
 ax = Axis(f[2,1]; xlabel="Probability of presence")
 xlims!(ax, (0, 1))
 ylims!(ax, low=0.0)
-hist!(ax, P, color=:lightgrey)
+hist!(ax, P, color=:lightgrey, bins=50)
 
 rg = Axis(f[1,1])
 xlims!(rg, (0, 1))
@@ -224,19 +221,21 @@ Just because we decided to use a learning curve does not mean we *have* to chang
 fig = Figure(; resolution=(600, 400))
 ax = Axis(fig[1,1]; xlabel="P(+)", ylabel="MCC")
 
-T = LinRange(0.0, 1.0, 25)
-Pr = LinRange(0.2, 0.8, 25)
-Threads.@threads for pr in Pr
-    CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf, presence=pr)) for τ in T]...)
+T = LinRange(0.0, 1.0, 20)
+Pr = LinRange(0.1, 0.9, 20)
+for pr in Pr
+    model.classifier.prior = pr
+    CT = hcat([first(crossvalidate(model, folds; τ=τ, threshold=false)) for τ in T]...)
     mccs = vec(mean(mcc.(CT); dims=1))
+    @info mccs
     bm, bi = findmax(mccs)
     scatter!(ax, pr, bm, color=T[bi], colorrange=(0., 1.), colormap=cgrad(iridescent), strokecolor=:black, strokewidth=1)
 end
 
 Colorbar(fig[1,2], colorrange=(0, 1), colormap=cgrad(iridescent), label="Optimal threshold")
 
-xlims!(ax, (0., 1.))
-ylims!(ax, (0.87, 0.89))
+#xlims!(ax, (0., 1.))
+#ylims!(ax, (0.87, 0.89))
 
 current_figure()
 ```
@@ -244,9 +243,8 @@ current_figure()
 ```{julia}
 #| echo: false
 #| output: false
-model = naivebayes(y, X; transformation=tf)
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in v]
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 
 pr = convert(Float64, similar(first(bio)))
 bs = convert(Float64, similar(first(bio)))

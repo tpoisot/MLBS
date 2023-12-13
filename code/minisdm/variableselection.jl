@@ -3,7 +3,7 @@ function noselection!(model, folds; verbose::Bool = false, kwargs...)
     return model
 end
 
-function backwardselection!(model, folds; verbose::Bool = false, kwargs...)
+function backwardselection!(model, folds; verbose::Bool = false, optimality=mcc, kwargs...)
     pool = collect(axes(model.X, 1))
     best_perf = -Inf
     while ~isempty(pool)
@@ -15,7 +15,7 @@ function backwardselection!(model, folds; verbose::Bool = false, kwargs...)
             this_pool = deleteat!(copy(pool), i)
             model.v = this_pool
             scores[i] = mean(
-                perf.(
+                optimality.(
                     first(
                         crossvalidate(model, folds; kwargs...),
                     )
@@ -37,7 +37,7 @@ function backwardselection!(model, folds; verbose::Bool = false, kwargs...)
     return model
 end
 
-function constrainedselection!(model, folds, pool; verbose::Bool = false, kwargs...)
+function constrainedselection!(model, folds, pool; verbose::Bool = false, optimality=mcc, kwargs...)
     on_top = filter(p -> !(p in pool), collect(axes(X, 1)))
     best_perf = -Inf
     while ~isempty(on_top)
@@ -49,7 +49,7 @@ function constrainedselection!(model, folds, pool; verbose::Bool = false, kwargs
             this_pool = push!(copy(pool), on_top[i])
             model.v = this_pool
             scores[i] = mean(
-                perf.(
+                optimality.(
                     first(
                         crossvalidate(model, folds; kwargs...),
                     )

@@ -8,7 +8,6 @@ In the previous chapters, we have focused our efforts on regression models, whic
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "minisdm/pipelines.jl"))
-#include(joinpath(_code_path, "minisdm/show.jl"))
 ```
 
 ## The problem: distribution of an endemic species
@@ -49,10 +48,12 @@ tX = X[:,tst]
 y = y[trn]
 X = X[:,trn]
 
+latlon=Matrix(coordinates[trn,[3,2]])
+
 testingpath = joinpath(_models_path, "sdm-testing-data.jld2")
 trainingpath = joinpath(_models_path, "sdm-training-data.jld2")
 JLD2.jldsave(testingpath; y=ty, X=tX)
-JLD2.jldsave(trainingpath; y=y, X=X)
+JLD2.jldsave(trainingpath; y=y, X=X, latlon=latlon)
 ```
 
 The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
@@ -303,8 +304,8 @@ The output of cross-validation is given in @fig-classification-crossvalidation (
 ```{julia}
 #| echo: false
 #| output: false
-train!(model)
-model.τ = 0.5
+train!(model; threshold=false)
+#model.τ = 0.5
 air = LinRange(extrema(occdata.BIO1)..., 250)
 prc = LinRange(extrema(occdata.BIO12)..., 250)
 SRF = zeros(Float64, (length(air), length(prc)))
@@ -364,10 +365,8 @@ We can now go through all of the pixels in the island of Corsica, and apply the 
 #| echo: false
 #| output: false
 pr = convert(Float64, similar(first(bio)))
-Threads.@threads for k in keys(pr)
-    x = [b[k] for b in bio]
-    pr[k] = predict(model, x; threshold=true)
-end
+F = permutedims(hcat(values.(bio)...))
+pr.grid[findall(!isnothing, bio[1].grid)] .= predict(model, F; threshold=true)
 ```
 
 ```{julia}
@@ -396,8 +395,8 @@ TN = findall((.!prd) .& (.!grd))
 FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
 heatmap!(ax2, pr, colormap=vibrant[1:2], alpha=0.4)
-scatter!(ax2, coordinates.longitude[trn][TP], coordinates.latitude[trn][TP], markersize=5, color=vibrant[2])
-scatter!(ax2, coordinates.longitude[trn][FP], coordinates.latitude[trn][FP], markersize=6, marker=:cross, color=:black)
+scatter!(ax2, latlon[TP,2], latlon[TP,1], markersize=5, color=vibrant[2])
+scatter!(ax2, latlon[FP,2], latlon[FP,1], markersize=6, marker=:cross, color=:black)
 
 for ax in [ax1, ax2, ax0]
     ax.xticklabelpad = 0
@@ -408,9 +407,6 @@ end
 
 colgap!(gl, 0)
 rowgap!(gl, 0)
-
-#colsize!(gl, 1, Relative(5/6))
-#rowsize!(gl, 2, Relative(1/6))
 
 current_figure()
 ```

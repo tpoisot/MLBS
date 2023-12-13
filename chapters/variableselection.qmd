@@ -173,9 +173,8 @@ train!(model; threshold=false)
 #| output: false
 folds = kfold(y, X; k=15, permute=true)
 C0v, C0t = crossvalidate(model, folds)
-allvar = deepcopy(model)
-allvar.v = collect(1:19)
-CXv, CXt = crossvalidate(allvar, folds)
+reset!(model)
+CXv, CXt = crossvalidate(model, folds)
 ```
 
 Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
@@ -202,23 +201,19 @@ We will perform four different versions of stepwise variable selection. Forward,
 #| echo: false
 #| output: false
 reset!(model)
-backwardselection!(model, folds; threshold=false)
-b0 = predictors(model)
+b0 = predictors(backwardselection!(model, folds; threshold=false))
 Cb0v, Cb0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-forwardselection!(model, folds; threshold=false)
-f0 = predictors(model)
+f0 = predictors(forwardselection!(model, folds; threshold=false))
 Cf0v, Cf0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-constrainedselection!(model, folds, [1,12]; threshold=false)
-c0 = predictors(model)
+c0 = predictors(constrainedselection!(model, folds, [1,12]; threshold=false))
 Cc0v, Cc0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-stepwisevif!(model, 10.0; threshold=false)
-i0 = predictors(model)
+i0 = predictors(stepwisevif!(model, 10.0; threshold=false))
 Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 ```
 
@@ -305,6 +300,7 @@ origmodel = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
 train!(origmodel; threshold=false)
 
 finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
+reset!(finalmodel)
 forwardselection!(finalmodel, folds; threshold=false)
 train!(finalmodel; threshold=false)
 
@@ -361,14 +357,6 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 ```{julia}
 #| output: false
 #| echo: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-1.jld")
-JLD.save(
-    modelpath,
-    "labels", trainlabels,
-    "features", trainfeatures,
-    "folds", folds,
-    "variables", vf,
-    "transformation", Whitening
-)
+modelpath = joinpath(_models_path, "sdm-step-1.jld2")
+JLD2.jldsave(modelpath; transformation=typeof(finalmodel.transformer), variables=finalmodel.v, folds = folds)
 ```
