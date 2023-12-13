@@ -15,12 +15,12 @@ function backwardselection(
             @info "N = $(length(pool))"
         end
         scores = zeros(length(pool))
-        Threads.@threads for i in eachindex(pool)
+        for i in eachindex(pool)
             this_pool = deleteat!(copy(pool), i)
             scores[i] = mean(
                 perf.(
                     first(
-                        crossvalidate(model, y, X[this_pool, :], folds, args...; kwargs...),
+                        crossvalidate(model, y, X[this_pool, :], folds),
                     )
                 ),
             )

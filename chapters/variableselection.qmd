@@ -134,7 +134,7 @@ Keep in mind that we do not know the number of variables we should use; therefor
 
 ### Removal of colinear variables
 
-Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there
+Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there **THIS PARAGRAPH IS NOT FINISHED**
 
 ## Multivariate transformations
 
@@ -241,7 +241,7 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 ```{julia}
 #| echo: false
 sel = ["Fwd." => forwardselection, "Backw." => backwardselection]
-trf = ["PCA" => MultivariateTransform{PCA}, "Whitening" => MultivariateTransform{Whitening}, "Raw data" => RawData]
+trf = ["Raw data" => RawData, "PCA" => MultivariateTransform{PCA}, "Whitening" => MultivariateTransform{Whitening}]
 msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
 
 hed = "| Selection | Transformation | Variables |"
