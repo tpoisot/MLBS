@@ -75,3 +75,10 @@ function auc(x::Array{T}, y::Array{T}) where {T <: Number}
     end
     return .-S
 end
+
+function ci(C::Vector{ConfusionMatrix}, f)
+    v = f.(C)
+    return 1.96 * std(v) / sqrt(length(C))
+end
+
+ci(C::Vector{ConfusionMatrix}) = ci(C, mcc)

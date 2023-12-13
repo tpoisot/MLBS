@@ -423,7 +423,7 @@ When comparing the prediction to the spatial distribution of occurrences (@fig-c
 #| echo: false
 #| output: false
 modelpath = joinpath(_models_path, "sdm-step-0.jld2")
-JLD2.jldsave(modelpath; variables=[1,12])
+JLD2.jldsave(modelpath; variables=model.v)
 ```
 
 ## Conclusion

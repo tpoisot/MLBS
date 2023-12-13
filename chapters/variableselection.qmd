@@ -11,16 +11,7 @@ There are two reasons to think about variable selection and feature engineering 
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/confusionmatrix.jl"))
 include(joinpath(_code_path, "minisdm/pipelines.jl"))
-include(joinpath(_code_path, "minisdm/nbc.jl"))
-include(joinpath(_code_path, "minisdm/transformations.jl"))
-include(joinpath(_code_path, "minisdm/mocks.jl"))
-include(joinpath(_code_path, "minisdm/crossvalidation.jl"))
-include(joinpath(_code_path, "minisdm/bootstrap.jl"))
-include(joinpath(_code_path, "minisdm/show.jl"))
-include(joinpath(_code_path, "minisdm/vif.jl"))
-include(joinpath(_code_path, "minisdm/variableselection.jl"))
 ```
 
 The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction [@booth2022]; this is particularly true when working from the WorldClim version [@fick2017], and not as problematic when using other data products like CHELSA [@karger2017].
@@ -53,6 +44,18 @@ end
 ```
 
 In this chapter, we will try to improve the model introduced in @sec-classification, by evaluating different methods to prepare our predictor variables.
+
+## A digression: what is a variable?
+
+measurement with unit
+
+compare with clustering chapter
+
+derived variables v. transformations
+
+exploratory data analysis
+
+feature engineering
 
 ## What is data leakage? {#sec-leakage}
 
@@ -161,16 +164,18 @@ JLD2.jldopen(modelpath, "r") do file
     global v0 = file["variables"]
 end;
 
-model = SDM(RawData(), NBC(), Thresholder())
-train!(model, y, X[v0,:]; classify=false)
+model = SDM(RawData(), NBC(), 0.5, X, y, v0)
+train!(model; threshold=false)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-folds = kfold(y, X[v0,:]; k=15, permute=true)
-C0v, C0t = crossvalidate(model, y, X[v0,:], folds)
-CXv, CXt = crossvalidate(model, y, X, folds)
+folds = kfold(y, X; k=15, permute=true)
+C0v, C0t = crossvalidate(model, folds)
+allvar = deepcopy(model)
+allvar.v = collect(1:19)
+CXv, CXt = crossvalidate(allvar, folds)
 ```
 
 Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
@@ -196,14 +201,25 @@ We will perform four different versions of stepwise variable selection. Forward,
 ```{julia}
 #| echo: false
 #| output: false
-b0 = backwardselection(model, y, X, folds, mcc)
-Cb0v, Cb0t = crossvalidate(model, y, X[b0,:], folds)
-f0 = forwardselection(model, y, X, folds, mcc)
-Cf0v, Cf0t = crossvalidate(model, y, X[f0,:], folds)
-c0 = constrainedselection(model, y, X, folds, [1,12], mcc)
-Cc0v, Cc0t = crossvalidate(model, y, X[c0,:], folds)
-i0 = stepwisevif(X, 10.0)
-Ci0v, Ci0t = crossvalidate(model, y, X[i0,:], folds)
+reset!(model)
+backwardselection!(model, folds)
+b0 = predictors(model)
+Cb0v, Cb0t = crossvalidate(model, folds)
+
+reset!(model)
+forwardselection!(model, folds)
+f0 = predictors(model)
+Cf0v, Cf0t = crossvalidate(model, folds)
+
+reset!(model)
+constrainedselection!(model, folds, [1,12])
+c0 = predictors(model)
+Cc0v, Cc0t = crossvalidate(model, folds)
+
+reset!(model)
+stepwisevif!(model, 10.0)
+i0 = predictors(model)
+Ci0v, Ci0t = crossvalidate(model, folds)
 ```
 
 ```{julia}
@@ -240,7 +256,7 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 
 ```{julia}
 #| echo: false
-sel = ["Fwd." => forwardselection, "Backw." => backwardselection]
+sel = ["Fwd." => forwardselection!, "Backw." => backwardselection!]
 trf = ["Raw data" => RawData, "PCA" => MultivariateTransform{PCA}, "Whitening" => MultivariateTransform{Whitening}]
 msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
 
@@ -254,12 +270,14 @@ tbl = [hed, sep]
 
 for (sk, sf) in sel
     for (tk, tf) in trf
-        @info "mod"
-        mod = SDM(tf(), NBC(), Thresholder())
-        @info "varsel"
-        vs = sf(mod, y, X, folds, mcc)
+        @info sf
+        mod = SDM(tf(), NBC(), 0.5, X, y, v0)
+        reset!(mod)
+        @info tf
+        sf(mod, folds)
+        vs = predictors(mod)
         @info size(X)
-        Csv, Cst = crossvalidate(mod, y, X[vs,:], folds)
+        Csv, Cst = crossvalidate(mod, folds)
         row = "| $(sk) | $(tk) | $(length(vs)) |"
         for (m, p) in msrs
             v = round(mean(p.(Csv)); digits=3)

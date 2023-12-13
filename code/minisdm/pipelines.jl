@@ -21,6 +21,8 @@ include("nbc.jl")
 include("confusionmatrix.jl")
 include("crossvalidation.jl")
 include("mocks.jl")
+include("vif.jl")
+include("variableselection.jl")
 
 function train!(sdm::SDM; threshold=true, training=:, optimality=mcc)
     train!(sdm.transformer, sdm.X[sdm.v,training])
@@ -54,6 +56,16 @@ end
 
 function StatsAPI.predict(sdm::SDM; kwargs...)
     return StatsAPI.predict(sdm::SDM, sdm.X; kwargs...)
+end
+
+function reset!(sdm::SDM)
+    sdm.v = collect(axes(sdm.X, 1))
+    sdm.τ = 0.5
+    return sdm
+end
+
+function predictors(sdm::SDM)
+    return copy(sdm.v)
 end
 
 #=

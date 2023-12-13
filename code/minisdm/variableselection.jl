@@ -1,14 +1,5 @@
-function backwardselection(
-    model,
-    y,
-    X,
-    folds,
-    perf,
-    args...;
-    verbose::Bool = false,
-    kwargs...,
-)
-    pool = collect(axes(X, 1))
+function backwardselection!(model, folds; verbose::Bool = false, kwargs...)
+    pool = collect(axes(model.X, 1))
     best_perf = -Inf
     while ~isempty(pool)
         if verbose
@@ -17,10 +8,11 @@ function backwardselection(
         scores = zeros(length(pool))
         for i in eachindex(pool)
             this_pool = deleteat!(copy(pool), i)
+            model.v = this_pool
             scores[i] = mean(
                 perf.(
                     first(
-                        crossvalidate(model, y, X[this_pool, :], folds),
+                        crossvalidate(model, folds; kwargs...),
                     )
                 ),
             )
@@ -36,20 +28,11 @@ function backwardselection(
             break
         end
     end
-    return pool
+    model.v = pool
+    return model
 end
 
-function constrainedselection(
-    model,
-    y,
-    X,
-    folds,
-    pool,
-    perf,
-    args...;
-    verbose::Bool = false,
-    kwargs...,
-)
+function constrainedselection!(model, folds, pool; verbose::Bool = false, kwargs...)
     on_top = filter(p -> !(p in pool), collect(axes(X, 1)))
     best_perf = -Inf
     while ~isempty(on_top)
@@ -59,10 +42,11 @@ function constrainedselection(
         scores = zeros(length(on_top))
         for i in eachindex(on_top)
             this_pool = push!(copy(pool), on_top[i])
+            model.v = this_pool
             scores[i] = mean(
                 perf.(
                     first(
-                        crossvalidate(model, y, X[this_pool, :], folds, args...; kwargs...),
+                        crossvalidate(model, folds; kwargs...),
                     )
                 ),
             )
@@ -79,10 +63,11 @@ function constrainedselection(
             break
         end
     end
-    return pool
+    model.v = pool
+    return model
 end
 
-function forwardselection(model, y, X, folds, perf, args...; kwargs...)
+function forwardselection!(model, folds; kwargs...)
     pool = Int64[]
-    return constrainedselection(model, y, X, folds, pool, perf, args...; kwargs...)
+    return constrainedselection!(model, folds, pool; kwargs...)
 end
