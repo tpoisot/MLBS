@@ -8,18 +8,14 @@ function train!(
     nbc::NBC,
     y::Vector{Bool},
     X::Matrix{T};
-    prior = 0.5,
+    prior = nothing,
 ) where {T <: Number}
+    nbc.prior = isnothing(prior) ? mean(y) : 0.5 # We set the P(+) as the prevalence if it is not specified
     X₊ = X[:, findall(y)]
     X₋ = X[:, findall(.!y)]
     nbc.presences = vec(mapslices(x -> Normal(mean(x), std(x)), X₊; dims = 2))
     nbc.absences = vec(mapslices(x -> Normal(mean(x), std(x)), X₋; dims = 2))
-    nbc.prior = prior
     return nbc
-end
-
-function train(::Type{NBC}, y, X; kwdef...)
-    return train!(NBC(), y, X; kwdef...)
 end
 
 function StatsAPI.predict(nbc::NBC, x::Vector{T}) where {T <: Number}

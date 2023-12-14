@@ -220,11 +220,15 @@ In other words, whichever class gives the higher score, is what the NBC will rec
 
 ### How the NBC learns
 
-There are two unknown quantities at this point. The first is the value of $P(+)$ and $P(-)$. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) *is* their prior. More broadly, we do not need to think about $P(-)$ too much, as it is simply $1-P(+)$, since the "state" of every single observation of environmental variables is either $+$ or $-$.
+There are two unknown quantities at this point. The first is the value of $P(+)$ and $P(-)$. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) *is* their prior. It now helps to think about the no-skill and coin-flip classifier we introduced earlier in the chapter. Assume that we do not use $P(x|c)$ when making our prediction: the baseline against which we compare the model will therefore be entire determined by $P(+)$. Picking a prior of one half is making the predictions at random (like coin-flip), and picking a prior equal to the prevalence is making the predictions at random (like no-skill). Understanding how we set the prior for the NBC is important, as it can ensure that we use a fair baseline to compare it against. Throughout this book, we will let our prior be the prevalence in the training data (and therefore our first task will be to beat the no-skill classifier). Finally, note that we do not need to think about $P(-)$ too much, as it is simply $1-P(+)$: the "state" of every single observation of the presence or absence of the species under a set of measured environmental variables is either $+$ or $-$.
 
 The most delicate problem is to figure out $P(x|c)$, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in $x$; as we work with continuous variables, we will rely on Gaussian NBC. In Gaussian NBC, we will consider that $x$ comes from a normal distribution $\mathcal{N}(\mu_{x,c},\sigma_{x,c})$, and therefore we simply need to evaluate the probability density function of this distribution at the point $x$. Other types of data are handled in the same way, with the difference that they use a different set of distributions; for example, categorical variables can be represented using multinomial distributions [@abbood2020].
 
-Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in @sec-gradientdescent, the learning phase only involves a single epoch: measuring the mean and standard deviation. This yields a Gaussian NBC with the assumption that variables are normally distributed, because the normal distribution is the maximal entropy distribution when we know these two moments.
+::: column-margin
+We could use different approaches to NBC, by using (for example) the empirical CDF function of the training data for each class. We will revisit this idea in chapter @sec-bioclim, as it establishes an interesting parallel between different methods.
+:::
+
+Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in @sec-gradientdescent, the learning phase only involves a single epoch: measuring the mean and standard deviation. This yields a Gaussian NBC with the assumption that variables are normally distributed, because the normal distribution is the maximal entropy distribution when we know these two moments. This also reveals an interesting feature of NBC: it can work when we do not have access to the underlying training data. Imagine a situation where we only have access to published summary statistics about the environmental variables for which the species was observed / not observed: we can use these to establish the Normal distributions for each feature for each class, and use the NBC. Its ability to work under extreme data scarcity (assuming we are comfortable with the assumptions about the shape of the distribution) makes NBC a surprisingly versatile classifier.
 
 ## Application: a baseline model of the Corsican nuthatch
 
@@ -236,7 +240,7 @@ To evaluate our model, as we discussed in @sec-crossvalidation, we will keep a h
 
 In this chapter, we will rely on Monte-Carlo cross validation (MCCV; see @sec-crossvalidation-montecarlo), using 100 replicates. In the following chapters, we will revert to using k-folds cross-validation, but using MCCV here is a good enough starting point.
 
-In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works *at all*. In a later chapter, we will introduce a slightly more domain-specific model to provide a baseline that would look like an actual model we would like to out-perform.
+In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works *at all*. In @sec-bioclim, we will introduce a slightly more domain-specific model to provide a baseline that would look like an actual model we would like to out-perform (but mostly to make the general point that any problem can be approached like a machine learning problem).
 
 ```{julia}
 #| echo: false
@@ -257,9 +261,9 @@ $$
 \frac{\text{TP}\times \text{TN} - \text{FP}\times \text{FN}}{\sqrt{(\text{TP}+\text{FP})\times (\text{TP}+\text{FN})\times (\text{TN}+\text{FP})\times (\text{TN}+\text{FN})}} \,.
 $$
 
-The MCC is a correlation coefficient (specifically, the Pearson product-moment correlation on a contingency table, where the contingency table is the confusion matrix; @powers2020), meaning that it returns values in $[-1, 1]$. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. Therefore, if we pick the model with the highest MCC, we are likely to pick the best possible model.
+The MCC is a correlation coefficient. Specifically, it is the Pearson product-moment correlation on a contingency table, where the contingency table is the confusion matrix [@powers2020]. Therefore, it returns values in $[-1, 1]$, which can be interpreted as every other correlation value. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. By picking the model with the highest MCC on the validation data, we are likely to pick the best possible model (after controlling for over-fitting).
 
-In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively $\text{TP}/(\text{TP}+\text{FP})$ and $\text{TN}/(\text{TN}+\text{FN})$, measure how likely a prediction of, respectively, presence and absence, are. These range in $[0,1]$, and values of one indicate a better performance of the model.
+In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively $\text{TP}/(\text{TP}+\text{FP})$ and $\text{TN}/(\text{TN}+\text{FN})$, measure how likely a prediction of, respectively, presence and absence, are. To put it in other words, they measure how much the "true" events are represented in all of the predictions for a given even type: a PPV value of 0.7 means that 7 out of 10 positive predictions were true positives. These range in $[0,1]$, and values of one indicate a better performance of the model. It may help to sometimes talk about the falses predictions, in which case the false omission rate (1 - NPV) and false discovery rate (1 - PPV) can be used: they quantify the *risk* we take when acting on a positive or negative recommendation from the model.
 
 Why not pick one of these instead of the MCC? Because all modeling is compromise; we don't want a model to become too good at predicting absences, to the point where prediction about presences would become meaningless. Selecting models on the basis of a measure that only emphasizes one outcome is a risk that we shouldn't be willing to take. For this reason, measures that are good at optimizing the value of a negative and a positive prediction are far better representations of the performance of a model. The MCC does just this.
 
@@ -305,7 +309,6 @@ The output of cross-validation is given in @fig-classification-crossvalidation (
 #| echo: false
 #| output: false
 train!(model; threshold=false)
-#model.τ = 0.5
 air = LinRange(extrema(occdata.BIO1)..., 250)
 prc = LinRange(extrema(occdata.BIO12)..., 250)
 SRF = zeros(Float64, (length(air), length(prc)))
@@ -372,33 +375,95 @@ pr.grid[findall(!isnothing, bio[1].grid)] .= predict(model, F; threshold=true)
 ```{julia}
 #| label: fig-classification-range
 #| echo: false
-#| fig-cap: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the true positives (orange dots) and false positives (black crosses) predictions. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*, but would definitely stand to be improved, possibly by accounting for more features.
-f = Figure(; resolution=(900, 700))
+#| fig-cap: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*, but would definitely stand to be improved, possibly by accounting for more features.
+f = Figure(; resolution = (900, 600))
 
-gl = f[1,1] = GridLayout()
+gl = f[1, 1] = GridLayout()
 
-ax0 = Axis(gl[1,1], xlabel="Longitude", ylabel = "Latitude", aspect = DataAspect())
-ax1 = Axis(gl[1,2], xlabel="Longitude", ylabel = "Latitude", aspect = DataAspect())
-ax2 = Axis(gl[1,3], xlabel="Longitude", ylabel = "Latitude", aspect = DataAspect())
+ax0 = Axis(
+    gl[1, 1];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "Training data",
+)
+ax1 = Axis(
+    gl[1, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True positives",
+)
+ax2 = Axis(
+    gl[1, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False positives",
+)
+ax3 = Axis(
+    gl[2, 1];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "Prediction",
+)
+ax4 = Axis(
+    gl[2, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False negatives",
+)
+ax5 = Axis(
+    gl[2, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True negatives",
+)
 
-heatmap!(ax1, pr, colormap=vibrant[1:2])
+heatmap!(ax3, pr; colormap = vibrant[1:2])
 
-heatmap!(ax0, pr, colormap=[light[1]])
-scatter!(ax0, coordinates.longitude[trn], coordinates.latitude[trn], color=coordinates.presence[trn], colormap=[:black, vibrant[2]], markersize=4)
+heatmap!(ax0, pr; colormap = [light[1]])
+scatter!(
+    ax0,
+    coordinates.longitude[trn],
+    coordinates.latitude[trn];
+    color = coordinates.presence[trn],
+    colormap = [:black, vibrant[2]],
+    markersize = 4,
+)
 
-heatmap!(ax2, pr, colormap=[light[1]])
-prd = predict(model, X; threshold=true)
+heatmap!(ax2, pr; colormap = [light[1]])
+prd = predict(model, X; threshold = true)
 grd = coordinates.presence[trn]
 
 TP = findall(prd .& grd)
 TN = findall((.!prd) .& (.!grd))
 FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
-heatmap!(ax2, pr, colormap=vibrant[1:2], alpha=0.4)
-scatter!(ax2, latlon[TP,2], latlon[TP,1], markersize=5, color=vibrant[2])
-scatter!(ax2, latlon[FP,2], latlon[FP,1], markersize=6, marker=:cross, color=:black)
 
-for ax in [ax1, ax2, ax0]
+heatmap!(ax1, pr; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(ax1, latlon[TP, 2], latlon[TP, 1]; markersize = 3, color = vibrant[2])
+
+heatmap!(ax2, pr; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(ax2, latlon[FP, 2], latlon[FP, 1]; markersize = 5, color = :black, marker = :cross)
+
+heatmap!(ax4, pr; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(
+    ax4,
+    latlon[FN, 2],
+    latlon[FN, 1];
+    markersize = 5,
+    color = vibrant[2],
+    marker = :cross,
+)
+
+heatmap!(ax5, pr; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(ax5, latlon[TN, 2], latlon[TN, 1]; markersize = 3, color = :black)
+
+for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
     ax.xticklabelpad = 0
     ax.yticklabelpad = 0
     hidedecorations!(ax)
@@ -406,7 +471,7 @@ for ax in [ax1, ax2, ax0]
 end
 
 colgap!(gl, 0)
-rowgap!(gl, 0)
+rowgap!(gl, 10)
 
 current_figure()
 ```
@@ -414,6 +479,8 @@ current_figure()
 ### What is an acceptable model?
 
 When comparing the prediction to the spatial distribution of occurrences (@fig-classification-range), it appears that the model identifies an area in the northeast where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the *purpose* of running this model -- if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model. For now, we have established a basic training routine for our model, and have started thinking spatially about *where* it is making errors (in space).
+
+Note that by visualizing the type of mis-classification from our training set, we gain a better understanding of *how* the model is wrong. False positives, for example, tends to be clustered either at the western margin of the main patch of the predicted range, and in a small number of clusters in the North. False negatives are also fairly close to the edge of the predicted range, but clustered towards the center of the island. This is a good sign! The errors that our model is mkaing seem to be mostly at the margin of the habitat of the species, for which we know, ecologically, that it is more difficult to properly map out.
 
 ```{julia}
 #| echo: false
@@ -424,4 +491,4 @@ JLD2.jldsave(modelpath; variables=model.v)
 
 ## Conclusion
 
-In this chapter, we introduced the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurrence, in which we predicted the potential presence of the species using temperature and classification. Through cross-validation, we confirmed that this model gave a good enough performance (@fig-classification-crossvalidation), looked at the decisions that were being made by the trained model (@fig-classification-decision), and finally mapped the prediction and their associated error in space (@fig-classification-range). In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.
+In this chapter, we introduced the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurrence, in which we predicted the potential presence of the species using temperature and precipitation. Through cross-validation, we confirmed that this model gave a good enough performance (@fig-classification-crossvalidation), looked at the decisions that were being made by the trained model (@fig-classification-decision), and finally mapped the prediction and their associated errors in space (@fig-classification-range). Based on this information, we concluded that the model was a reasonable first approximation of where *Sitta whiteheadi* can be present. In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.
