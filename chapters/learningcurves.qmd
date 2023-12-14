@@ -46,11 +46,11 @@ $$
 −\left[y \times \text{log}\ p+(1−y)\times \text{log}\ (1−p)\right] \,,
 $$
 
-where $y$ is the actual class, and $p$ is the probability associated to the positive class. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. Which is to say that log-loss measures how much information about $y$ is conveyed by $p$. In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of learning.
+where $y$ is the actual class, and $p$ is the probability associated to the positive class. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. Which is to say that log-loss measures how much information about $y$ is conveyed by $p$. In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of the advancement of the learning process.
 
 ## How to optimize the threshold?
 
-In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.
+In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased (towards false positives). We then increase the threshold, and start again.
 
 As we have discussed in @sec-learningcurves-threshold, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
 
@@ -108,9 +108,8 @@ train!(model; threshold=false)
 ```{julia}
 #| echo: false
 #| output: false
-T = LinRange(0.0, 1.0, 70)
-CT = hcat([first(crossvalidate(model, folds; τ=τ, threshold=false)) for τ in T]...)
-model.τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
+T = LinRange(0.0, 1.0, 120)
+CT = threshold!(model, folds; endpoints=T)
 ```
 
 In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
@@ -153,12 +152,33 @@ cl = [vibrant[1:2][i+1] for i in y]
 
 scatter!(rg, P, Ys, color=cl)
 
-vlines!(ax, [τ], color=:black, linestyle=:dash)
-vlines!(rg, [τ], color=:black, linestyle=:dash)
+vlines!(ax, [model.τ], color=:black, linestyle=:dash)
+vlines!(rg, [model.τ], color=:black, linestyle=:dash)
 
 hideydecorations!(ax)
 hidedecorations!(rg)
 hidespines!(rg)
+
+current_figure()
+```
+
+Looking at @fig-tuning-probabilities, it appears that changing the threshold is changing the proportion of false positives and negatives; it is worth investigating exactly how this happens. We can explore this behavior in @fig-tuning-ppvnpv. The points where the PPV and NPC curves meet is a good first approximation of the threshold (the MCC is not picking this exact point, but this is an approximation nonetheless).
+
+
+```{julia}
+#| echo: false
+#| label: fig-tuning-ppvnpv
+#| fig-cap: Learning curve for the threshold of the NBC model, showing the PPV (solid line) and the NPV (dashed line). This figure shows how increasing the threshold leads to a better positive predictive value (we are more confident in the predicti class) at the cost of a loss in the negative predictive value (the pixels classified as negative are not meaningful). Essentially, moving the threshold (and indeed, tuning any other hyper-parameter) is a way to find a position in this space where the balance between errors maximizes the skill of our classifier.
+fig = Figure(; resolution=(500, 300))
+ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="Predictive value")
+
+
+
+lines!(ax, T, vec(mean(ppv.(CT); dims=1)), color=bright[2], linewidth=2, linestyle=:solid)
+lines!(ax, T, vec(mean(npv.(CT); dims=1)), color=bright[3], linewidth=2, linestyle=:dash)
+
+xlims!(ax, (0., 1.))
+ylims!(ax, (0., 1.))
 
 current_figure()
 ```
@@ -201,6 +221,8 @@ end
 
 current_figure()
 ```
+
+In a sense, the ROC and PR curves are another projection of the results from @fig-tuning-ppvnpv: a good classifier makes credible recommendations for its positive class, while maintaining credible recommendations for the negative class. Looking at several ways to express the performance of the classifier is a good idea, as a good understanding of how reliable our predicitions are depends on our ability to appraise these different sources of error.
 
 ### Fine-tuning the NBC prior
 
@@ -247,16 +269,12 @@ _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layer
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 
 pr = convert(Float64, similar(first(bio)))
-bs = convert(Float64, similar(first(bio)))
 en = convert(Float64, similar(first(bio)))
 
-submodels = [naivebayes(y, X[b,:]; transformation=tf) for b in bootstrap(y, X; n=500)]
-
 Threads.@threads for k in keys(pr)
-    x = [bio[i][k] for i in axes(v, 1)]
-    pr[k] = model(x)
+    x = [bio[i][k] for i in 1:19]
+    pr[k] = predict(model, x; threshold=false)
     en[k] = entropy(pr[k])
-    bs[k] = iqr([m(x) for m in submodels])
 end
 ```
 
@@ -269,9 +287,12 @@ We are *not* applying the older versions of the model to the testing data, as we
 ```{julia}
 #| echo: false
 #| output: false
-ytest, Xtest = JLD.load(joinpath(_ptm_path, "sdm-step-0.jld"))["testing"]
-preds = vec(mapslices(model, Xtest[:,v], dims=2))
-C = ConfusionMatrix(preds, ytest, τ)
+JLD2.jldopen(joinpath(_models_path, "sdm-testing-data.jld2"), "r") do file
+    global Xt = file["X"]
+    global yt = file["y"]
+end;
+preds = predict(model, Xt)
+C = ConfusionMatrix(preds, yt)
 ```
 
 We can start by taking a look at the confusion matrix on the testing data:
@@ -293,9 +314,9 @@ The final predictions are shown in @fig-tuning-map. Although the range map is ve
 #| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability. Darker pixels in the uncertainty map indicate a higher variance between bootstrap runs.
 f = Figure()
 ax = Axis(f[1,1], aspect=DataAspect())
-heatmap!(ax, pr .>= τ, colormap=vibrant[1:2])
+heatmap!(ax, pr .>= model.τ, colormap=vibrant[1:2])
 ax2 = Axis(f[1,2], aspect=DataAspect())
-heatmap!(ax2, bs, colormap=cgrad(iridescent))
+heatmap!(ax2, en, colormap=iridescent)
 for a in [ax, ax2]
     hidedecorations!(a)
     hidespines!(a)

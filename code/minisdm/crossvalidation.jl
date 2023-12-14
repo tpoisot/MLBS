@@ -1,3 +1,9 @@
+function threshold!(sdm, folds; endpoints=LinRange(0.0, 1.0, 50), optimality=mcc, kwargs...)
+    C = hcat([first(crossvalidate(sdm, folds; τ=τ, threshold=false, kwargs...)) for τ in endpoints]...)
+    model.τ = T[last(findmax(vec(mean(optimality.(C); dims=1))))]
+    return C
+end
+
 function crossvalidate(sdm, folds; τ=nothing, kwargs...)
     Cv = zeros(ConfusionMatrix, length(folds))
     Ct = zeros(ConfusionMatrix, length(folds))
