@@ -99,12 +99,12 @@ modelpath = joinpath(_models_path, "sdm-step-1.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
+    global folds = file["folds"]
 end;
 
 JLD2.jldopen(modelpath, "r") do file
     global v0 = file["variables"]
     global tr = file["transformation"]
-    global folds = file["folds"]
 end;
 
 model = SDM(tr(), NBC(), 0.5, X, y, v0)
@@ -240,9 +240,7 @@ As we are now considering that our model is adequately trained, we can apply it 
 #| output: false
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
-pr = convert(Float64, similar(first(bio)))
-F = permutedims(hcat(values.(bio)...))
-pr.grid[findall(!isnothing, bio[1].grid)] .= predict(model, F; threshold=true)
+pr = predict(model, bio; threshold=true)
 ```
 
 We are *not* applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of "we pick the best model as the one with the highest validation MCC", and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of $p$-hacking, as the question of "what to do in case a model with lower validation MCC had a better performance on the testing data?" would arise, and we do not want to start questioning our central decision this late in the process.
@@ -297,7 +295,6 @@ JLD2.jldsave(
     modelpath;
     transformation = typeof(model.transformer),
     threshold = model.τ,
-    variables = model.v,
-    folds = folds
+    variables = model.v
 )
 ```

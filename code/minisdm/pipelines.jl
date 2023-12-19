@@ -106,3 +106,5 @@ end
 function ConfusionMatrix(ensemble::Bagging; kwargs...)
     return [ConfusionMatrix(m; kwargs...) for m in ensemble.models]
 end
+
+rangediff(new, old) = mask(new .| old, new .- old)

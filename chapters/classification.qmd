@@ -48,12 +48,15 @@ tX = X[:,tst]
 y = y[trn]
 X = X[:,trn]
 
+folds = kfold(y, X; k=12)
+bags = bootstrap(y, X; n=50)
+
 latlon=Matrix(coordinates[trn,[3,2]])
 
 testingpath = joinpath(_models_path, "sdm-testing-data.jld2")
 trainingpath = joinpath(_models_path, "sdm-training-data.jld2")
 JLD2.jldsave(testingpath; y=ty, X=tX)
-JLD2.jldsave(trainingpath; y=y, X=X, latlon=latlon)
+JLD2.jldsave(trainingpath; y=y, X=X, latlon=latlon, folds=folds, bags=bags)
 ```
 
 The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
@@ -360,17 +363,10 @@ It is interesting to compare @fig-classification-decision with, for example, the
 #| output: false
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+pr = predict(model, bio; threshold=true)
 ```
 
 We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of *Sitta whiteheadi*. This result is reported in @fig-classification-range. Because we have used training data for which we know the labels, we can also map the *outcome* of applying the model, which it so say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.
-
-```{julia}
-#| echo: false
-#| output: false
-pr = convert(Float64, similar(first(bio)))
-F = permutedims(hcat(values.(bio)...))
-pr.grid[findall(!isnothing, bio[1].grid)] .= predict(model, F; threshold=true)
-```
 
 ```{julia}
 #| label: fig-classification-range

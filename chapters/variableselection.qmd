@@ -158,6 +158,7 @@ modelpath = joinpath(_models_path, "sdm-step-0.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
+    global folds = file["folds"]
 end;
 
 JLD2.jldopen(modelpath, "r") do file
@@ -171,7 +172,6 @@ train!(model; threshold=false)
 ```{julia}
 #| echo: false
 #| output: false
-folds = kfold(y, X; k=15, permute=true)
 C0v, C0t = crossvalidate(model, folds)
 reset!(model)
 CXv, CXt = crossvalidate(model, folds)
@@ -358,5 +358,5 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 #| output: false
 #| echo: false
 modelpath = joinpath(_models_path, "sdm-step-1.jld2")
-JLD2.jldsave(modelpath; transformation=typeof(finalmodel.transformer), variables=finalmodel.v, folds = folds)
+JLD2.jldsave(modelpath; transformation=typeof(finalmodel.transformer), variables=finalmodel.v)
 ```
