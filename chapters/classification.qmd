@@ -48,7 +48,7 @@ tX = X[:,tst]
 y = y[trn]
 X = X[:,trn]
 
-folds = kfold(y, X; k=12)
+folds = kfold(y, X; k=15)
 bags = bootstrap(y, X; n=50)
 
 latlon=Matrix(coordinates[trn,[3,2]])
