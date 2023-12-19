@@ -295,7 +295,9 @@ In this chapter, we have refined a model by adopting a principled approach to es
 modelpath = joinpath(_models_path, "sdm-step-2.jld")
 JLD2.jldsave(
     modelpath;
+    transformation = typeof(model.transformer),
     threshold = model.τ,
-    variables = model.v
+    variables = model.v,
+    folds = folds
 )
 ```
