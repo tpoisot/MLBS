@@ -30,4 +30,50 @@ include(joinpath(_code_path, "minisdm/pipelines.jl"))
 
 ## Application: uncertainty of the Corsican nuthatch model
 
+```{julia}
+#| echo: false
+#| output: false
+modelpath = joinpath(_models_path, "sdm-step-2.jld2")
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+end;
+
+JLD2.jldopen(modelpath, "r") do file
+    global v0 = file["variables"]
+    global tr = file["transformation"]
+    global τ = file["threshold"]
+    global folds = file["folds"]
+end;
+
+model = SDM(tr(), NBC(), τ, X, y, v0)
+
+bags = bootstrap(y, X)
+ensemble = Bagging(model, bags)
+train!(ensemble)
+```
+
+```{julia}
+#| echo: false
+#| output: false
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+X0 = predict(ensemble.model, bio; threshold=false)
+μ = predict(ensemble, bio; threshold=false, consensus=mean)
+σ = predict(ensemble, bio; threshold=false, consensus=std)
+IQR = predict(ensemble, bio; threshold=false, consensus=iqr)
+```
+
+```{julia}
+#| echo: false
+#| output: false
+Z = (X0 - μ)/σ
+```
+
+```{julia}
+#| echo: false
+#| output: false
+heatmap(Z; colorrange=(-0.5, 0.5), colormap=nightfall)
+```
+
 ## Conclusion

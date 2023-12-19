@@ -19,11 +19,11 @@ function Bagging(model::SDM, bags::Vector)
     return Bagging(model, bags, [deepcopy(model) for _ in eachindex(bags)])
 end
 
-function train!(ensemble::Bagging, y, X; kwargs...)
+function train!(ensemble::Bagging; kwargs...)
     Threads.@threads for m in eachindex(ensemble.models)
-        train!(ensemble.models[m], y, X[:, ensemble.bags[m][1]]; kwargs...)
+        train!(ensemble.models[m]; training=ensemble.bags[m][1], kwargs...)
     end
-    train!(ensemble.model, y, X; kwargs...)
+    train!(ensemble.model; kwargs...)
     return ensemble
 end
 
@@ -33,22 +33,26 @@ function StatsAPI.predict(ensemble::Bagging, X; consensus = median, kwargs...)
     return isone(length(ỹ)) ? only(ỹ) : ỹ
 end
 
-function outofbag(ensemble::Bagging, y, X, bags, args...; kwargs...)
+function StatsAPI.predict(ensemble::Bagging; kwargs...)
+    return StatsAPI.predict(ensemble, ensemble.model.X; kwargs...)
+end
+
+function outofbag(ensemble::Bagging; kwargs...)
     instance = rand(eachindex(y))
     done_instances = Int64[]
     outcomes = Bool[]
 
     for instance in eachindex(y)
-        valid_models = findall(x -> !(instance in x[1]), bags)
+        valid_models = findall(x -> !(instance in x[1]), ensemble.bags)
         if !isempty(valid_models)
             push!(done_instances, instance)
             pred = [
-                predict(ensemble.models[i], X[:, instance], args...; kwargs...) for
+                predict(ensemble.models[i], ensemble.model.X[:, instance]; kwargs...) for
                 i in valid_models
             ]
             push!(outcomes, count(pred) > count(pred) // 2)
         end
     end
 
-    return ConfusionMatrix(outcomes, y[done_instances])
+    return ConfusionMatrix(outcomes, ensemble.model.y[done_instances])
 end

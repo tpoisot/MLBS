@@ -23,6 +23,7 @@ include("crossvalidation.jl")
 include("mocks.jl")
 include("vif.jl")
 include("variableselection.jl")
+include("bootstrap.jl")
 
 function train!(sdm::SDM; threshold=true, training=:, optimality=mcc)
     train!(sdm.transformer, sdm.X[sdm.v,training])
@@ -82,3 +83,17 @@ train!(sdm; training=training)
 yhat = predict(sdm, X)
 ConfusionMatrix(yhat, y) |> mcc
 =#
+
+function StatsAPI.predict(sdm::SDM, layers::Vector{T}; kwargs...) where {T <: SimpleSDMLayer}
+    pr = convert(Float64, similar(first(layers)))
+    F = permutedims(hcat(values.(layers)...))
+    pr.grid[findall(!isnothing, layers[1].grid)] .= predict(sdm, F; kwargs...)
+    return pr
+end
+
+function StatsAPI.predict(ensemble::Bagging, layers::Vector{T}; kwargs...) where {T <: SimpleSDMLayer}
+    pr = convert(Float64, similar(first(layers)))
+    F = permutedims(hcat(values.(layers)...))
+    pr.grid[findall(!isnothing, layers[1].grid)] .= predict(ensemble, F; kwargs...)
+    return pr
+end
