@@ -2,7 +2,7 @@
 
 In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of an hyper-parameter of the model we developed in ­@sec-classification and @sec-predictors (the threshold at which we consider that a probability is high enough to be considered a positive prediction).
 
-We will illustrate this using an approach called moving-threshold classification, and additionally discuss how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then *explain* in @sec-explanations.
+We will illustrate this using an approach called moving-threshold classification, and additionally discuss how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], successive halvings [@jamieson2016], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then *explain* in @sec-explanations.
 
 ```{julia}
 #| echo: false
@@ -37,6 +37,12 @@ We have just described the Receiver Operating Characteristic (ROC; @fawcett2006)
 One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions [@poisot2023]. In addition, although a good model will have a high ROC-AUC, a bad model can get a high ROC-AUC too [@Halligan2015]; this means that ROC-AUC alone is not enough to select a model.
 
 An alternative to ROC is the PR (for precision-recall) curve, in which the positive predictive value is plotted against the true-positive rate; in other words, the PR curve (and therefore the PR-AUC) quantify whether a classifier makes reliable positive predictions, both in terms of these predictions being associated to actual positive outcomes (true-positive rate) and not associated to actual negative outcomes (positive predictive value). Because the PR curve uses the positive predictive values, it captures information that is similar to the ROC curve, but is in general more informative [@Saito2015].
+
+### The TPTS curve
+
+@Becker2022 developed a variant of the ROC curve meant to be used when the validation data are *only* composed of the predictive class; there are a number of situations when this is a reasonable assumption. In the original article, the testing data were reported positive detection of beta-coronaviruses in bat species, which can be seen as a positive-only event since negative tests are unlikely to be reported [the "file-drawer effect"; @pautasso2010]. In this context, evaluating the model by accounting for negative testing data introduces biases, as we do not have access to novel negative instances.
+
+The idea behind the TPTS curve is to instead evaluate the sensitivity of the model as a function of the prevalence that would have been observed *during training* using a specific threshold. At higher thresholds, all instances are predicted positive, but the TPTS curve quantifies how reliably high the specificity can be while keeping the threshold as low as possible. As for the ROC curve, a good model will get a high specificity even at a low threshold.
 
 ### A note on cross-entropy loss
 
@@ -169,15 +175,17 @@ Looking at @fig-tuning-probabilities, it appears that changing the threshold is 
 #| label: fig-tuning-ppvnpv
 #| fig-cap: Learning curve for the threshold of the NBC model, showing the PPV (solid line) and the NPV (dashed line). This figure shows how increasing the threshold leads to a better positive predictive value (we are more confident in the predicti class) at the cost of a loss in the negative predictive value (the pixels classified as negative are not meaningful). Essentially, moving the threshold (and indeed, tuning any other hyper-parameter) is a way to find a position in this space where the balance between errors maximizes the skill of our classifier.
 fig = Figure(; resolution=(500, 300))
-ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="Predictive value")
 
+ax1 = Axis(fig[1,1]; xlabel="Threshold", ylabel="Positive Predictive value")
+ax2 = Axis(fig[1,2]; xlabel="Threshold", ylabel="Negative Predictive value")
 
+lines!(ax1, T, vec(mean(ppv.(CT); dims=1)), color=bright[2], linewidth=2, linestyle=:solid)
+lines!(ax2, T, vec(mean(npv.(CT); dims=1)), color=bright[3], linewidth=2, linestyle=:dash)
 
-lines!(ax, T, vec(mean(ppv.(CT); dims=1)), color=bright[2], linewidth=2, linestyle=:solid)
-lines!(ax, T, vec(mean(npv.(CT); dims=1)), color=bright[3], linewidth=2, linestyle=:dash)
-
-xlims!(ax, (0., 1.))
-ylims!(ax, (0., 1.))
+for ax in [ax1, ax2]
+    xlims!(ax, (0., 1.))
+    ylims!(ax, (0., 1.))
+end
 
 current_figure()
 ```
@@ -223,63 +231,19 @@ current_figure()
 
 In a sense, the ROC and PR curves are another projection of the results from @fig-tuning-ppvnpv: a good classifier makes credible recommendations for its positive class, while maintaining credible recommendations for the negative class. Looking at several ways to express the performance of the classifier is a good idea, as a good understanding of how reliable our predicitions are depends on our ability to appraise these different sources of error.
 
-### Fine-tuning the NBC prior
+### Testing and visualizing the final model
 
-In the previous section, we have assumed that the prior on occurrences $P(+)$ was one half, which is a decision we can revisit. But changing this value would probably require that we also change the threshold, and for this reason we need to optimize both hyperparameters at the same time. We present the results of a simple grid search in @fig-tuning-both.
-
-Based on these results, it appears that changing the value of the prior has very little impact on the best MCC we can achieve: the threshold is simply adjusted to reflect the fact that we assume occurrences to be increasingly likely. In this example, there is very little incentive for us to change the value of the prior, as it would have a very small effect on the overall performance of the model. For this reason, we will keep the previous model ($P(+) = 0.5$ and $\tau \approx `{julia} round(τ; digits=2)`$) as the best one.
-
-::: column-margin
-A grid search in an exhaustive sweep of all possible combinations of parameter values. In order to make the process more efficient, refined approaches like successive halvings [@jamieson2016] can be used.
-:::
-
-Just because we decided to use a learning curve does not mean we *have* to change the hyper-parameters. Sometimes, this approach reveals that the value of an hyper-parameter is not really important to model performance, and we need to make a decision on what to do next. Here, although there are marginal changes in the value of the MCC, they do not feel significant enough to change the value of the prior.
-
-```{julia}
-#| echo: false
-#| label: fig-tuning-both
-#| fig-cap: learning curve for the threshold and prior
-fig = Figure(; resolution=(600, 400))
-ax = Axis(fig[1,1]; xlabel="P(+)", ylabel="MCC")
-
-T = LinRange(0.0, 1.0, 20)
-Pr = LinRange(0.1, 0.9, 20)
-for pr in Pr
-    model.classifier.prior = pr
-    CT = hcat([first(crossvalidate(model, folds; τ=τ, threshold=false)) for τ in T]...)
-    mccs = vec(mean(mcc.(CT); dims=1))
-    @info mccs
-    bm, bi = findmax(mccs)
-    scatter!(ax, pr, bm, color=T[bi], colorrange=(0., 1.), colormap=cgrad(iridescent), strokecolor=:black, strokewidth=1)
-end
-
-Colorbar(fig[1,2], colorrange=(0, 1), colormap=cgrad(iridescent), label="Optimal threshold")
-
-#xlims!(ax, (0., 1.))
-#ylims!(ax, (0.87, 0.89))
-
-current_figure()
-```
+As we are now considering that our model is adequately trained, we can apply it to the testing data we had set aside early in @sec-classification. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important.
 
 ```{julia}
 #| echo: false
 #| output: false
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
-
 pr = convert(Float64, similar(first(bio)))
-en = convert(Float64, similar(first(bio)))
-
-Threads.@threads for k in keys(pr)
-    x = [bio[i][k] for i in 1:19]
-    pr[k] = predict(model, x; threshold=false)
-    en[k] = entropy(pr[k])
-end
+F = permutedims(hcat(values.(bio)...))
+pr.grid[findall(!isnothing, bio[1].grid)] .= predict(model, F; threshold=true)
 ```
-
-### Testing and visualizing the final model
-
-As we are now considering that our model is adequately trained, we can apply it to the testing data we had set aside early in @sec-classification. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important.
 
 We are *not* applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of "we pick the best model as the one with the highest validation MCC", and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of $p$-hacking, as the question of "what to do in case a model with lower validation MCC had a better performance on the testing data?" would arise, and we do not want to start questioning our central decision this late in the process.
 
@@ -305,18 +269,16 @@ $$
 
 This is very promising! There are far more predictions on the diagonal (`{julia} C.tp + C.tn`) than outside of it (`{julia} C.fp + C.fn`), which suggests an accurate classifier. The MCC of this model is `{julia} round(mcc(C); digits=3)`, its true-skill statistic is `{julia} round(trueskill(C); digits=3)`, and its positive and negative predictive values are respectively `{julia} round(ppv(C); digits=3)` and `{julia} round(npv(C); digits=3)`. In other words: this model is *extremely* good. The values of PPV and NPV in particular are important to report: they tell us that when the model predicts a positive or negative outcome, it is expected to be correct more than 9 out of 10 times.
 
-The final predictions are shown in @fig-tuning-map. Although the range map is very similar to the one we produced by the end of @sec-predictors, the small addition of an optimized threshold leads to a model that is overall a little more accurate. Note that the uncertainty has a much nicer spatial structure when compared to our initial attempt (in @fig-classification-range): there are combinations of environmental variables that make prediction more difficult, but they tend to be very spatially clustered.
+The final predictions are shown in @fig-tuning-map. Although the range map is very similar to the one we produced by the end of @sec-predictors, the small addition of an optimized threshold leads to a model that is overall a little more accurate. In @sec-bagging, we will focus on the uncertainty associated to this prediction.
 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-map
-#| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability. Darker pixels in the uncertainty map indicate a higher variance between bootstrap runs.
+#| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
 f = Figure()
 ax = Axis(f[1,1], aspect=DataAspect())
 heatmap!(ax, pr .>= model.τ, colormap=vibrant[1:2])
-ax2 = Axis(f[1,2], aspect=DataAspect())
-heatmap!(ax2, en, colormap=iridescent)
-for a in [ax, ax2]
+for a in [ax]
     hidedecorations!(a)
     hidespines!(a)
 end
@@ -325,20 +287,15 @@ current_figure()
 
 ## Conclusion
 
-In this chapter, we have refined a model by adopting a principled approach to establishing hyper-parameters. This resulted in a final trained model, which we applied to produce the final prediction of the distribution of *Sitta whiteheadi*. In @sec-explanations, we will start asking "why"? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions.
+In this chapter, we have refined a model by adopting a principled approach to establishing hyper-parameters. This resulted in a final trained model, which we applied to produce the final prediction of the distribution of *Sitta whiteheadi*. In @sec-explanations, we will start asking "why"? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions. But before we do this, we will spend time in @sec-bagging to discuss the uncertainty that is part of this model, and how it can be communicated.
 
 ```{julia}
 #| output: false
 #| echo: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-2.jld")
-JLD.save(
-    modelpath,
-    "labels", y,
-    "features", X,
-    "folds", folds,
-    "variables", v,
-    "transformation", Whitening,
-    "threshold", τ
+modelpath = joinpath(_models_path, "sdm-step-2.jld")
+JLD2.jldsave(
+    modelpath;
+    threshold = model.τ,
+    variables = model.v
 )
 ```
