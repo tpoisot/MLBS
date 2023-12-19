@@ -24,6 +24,8 @@ include(joinpath(_code_path, "minisdm/pipelines.jl"))
 
 ### Performance and inter-model agreement
 
+In order for the bagging procedure to make sense, the component of the homogeneous ensemble should have two properties. First, each model trained on a subset of the data must be *skilled*, which is to say that if cross-validated on its own, it should have a good performance. Second, the models should (ideally) *disagree* in their predictions. The last part is important: bagging is useful when there are different ways (different biases) for a model to make accurate predictions. If all the models agree, then there is less interest in building an ensemble (aside from showing the uncertainty, as we will illustrate below).
+
 ### Performance evaluation
 
 ### Aggregation of the ensemble outputs
@@ -48,7 +50,7 @@ end;
 
 model = SDM(tr(), NBC(), τ, X, y, v0)
 
-bags = bootstrap(y, X)
+bags = bootstrap(y, X; n=100)
 ensemble = Bagging(model, bags)
 train!(ensemble)
 ```
@@ -74,6 +76,28 @@ Z = (X0 - μ)/σ
 #| echo: false
 #| output: false
 heatmap(Z; colorrange=(-0.5, 0.5), colormap=nightfall)
+```
+
+tpr ppv
+
+```{julia}
+f = Figure()
+ax1 = Axis(f[1,1]; aspect=1)
+ax2 = Axis(f[1,2]; aspect=1)
+
+C = ConfusionMatrix(ensemble.model)
+OOB = outofbag(ensemble)
+E = ConfusionMatrix(ensemble)
+
+scatter!(ax1, fpr.(E), tpr.(E), color=vibrant[1], marker=:cross)
+scatter!(ax1, (fpr(C), tpr(C)), color=:black)
+scatter!(ax1, (fpr(OOB), tpr(OOB)), color=vibrant[2])
+
+scatter!(ax2, tpr.(E), ppv.(E), color=vibrant[1], marker=:cross)
+scatter!(ax2, (tpr(C), ppv(C)), color=:black)
+scatter!(ax2, (tpr(OOB), ppv(OOB)), color=vibrant[2])
+
+current_figure()
 ```
 
 ## Conclusion

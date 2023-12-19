@@ -97,3 +97,12 @@ function StatsAPI.predict(ensemble::Bagging, layers::Vector{T}; kwargs...) where
     pr.grid[findall(!isnothing, layers[1].grid)] .= predict(ensemble, F; kwargs...)
     return pr
 end
+
+function ConfusionMatrix(sdm::SDM; kwargs...)
+    ŷ = predict(sdm; kwargs...)
+    return ConfusionMatrix(ŷ, sdm.y)
+end
+
+function ConfusionMatrix(ensemble::Bagging; kwargs...)
+    return [ConfusionMatrix(m; kwargs...) for m in ensemble.models]
+end
