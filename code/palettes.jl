@@ -124,3 +124,10 @@ light = [
     colorant"#BBCC33",
     colorant"#AAAA00",
 ]
+
+# Semantic colors for the book
+crosscolors = (
+    training = bright[1],
+    validation = bright[2],
+    testing = bright[3],
+)

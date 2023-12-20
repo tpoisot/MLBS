@@ -134,7 +134,7 @@ mbe(tr, pr) = mean(tr .- pr)
 
 Before seeing examples of strategies for cross-validation, it is important to consider the high-level perspective of the way we will perform the entire training sequence. First, we need to keep a testing dataset. Depending on the problem, it may be *feasible* or *desirable* to use an external testing dataset [@homeyer2022]. In problems for which the volume of data is limited (the 99.99% of biodiversity applications that do not involve metagenomics of remote sensing), this is almost impossible, and therefore we need to resort to removing a proportion of the data. It means that collected data will never be used for training, which is not ideal, but what we gain in return is a fairer appraisal of the performance of the model, which is a really advantageous trade-off. When the testing data are removed, we can start splitting the rest of the data in training and validation sets. This can involve two broad categories of families: exhaustive splits (all data are used for training and evaluation), and non-exhaustive splits (the opposite; for once, the terminology makes sense!).
 
-### Holdout
+### Holdout {#sec-crossvalidation-holdout}
 
 The holdout method is what we used in @sec-gradientdescent, in which we randomly selected some observations to be part of the validation data (which was, in practice, a testing dataset in this example), and kept the rest to serve as the training data. Holdout cross-validation is possibly the simplest technique, but it suffers from a few drawbacks.
 

@@ -68,6 +68,83 @@ For once, and after over 15 years of methodological discussion, it appears that 
 
 In this section, we will finish the training of the model for the distribution of *Sitta whiteheadi*, by picking optimal hyper-parameters, and finally reporting its performance on the testing dataset. At the end of this chapter, we will therefore have established a trained model, that we will use in @sec-explanations to see how each prediction emerges.
 
+```{julia}
+#| echo: false
+#| output: false
+modelpath = joinpath(_models_path, "sdm-step-1.jld2")
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+    global folds = file["folds"]
+    global coordinates = file["coordinates"]
+end;
+
+JLD2.jldopen(modelpath, "r") do file
+    global v0 = file["variables"]
+    global tr = file["transformation"]
+end;
+
+model = SDM(tr(), NBC(), 0.5, X, y, v0)
+train!(model; threshold=false)
+```
+
+### Revisiting assumptions on cross-validation
+
+```{julia}
+#| echo: false
+#| output: false
+_repls = 50
+_prop = LinRange(0.02, 0.98, 30)
+valm = zeros(length(_prop), _repls)
+trnm = zeros(length(_prop), _repls)
+
+for (i,p) in enumerate(_prop)
+    for j in Base.oneto(_repls)
+        _folds = [holdout(y, X; proportion=p)]
+        Cs = crossvalidate(model, _folds; threshold=false)
+        valm[i,j] = mean(mcc.(Cs[1]))
+        trnm[i,j] = mean(mcc.(Cs[2]))
+    end
+end
+```
+
+Most things related to cross-validation *are* hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to poor outcomes. In @fig-tuning-holdout, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation [see @sec-crossvalidation-holdout] can change our ability to produce a good model. Specifically, we compare the MCC estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough example to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.
+
+```{julia}
+#| echo: false
+#| label: fig-tuning-holdout
+#| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 50 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
+fig = Figure(; resolution=(500, 500))
+ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="MCC (validation)")
+ax2 = Axis(fig[2,1]; xlabel="Holdout proportion", ylabel="MCC (training)")
+
+μ = vec(mean(valm; dims=2))
+σ = vec(std(valm, dims=2))
+c = 1.96 .* σ ./ sqrt(_repls)
+band!(ax1, _prop, μ-c, μ+c, color = (crosscolors.validation, 0.4))
+scatterlines!(ax1, _prop, μ, color = crosscolors.validation, markersize=4, linewidth=1)
+
+μ = vec(mean(trnm; dims=2))
+σ = vec(std(trnm, dims=2))
+c = 1.96 .* σ ./ sqrt(_repls)
+band!(ax2, _prop, μ-c, μ+c, color = (crosscolors.training, 0.4))
+scatterlines!(ax2, _prop, μ, color = crosscolors.training, markersize=4, linewidth=1)
+
+xlims!(ax1, (0., 1.))
+xlims!(ax2, (0., 1.))
+ylims!(ax1, (0.75, 0.9))
+ylims!(ax2, (0.75, 0.9))
+current_figure()
+```
+
+::: column-margin
+Remember from @sec-crossvalidation-kfolds that with k-fold, $k$ is an hyper-parameter; it can be tuned in the exact same way! The value of $k$ used in these chapters has been picked because it gives adequate performance.
+:::
+
+Performing this type of analysis is crucial, as it will help us figure out the correct conditions under which a model can be trained. In this case, if we decided to use holdout cross-validation (which we do not, we will keep using *k*-folds!) it appears that the model performance can be reliably be estimated even with low holdout proportions. The usual cutoff of 30% of data used for training using holdout would give reliable estimates of model performance.
+
+This simple example served as an illustration of what a learning curve looks like. In the rest of this chapter, we will focus on tuning an hyper-parameter from the model itself (the probability threshold for attribution of the positive class), and see how we can re-construct a general approach from thinking about the components of the confusion table.
+
 ### Making the NBC explicitly probabilistic {#sec-learningcurves-probabilistic}
 
 In @sec-classification, we have expressed the probability that the NBC recommends a positive outcome as
@@ -91,26 +168,6 @@ $$
 This value $P(x)$ is the "evidence" in Bayesian parlance, and we can use this value explicitly to get the prediction for the probability associated to the class $+$ using the NBC.
 
 Note that we can see that using the approximate version we used so far (the prediction is positive if $P(+) P(x|+) > P(-) P(x|-)$) is equivalent to saying that the prediction is positive whenever $P(+|x) > \tau$ with $\tau = 0.5$. In the next sections, we will challenge the assumption that $0.5$ is the optimal value of $\tau$.
-
-```{julia}
-#| echo: false
-#| output: false
-modelpath = joinpath(_models_path, "sdm-step-1.jld2")
-JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
-    global X = file["X"]
-    global y = file["y"]
-    global folds = file["folds"]
-    global coordinates = file["coordinates"]
-end;
-
-JLD2.jldopen(modelpath, "r") do file
-    global v0 = file["variables"]
-    global tr = file["transformation"]
-end;
-
-model = SDM(tr(), NBC(), 0.5, X, y, v0)
-train!(model; threshold=false)
-```
 
 ```{julia}
 #| echo: false
