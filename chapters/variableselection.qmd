@@ -159,6 +159,7 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
     global folds = file["folds"]
+    global coordinates = file["coordinates"]
 end;
 
 JLD2.jldopen(modelpath, "r") do file
@@ -322,28 +323,92 @@ end
 #| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
 final_range = vpr .> 0.5
 old_range = opr .> 0.5
-rangediff(new, old) = mask(new .| old, new .- old)
-fig = Figure(; resolution=(500,600))
-ax1 = Axis(fig[1,1]; aspect=DataAspect(), title="Initial")
-ax2 = Axis(fig[1,2]; aspect=DataAspect(), title="Final")
-ax3 = Axis(fig[2,1]; aspect=DataAspect(), title="Difference")
-heatmap!(ax1, old_range, colormap=vibrant[1:2])
-heatmap!(ax2, final_range, colormap=vibrant[1:2])
-heatmap!(ax3, final_range, colormap=[vibrant[1], vibrant[1]], alpha=0.7)
+
+f = Figure(; resolution = (900, 600))
+
+gl = f[1, 1] = GridLayout()
+
+ax0 = Axis(
+    gl[1, 1];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "Prediction difference",
+)
+ax1 = Axis(
+    gl[1, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True positives",
+)
+ax2 = Axis(
+    gl[1, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False positives",
+)
+ax4 = Axis(
+    gl[2, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False negatives",
+)
+ax5 = Axis(
+    gl[2, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True negatives",
+)
+
 rm_pal = cgrad(reverse(nightfall), 3, categorical=true)
-heatmap!(ax3, rangediff(final_range, old_range); colormap = rm_pal)
+heatmap!(ax0, final_range, colormap=[vibrant[1], vibrant[1]], alpha=0.7)
+heatmap!(ax0, rangediff(final_range, old_range); colormap = rm_pal)
 
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
 clab = ["Loss", "No change", "Gain"]
-Legend(fig[2,2], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
+Legend(gl[2,1], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
 
-for ax in [ax1, ax2, ax3]
+prd = predict(finalmodel; threshold = true)
+grd = y
+
+TP = findall(prd .& grd)
+TN = findall((.!prd) .& (.!grd))
+FP = findall(prd .& (.!grd))
+FN = findall((.!prd) .& grd)
+
+heatmap!(ax1, final_range; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 3, color = vibrant[2])
+
+heatmap!(ax2, final_range; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 5, color = :black, marker = :cross)
+
+heatmap!(ax4, final_range; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(
+    ax4,
+    coordinates[FN, 2],
+    coordinates[FN, 1];
+    markersize = 5,
+    color = vibrant[2],
+    marker = :cross,
+)
+
+heatmap!(ax5, final_range; colormap = vibrant[1:2], alpha = 0.4)
+scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = :black)
+
+for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
     ax.xticklabelpad = 0
     ax.yticklabelpad = 0
     hidedecorations!(ax)
     hidespines!(ax)
 end
+
+colgap!(gl, 0)
+rowgap!(gl, 10)
 
 current_figure()
 ```

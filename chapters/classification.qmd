@@ -56,7 +56,7 @@ latlon=Matrix(coordinates[trn,[3,2]])
 testingpath = joinpath(_models_path, "sdm-testing-data.jld2")
 trainingpath = joinpath(_models_path, "sdm-training-data.jld2")
 JLD2.jldsave(testingpath; y=ty, X=tX)
-JLD2.jldsave(trainingpath; y=y, X=X, latlon=latlon, folds=folds, bags=bags)
+JLD2.jldsave(trainingpath; y=y, X=X, coordinates=latlon, folds=folds, bags=bags)
 ```
 
 The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
