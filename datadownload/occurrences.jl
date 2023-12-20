@@ -4,15 +4,14 @@ import CSV
 using SpeciesDistributionToolkit
 using CairoMakie
 
-spatial_extent = (left = 8.412, bottom = 41.325, right = 9.662, top = 43.060)
+spatial_extent = (left = 8.53, bottom = 41.325, right = 9.58, top = 43.040)
 dataprovider = RasterData(CHELSA1, BioClim)
 
 temperature = SimpleSDMPredictor(dataprovider; layer = "BIO1", spatial_extent...)
-heatmap(temperature, colormap=:lajolla)
+heatmap(temperature, colormap=[:black, :black])
 
 # Data
 BIOX = convert.(Float32, [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
-#LULC = convert.(Float32, [SimpleSDMPredictor(RasterData(EarthEnv, LandCover); full=true, layer = l, spatial_extent...) for l in layers(RasterData(EarthEnv, LandCover))])
 SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
 sitta = taxon("Sitta whiteheadi"; strict = false)
@@ -55,7 +54,6 @@ heatmap(
     axis = (; aspect = DataAspect()),
     figure = (; resolution = (800, 500)),
 )
-#heatmap!(bgmask; colormap = cgrad([:transparent, :white]; alpha = 0.3))
 scatter!(keys(presencelayer); color = :black)
 scatter!(keys(bgpoints); color = :red)
 current_figure()
