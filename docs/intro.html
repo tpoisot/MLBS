@@ -257,6 +257,161 @@ div.csl-indent {
 <p>note on the meaning of colors</p>
 <section id="core-concepts-in-data-science" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="core-concepts-in-data-science"><span class="header-section-number">1.1</span> Core concepts in data science</h2>
+<div class="cell" data-fig-width="100%" data-fig-responsive="false" data-layout-align="default">
+<div class="cell-output-display">
+<div id="flw-overview" class="quarto-float">
+<figure class="quarto-float quarto-float-flw figure">
+<div aria-describedby="flw-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<svg width="NaN" height="480" viewbox="7.20 7.20 269.40 555.20" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(11.2 551.2)">
+<title>G</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-544 258.2,-544 258.2,4 -4,4"></polygon>
+<!-- training -->
+<g id="node1" class="node">
+<title>training</title>
+<path fill="none" stroke="black" d="M134.32,-536.73C134.32,-538.53 113.92,-540 88.8,-540 63.68,-540 43.27,-538.53 43.27,-536.73 43.27,-536.73 43.27,-507.27 43.27,-507.27 43.27,-505.47 63.68,-504 88.8,-504 113.92,-504 134.32,-505.47 134.32,-507.27 134.32,-507.27 134.32,-536.73 134.32,-536.73"></path>
+<path fill="none" stroke="black" d="M134.32,-536.73C134.32,-534.92 113.92,-533.45 88.8,-533.45 63.68,-533.45 43.27,-534.92 43.27,-536.73"></path>
+<text text-anchor="middle" x="88.8" y="-517.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Training data</text>
+</g>
+<!-- model -->
+<g id="node3" class="node">
+<title>model</title>
+<polygon fill="none" stroke="transparent" points="99.4,-468 0.2,-468 0.2,-432 99.4,-432 99.4,-468"></polygon>
+<polyline fill="none" stroke="black" points="0.2,-432 99.4,-432 "></polyline>
+<text text-anchor="middle" x="49.8" y="-445.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Model training</text>
+</g>
+<!-- training&#45;&gt;model -->
+<g id="edge1" class="edge">
+<title>training-&gt;model</title>
+<path fill="none" stroke="black" d="M79.16,-503.7C74.67,-495.64 69.24,-485.89 64.27,-476.98"></path>
+<polygon fill="black" stroke="black" points="67.25,-475.14 59.33,-468.1 61.14,-478.54 67.25,-475.14"></polygon>
+</g>
+<!-- crossval -->
+<g id="node5" class="node">
+<title>crossval</title>
+<polygon fill="none" stroke="transparent" points="142.84,-324 34.75,-324 34.75,-288 142.84,-288 142.84,-324"></polygon>
+<polyline fill="none" stroke="black" points="34.75,-288 142.84,-288 "></polyline>
+<text text-anchor="middle" x="88.8" y="-301.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Cross-validation</text>
+</g>
+<!-- training&#45;&gt;crossval -->
+<g id="edge3" class="edge">
+<title>training-&gt;crossval</title>
+<path fill="none" stroke="black" d="M97.1,-503.79C101.54,-493.63 106.54,-480.38 108.8,-468 117.34,-421.2 105.9,-366.07 97.13,-333.97"></path>
+<polygon fill="black" stroke="black" points="100.4,-332.67 94.29,-324.02 93.67,-334.59 100.4,-332.67"></polygon>
+</g>
+<!-- testing -->
+<g id="node2" class="node">
+<title>testing</title>
+<path fill="none" stroke="black" d="M254.11,-248.73C254.11,-250.53 235.14,-252 211.8,-252 188.45,-252 169.49,-250.53 169.49,-248.73 169.49,-248.73 169.49,-219.27 169.49,-219.27 169.49,-217.47 188.45,-216 211.8,-216 235.14,-216 254.11,-217.47 254.11,-219.27 254.11,-219.27 254.11,-248.73 254.11,-248.73"></path>
+<path fill="none" stroke="black" d="M254.11,-248.73C254.11,-246.92 235.14,-245.45 211.8,-245.45 188.45,-245.45 169.49,-246.92 169.49,-248.73"></path>
+<text text-anchor="middle" x="211.8" y="-229.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Testing data</text>
+</g>
+<!-- test -->
+<g id="node8" class="node">
+<title>test</title>
+<polygon fill="none" stroke="transparent" points="187.26,-180 76.34,-180 76.34,-144 187.26,-144 187.26,-180"></polygon>
+<polyline fill="none" stroke="black" points="76.34,-144 187.26,-144 "></polyline>
+<text text-anchor="middle" x="131.8" y="-157.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Performance test</text>
+</g>
+<!-- testing&#45;&gt;test -->
+<g id="edge8" class="edge">
+<title>testing-&gt;test</title>
+<path fill="none" stroke="black" d="M192.02,-215.7C182.04,-206.97 169.79,-196.24 158.94,-186.75"></path>
+<polygon fill="black" stroke="black" points="161.18,-184.06 151.35,-180.1 156.57,-189.32 161.18,-184.06"></polygon>
+</g>
+<!-- prediction -->
+<g id="node4" class="node">
+<title>prediction</title>
+<path fill="none" stroke="black" d="M93.34,-392.73C93.34,-394.53 76.96,-396 56.8,-396 36.63,-396 20.25,-394.53 20.25,-392.73 20.25,-392.73 20.25,-363.27 20.25,-363.27 20.25,-361.47 36.63,-360 56.8,-360 76.96,-360 93.34,-361.47 93.34,-363.27 93.34,-363.27 93.34,-392.73 93.34,-392.73"></path>
+<path fill="none" stroke="black" d="M93.34,-392.73C93.34,-390.92 76.96,-389.45 56.8,-389.45 36.63,-389.45 20.25,-390.92 20.25,-392.73"></path>
+<text text-anchor="middle" x="56.8" y="-373.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Prediction</text>
+</g>
+<!-- model&#45;&gt;prediction -->
+<g id="edge2" class="edge">
+<title>model-&gt;prediction</title>
+<path fill="none" stroke="black" d="M51.53,-431.7C52.3,-423.98 53.23,-414.71 54.09,-406.11"></path>
+<polygon fill="black" stroke="black" points="57.58,-406.4 55.09,-396.1 50.61,-405.71 57.58,-406.4"></polygon>
+</g>
+<!-- prediction&#45;&gt;crossval -->
+<g id="edge4" class="edge">
+<title>prediction-&gt;crossval</title>
+<path fill="none" stroke="black" d="M64.71,-359.7C68.35,-351.73 72.75,-342.1 76.79,-333.26"></path>
+<polygon fill="black" stroke="black" points="80,-334.65 80.98,-324.1 73.64,-331.74 80,-334.65"></polygon>
+</g>
+<!-- cvplus -->
+<g id="node6" class="node">
+<title>cvplus</title>
+<text text-anchor="middle" x="52.8" y="-229.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00" fill="darkgreen">✓</text>
+</g>
+<!-- crossval&#45;&gt;cvplus -->
+<g id="edge5" class="edge">
+<title>crossval-&gt;cvplus</title>
+<path fill="none" stroke="black" d="M79.9,-287.7C75.8,-279.73 70.85,-270.1 66.31,-261.26"></path>
+<polygon fill="black" stroke="black" points="69.28,-259.4 61.59,-252.1 63.06,-262.6 69.28,-259.4"></polygon>
+</g>
+<!-- cvminus -->
+<g id="node7" class="node">
+<title>cvminus</title>
+<text text-anchor="middle" x="124.8" y="-229.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00" fill="darkred">✗</text>
+</g>
+<!-- crossval&#45;&gt;cvminus -->
+<g id="edge6" class="edge">
+<title>crossval-&gt;cvminus</title>
+<path fill="none" stroke="black" d="M97.7,-287.7C101.8,-279.73 106.75,-270.1 111.29,-261.26"></path>
+<polygon fill="black" stroke="black" points="114.54,-262.6 116,-252.1 108.32,-259.4 114.54,-262.6"></polygon>
+</g>
+<!-- cvplus&#45;&gt;test -->
+<g id="edge7" class="edge">
+<title>cvplus-&gt;test</title>
+<path fill="none" stroke="black" d="M72.33,-215.7C82.18,-206.97 94.28,-196.24 104.99,-186.75"></path>
+<polygon fill="black" stroke="black" points="107.33,-189.36 112.49,-180.1 102.69,-184.12 107.33,-189.36"></polygon>
+</g>
+<!-- testplus -->
+<g id="node9" class="node">
+<title>testplus</title>
+<text text-anchor="middle" x="95.8" y="-85.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00" fill="darkgreen">✓</text>
+</g>
+<!-- test&#45;&gt;testplus -->
+<g id="edge9" class="edge">
+<title>test-&gt;testplus</title>
+<path fill="none" stroke="black" d="M122.9,-143.7C118.8,-135.73 113.85,-126.1 109.31,-117.26"></path>
+<polygon fill="black" stroke="black" points="112.28,-115.4 104.59,-108.1 106.06,-118.6 112.28,-115.4"></polygon>
+</g>
+<!-- testminus -->
+<g id="node10" class="node">
+<title>testminus</title>
+<text text-anchor="middle" x="167.8" y="-85.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00" fill="darkred">✗</text>
+</g>
+<!-- test&#45;&gt;testminus -->
+<g id="edge10" class="edge">
+<title>test-&gt;testminus</title>
+<path fill="none" stroke="black" d="M140.7,-143.7C144.8,-135.73 149.75,-126.1 154.29,-117.26"></path>
+<polygon fill="black" stroke="black" points="157.54,-118.6 159,-108.1 151.32,-115.4 157.54,-118.6"></polygon>
+</g>
+<!-- use -->
+<g id="node11" class="node">
+<title>use</title>
+<polygon fill="none" stroke="black" points="142.67,-36 48.93,-36 48.93,0 142.67,0 142.67,-36"></polygon>
+<text text-anchor="middle" x="95.8" y="-13.8" font-family="Helvetica,Arial,sans-serif" font-size="14.00">Usable model</text>
+</g>
+<!-- testplus&#45;&gt;use -->
+<g id="edge11" class="edge">
+<title>testplus-&gt;use</title>
+<path fill="none" stroke="black" d="M95.8,-71.7C95.8,-63.98 95.8,-54.71 95.8,-46.11"></path>
+<polygon fill="black" stroke="black" points="99.3,-46.1 95.8,-36.1 92.3,-46.1 99.3,-46.1"></polygon>
+</g>
+</g>
+</svg>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-flw" id="flw-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model. The process of creating a model starts with a trainig dataset made of predictors and responses, which is used to train a model. This model is cross-validated on its training data, to estimate whether it can be fully retrained. The fully trained model is that applied to an independent testing dataset, and the evaluation of the performance determines whether it will be used.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
 <section id="eda" class="level3" data-number="1.1.1">
 <h3 data-number="1.1.1" class="anchored" data-anchor-id="eda"><span class="header-section-number">1.1.1</span> EDA</h3>
 </section>

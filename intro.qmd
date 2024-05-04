@@ -22,6 +22,56 @@ note on the meaning of colors
 
 ## Core concepts in data science
 
+```{dot}
+//| fig-width: 100%
+//| fig-responsive: false
+//| fig-cap: An overview of the process of coming up with a usable model. The process of creating a model starts with a trainig dataset made of predictors and responses, which is used to train a model. This model is cross-validated on its training data, to estimate whether it can be fully retrained. The fully trained model is that applied to an independent testing dataset, and the evaluation of the performance determines whether it will be used.
+//| label: flw-overview
+digraph G {
+    margin = 0.1
+    layout = dot
+    rankdir="TB"
+	fontname="Helvetica,Arial,sans-serif"
+	node [fontname="Helvetica,Arial,sans-serif"]
+	edge [fontname="Helvetica,Arial,sans-serif"]
+
+    training[shape=cylinder, label="Training data"]
+    testing[shape=cylinder, label="Testing data"]
+
+    training -> model;
+    model -> prediction;
+
+    model[label="Model training", shape=underline]
+    prediction[shape=cylinder, label="Prediction"]
+
+    training -> crossval;
+    prediction -> crossval;
+    crossval -> cvplus;
+    crossval -> cvminus;
+
+    crossval[shape=underline, label="Cross-validation"]
+    test[shape=underline, label="Performance test"]
+
+    cvplus -> test;
+    testing -> test;
+
+    test -> testplus;
+    test -> testminus;
+
+    testplus -> use;
+
+    testplus[shape="plaintext" fontcolor="darkgreen" label="✓"];
+    cvplus[shape="plaintext" fontcolor="darkgreen" label="✓"];
+
+    testminus[shape="plaintext" fontcolor="darkred" label="✗"];
+    cvminus[shape="plaintext" fontcolor="darkred" label="✗"];
+
+    use[label="Usable model", shape=rect]
+
+}
+```
+
+
 ### EDA
 
 ### Clustering and regression

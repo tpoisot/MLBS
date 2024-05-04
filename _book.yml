@@ -8,7 +8,7 @@ book:
   license: cc-by-nc
   repo-url: https://github.com/tpoisot/MLBS
   repo-actions: [source, issue]
-  downloads: [typst]
+  downloads: [pdf]
   search:
     location: sidebar
     type: overlay

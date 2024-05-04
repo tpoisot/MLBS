@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.5.29">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Machine Learning for Biodiversity Scientists - 2&nbsp; Clustering</title>
+<title>Machine Learning for Biodiversity Scientists – 2&nbsp; Clustering</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -43,7 +43,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -67,7 +67,9 @@ div.csl-indent {
   "type": "overlay",
   "limit": 10,
   "keyboard-shortcut": [
-    null
+    "f",
+    "/",
+    "s"
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -77,17 +79,45 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -97,11 +127,11 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/clustering.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -112,7 +142,7 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Machine Learning for Biodiversity Scientists</a> 
@@ -199,7 +229,7 @@ div.csl-indent {
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
@@ -326,12 +356,12 @@ div.csl-indent {
 <p>If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a <em>lot</em> of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel. But just like we can get more information that Landsat 9, so too can Landsat 9 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape.</p>
 <div id="cell-fig-kmeans-composites" class="cell page-columns page-full" data-execution_count="3">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="4">
-<div id="fig-kmeans-composites" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-kmeans-composites" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-composites-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-composites-output-1.png" class="img-fluid figure-img">
 </div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-composites-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-composites-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.1: The Landsat 9 data are combined into the “Natural Color” image, in which the red, green, and blue bands are mapped to their respective channels (left). The other composites is a 6-5-4 image meant to show differences between urban areas, vegetations, and crops. Note that the true-color composite is slightly distored compared to the colors of the landscape we expect; this is because natural colors are difficult to reproduce accurately.
 </figcaption>
 </figure>
@@ -348,12 +378,12 @@ Figure&nbsp;2.1: The Landsat 9 data are combined into the “Natural Color” im
 <p>We can look at the relationship between the NDVI and NDMI data <a href="#fig-kmeans-hexbin" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>. For example, NDMI values around -0.1 are <a href="https://eos.com/make-an-analysis/ndmi/">low-canopy cover with low water stress</a>; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time <span class="citation" data-cites="zheng2021">(<a href="#ref-zheng2021" role="doc-biblioref">Zheng et al. 2021</a>)</span>. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds <span class="citation" data-cites="mcfeeters2013">(<a href="#ref-mcfeeters2013" role="doc-biblioref">McFeeters 2013</a>)</span>.</p>
 <div id="cell-fig-kmeans-hexbin" class="cell page-columns page-full" data-execution_count="5">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="6">
-<div id="fig-kmeans-hexbin" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-kmeans-hexbin" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-hexbin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-hexbin-output-1.png" class="img-fluid figure-img">
 </div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-hexbin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-hexbin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.2: The pixels acquired from Landsat 9 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are <em>derived</em> data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
 </figcaption>
 </figure>
@@ -431,12 +461,12 @@ Figure&nbsp;2.2: The pixels acquired from Landsat 9 exist in a space with many d
 <p>Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using <span class="math inline">\(k = 3\)</span>, we get the results presented in <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>.</p>
 <div id="cell-fig-kmeans-initial-landscape" class="cell page-columns page-full" data-execution_count="8">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="9">
-<div id="fig-kmeans-initial-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-kmeans-initial-landscape" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-initial-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-initial-landscape-output-1.png" class="img-fluid figure-img">
 </div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-initial-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-initial-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.3: caption
 </figcaption>
 </figure>
@@ -456,17 +486,17 @@ Figure&nbsp;2.3: caption
 <h3 data-number="2.4.2" class="anchored" data-anchor-id="optimal-number-of-pixels"><span class="header-section-number">2.4.2</span> Optimal number of pixels</h3>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>.</p>
-</div></div><p>In order to produce <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in <a href="#sec-kmeans-initial" class="quarto-xref"><span>Section&nbsp;2.4.1</span></a>, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of <span class="math inline">\(k\)</span>; we know that it is more than 3, but how much more?</p>
-<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies and Bouldin (<a href="#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section&nbsp;2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. More than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
+<p>We will revisit the issue of tuning the hyper-parameters in more depth in <a href="learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>.</p>
+</div></div><p>In order to produce <a href="#fig-kmeans-initial-landscape" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in <a href="#sec-kmeans-initial" class="quarto-xref"><span>Section 2.4.1</span></a>, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of <span class="math inline">\(k\)</span>; we know that it is more than 3, but how much more?</p>
+<p>We will now change the values of <span class="math inline">\(k\)</span> and use the <span class="citation" data-cites="davies1979">Davies and Bouldin (<a href="#ref-davies1979" role="doc-biblioref">1979</a>)</span> measure introduced in <a href="#sec-clustering-optimality" class="quarto-xref"><span>Section 2.3.5</span></a> to identify the optimal value of <span class="math inline">\(k\)</span>. The results are presented in <a href="#fig-kmeans-tuning" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>. Note that we only explore <span class="math inline">\(k \in [3, 10]\)</span>. More than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.</p>
 <div id="cell-fig-kmeans-tuning" class="cell page-columns page-full" data-execution_count="10">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="11">
-<div id="fig-kmeans-tuning" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-kmeans-tuning" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-tuning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-tuning-output-1.png" class="img-fluid figure-img">
 </div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-tuning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-tuning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.4: Results of running the <em>k</em>-means algorithm ten times for each number of clusters between 3 and 8. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
 </figcaption>
 </figure>
@@ -485,12 +515,12 @@ Figure&nbsp;2.4: Results of running the <em>k</em>-means algorithm ten times for
 └ @ Clustering ~/.julia/packages/Clustering/wNDPu/src/kmeans.jl:191</code></pre>
 </div>
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="12">
-<div id="fig-kmeans-optimal-landscape" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-kmeans-optimal-landscape" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-optimal-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-optimal-landscape-output-2.png" class="img-fluid figure-img">
 </div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-optimal-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-optimal-landscape-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.5: Results of the landscape clustering with k=5 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
 </figcaption>
 </figure>
@@ -499,14 +529,15 @@ Figure&nbsp;2.5: Results of the landscape clustering with k=5 clusters. This num
 </div>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>We will revisit the issue of understanding how a model makes a prediction in <a href="explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>.</p>
+<p>We will revisit the issue of understanding how a model makes a prediction in <a href="explanations.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
 </div></div><p>The relative size of the clusters (as well as the position of their centroids) is presented in <a href="#tbl-clustering-centers" class="quarto-xref">Table&nbsp;<span>2.1</span></a>. There is a good difference in the size of the clusters, which is an important thing to note. Indeed, a common myth about <em>k</em>-means is that it gives clusters of the same size. This “size” does not refer to the cardinality of the clusters, but to the volume that they cover in the space of the parameters. If an area of the space of parameters is more densely packed with instances, the cluster covering the area will have more points!</p>
-<div class="cell" data-execution_count="12">
-<div id="tbl-clustering-centers" class="cell anchored" data-execution_count="12">
-<figure class="quarto-float quarto-float-tbl figure">
+<div class="cell page-columns page-full" data-execution_count="12">
+<div id="tbl-clustering-centers" class="cell quarto-float anchored page-columns page-full" data-execution_count="12">
+<figure class="quarto-float quarto-float-tbl figure page-columns page-full">
 <div aria-describedby="tbl-clustering-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output cell-output-display">
-<table class="cell table table-sm table-striped small" data-quarto-postprocess="true">
+<div>
+<table class="do-not-create-environment cell table table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
 <tr class="header headerLastRow">
 <th style="text-align: right;" data-quarto-table-cell-role="th">Cluster</th>
@@ -556,7 +587,8 @@ Figure&nbsp;2.5: Results of the landscape clustering with k=5 clusters. This num
 </table>
 </div>
 </div>
-<figcaption class="table quarto-float-caption quarto-float-tbl" id="tbl-clustering-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-tbl margin-caption" id="tbl-clustering-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2.1: Summary of the values for the centers of the optimal clusters found in this image. The cover column gives the percentage of all pixels associated to this class. The clusters are sorted by the NDVI of their centroid.
 </figcaption>
 </figure>
@@ -569,12 +601,12 @@ Table&nbsp;2.1: Summary of the values for the centers of the optimal clusters fo
 <p>By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in <em>k</em>-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes <em>k</em>-means closer to (or at least most efficient as) a method for quantization <span class="citation" data-cites="gray1984">(<a href="#ref-gray1984" role="doc-biblioref">Gray 1984</a>)</span>.</p>
 <div id="cell-fig-kmeans-clustering" class="cell page-columns page-full" data-execution_count="13">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="14">
-<div id="fig-kmeans-clustering" class="quarto-figure quarto-figure-center anchored page-columns page-full">
+<div id="fig-kmeans-clustering" class="quarto-figure quarto-figure-center quarto-float anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-kmeans-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="clustering_files/figure-html/fig-kmeans-clustering-output-1.png" class="img-fluid figure-img">
 </div>
-<figcaption class="figure quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-kmeans-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2.6: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
 </figcaption>
 </figure>
@@ -585,9 +617,12 @@ Figure&nbsp;2.6: Visualisation of the clustering output as a function of the NDV
 </section>
 <section id="conclusion" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">2.5</span> Conclusion</h2>
-<p>In this chapter, we have used the <em>k</em>-means algorithm to create groups in a large dataset that had no labels, <em>i.e.</em> the points were not assigned to a class. By picking the features we wanted to cluster the point, we were able to highlight specific aspects of the landscape. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we will start adding labels to our data, and shift our attention from classification to regression problems.</p>
+<p>In this chapter, we have used the <em>k</em>-means algorithm to create groups in a large dataset that had no labels, <em>i.e.</em> the points were not assigned to a class. By picking the features we wanted to cluster the point, we were able to highlight specific aspects of the landscape. In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, we will start adding labels to our data, and shift our attention from classification to regression problems.</p>
 
 
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden">
+
+</div>
 </section>
 <section id="bibliography" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
@@ -679,18 +714,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -722,7 +746,47 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -757,7 +821,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -772,38 +840,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    const typesetMath = (el) => {
-      if (window.MathJax) {
-        // MathJax Typeset
-        window.MathJax.typeset([el]);
-      } else if (window.katex) {
-        // KaTeX Render
-        var mathElements = el.getElementsByClassName("math");
-        var macros = [];
-        for (var i = 0; i < mathElements.length; i++) {
-          var texText = mathElements[i].firstChild;
-          if (mathElements[i].tagName == "SPAN") {
-            window.katex.render(texText.data, mathElements[i], {
-              displayMode: mathElements[i].classList.contains('display'),
-              throwOnError: false,
-              macros: macros,
-              fleqn: false
-            });
-          }
-        }
-      }
-    }
     if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
         }
-        typesetMath(container);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
         return container.innerHTML
       } else {
-        typesetMath(note);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -812,8 +870,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      typesetMath(note);
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -1042,7 +1107,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0 International License</a></p>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/clustering.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
