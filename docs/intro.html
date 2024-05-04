@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.429">
+<meta name="generator" content="quarto-1.5.29">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Machine Learning for Biodiversity Scientists - 1&nbsp; Introduction</title>
+<title>Machine Learning for Biodiversity Scientists – 1&nbsp; Introduction</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -67,7 +67,9 @@ div.csl-indent {
   "type": "overlay",
   "limit": 10,
   "keyboard-shortcut": [
-    null
+    "f",
+    "/",
+    "s"
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -77,6 +79,7 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -92,11 +95,11 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -107,7 +110,7 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Machine Learning for Biodiversity Scientists</a> 
@@ -194,7 +197,7 @@ div.csl-indent {
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
@@ -243,13 +246,13 @@ div.csl-indent {
 </header>
 
 
-<p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning; there are many good papers giving overviews of some applications of data science to biological problems; and there are, of course, thousands of tutorials about how to write code (some of them are good!).</p>
+<p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Universit�� de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning; there are many good papers giving overviews of some applications of data science to biological problems; and there are, of course, thousands of tutorials about how to write code (some of them are good!).</p>
 <p>But one thing that students commonly called for was an attempt to tie concepts together, and to explain when and how human decisions were required in ML approaches <span class="citation" data-cites="sulmont2019">(<a href="#ref-sulmont2019" role="doc-biblioref">Sulmont, Patitsas, and Cooperstock 2019</a>)</span>. This is this attempt.</p>
 <p>There are, broadly speaking, two situations in which reading this book is useful. The first is when you are done reading some general books about machine learning, and want to see how it can be applied to problems that are more specific to biodiversity research; the second is when you have a working understanding of biodiversity research, and want a stepping stone into the machine learning literature. Note that there is no scenario where you <em>stop</em> after reading this book – this is by design. The purpose of this book is to give a practical overview of “how data science for biodiversity happens”, and this needs to be done in parallel to even more fundamental readings.</p>
 <div class="content-margin">
 <p>These are examples of books I like. I found them comprehensive and engaging. They may not work for you.</p>
 </div>
-<p>A wonderful introduction to the mathematics behind machine learning can be found in <span class="citation" data-cites="deisenroth2020">Deisenroth, Faisal, and Ong (<a href="#ref-deisenroth2020" role="doc-biblioref">2020</a>)</span>, which provides stunning visualization of mathematical concepts. <span class="citation" data-cites="yau2015">Yau (<a href="#ref-yau2015" role="doc-biblioref">2015</a>)</span> is a particularly useful book about the ways to visualize data in a meaningful way. <strong>TK</strong></p>
+<p>A wonderful introduction to the mathematics behind machine learning can be found in <span class="citation" data-cites="deisenroth2020">Deisenroth, Faisal, and Ong (<a href="#ref-deisenroth2020" role="doc-biblioref">2020</a>)</span>, which provides stunning visualization of mathematical concepts. <span class="citation" data-cites="yau2015">Yau (<a href="#ref-yau2015" role="doc-biblioref">2015</a>)</span> is a particularly useful book about the ways to visualize data in a meaningful way. <span class="citation" data-cites="watt2020">(<a href="#ref-watt2020" role="doc-biblioref">Watt, Borhani, and Katsaggelos 2020</a>)</span> <strong>TK</strong></p>
 <p>When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible quantity of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.</p>
 <p>note on the meaning of colors</p>
 <section id="core-concepts-in-data-science" class="level2" data-number="1.1">
@@ -272,14 +275,14 @@ div.csl-indent {
 </section>
 <section id="an-overview-of-the-content" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</h2>
-<p>In <a href="chapters/clustering.html" class="quarto-xref"><span>Chapter&nbsp;2</span></a>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
-<p>In <a href="chapters/gradientdescent.html" class="quarto-xref"><span>Chapter&nbsp;3</span></a>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
-<p>In <a href="chapters/crossvalidation.html" class="quarto-xref"><span>Chapter&nbsp;4</span></a>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
-<p>In <a href="chapters/variableselection.html#sec-leakage" class="quarto-xref"><span>Section&nbsp;6.2</span></a>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
-<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter&nbsp;5</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
+<p>In <a href="chapters/clustering.html" class="quarto-xref"><span>Chapter 2</span></a>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
+<p>In <a href="chapters/gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
+<p>In <a href="chapters/crossvalidation.html" class="quarto-xref"><span>Chapter 4</span></a>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
+<p>In <a href="chapters/variableselection.html#sec-leakage" class="quarto-xref"><span>Section 6.2</span></a>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
+<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter 5</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-variable-selection</span>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.</p>
-<p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter&nbsp;7</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
-<p>In <a href="chapters/explanations.html" class="quarto-xref"><span>Chapter&nbsp;8</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
+<p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
+<p>In <a href="chapters/explanations.html" class="quarto-xref"><span>Chapter 8</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-bagging</span>, …</p>
 </section>
 <section id="some-rules-about-this-book" class="level2" data-number="1.3">
@@ -313,6 +316,9 @@ div.csl-indent {
 <p>The most broadly known alternative to the <code>iris</code> dataset is <code>penguins</code>, which was collected by ecologists <span class="citation" data-cites="gorman2014">(<a href="#ref-gorman2014" role="doc-biblioref">Gorman, Williams, and Fraser 2014</a>)</span>, and published as a standard dataset <span class="citation" data-cites="horst2020">(<a href="#ref-horst2020" role="doc-biblioref">Horst, Hill, and Gorman 2020</a>)</span> so that we can train students without engaging with the “legacy” of eugenicists. The <code>penguins</code> dataset is also genuinely good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won’t use <code>penguins</code> either. It’s a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go <code>penguins</code>.</p>
 
 
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden">
+
+</div>
 </section>
 </section>
 <section id="bibliography" class="level1 unnumbered">
@@ -347,6 +353,9 @@ Sulmont, Elisabeth, Elizabeth Patitsas, and Jeremy R. Cooperstock. 2019. <span>�
 </div>
 <div id="ref-unwin2021" class="csl-entry" role="listitem">
 Unwin, Antony, and Kim Kleinman. 2021. <span>“The Iris Data Set: In Search of the Source of <span><em>Virginica</em></span>.”</span> <em>Significance</em> 18 (6): 26–29. <a href="https://doi.org/10.1111/1740-9713.01589">https://doi.org/10.1111/1740-9713.01589</a>.
+</div>
+<div id="ref-watt2020" class="csl-entry" role="listitem">
+Watt, Jeremy, Reza Borhani, and Aggelos Katsaggelos. 2020. <span>“Machine Learning Refined,”</span> January. <a href="https://doi.org/10.1017/9781108690935">https://doi.org/10.1017/9781108690935</a>.
 </div>
 <div id="ref-yau2015" class="csl-entry" role="listitem">
 Yau, Nathan. 2015. <span>“Visualize This,”</span> October. <a href="https://doi.org/10.1002/9781118722213">https://doi.org/10.1002/9781118722213</a>.
@@ -390,18 +399,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -433,7 +431,47 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -468,7 +506,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -483,38 +525,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    const typesetMath = (el) => {
-      if (window.MathJax) {
-        // MathJax Typeset
-        window.MathJax.typeset([el]);
-      } else if (window.katex) {
-        // KaTeX Render
-        var mathElements = el.getElementsByClassName("math");
-        var macros = [];
-        for (var i = 0; i < mathElements.length; i++) {
-          var texText = mathElements[i].firstChild;
-          if (mathElements[i].tagName == "SPAN") {
-            window.katex.render(texText.data, mathElements[i], {
-              displayMode: mathElements[i].classList.contains('display'),
-              throwOnError: false,
-              macros: macros,
-              fleqn: false
-            });
-          }
-        }
-      }
-    }
     if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
         }
-        typesetMath(container);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
         return container.innerHTML
       } else {
-        typesetMath(note);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -523,8 +555,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      typesetMath(note);
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -753,7 +792,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0 International License</a></p>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/intro.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
