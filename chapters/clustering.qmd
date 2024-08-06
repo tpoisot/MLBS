@@ -369,7 +369,7 @@ for cluster in axes(ctr, 2)
 end
 sort!(df, :NDVI)
 out = pretty_table(String, df, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = true)
-display("text/html", out)
+display(out)
 ```
 
 ::: column-margin
