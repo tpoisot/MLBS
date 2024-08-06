@@ -24,4 +24,4 @@ crossref:
       key: flw
       latex-env: flowchart
 
-#csl: https://www.zotero.org/styles/ecology-letters
+csl: https://www.zotero.org/styles/ecology-letters
