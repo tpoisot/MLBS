@@ -301,6 +301,7 @@ We will now change the values of $k$ and use the @davies1979 measure introduced 
 ```{julia}
 #| label: fig-kmeans-tuning
 #| echo: false
+#| width: 100%
 #| fig-cap: Results of running the *k*-means algorithm ten times for each number of clusters between 3 and 8. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
 f = Figure(; resolution=(500,500))
 

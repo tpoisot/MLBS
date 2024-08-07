@@ -3,7 +3,8 @@ format:
     theme: [cosmo, resources/scss/global.scss]
     linestretch: 1.7
     fig-cap-location: margin
-    tbl-cap-location: margin
+    tbl-cap-location: top
+    fig-responsive: true
     toc-title: "Chapter overview"
     toc-expand: false
   pdf:
