@@ -353,6 +353,7 @@ The relative size of the clusters (as well as the position of their centroids) i
 ```{julia}
 #| label: tbl-clustering-centers
 #| echo: false
+#| output: asis
 #| tbl-cap: Summary of the values for the centers of the optimal clusters found in this image. The cover column gives the percentage of all pixels associated to this class. The clusters are sorted by the NDVI of their centroid.
 df = DataFrame()
 ctr = clusters.centers
@@ -368,8 +369,7 @@ for cluster in axes(ctr, 2)
     )
 end
 sort!(df, :NDVI)
-out = pretty_table(String, df, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = true)
-display(out)
+pretty_table(df, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```
 
 ::: column-margin

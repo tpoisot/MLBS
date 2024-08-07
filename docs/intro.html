@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.29">
+<meta name="generator" content="quarto-1.5.47">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Machine Learning for Biodiversity Scientists – 1&nbsp; Introduction</title>
+<title>1&nbsp; Introduction – Machine Learning for Biodiversity Scientists</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -95,13 +95,13 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -179,9 +179,9 @@ div.csl-indent {
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
@@ -246,20 +246,20 @@ div.csl-indent {
 </header>
 
 
-<p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Universit�� de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning; there are many good papers giving overviews of some applications of data science to biological problems; and there are, of course, thousands of tutorials about how to write code (some of them are good!).</p>
-<p>But one thing that students commonly called for was an attempt to tie concepts together, and to explain when and how human decisions were required in ML approaches <span class="citation" data-cites="sulmont2019">(<a href="#ref-sulmont2019" role="doc-biblioref">Sulmont, Patitsas, and Cooperstock 2019</a>)</span>. This is this attempt.</p>
+<p>This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning; there are many good papers giving overviews of some applications of data science to biological problems; and there are, of course, thousands of tutorials about how to write code (some of them are good!).</p>
+<p>But one thing that students commonly called for was an attempt to tie concepts together, and to explain when and how human decisions were required in ML approaches <span class="citation" data-cites="sulmont2019">(<a href="#ref-sulmont2019" role="doc-biblioref">Sulmont <em>et al.</em> 2019</a>)</span>. This is this attempt.</p>
 <p>There are, broadly speaking, two situations in which reading this book is useful. The first is when you are done reading some general books about machine learning, and want to see how it can be applied to problems that are more specific to biodiversity research; the second is when you have a working understanding of biodiversity research, and want a stepping stone into the machine learning literature. Note that there is no scenario where you <em>stop</em> after reading this book – this is by design. The purpose of this book is to give a practical overview of “how data science for biodiversity happens”, and this needs to be done in parallel to even more fundamental readings.</p>
 <div class="content-margin">
 <p>These are examples of books I like. I found them comprehensive and engaging. They may not work for you.</p>
 </div>
-<p>A wonderful introduction to the mathematics behind machine learning can be found in <span class="citation" data-cites="deisenroth2020">Deisenroth, Faisal, and Ong (<a href="#ref-deisenroth2020" role="doc-biblioref">2020</a>)</span>, which provides stunning visualization of mathematical concepts. <span class="citation" data-cites="yau2015">Yau (<a href="#ref-yau2015" role="doc-biblioref">2015</a>)</span> is a particularly useful book about the ways to visualize data in a meaningful way. <span class="citation" data-cites="watt2020">(<a href="#ref-watt2020" role="doc-biblioref">Watt, Borhani, and Katsaggelos 2020</a>)</span> <strong>TK</strong></p>
+<p>A wonderful introduction to the mathematics behind machine learning can be found in <span class="citation" data-cites="deisenroth2020">Deisenroth <em>et al.</em> (<a href="#ref-deisenroth2020" role="doc-biblioref">2020</a>)</span>, which provides stunning visualization of mathematical concepts. <span class="citation" data-cites="yau2015">Yau (<a href="#ref-yau2015" role="doc-biblioref">2015</a>)</span> is a particularly useful book about the ways to visualize data in a meaningful way. <span class="citation" data-cites="watt2020">(<a href="#ref-watt2020" role="doc-biblioref">Watt <em>et al.</em> 2020</a>)</span> <strong>TK</strong></p>
 <p>When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible quantity of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.</p>
 <p>note on the meaning of colors</p>
 <section id="core-concepts-in-data-science" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="core-concepts-in-data-science"><span class="header-section-number">1.1</span> Core concepts in data science</h2>
 <div class="cell" data-fig-width="100%" data-fig-responsive="false" data-layout-align="default">
 <div class="cell-output-display">
-<div id="flw-overview" class="quarto-float">
+<div id="flw-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-flw figure">
 <div aria-describedby="flw-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div>
@@ -431,13 +431,13 @@ Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model.
 <section id="an-overview-of-the-content" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="an-overview-of-the-content"><span class="header-section-number">1.2</span> An overview of the content</h2>
 <p>In <a href="chapters/clustering.html" class="quarto-xref"><span>Chapter 2</span></a>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
-<p>In <a href="chapters/gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
-<p>In <a href="chapters/crossvalidation.html" class="quarto-xref"><span>Chapter 4</span></a>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
-<p>In <a href="chapters/variableselection.html#sec-leakage" class="quarto-xref"><span>Section 6.2</span></a>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
-<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter 5</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-gradientdescent</span>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-crossvalidation</span>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-leakage</span>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-classification</span>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-variable-selection</span>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.</p>
-<p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
-<p>In <a href="chapters/explanations.html" class="quarto-xref"><span>Chapter 8</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-tuning</span>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-explanations</span>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-bagging</span>, …</p>
 </section>
 <section id="some-rules-about-this-book" class="level2" data-number="1.3">
@@ -446,7 +446,7 @@ Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model.
 <section id="no-code" class="level3" data-number="1.3.1">
 <h3 data-number="1.3.1" class="anchored" data-anchor-id="no-code"><span class="header-section-number">1.3.1</span> No code</h3>
 <p>This is, maybe, the most surprising rule, because data science <em>is</em> programming (in a sense). But sometimes there is so much focus on programming that we lose track of the other, important aspects of the practice of data science: abstractions, relationship with data, and domain knowledge.</p>
-<p>This book <em>did</em> involve a lot of code. Specifically, this book was written using <em>Julia</em> <span class="citation" data-cites="bezanson2017">(<a href="#ref-bezanson2017" role="doc-biblioref">Bezanson et al. 2017</a>)</span>, and every figure is generated by a notebook, and they are part of the material I use when teaching from this content in the classroom. But code is <em>not</em> a universal language, and unless you are really familiar with the language, code can obfuscate. I had no intention to write a <em>Julia</em> book (or an <em>R</em> book, or a <em>Python</em> book). The point is to think about data science applied to ecological research, and I felt like it would be more inclusive to do this in a language agnostic way.</p>
+<p>This book <em>did</em> involve a lot of code. Specifically, this book was written using <em>Julia</em> <span class="citation" data-cites="bezanson2017">(<a href="#ref-bezanson2017" role="doc-biblioref">Bezanson <em>et al.</em> 2017</a>)</span>, and every figure is generated by a notebook, and they are part of the material I use when teaching from this content in the classroom. But code is <em>not</em> a universal language, and unless you are really familiar with the language, code can obfuscate. I had no intention to write a <em>Julia</em> book (or an <em>R</em> book, or a <em>Python</em> book). The point is to think about data science applied to ecological research, and I felt like it would be more inclusive to do this in a language agnostic way.</p>
 <p>And finally, code rots. Code with more dependencies rots faster. It take a single change in the API of a package to break the examples, and then you are left with a very expensive monitor stand. With a few exceptions, the examples in this book do not use complicated packages either.</p>
 </section>
 <section id="no-simulated-data" class="level3" data-number="1.3.2">
@@ -456,7 +456,7 @@ Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model.
 </section>
 <section id="no-model-zoo" class="level3" data-number="1.3.3">
 <h3 data-number="1.3.3" class="anchored" data-anchor-id="no-model-zoo"><span class="header-section-number">1.3.3</span> No model zoo</h3>
-<p>My favorite machine learning package is <em>MLJ</em> <span class="citation" data-cites="blaom2020">(<a href="#ref-blaom2020" role="doc-biblioref">Blaom et al. 2020</a>)</span>. When given a table of labels and a table of features, it will give back a series of models that match with these data. It speeds up the discovery of models considerably, and is generally a lot more informative than trying to read from a list of possible techniques. If I have questions about an algorithm from this list, I can start reading more documentation about how it works.</p>
+<p>My favorite machine learning package is <em>MLJ</em> <span class="citation" data-cites="blaom2020">(<a href="#ref-blaom2020" role="doc-biblioref">Blaom <em>et al.</em> 2020</a>)</span>. When given a table of labels and a table of features, it will give back a series of models that match with these data. It speeds up the discovery of models considerably, and is generally a lot more informative than trying to read from a list of possible techniques. If I have questions about an algorithm from this list, I can start reading more documentation about how it works.</p>
 <p>Reading a long enumeration of things is boring; unless it’s sung by Yakko Warner, I’m not interested, and I refuse to inflict it on people. But more importantly, these enumerations of models often distract from thinking about the problem we want to solve in more abstract terms. I rarely wake up in the morning and think “oh boy I can’t wait to train a SVM today”; chances are, my thought process will be closer to “I need to tell the mushroom people where I think the next good foraging locations will be”. The rest, is implementation details.</p>
 <p>In fact, 90% of this book uses only two models: linear regression, and the Naïve Bayes Classifier. Some other models are involved in a few chapters, but these two models are breathtakingly simple, work surprisingly well, run fast, and can be tweaked to allow us to build deep intuitions about how machines learn. They are perfect for the classroom, and give us the freedom to spent most of our time thinking about how we interact with models, and why, and how we make methodological decisions.</p>
 </section>
@@ -464,11 +464,11 @@ Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model.
 <h3 data-number="1.3.4" class="anchored" data-anchor-id="no-iris-dataset"><span class="header-section-number">1.3.4</span> No <code>iris</code> dataset</h3>
 <p>From a teaching point of view, the <code>iris</code> dataset is like hearing Smash Mouth in a movie trailer, in that it tells you two things with absolute certainty. First, that you are indeed watching a movie trailer. Second, that you could be watching Shrek instead. There are datasets out there that are <em>infinitely more</em> exciting to use than <code>iris</code>.</p>
 <p>But there is a far more important reason not to use <code>iris</code>: eugenics.</p>
-<p>Listen, we made it several hundred words in a text about quantitative techniques in life sciences without encountering a sad little man with racist ideas that academia decided to ignore because “he just contributed so much to the field, and these were different times, maybe we shouldn’t be so quick to judge?”. Ronald Aylmer Fisher, statistics’ most racist nerd, was such a man; and there are, of course, those who want to consider the possibility that you can be outrageously racist as long as you are an outstanding scientist <span class="citation" data-cites="bodmer2021">(<a href="#ref-bodmer2021" role="doc-biblioref">Bodmer et al. 2021</a>)</span>.</p>
-<p>The <code>iris</code> dataset was first published by <span class="citation" data-cites="fisher1936">Fisher (<a href="#ref-fisher1936" role="doc-biblioref">1936</a>)</span> in the <em>Annals of Eugenics</em> (so, there’s a bit of a red flag there already), and draws from several publications by Edgar Anderson, starting with <span class="citation" data-cites="anderson1928">Anderson (<a href="#ref-anderson1928" role="doc-biblioref">1928</a>)</span>; <span class="citation" data-cites="unwin2021">Unwin and Kleinman (<a href="#ref-unwin2021" role="doc-biblioref">2021</a>)</span> have an interesting historiographic deep-dive into the correspondence between the two. Judging by the dates, you may think that Fisher was a product of his time. But this could not be further from the truth. Fisher was dissatisfied with his time, to the point where his contributions to statistics were done in service of his views, in order to provide the appearance of scientific rigor to his bigotry.</p>
+<p>Listen, we made it several hundred words in a text about quantitative techniques in life sciences without encountering a sad little man with racist ideas that academia decided to ignore because “he just contributed so much to the field, and these were different times, maybe we shouldn’t be so quick to judge?”. Ronald Aylmer Fisher, statistics’ most racist nerd, was such a man; and there are, of course, those who want to consider the possibility that you can be outrageously racist as long as you are an outstanding scientist <span class="citation" data-cites="bodmer2021">(<a href="#ref-bodmer2021" role="doc-biblioref">Bodmer <em>et al.</em> 2021</a>)</span>.</p>
+<p>The <code>iris</code> dataset was first published by <span class="citation" data-cites="fisher1936">Fisher (<a href="#ref-fisher1936" role="doc-biblioref">1936</a>)</span> in the <em>Annals of Eugenics</em> (so, there’s a bit of a red flag there already), and draws from several publications by Edgar Anderson, starting with <span class="citation" data-cites="anderson1928">Anderson (<a href="#ref-anderson1928" role="doc-biblioref">1928</a>)</span>; <span class="citation" data-cites="unwin2021">Unwin &amp; Kleinman (<a href="#ref-unwin2021" role="doc-biblioref">2021</a>)</span> have an interesting historiographic deep-dive into the correspondence between the two. Judging by the dates, you may think that Fisher was a product of his time. But this could not be further from the truth. Fisher was dissatisfied with his time, to the point where his contributions to statistics were done in service of his views, in order to provide the appearance of scientific rigor to his bigotry.</p>
 <p>Fisher advocated for forced sterilization for the “defectives” (which he estimated at, oh, roughly 10% of the population), argued that not all races had equal capacity for intellectual and emotional development, and held a host of related opinions. There is no amount of contribution to science that pardon these views. Coming up with the idea of the null hypothesis does not even out lending “scientific” credibility to ideas whose logical (and historical) conclusion is genocide. That Ronald Fisher is still described as a polymath and a genius is infuriating, and we should use every alternative to his work that we have.</p>
 <p>Thankfully, there are alternatives!</p>
-<p>The most broadly known alternative to the <code>iris</code> dataset is <code>penguins</code>, which was collected by ecologists <span class="citation" data-cites="gorman2014">(<a href="#ref-gorman2014" role="doc-biblioref">Gorman, Williams, and Fraser 2014</a>)</span>, and published as a standard dataset <span class="citation" data-cites="horst2020">(<a href="#ref-horst2020" role="doc-biblioref">Horst, Hill, and Gorman 2020</a>)</span> so that we can train students without engaging with the “legacy” of eugenicists. The <code>penguins</code> dataset is also genuinely good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won’t use <code>penguins</code> either. It’s a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go <code>penguins</code>.</p>
+<p>The most broadly known alternative to the <code>iris</code> dataset is <code>penguins</code>, which was collected by ecologists <span class="citation" data-cites="gorman2014">(<a href="#ref-gorman2014" role="doc-biblioref">Gorman <em>et al.</em> 2014</a>)</span>, and published as a standard dataset <span class="citation" data-cites="horst2020">(<a href="#ref-horst2020" role="doc-biblioref">Horst <em>et al.</em> 2020</a>)</span> so that we can train students without engaging with the “legacy” of eugenicists. The <code>penguins</code> dataset is also genuinely good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won’t use <code>penguins</code> either. It’s a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go <code>penguins</code>.</p>
 
 
 <div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden">
@@ -480,40 +480,40 @@ Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model.
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-anderson1928" class="csl-entry" role="listitem">
-Anderson, Edgar. 1928. <span>“The Problem of Species in the Northern Blue Flags, Iris Versicolor l. And Iris Virginica l.”</span> <em>Annals of the Missouri Botanical Garden</em> 15 (3): 241. <a href="https://doi.org/10.2307/2394087">https://doi.org/10.2307/2394087</a>.
+Anderson, E. (1928). <a href="https://doi.org/10.2307/2394087">The problem of species in the northern blue flags, iris versicolor l. And iris virginica l.</a> <em>Annals of the Missouri Botanical Garden</em>, 15, 241.
 </div>
 <div id="ref-bezanson2017" class="csl-entry" role="listitem">
-Bezanson, Jeff, Alan Edelman, Stefan Karpinski, and Viral B. Shah. 2017. <span>“Julia: A Fresh Approach to Numerical Computing.”</span> <em>SIAM Review</em> 59 (1): 65–98. <a href="https://doi.org/10.1137/141000671">https://doi.org/10.1137/141000671</a>.
+Bezanson, J., Edelman, A., Karpinski, S. &amp; Shah, V.B. (2017). <a href="https://doi.org/10.1137/141000671">Julia: A Fresh Approach to Numerical Computing</a>. <em>SIAM Review</em>, 59, 65–98.
 </div>
 <div id="ref-blaom2020" class="csl-entry" role="listitem">
-Blaom, Anthony, Franz Kiraly, Thibaut Lienart, Yiannis Simillides, Diego Arenas, and Sebastian Vollmer. 2020. <span>“MLJ: A Julia Package for Composable Machine Learning.”</span> <em>Journal of Open Source Software</em> 5 (55): 2704. <a href="https://doi.org/10.21105/joss.02704">https://doi.org/10.21105/joss.02704</a>.
+Blaom, A., Kiraly, F., Lienart, T., Simillides, Y., Arenas, D. &amp; Vollmer, S. (2020). <a href="https://doi.org/10.21105/joss.02704">MLJ: A julia package for composable machine learning</a>. <em>Journal of Open Source Software</em>, 5, 2704.
 </div>
 <div id="ref-bodmer2021" class="csl-entry" role="listitem">
-Bodmer, Walter, R. A. Bailey, Brian Charlesworth, Adam Eyre-Walker, Vernon Farewell, Andrew Mead, and Stephen Senn. 2021. <span>“The Outstanding Scientist, R.A. Fisher: His Views on Eugenics and Race.”</span> <em>Heredity</em> 126 (4): 565–76. <a href="https://doi.org/10.1038/s41437-020-00394-6">https://doi.org/10.1038/s41437-020-00394-6</a>.
+Bodmer, W., Bailey, R.A., Charlesworth, B., Eyre-Walker, A., Farewell, V., Mead, A., <em>et al.</em> (2021). <a href="https://doi.org/10.1038/s41437-020-00394-6">The outstanding scientist, R.A. Fisher: his views on eugenics and race</a>. <em>Heredity</em>, 126, 565–576.
 </div>
 <div id="ref-deisenroth2020" class="csl-entry" role="listitem">
-Deisenroth, Marc Peter, A. Aldo Faisal, and Cheng Soon Ong. 2020. <span>“Mathematics for Machine Learning,”</span> February. <a href="https://doi.org/10.1017/9781108679930">https://doi.org/10.1017/9781108679930</a>.
+Deisenroth, M.P., Faisal, A.A. &amp; Ong, C.S. (2020). <a href="https://doi.org/10.1017/9781108679930">Mathematics for machine learning</a>.
 </div>
 <div id="ref-fisher1936" class="csl-entry" role="listitem">
-Fisher, R. A. 1936. <span>“The Use Of Multiple Measurements In Taxonomic Problems.”</span> <em>Annals of Eugenics</em> 7 (2): 179–88. <a href="https://doi.org/10.1111/j.1469-1809.1936.tb02137.x">https://doi.org/10.1111/j.1469-1809.1936.tb02137.x</a>.
+Fisher, R.A. (1936). <a href="https://doi.org/10.1111/j.1469-1809.1936.tb02137.x">The Use Of Multiple Measurements In Taxonomic Problems</a>. <em>Annals of Eugenics</em>, 7, 179–188.
 </div>
 <div id="ref-gorman2014" class="csl-entry" role="listitem">
-Gorman, Kristen B., Tony D. Williams, and William R. Fraser. 2014. <span>“Ecological Sexual Dimorphism and Environmental Variability Within a Community of Antarctic Penguins (Genus Pygoscelis).”</span> Edited by André Chiaradia. <em>PLoS ONE</em> 9 (3): e90081. <a href="https://doi.org/10.1371/journal.pone.0090081">https://doi.org/10.1371/journal.pone.0090081</a>.
+Gorman, K.B., Williams, T.D. &amp; Fraser, W.R. (2014). <a href="https://doi.org/10.1371/journal.pone.0090081">Ecological Sexual Dimorphism and Environmental Variability within a Community of Antarctic Penguins (Genus Pygoscelis)</a>. <em>PLoS ONE</em>, 9, e90081.
 </div>
 <div id="ref-horst2020" class="csl-entry" role="listitem">
-Horst, Allison M, Alison Presmanes Hill, and Kristen B Gorman. 2020. <em>Allisonhorst/Palmerpenguins: V0.1.0</em>. Zenodo. <a href="https://doi.org/10.5281/ZENODO.3960218">https://doi.org/10.5281/ZENODO.3960218</a>.
+Horst, A.M., Hill, A.P. &amp; Gorman, K.B. (2020). <em><a href="https://doi.org/10.5281/ZENODO.3960218">Allisonhorst/palmerpenguins: v0.1.0</a></em>. Zenodo.
 </div>
 <div id="ref-sulmont2019" class="csl-entry" role="listitem">
-Sulmont, Elisabeth, Elizabeth Patitsas, and Jeremy R. Cooperstock. 2019. <span>“Can You Teach Me to Machine Learn?”</span> <em>Proceedings of the 50th ACM Technical Symposium on Computer Science Education</em>, February. <a href="https://doi.org/10.1145/3287324.3287392">https://doi.org/10.1145/3287324.3287392</a>.
+Sulmont, E., Patitsas, E. &amp; Cooperstock, J.R. (2019). <a href="https://doi.org/10.1145/3287324.3287392">Can you teach me to machine learn?</a> <em>Proceedings of the 50th ACM Technical Symposium on Computer Science Education</em>.
 </div>
 <div id="ref-unwin2021" class="csl-entry" role="listitem">
-Unwin, Antony, and Kim Kleinman. 2021. <span>“The Iris Data Set: In Search of the Source of <span><em>Virginica</em></span>.”</span> <em>Significance</em> 18 (6): 26–29. <a href="https://doi.org/10.1111/1740-9713.01589">https://doi.org/10.1111/1740-9713.01589</a>.
+Unwin, A. &amp; Kleinman, K. (2021). <a href="https://doi.org/10.1111/1740-9713.01589">The Iris Data Set: In Search of the Source of <span><em>Virginica</em></span></a>. <em>Significance</em>, 18, 26–29.
 </div>
 <div id="ref-watt2020" class="csl-entry" role="listitem">
-Watt, Jeremy, Reza Borhani, and Aggelos Katsaggelos. 2020. <span>“Machine Learning Refined,”</span> January. <a href="https://doi.org/10.1017/9781108690935">https://doi.org/10.1017/9781108690935</a>.
+Watt, J., Borhani, R. &amp; Katsaggelos, A. (2020). <a href="https://doi.org/10.1017/9781108690935">Machine learning refined</a>.
 </div>
 <div id="ref-yau2015" class="csl-entry" role="listitem">
-Yau, Nathan. 2015. <span>“Visualize This,”</span> October. <a href="https://doi.org/10.1002/9781118722213">https://doi.org/10.1002/9781118722213</a>.
+Yau, N. (2015). <a href="https://doi.org/10.1002/9781118722213">Visualize this</a>.
 </div>
 </div>
 </section>
