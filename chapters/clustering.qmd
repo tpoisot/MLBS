@@ -55,7 +55,7 @@ In fact, we are going to use an image with many dimensions: the data in this cha
 | 3      | Visible green                |                                                 |
 | 4      | Visible red                  |                                                 |
 | 5      | Near-infrared (NIR)          | Reflected by healthy plants                     |
-| 6, 7   | Short wavelength IR (SWIR 1) | Good at differentiating wet earth and dry earth |
+| 6, 7   | Short wavelength IR (SWIR 1 and 2) | Good at differentiating wet earth and dry earth |
 | 8      | Panchromatic                 | High-resolution monochrome                      |
 | 9      | Cirrus band                  | Can pick up high and thin clouds                |
 | 10, 11 | Thermal infrared             |                                                 |
