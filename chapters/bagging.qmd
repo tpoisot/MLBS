@@ -1,1 +1,5 @@
+---
+engine: julia
+---
+
 # Bagging and ensembles {#sec-bagging}

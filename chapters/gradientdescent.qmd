@@ -1,3 +1,7 @@
+---
+engine: julia
+---
+
 # Gradient descent {#sec-gradientdescent}
 
 As we progress into this book, the process of delivering a trained model is going to become more and more complex. In @sec-clustering, we worked with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
