@@ -48,19 +48,21 @@ R, G, B, N, S1, S2 = readlandsat(_data_path)
 
 In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene [@vermote2016], for which we have access to 9 different bands.
 
-| Band   | Measure                      | Notes                                           |
+| Band | Measure | Notes |
 |------------------|-----------------------|-------------------------------|
-| 1      | Aerosol                      | Good proxy for Chl. in oceans                   |
-| 2      | Visible blue                 |                                                 |
-| 3      | Visible green                |                                                 |
-| 4      | Visible red                  |                                                 |
-| 5      | Near-infrared (NIR)          | Reflected by healthy plants                     |
-| 6, 7   | Short wavelength IR (SWIR 1 and 2) | Good at differentiating wet earth and dry earth |
-| 8      | Panchromatic                 | High-resolution monochrome                      |
-| 9      | Cirrus band                  | Can pick up high and thin clouds                |
-| 10, 11 | Thermal infrared             |                                                 |
+| 1 | Aerosol | Good proxy for Chl. in oceans |
+| 2 | Visible blue |  |
+| 3 | Visible green |  |
+| 4 | Visible red |  |
+| 5 | Near-infrared (NIR) | Reflected by healthy plants |
+| 6, 7 | Short wavelength IR (SWIR 1 and 2) | Good at differentiating wet earth and dry earth |
+| 8 | Panchromatic | High-resolution monochrome |
+| 9 | Cirrus band | Can pick up high and thin clouds |
+| 10, 11 | Thermal infrared |  |
 
-: Overview of the bands in a Landsat 9 scene. The data from this chapter were downloaded from [LandsatLook](https://landsatlook.usgs.gov).
+: Overview of the bands in a Landsat 9 scene. The data from this chapter were downloaded from [LandsatLook].
+
+  [LandsatLook]: https://landsatlook.usgs.gov
 
 By using the data present in the channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).
 
@@ -101,6 +103,11 @@ But can we classify these different environments starting in an ecologically rel
 
 One way to do this is to calculate the normalized difference vegetation index, or NDVI [@kennedy2020]. NDVI is derived from the band data (NIR - Red), and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water; Green - NIR) and NDMI (moisture; NIR - SWIR1) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI). Other commonly used indices based on Landsat 9 data include the NBR (Normalized Burned Ratio), for which high values are suggestive of a history of intense fire [@roy2006 have challenged the idea that this measure is relevant immediately post-fire], and the NDBI (Normalized Difference Built-up Index) for urban areas.
 
+Normalized differences indices are really fascinating measures to apply when you have two different quantities $u$ and $w$. The formula for the normalized difference index is
+
+$$\frac{u-w}{u+w}$$
+
+or in other words, is the difference between these two quantities *relatively* larger than their sum. If $u = w$, their normalized difference is 0. If $w = 0$, or $u = 0$, their normalized difference is 1. Normalized differences are good at measuring the *over* or *under* representation of quantities you can reasonably add ("reasonably" meaning that you do not have strong statistical or biological arguments against). For example, @dansereau2024 used the normalized difference of different measures of food web structure to identify areas in space where different types of competition for food dominated ecological communities.
 
 ```{julia}
 #| label: get-ndvi-et-al
@@ -116,7 +123,9 @@ X[2,:] .= vec(ndwi)
 X[3,:] .= vec(ndmi)
 ```
 
-We can look at the relationship between the NDVI and NDMI data [@fig-kmeans-hexbin]. For example, NDMI values around -0.1 are [low-canopy cover with low water stress](https://eos.com/make-an-analysis/ndmi/); NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time [@zheng2021]. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds [@mcfeeters2013].
+We can look at the relationship between the NDVI and NDMI data [@fig-kmeans-hexbin]. For example, NDMI values around -0.1 are [low-canopy cover with low water stress]; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time [@zheng2021]. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds [@mcfeeters2013].
+
+  [low-canopy cover with low water stress]: https://eos.com/make-an-analysis/ndmi/
 
 ```{julia}
 #| label: fig-kmeans-hexbin
@@ -177,12 +186,12 @@ $$
 \mathbf{c}_j = \frac{1}{|\mathbf{C}_j|}\sum\mathbf{C}_j \,,
 $$ {#eq-clustering-centroid-update}
 
-where $|\cdot|$ is the cardinality of (number of istances in) $\mathbf{C}_j$, and $\sum \mathbf{C}_j$ is the sum of each feature in $\mathbf{C}_j$. To put it plainly: we update the centroid of $\mathbf{C}_j$ so that it takes, for each feature, the average value of all the instances that form $\mathbf{C}_j$.
+where $|\cdot|$ is the cardinality of (number of instances in) $\mathbf{C}_j$, and $\sum \mathbf{C}_j$ is the sum of each feature in $\mathbf{C}_j$. To put it plainly: we update the centroid of $\mathbf{C}_j$ so that it takes, for each feature, the average value of all the instances that form $\mathbf{C}_j$.
 
 ### Updating the classes
 
 ::: column-margin
-Repeating a step multiple times in a row is called an iterative process, and we will see a *lot* of them.
+Repeating a step multiple times in a row is called an iterative process, and we will see a *lot* of them. @sec-gradientdescent relies almost entirely on iteration, in fact.
 :::
 
 Once we have applied @eq-clustering-centroid-update to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.
@@ -200,6 +209,10 @@ In order to get the best possible solution, it is therefore common to run *k*-me
 One question that is left un-answered is the value of $k$. How do we decide on the number of clusters?
 
 There are two solutions here. One is to have an *a priori* knowledge of the number of classes. For example, if the purpose of clustering is to create groups for some specific task, there might be an upper/lower bound to the number of tasks you are willing to consider. The other solution is to run the algorithm in a way that optimizes the number of clusters for us.
+
+::: column-margin
+We will spend a lot more time on the proper technique to optimize ("tune") the hyperparameters of a model in @sec-tuning.
+:::
 
 This second solution turns out to be rather simple with *k*-means. We need to change the value of $k$, run it on the same dataset several times, and then pick the solution that was *optimal*. But this is not trivial. Simply using @eq-clustering-variance would lead to always preferring many clusters. After all, each point in its own cluster would get a pretty low variance!
 
@@ -250,7 +263,7 @@ hidedecorations!(ax)
 current_figure()
 ```
 
->  After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, *i.e.* we want to see what the landscape would look like when divided into three categories. 
+> After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, *i.e.* we want to see what the landscape would look like when divided into three categories.
 
 ::: column-margin
 In fact, take some time to think about how you would use $k$-means to come up with a way to remove pixels with only water from this image!
@@ -373,8 +386,11 @@ pretty_table(df, backend = Val(:markdown), formatters = ft_nomissing, show_subhe
 ```
 
 ::: column-margin
-In fact, this behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes](https://github.com/karthik/wesanderson), and [David Lawrence Miller's Beyoncé palettes](https://github.com/dill/beyonce). Let it never again be said that ecologists should not be trusted with machine learning methods.
+In fact, this behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes], and [David Lawrence Miller's Beyoncé palettes]. Let it never again be said that ecologists should not be trusted with machine learning methods.
 :::
+
+  [Karthik Ram's Wes Anderson palettes]: https://github.com/karthik/wesanderson
+  [David Lawrence Miller's Beyoncé palettes]: https://github.com/dill/beyonce
 
 The area of the space of parameters covered by each cluster in represented in @fig-kmeans-clustering, and this result is actually not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.
 
