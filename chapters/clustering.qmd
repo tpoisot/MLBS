@@ -144,6 +144,37 @@ By picking these four transformed values, instead of simply looking at the clust
 
 In order to understand the theory underlying *k*-means, we will work backwards from its output. As a method for clustering, *k*-means will return a vector of *class memberships*, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that *k*-means is a transformation, taking as its input a vector with three dimensions (NDVI, NDMI, NDWI), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. Pixels only belongs to one class. These are the input and output of our blackbox, and now we can start figuring out its internals.
 
+```{dot}
+//| fig-width: 100%
+//| fig-responsive: false
+//| fig-cap: An overview of the process of coming up with a usable model. The process of creating a model starts with a trainig dataset made of predictors and responses, which is used to train a model. This model is cross-validated on its training data, to estimate whether it can be fully retrained. The fully trained model is that applied to an independent testing dataset, and the evaluation of the performance determines whether it will be used.
+//| label: flw-kmeans
+digraph G {
+    margin = 0.1
+    layout = dot
+    rankdir="TB"
+	fontname="Helvetica,Arial,sans-serif"
+	node [fontname="Helvetica,Arial,sans-serif"]
+	edge [fontname="Helvetica,Arial,sans-serif"]
+
+    rndcnt[label="Random centroids",shape=plaintext]
+    cntr[label="Update centroids",shape=underline]
+    opt[shape=underline, label="Optimum reached?"]
+    clstr[label="Optimal centroids",shape=rect]
+
+    optyes[shape="plaintext" fontcolor="darkgreen" label="✓"];
+    optno[shape="plaintext" fontcolor="darkred" label="✗"];
+
+    rndcnt -> cntr
+    cntr -> opt
+    opt -> optyes
+    opt -> optno
+    optno -> cntr
+    optyes -> clstr
+
+}
+```
+
 ### Inputs and parameters
 
 ::: column-margin
@@ -254,7 +285,7 @@ C = permutedims(reshape(assignments(clusters), size(ndvi)))
 ```{julia}
 #| label: fig-kmeans-initial-landscape
 #| echo: false
-#| fig-cap: caption
+#| fig-cap: After iterating the k-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, i.e. we want to see what the landscape would look like when divided into three categories.
 
 fig = Figure(; resolution=(500, 240))
 ax = CairoMakie.Axis(fig[1,1]; aspect=DataAspect())
@@ -262,8 +293,6 @@ heatmap!(ax, C; colormap=light[2:4])
 hidedecorations!(ax)
 current_figure()
 ```
-
-> After iterating the *k*-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, *i.e.* we want to see what the landscape would look like when divided into three categories.
 
 ::: column-margin
 In fact, take some time to think about how you would use $k$-means to come up with a way to remove pixels with only water from this image!
@@ -334,7 +363,7 @@ rowgap!(gl, 0.0)
 current_figure()
 ```
 
-There are two interesting things in @fig-kmeans-tuning. First, note that for $k=\{3,4\}$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! This is a good sign, and, anecdotally, something that might suggest a really information separation of the points. Second, $k = 3$ has by far the lowest Davies-Bouldin index of all values we tried, and is therefore strongly suggestive of an optimal hyper-parameter. But in @fig-kmeans-initial-landscape, we already established that one of these clusters was capturing *both* water and built-up environments, so although it may look better from a quantitative point of view, it is not an ideal solution *for the specific problem we have*.
+There are two interesting things in @fig-kmeans-tuning. First, note that for $k=\{3,4\}$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! This is a good sign, and, anecdotally, something that might suggest a really informative separation of the points. Second, $k = 3$ has by far the lowest Davies-Bouldin index of all values we tried, and is therefore strongly suggestive of an optimal hyper-parameter. But in @fig-kmeans-initial-landscape, we already established that one of these clusters was capturing *both* water and built-up environments, so although it may look better from a quantitative point of view, it is not an ideal solution *for the specific problem we have*.
 
 In this specific case, it makers very little sense *not* to use $k = 4$ or $k = 5$. They have about the same performance, but this gives us potentially more classes that are neither water nor built-up. This image is one of many cases where it is acceptable to sacrifice a little bit of optimality in order to present more actionable information. Based on the results in this section, we will pick the largest possible $k$ that does not lead to a drop in performance, which in our case is $k=5$.
 
