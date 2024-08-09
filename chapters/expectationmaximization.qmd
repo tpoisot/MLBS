@@ -46,3 +46,25 @@ X[3,:] .= vec(ndmi)
 ```
 
 BUT WHY - maybe features are not independant / clusters have different densities
+
+## What is a Gaussian distribution
+
+## Understanding expectation-maximization
+
+## Gaussian Mixture Models
+
+## Application:
+
+```{julia}
+# using GaussianMixtures ?
+k = 2
+mu = randn(k)
+sigma = 10rand(k)
+MM = MixtureModel(
+    Normal,
+    [(mu[i], sigma[i]) for i in 1:k],
+    [1/k for i in 1:k]
+)
+```
+
+## Conclusion
