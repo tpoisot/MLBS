@@ -19,6 +19,7 @@ using StatsBase
 using Random
 import CSV
 using DataFrames
+using PrettyTables
 
 set_theme!()
 CairoMakie.activate!(; type = "png")

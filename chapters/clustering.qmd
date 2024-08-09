@@ -450,10 +450,11 @@ for cluster in axes(ctr, 2)
     push!(df,
         (
             Cluster=cluster,
-            Cover=round(Int, count(clusters.assignments .== cluster)/prod(size(ndvi))*100),
+            Cover=round(Int, count(clusters.assignments .== cluster)/prod(size(NDVI))*100),
             NDVI=round(ctr[1,cluster]; digits=3),
             NDWI=round(ctr[2,cluster]; digits=3),
             NDMI=round(ctr[3,cluster]; digits=3),
+            NBR=round(ctr[4,cluster]; digits=3),
         )
     )
 end
