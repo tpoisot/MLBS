@@ -1,3 +1,7 @@
+---
+engine: julia
+---
+
 # Cross-validation {#sec-crossvalidation}
 
 In @sec-clustering, we were very lucky. Because we applied an unsupervised method, we didn't really have a target to compare to the output. Whatever classification we got, we had to live with it. It was incredibly freeing. Sadly, in most applications, we will have to compare our predictions to data, and data are incredibly vexatious. In this chapter, we will develop intuitions on the notions of training, testing, and validation.

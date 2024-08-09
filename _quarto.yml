@@ -17,4 +17,11 @@ bibliography: references.bib
 reference-section-title: References
 citeproc: true
 
-csl: https://www.zotero.org/styles/biologia
+crossref:
+  custom:
+    - kind: float
+      reference-prefix: Flowchart
+      key: flw
+      latex-env: flowchart
+
+csl: https://www.zotero.org/styles/ecology-letters

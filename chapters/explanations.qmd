@@ -1,3 +1,7 @@
+---
+engine: julia
+---
+
 # Explaining predictions {#sec-explanations}
 
 In this chapter, we will

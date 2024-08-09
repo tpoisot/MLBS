@@ -1,3 +1,7 @@
+---
+engine: julia
+---
+
 # Bagging, ensembles, and uncertainty {#sec-bagging}
 
 In @sec-tuning, we have established a good (as evaluated on the testing data) model for the distribution of *Sitta whiteheadi*. In this chapter, before jumping into the explainability of predictions [@sec-explanations], we will introduce a technique called bootstrap aggregating (or bagging, for short), discuss the notion of ensemble models, and see how we can use these approaches to talk about model uncertainty.
@@ -101,3 +105,8 @@ current_figure()
 ```
 
 ## Conclusion
+---
+engine: julia
+---
+
+# Bagging and ensembles {#sec-bagging}

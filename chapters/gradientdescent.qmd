@@ -1,3 +1,7 @@
+---
+engine: julia
+---
+
 # Gradient descent {#sec-gradientdescent}
 
 As we progress into this book, the process of delivering a trained model is going to become more and more complex. In @sec-clustering, we worked with a model that did not really require training (but did require to pick the best hyper-parameter). In this chapter, we will only increase complexity very slightly, by considering how we can train a model when we have a reference dataset to compare to.
@@ -246,8 +250,7 @@ rename!(df, :LossTrain => "Loss (training)")
 rename!(df, :LossTest => "Loss (testing)")
 rename!(df, :b0 => "β₀")
 rename!(df, :b1 => "β₁")
-out = pretty_table(String, df, tf = tf_html_simple, formatters = ft_nomissing, show_subheader = false, show_header = true)
-display("text/html", out)
+pretty_table(df, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```
 
 In order to protect against over-fitting, it is common to add a check to the training loop, to say that after a minimum number of iterations has been done, we stop the training when the loss on the testing data starts increasing. In order to protect against very long training steps, it is also common to set a tolerance (absolute or relative) under which we decide that improvements to the loss are not meaningful, and which serves as a stopping criterion for the training.
