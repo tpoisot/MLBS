@@ -461,13 +461,6 @@ sort!(df, :NDVI)
 pretty_table(df, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```
 
-::: column-margin
-In fact, this behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes], and [David Lawrence Miller's Beyoncé palettes]. Let it never again be said that ecologists should not be trusted with machine learning methods.
-:::
-
-  [Karthik Ram's Wes Anderson palettes]: https://github.com/karthik/wesanderson
-  [David Lawrence Miller's Beyoncé palettes]: https://github.com/dill/beyonce
-
 The area of the space of parameters covered by each cluster in represented in @fig-kmeans-clustering, and this result is actually not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.
 
 ::: column-margin
