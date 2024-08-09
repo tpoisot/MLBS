@@ -1,0 +1,48 @@
+---
+engine: julia
+---
+
+# Expectation-Maximization {#sec-expmax}
+
+In @sec-clustering, we applied the *k*-means technique to provide a grouping of unlabelled data into clusters. This was based on a few important ideas, like: points that are close to one another should belong to the same cluster; the quality of a cluster is a tradeoff between its membership and its variance; the selection of hyper-parameters changes the number of clusters and the quality of the clustering.
+
+Yet, we identified a possible issue with the output of *k*-means: the clusters covered the same amount of "space" in the space of the variables we used for clustering. As a possible solution, we mentioned models like Gaussian Mixture Models. In this chapter, we will present the concept of expectation-maximization, and apply it to clustering using mixtures of Gaussians. In the process, we will introduce the idea of likelihood, and start building up elements that will be useful to better understant the notion of gradient descent, introduced in @sec-gradientdescent.
+
+```{julia}
+#| label: activate-environment
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "lib")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "colorcube.jl"))
+include(joinpath(_code_path, "landsat.jl"))
+include(joinpath(_code_path, "daviesbouldin.jl"))
+include(joinpath(_code_path, "palettes.jl"))
+```
+
+## A digression: this is starting to sound suspiciously like statistics?
+
+Correct!
+
+## The problem: classifying pixels from an image
+
+In order to illustrate the importance of changing the method through which we solve the same problem, we will use the same data as in @sec-clustering-data. 
+
+
+```{julia}
+#| label: load-data-cubes
+#| echo: false
+#| output: false
+_data_path = joinpath(dirname(Base.active_project()), "data", "kmeans", "cooked")
+R, G, B, N, S1, S2 = readlandsat(_data_path)
+ndvi = @. (N - R) / (N + R)
+ndwi = @. (G - N) / (G + N)
+ndmi = @. (N - S1) / (N + S1)
+
+X = zeros(Float32, (3, prod(size(ndvi))...))
+X[1,:] .= vec(ndvi)
+X[2,:] .= vec(ndwi)
+X[3,:] .= vec(ndmi)
+```
+
+BUT WHY - maybe features are not independant / clusters have different densities

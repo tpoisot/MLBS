@@ -33,6 +33,7 @@ book:
     - index.qmd
     - intro.qmd
     - chapters/clustering.qmd
+    - chapters/expectationmaximization.qmd
     - chapters/gradientdescent.qmd
     - chapters/crossvalidation.qmd
     - chapters/classification.qmd
