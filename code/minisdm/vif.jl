@@ -11,7 +11,7 @@ function stepwisevif!(model::SDM, threshold; kwargs...)
     X = (Xv .- mean(Xv; dims = 2)) ./ std(Xv; dims = 2)
     vifs = zeros(Float64, length(model.v))
     for i in eachindex(model.v)
-        linreg = lm(Xv[setdiff(eachindex(model.v), i), :]', Xv[i, :])
+        linreg = GLM.lm(Xv[setdiff(eachindex(model.v), i), :]', Xv[i, :])
         vifs[i] = vif(linreg)
     end
     all(vifs .<= threshold) && return model
