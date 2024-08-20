@@ -6,6 +6,7 @@ Manifest.toml
 data/**/raw/*
 /.luarc.json
 data/**/*.tiff
+- data/general/layers.tiff
 
 # Quarto files
 _freeze/
