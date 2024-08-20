@@ -10,12 +10,12 @@ As we progress into this book, the process of delivering a trained model is goin
 #| label: Loading the required packages
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "splitters.jl"))
+#include(joinpath(_code_path, "splitters.jl"))
 ```
 
-Doing do will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
+Doing so will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
 
 ## A digression: what is a trained model? {#sec-gradientdescent-trainedmodel}
 
@@ -40,7 +40,6 @@ But the square term can be relaxed; and there is no reason not to assume a power
 The "reality" (*i.e.* the relationship between $S$ and $L$ that correctly accounts for ecological constraints, and fit the data as closely as possible) is a little bit different than this formula [@macdonald2020]. But for the purpose of this chapter, figuring out the values of $a$ and $b$ from empirical data is a very instructive exercise.
 
 In @fig-gradient-data, we can check that there is a linear relationship between the natural log of the number of species and the natural log of the number of links. This is not surprising! If we assume that $L \approx b\times S^a$, then we can take the log of both sides, and we get $\text{log}\, L \approx a \times \text{log}\, S + \text{log}\,b$. This is linear model, and so we can estimate its parameters using linear regression!
-
 
 ```{julia}
 #| label: Loading the data
@@ -91,12 +90,12 @@ In data science, things often have multiple names. This is true of loss function
 
 This loss function is usually called the MSE (Mean Standard Error), or L2 loss, or the quadratic loss, because the paths to machine learning terminology are many. This is a good example of a loss function for regression (and we will discuss loss functions for classification later in this book). There are alternative loss functions to use for regression problems in @tbl-gradientdescent-regressionloss.
 
-| Measure                       | Expression                                               | Remarks                                                                              |
+| Measure | Expression | Remarks |
 |----------------------------------|-------------------|-------------------|
-| Mean Squared Error (MSE, L2)  | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$ | Large errors are (proportionally) more penalized because of the squaring             |
-| Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$            | Error measured in the units of the response variable                                 |
-| Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$                                      | Error measured in the units of the response variable                                 |
-| Mean Bias Error               | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)$   | Errors *can* cancel out, but this can be used as a measure of positive/negative bias |
+| Mean Squared Error (MSE, L2) | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)^2$ | Large errors are (proportionally) more penalized because of the squaring |
+| Mean Absolute Error (MAE, L1) | $\frac{1}{n}\sum_{i=1}^{n}\|y_i - \hat y_i\|$ | Error measured in the units of the response variable |
+| Root Mean Square Error (RMSE) | $\sqrt{\text{MSE}}$ | Error measured in the units of the response variable |
+| Mean Bias Error | $\frac{1}{n}\sum_{i=1}^{n}\left(y_i - \hat y_i\right)$ | Errors *can* cancel out, but this can be used as a measure of positive/negative bias |
 
 : List of common loss functions for regression problems {#tbl-gradientdescent-regressionloss tbl-colwidths="\[25,25,50\]"}
 
@@ -202,7 +201,8 @@ The number of iterations over which we train the model is usually called the num
 #| label: Split between test/train data
 #| echo: false
 #| output: false
-train_idx, test_idx = holdout(ls.S, ls.L)
+train_idx = sample(eachindex(ls.S), floor(Int, 0.7length(ls.L)); replace=false)
+test_idx = filter(i -> !(i in train_idx), eachindex(ls.L))
 training = ls[train_idx,:]
 testing = ls[test_idx,:]
 

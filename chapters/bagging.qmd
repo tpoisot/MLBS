@@ -105,8 +105,5 @@ current_figure()
 ```
 
 ## Conclusion
----
-engine: julia
----
 
 # Bagging and ensembles {#sec-bagging}

@@ -21,7 +21,7 @@ include(joinpath(_code_path, "minisdm/pipelines.jl"))
 When first introducing classification in @sec-classification and @sec-predictors, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either "present" or "absent"). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.
 
 ::: column-margin
-Note that the quantitative value returned by the classifier does not *need* to be a probability; it simply needs to be on an interval or ratio scale.
+Note that the quantitative value returned by the classifier does not *need* to be a probability; it simply needs to be on an interval (or ratio) scale.
 :::
 
 The idea behind the use of thresholds is simple: if the classifier output $\hat y$ is larger than (or equal to) the threshold value $\tau$, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value $\hat y$ returned by the classifier be a probability. We can simply decide to pick $\tau$ somewhere in the support of the distribution of $\hat y$.
@@ -341,7 +341,7 @@ The final predictions are shown in @fig-tuning-map. Although the range map is ve
 #| echo: false
 #| label: fig-tuning-map
 #| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
-f = Figure(; resolution = (900, 600))
+f = Figure(; resolution = (700, 600))
 
 gl = f[1, 1] = GridLayout()
 
@@ -390,7 +390,7 @@ cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
 clab = ["Loss", "No change", "Gain"]
 Legend(gl[2,1], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
 
-prd = predict(finalmodel; threshold = true)
+prd = predict(model; threshold = true)
 grd = y
 
 TP = findall(prd .& grd)
@@ -417,7 +417,7 @@ scatter!(
 heatmap!(ax5, final_range; colormap = vibrant[1:2], alpha = 0.4)
 scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = :black)
 
-for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
+for ax in [ax0, ax1, ax2, ax4, ax5]
     ax.xticklabelpad = 0
     ax.yticklabelpad = 0
     hidedecorations!(ax)
@@ -438,10 +438,10 @@ In this chapter, we have refined a model by adopting a principled approach to es
 #| output: false
 #| echo: false
 modelpath = joinpath(_models_path, "sdm-step-2.jld2")
-JLD2.jldsave(
+#=JLD2.jldsave(
     modelpath;
     transformation = typeof(model.transformer),
     threshold = model.τ,
     variables = model.v
-)
+)=#
 ```

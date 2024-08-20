@@ -12,9 +12,10 @@ In a sense, we started thinking about these concepts in @sec-gradientdescent; sp
 #| label: Loading the required packages
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "splitters.jl"))
+using GLM
+include(joinpath(_code_path, "minisdm", "crossvalidation.jl"))
 ```
 
 ## How can we split a dataset?
@@ -94,7 +95,7 @@ The cherry blossom tree (*Prunus*) is renowned for its impressive bloom, which h
 #| output: false
 average = zeros(Float64, size(sakura, 1))
 for (i, row) in enumerate(eachrow(sakura))
-    window = sort((-7, 2))
+    window = sort([-7, 2])
     year_span = row.year .+ window
     valid_records = year_span[1] .< sakura.year .< year_span[2]
     subset = dropmissing(sakura[findall(valid_records), :])
@@ -234,7 +235,7 @@ for (i, Ki) in enumerate(folds)
         train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
         valid = sakuratrain[valid_idx, :]
         train = sakuratrain[train_idx, :]
-        m1 = lm(@formula(flowavg ~ temperature), train)
+        m1 = GLM.lm(@formula(flowavg ~ temperature), train)
             for (ds, dn) in [(train, :Training), (valid, :Validation)]
                 for (m,p) in [(mse, :MSE), (rmse, :RMSE), (mae, :MAE), (mbe, :MBE)]
                     loss = m(ds.flowavg, predict(m1, ds))
@@ -263,7 +264,7 @@ We can visualize the results of our model training and assessment process. These
 #| label: Re-train the model and test it
 #| echo: false
 #| output: false
-model = lm(@formula(flowavg ~ temperature), sakuratrain)
+model = GLM.lm(@formula(flowavg ~ temperature), sakuratrain)
 
 summary_table = copy(benchmark_result)
 allowmissing!(summary_table, Symbol("Loss (std. dev.)"))
@@ -308,8 +309,7 @@ Yet it is important to contextualize these results. What does it means for our p
 #| label: tbl-splits-performance-summary
 #| tbl-cap: TODO
 #| echo: false
-out = pretty_table(String, summary_table, tf= tf_html_simple, formatters = ft_nomissing, show_subheader = false)
-display("text/html", out)
+pretty_table(summary_table, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```
 
 First, what are we predicting? Our response variable is not *really* the day of the bloom, but is rather a smoothed average looking back some years, and looking ahead some years too. For this reason, we are removing a lot of the variability in the underlying time series. This is not necessarily a bad thing, especially if we are looking for a trend at a large temporal scale, but it means that we should not interpret our results at a scale lower than the duration of the window we use for averaging.

@@ -188,12 +188,16 @@ The accuracy of this classifier would be $0.95$, which seems extremely high! Thi
 In fact, even a classifier that would not be that extreme would be mis-represented if all we cared about was the accuracy. If we take the case of the no-skill classifier, the accuracy is given by $b^2 + (1-b)^2$, which is an inverted parabola that is *maximized* for $b \approx 0$ -- a model guessing at random will appear better when the problem we want to solve gets more difficult.
 
 ::: column-margin
-Whenever possible, avoid using accuracy except to communicate the skill of the model is easy to understand terms.
+Whenever possible, avoid using accuracy except to communicate the skill of the model in easy to understand terms.
 :::
 
 This is an issue inherent to accuracy: it can tell you that a classifier is bad (when it is low), but it cannot really tell you when a classifier is *good*, as no-skill (or worse-than-no-skill) classifiers can have very high values. It remains informative as an *a posteriori* measure of performance, but only after using reliable measures to ensure that the model means something.
 
 ## The Naive Bayes Classifier
+
+::: column-margin
+In practice, we do not use the Naive Bayes Classifier for SDMs. There are far more powerful alternatives based on boosting, like boosted regression trees, or Bayesian additive regression trees. But NBC makes for an easy to follow example across many chapters.
+:::
 
 The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is built on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works *at all* is counter-intuitive [@hand2001]. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability can be somewhat unstable, it generally gives good predictions. NBC is the data science equivalent of saying "eh, I reckon it's probably *this* class" and somehow getting it right 95% of the time. There are, in fact, several papers questioning *why* NBC works *at all* [see *e.g.* @kupervasser2014].
 
@@ -301,12 +305,12 @@ current_figure()
 
 The output of cross-validation is given in @fig-classification-crossvalidation (and compared to the no-skill classifier in @tbl-classification-crossvalidation). As we are satisfied with the model performance, we can re-train it using all the data (*but not the part used for testing*) in order to make our first series of predictions.
 
-| Measure  | Training                                       | Validation                                     | No-skill                                      |
+| Measure | Training | Validation | No-skill |
 |------------------|------------------|------------------|------------------|
 | Accuracy | `{julia} round(mean(accuracy.(Ct)); digits=3)` | `{julia} round(mean(accuracy.(Cv)); digits=3)` | `{julia} round(accuracy(Cnoskill); digits=3)` |
-| NPV      | `{julia} round(mean(npv.(Ct)); digits=3)`      | `{julia} round(mean(npv.(Cv)); digits=3)`      | `{julia} round(npv(Cnoskill); digits=3)`      |
-| PPV      | `{julia} round(mean(ppv.(Ct)); digits=3)`      | `{julia} round(mean(ppv.(Cv)); digits=3)`      | `{julia} round(ppv(Cnoskill); digits=3)`      |
-| MCC      | `{julia} round(mean(mcc.(Ct)); digits=3)`      | `{julia} round(mean(mcc.(Cv)); digits=3)`      | `{julia} round(mcc(Cnoskill); digits=3)`      |
+| NPV | `{julia} round(mean(npv.(Ct)); digits=3)` | `{julia} round(mean(npv.(Cv)); digits=3)` | `{julia} round(npv(Cnoskill); digits=3)` |
+| PPV | `{julia} round(mean(ppv.(Ct)); digits=3)` | `{julia} round(mean(ppv.(Cv)); digits=3)` | `{julia} round(ppv(Cnoskill); digits=3)` |
+| MCC | `{julia} round(mean(mcc.(Ct)); digits=3)` | `{julia} round(mean(mcc.(Cv)); digits=3)` | `{julia} round(mcc(Cnoskill); digits=3)` |
 
 : Overview of the data presented in @fig-classification-crossvalidation, compared to the no-skill classifier. {#tbl-classification-crossvalidation}
 
@@ -376,7 +380,7 @@ We can now go through all of the pixels in the island of Corsica, and apply the 
 #| label: fig-classification-range
 #| echo: false
 #| fig-cap: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*, but would definitely stand to be improved, possibly by accounting for more features.
-f = Figure(; resolution = (900, 600))
+f = Figure(; resolution = (700, 600))
 
 gl = f[1, 1] = GridLayout()
 

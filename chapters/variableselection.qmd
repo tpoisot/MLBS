@@ -335,7 +335,7 @@ end
 final_range = vpr .> 0.5
 old_range = opr .> 0.5
 
-f = Figure(; resolution = (900, 600))
+f = Figure(; resolution = (700, 600))
 
 gl = f[1, 1] = GridLayout()
 
@@ -411,7 +411,7 @@ scatter!(
 heatmap!(ax5, final_range; colormap = vibrant[1:2], alpha = 0.4)
 scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = :black)
 
-for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
+for ax in [ax0, ax1, ax2, ax4, ax5]
     ax.xticklabelpad = 0
     ax.yticklabelpad = 0
     hidedecorations!(ax)
