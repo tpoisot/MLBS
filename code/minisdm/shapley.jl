@@ -45,5 +45,5 @@ function shap_list_points(f, X, Z, i, j, n)
 end
 
 function shap_all_points(f, X, Z, j, n)
-    return shap_list_points(f, X, Z, axes(X, 1), j, n)
+    return shap_list_points(f, X, Z, axes(X, 2), j, n)
 end
