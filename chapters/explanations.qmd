@@ -6,6 +6,15 @@ engine: julia
 
 In this chapter, we will
 
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+include(joinpath(_code_path, "minisdm/shapley.jl"))
+```
+
 navigate the accuracy-explainability for public policy @bell2022
 
 what is explainable differs between stakeholders @amarasinghe2023
@@ -21,3 +30,91 @@ biodiversity need sustained model uptake @weiskopf2022
 @lundberg2017 SHAP
 
 transfo in model = we can still apply these techniques instead of asking "what does PC1 = 0.4 mean"
+
+## Application
+
+```{julia}
+modelpath = joinpath(_models_path, "sdm-step-2.jld2")
+JLD2.jldopen(modelpath, "r") do file
+    global v0 = file["variables"]
+    global tr = file["transformation"]
+    global thr = file["threshold"]
+end;
+
+model = SDM(tr(), NBC(), thr, X, y, v0)
+train!(model; threshold=true)
+```
+
+```{julia}
+f = (p) -> predict(model, p; threshold=false)
+
+S = zeros(Float64, (length(v0), length(y)))
+for (vidx, vpos) in enumerate(v0)
+    for instance in axes(S, 2)
+        S[vidx,instance] = shap_one_point(f, X, X, instance, vpos, 100)
+    end
+end
+P = X[v0,:]
+```
+
+```{julia}
+shaps = S[:,2]
+
+f = Figure()
+
+ax = Axis(f[1,1], yticks = ([3,2,1], ["BIO$(v)" for v in v0]))
+xlims!(ax, low=-0.5, high=0.5)
+
+vlines!([0.0], color=:black, linestyle=:dash)
+
+starts = cumsum(shaps) .- shaps
+elev = reverse(collect(axes(shaps, 1)))
+ydir = zeros(length(shaps))
+
+arrows!(ax, starts, elev, shaps, ydir, align=:tailhead)
+scatter!(ax, [P[1]-mean(P)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=25)
+
+current_figure()
+```
+
+```{julia}
+f = Figure()
+gl = f[1,1] = GridLayout()
+ax1 = Axis(gl[1,1]; ylabel="BIO $(v0[1])", xaxisposition=:top)
+density!(ax1, S[1,:])
+ax2 = Axis(gl[2,1]; ylabel="BIO $(v0[2])")
+density!(ax2, S[2,:])
+ax3 = Axis(gl[3,1]; ylabel="BIO $(v0[3])", xaxisposition=:top, yaxisposition=:right)
+density!(ax3, S[3,:])
+
+xmin, xmax = extrema(S)
+for ax in [ax1, ax2, ax3]
+    xlims!(ax, low=xmin, high=xmax)
+    ylims!(ax, low=0.0)
+    hideydecorations!(ax, label=false)
+end
+
+rowgap!(gl, 0.0)
+colgap!(gl, 0.0)
+
+current_figure()
+```
+
+```{julia}
+f = Figure()
+args = (color=predict(model), markersize=5, colorrange=(0., 1.))
+
+ax1 = Axis(f[1,1]; xlabel="BIO $(v0[1])")
+scatter!(ax1, P[1,:], S[1,:]; args...)
+ax2 = Axis(f[2,1]; xlabel="BIO $(v0[2])")
+scatter!(ax2, P[2,:], S[2,:]; args...)
+ax3 = Axis(f[1,2]; xlabel="BIO $(v0[3])")
+scatter!(ax3, P[3,:], S[3,:]; args...)
+
+xmin, xmax = extrema(S)
+for ax in [ax1, ax2, ax3]
+    hlines!(ax, [0.0], color=:black, linestyle=:dash)
+end
+
+current_figure()
+```
