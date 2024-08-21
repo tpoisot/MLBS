@@ -136,8 +136,8 @@ scatterlines!(ax2, _prop, μ, color = crosscolors.training, markersize=4, linewi
 
 xlims!(ax1, (0., 1.))
 xlims!(ax2, (0., 1.))
-ylims!(ax1, (0.75, 0.9))
-ylims!(ax2, (0.75, 0.9))
+ylims!(ax1, (0.05, 0.9))
+ylims!(ax2, (0.05, 0.9))
 current_figure()
 ```
 
