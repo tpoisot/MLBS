@@ -97,8 +97,8 @@ train!(model; threshold=false)
 ```{julia}
 #| echo: false
 #| output: false
-_repls = 50
-_prop = LinRange(0.02, 0.98, 30)
+_repls = 90
+_prop = LinRange(0.05, 0.95, 25)
 valm = zeros(length(_prop), _repls)
 trnm = zeros(length(_prop), _repls)
 
@@ -118,9 +118,8 @@ Most things related to cross-validation *are* hyper-parameters, in that they wil
 #| echo: false
 #| label: fig-tuning-holdout
 #| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 50 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
-fig = Figure(; resolution=(500, 500))
-ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="MCC (validation)")
-ax2 = Axis(fig[2,1]; xlabel="Holdout proportion", ylabel="MCC (training)")
+fig = Figure(; resolution=(500, 250))
+ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="MCC")
 
 μ = vec(mean(valm; dims=2))
 σ = vec(std(valm, dims=2))
@@ -131,13 +130,11 @@ scatterlines!(ax1, _prop, μ, color = crosscolors.validation, markersize=4, line
 μ = vec(mean(trnm; dims=2))
 σ = vec(std(trnm, dims=2))
 c = 1.96 .* σ ./ sqrt(_repls)
-band!(ax2, _prop, μ-c, μ+c, color = (crosscolors.training, 0.4))
-scatterlines!(ax2, _prop, μ, color = crosscolors.training, markersize=4, linewidth=1)
+band!(ax1, _prop, μ-c, μ+c, color = (crosscolors.training, 0.4))
+scatterlines!(ax1, _prop, μ, color = crosscolors.training, markersize=4, linewidth=1)
 
 xlims!(ax1, (0., 1.))
-xlims!(ax2, (0., 1.))
-ylims!(ax1, (0.05, 0.9))
-ylims!(ax2, (0.05, 0.9))
+ylims!(ax1, (0.6, 0.95))
 current_figure()
 ```
 

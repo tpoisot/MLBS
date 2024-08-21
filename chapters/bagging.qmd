@@ -79,7 +79,7 @@ Z = (X0 - μ)/σ
 ```{julia}
 #| echo: false
 #| output: false
-heatmap(Z; colorrange=(-0.5, 0.5), colormap=nightfall)
+heatmap(Z; colorrange=(-0.2, 0.2), colormap=nightfall)
 ```
 
 tpr ppv

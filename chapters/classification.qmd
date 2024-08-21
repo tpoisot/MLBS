@@ -39,7 +39,7 @@ Consider our dataset for a minute. In order to predict the presence of a species
 
   [Global Biodiversity Information Facility]: https://www.gbif.org/
 
-To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the CHELSA2 dataset [@karger2017], at a resolution of 30 seconds of arc. WorldClim2 [@fick2017] is also appropriate, but is known to have some artifacts.
+To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the CHELSA1 dataset [@karger2017], at a resolution of 30 seconds of arc. WorldClim2 [@fick2017] also offers access to similar bioclimatic variables, but is known to have some artifacts that may bias the analysis.
 
 ```{julia}
 #| echo: false

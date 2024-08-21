@@ -12,6 +12,19 @@ heatmap(temperature, colormap=[:black, :black])
 
 # Data
 BIOX = convert.(Float32, [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
+
+# Get the data for elevation as well (using the same value)
+wc_elevation = SimpleSDMPredictor(RasterData(WorldClim2, Elevation); resolution=0.5, spatial_extent...)
+elevation = copy(BIOX[1])
+for k in keys(elevation)
+    elevation[k] = wc_elevation[k]
+    elevation[k] = isnothing(elevation[k]) ? 0.0 : elevation[k]
+end
+
+# Add the elevation at the end of the stack
+push!(BIOX, elevation)
+
+# Save the layers
 SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
 sitta = taxon("Sitta whiteheadi"; strict = false)
@@ -44,7 +57,7 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = backgroundpoints((x -> x^1.05).(bgmask), round(Int, 0.6sum(presencelayer)); replace=false)
+bgpoints = backgroundpoints((x -> x^1.0).(bgmask), round(Int, 0.6sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
 replace!(presencelayer, false => nothing)
 
@@ -54,8 +67,8 @@ heatmap(
     axis = (; aspect = DataAspect()),
     figure = (; resolution = (800, 500)),
 )
-scatter!(keys(presencelayer); color = :black)
-scatter!(keys(bgpoints); color = :red)
+scatter!(keys(presencelayer); color = :black, markersize=6)
+scatter!(keys(bgpoints); color = :red, markersize=4)
 current_figure()
 
 # Get the data
@@ -73,7 +86,7 @@ using DataFrames
 import CSV
 
 df = DataFrame(latitude=lat, longitude=lon, presence=pre)
-for (i, l) in enumerate(layers(dataprovider))
+for (i, l) in enumerate(vcat(layers(dataprovider) , "Elevation"))
     df[!,l] = biox[i]
 end
 CSV.write("data/general/observations.csv", df)
