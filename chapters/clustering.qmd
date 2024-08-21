@@ -41,12 +41,12 @@ Throughout this chapter, we will work on a single image -- we may initially balk
 #| label: load-data-cubes
 #| echo: false
 #| output: false
-R = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.B4.tif"), SimpleSDMResponse)
-G = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.B3.tif"), SimpleSDMResponse)
-B = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.B2.tif"), SimpleSDMResponse)
-NIR = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.B5.tif"), SimpleSDMResponse)
-SWIR1 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.B6.tif"), SimpleSDMResponse)
-SWIR2 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.B7.tif"), SimpleSDMResponse)
+R = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B4.tif"), SimpleSDMResponse)
+G = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B3.tif"), SimpleSDMResponse)
+B = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B2.tif"), SimpleSDMResponse)
+NIR = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B5.tif"), SimpleSDMResponse)
+SWIR1 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B6.tif"), SimpleSDMResponse)
+SWIR2 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B7.tif"), SimpleSDMResponse)
 ```
 
 In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 8 scene [@vermote2016], for which we have access to many different bands.
@@ -63,9 +63,7 @@ In fact, we are going to use an image with many dimensions: the data in this cha
 | 9 | Cirrus band | Can pick up high and thin clouds |
 | 10, 11 | Thermal infrared |  |
 
-: Overview of the bands in a Landsat 9 scene. The data from this chapter were downloaded from [LandsatLook].
-
-  [LandsatLook]: https://landsatlook.usgs.gov
+: Overview of the bands in a Landsat 8 scene. The data from this chapter were downloaded using the Google Earth Engine API, and are a composite of cloud-free and shadow-free pixels between the months of April and October of 2017. Note that we are spanning a wide range of seasonal conditions!
 
 By using the data present in the channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).
 
@@ -342,10 +340,10 @@ replace!(msk, true => nothing)
 replace!(msk, false => true)
 
 X = zeros(Float32, (4, length(msk)))
-X[1,:] .= values(mask(msk, NDVI))
-X[2,:] .= values(mask(msk, NDWI))
-X[3,:] .= values(mask(msk, NDMI))
-X[4,:] .= values(mask(msk, NBR))
+X[1,:] .= values(SpeciesDistributionToolkit.mask(msk, NDVI))
+X[2,:] .= values(SpeciesDistributionToolkit.mask(msk, NDWI))
+X[3,:] .= values(SpeciesDistributionToolkit.mask(msk, NDMI))
+X[4,:] .= values(SpeciesDistributionToolkit.mask(msk, NBR))
 ```
 
 What would make such a classification better? Recall from the @sec-kmeans-theory that the assignment of instances to classes is done based on the distance to the centroid, which it itself the average of the features of the members of each class. By removing the pixels that are not relevant to our question (such as using water pixels to classify the image using data relevant to vegetation), we are taking steps to ensure that the space in which the centroids can exist is more rigorously defined for the question we are interested in.
