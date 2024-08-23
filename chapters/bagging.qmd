@@ -47,13 +47,7 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global bags = file["bags"]
 end;
 
-JLD2.jldopen(modelpath, "r") do file
-    global v0 = file["variables"]
-    global tr = file["transformation"]
-    global τ = file["threshold"]
-end;
-
-model = SDM(tr(), NBC(), τ, X, y, v0)
+model = loadsdm(modelpath)
 
 ensemble = Bagging(model, bags)
 train!(ensemble)
