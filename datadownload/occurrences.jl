@@ -13,17 +13,6 @@ heatmap(temperature, colormap=[:black, :black])
 # Data
 BIOX = convert.(Float32, [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
 
-# Get the data for elevation as well (using the same value)
-wc_elevation = SimpleSDMPredictor(RasterData(WorldClim2, Elevation); resolution=0.5, spatial_extent...)
-elevation = copy(BIOX[1])
-for k in keys(elevation)
-    elevation[k] = wc_elevation[k]
-    elevation[k] = isnothing(elevation[k]) ? 0.0 : elevation[k]
-end
-
-# Add the elevation at the end of the stack
-push!(BIOX, elevation)
-
 # Save the layers
 SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
 
@@ -82,11 +71,8 @@ pre = vcat([true for p in pr], [false for p in ab])
 # data
 biox = [vcat([bx[p] for p in pr], [bx[p] for p in ab]) for bx in BIOX]
 
-using DataFrames
-import CSV
-
 df = DataFrame(latitude=lat, longitude=lon, presence=pre)
-for (i, l) in enumerate(vcat(layers(dataprovider) , "Elevation"))
+for (i, l) in enumerate(layers(dataprovider))
     df[!,l] = biox[i]
 end
 CSV.write("data/general/observations.csv", df)

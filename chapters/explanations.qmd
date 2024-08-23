@@ -34,33 +34,43 @@ transfo in model = we can still apply these techniques instead of asking "what d
 ## Application
 
 ```{julia}
-modelpath = joinpath(_models_path, "sdm-step-2.jld2")
+modelpath = joinpath(_models_path, "sdm-step-0.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
     global folds = file["folds"]
     global coordinates = file["coordinates"]
 end;
-JLD2.jldopen(modelpath, "r") do file
-    global v0 = file["variables"]
-    global tr = file["transformation"]
-    global thr = file["threshold"]
-end;
 
-model = SDM(MultivariateTransform{Whitening}(), NBC(), thr, X, y, v0)
-train!(model; threshold=true)
+model = loadsdm(modelpath)
+reset!(model)
+train!(model)
+stepwisevif!(model, 100.0; threshold=false)
+train!(model)
+threshold!(model, folds; endpoints=LinRange(0.0, 1.0, 120))
 ```
 
 ```{julia}
 predictor = (p) -> predict(model, p; threshold=false)
 
-S = zeros(Float64, (length(v0), length(y)))
-for (vidx, vpos) in enumerate(v0)
+S = zeros(Float64, (length(model.v), length(y)))
+for (vidx, vpos) in enumerate(model.v)
     for instance in axes(S, 2)
         S[vidx,instance] = shap_one_point(predictor, X, X, instance, vpos, 100)
     end
 end
-P = X[v0,:]
+P = X[model.v,:]
+```
+
+```{julia}
+varimp = vec(mean(abs.(S); dims=2))
+varimp ./= sum(varimp)
+varord = sortperm(varimp; rev=true)
+for v in varord
+    vname = model.v[v]
+    vctr = round(Int, varimp[v]*100)
+    println("$(vname) - $(vctr)%")
+end
 ```
 
 ```{julia}
@@ -68,7 +78,7 @@ shaps = S[:,2]
 
 f = Figure()
 
-ax = Axis(f[1,1], yticks = (reverse(collect(1:length(v0))), ["BIO$(v)" for v in v0]))
+ax = Axis(f[1,1], yticks = (reverse(collect(1:length(model.v))), ["BIO$(v)" for v in model.v]))
 xlims!(ax, low=-0.5, high=0.5)
 
 vlines!([0.0], color=:black, linestyle=:dash)
@@ -86,15 +96,13 @@ current_figure()
 ```{julia}
 f = Figure()
 gl = f[1,1] = GridLayout()
-ax1 = Axis(gl[1,1]; ylabel="BIO $(v0[1])", xaxisposition=:top)
-density!(ax1, S[1,:])
-ax2 = Axis(gl[2,1]; ylabel="BIO $(v0[2])")
-density!(ax2, S[2,:])
-ax3 = Axis(gl[3,1]; ylabel="BIO $(v0[3])", xaxisposition=:top, yaxisposition=:right)
-density!(ax3, S[3,:])
+ax1 = Axis(gl[1,1]; ylabel="BIO $(model.v[varord[1]])", xaxisposition=:top)
+density!(ax1, S[varord[1],:])
+ax2 = Axis(gl[1,2]; ylabel="BIO $(model.v[varord[2]])", xaxisposition=:top, yaxisposition=:right)
+density!(ax2, S[varord[2],:])
 
 xmin, xmax = extrema(S)
-for ax in [ax1, ax2, ax3]
+for ax in [ax1, ax2, ax3, ax4]
     xlims!(ax, low=xmin, high=xmax)
     ylims!(ax, low=0.0)
     hideydecorations!(ax, label=false)
@@ -110,15 +118,14 @@ current_figure()
 f = Figure()
 args = (color=predict(model), markersize=5, colorrange=(0., 1.))
 
-ax1 = Axis(f[1,1]; xlabel="BIO $(v0[1])")
-scatter!(ax1, P[1,:], S[1,:]; args...)
-ax2 = Axis(f[2,1]; xlabel="BIO $(v0[2])")
-scatter!(ax2, P[2,:], S[2,:]; args...)
-ax3 = Axis(f[1,2]; xlabel="BIO $(v0[3])")
-scatter!(ax3, P[3,:], S[3,:]; args...)
+ax1 = Axis(f[1,1]; xlabel="BIO $(model.v[varord[1]])")
+scatter!(ax1, P[varord[1],:], S[varord[1],:]; args...)
+ax2 = Axis(f[1,2]; xlabel="BIO $(model.v[varord[2]])")
+scatter!(ax2, P[varord[2],:], S[varord[2],:]; args...)
+
 
 xmin, xmax = extrema(S)
-for ax in [ax1, ax2, ax3]
+for ax in [ax1, ax2, ax3, ax4]
     hlines!(ax, [0.0], color=:black, linestyle=:dash)
 end
 
@@ -131,23 +138,23 @@ bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; 
 ```
 
 ```{julia}
-V = [convert(Float32, similar(bio[1])) for i in axes(v0, 1)]
+V = [convert(Float32, similar(bio[1])) for i in axes(model.v, 1)]
 
-B = Float64.(permutedims(hcat(values.(bio)...)))[1:19,:]
-for i in axes(v0, 1)
-    A = shap_all_points(predictor, B, X[1:19,:], v0[i], 10)
+B = Float64.(permutedims(hcat(values.(bio)...)))
+for i in axes(model.v, 1)
+    A = shap_all_points(predictor, B, X, model.v[i], 10)
     V[i].grid[findall(!isnothing, V[i].grid)] .= A
 end
 ```
 
 ```{julia}
-heatmap(V[1], colormap=nightfall, colorrange=(-0.2,0.2))
+heatmap(V[varord[1]], colormap=nightfall, colorrange=(-0.2,0.2))
 ```
 
 ```{julia}
 mostimp = mosaic(x -> argmax(abs.(x)), V)
 
-cmap = Makie.wong_colors()[2:4]
+cmap = bright[2:length(model.v)+1]
 
 f = Figure()
 ax = Axis(f[1,1])
@@ -155,7 +162,7 @@ ax = Axis(f[1,1])
 heatmap!(ax, mostimp, colormap=cmap)
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in cmap]
-clab = ["BIO$(s)" for s in v0]
+clab = ["BIO$(s)" for s in model.v]
 Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10))
 
 current_figure()
