@@ -17,6 +17,7 @@ function loadsdm(path; kwargs...)
     __ltransfo = Dict([
         :ZScore => ZScore,
         :RawData => RawData,
+        Symbol("Main.Notebook.RawData") => RawData, # TODO Automate the way to prefix symbols when saving the models
         Symbol("MultivariateTransform{Whitening}") => MultivariateTransform{Whitening},
         Symbol("MultivariateTransform{PCA}") => MultivariateTransform{PCA},
     ])
