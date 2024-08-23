@@ -43,11 +43,8 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
 end;
 
 model = loadsdm(modelpath)
-reset!(model)
+model.v = [1, 12, 14]
 train!(model)
-stepwisevif!(model, 100.0; threshold=false)
-train!(model)
-threshold!(model, folds; endpoints=LinRange(0.0, 1.0, 120))
 ```
 
 ```{julia}
@@ -100,9 +97,11 @@ ax1 = Axis(gl[1,1]; ylabel="BIO $(model.v[varord[1]])", xaxisposition=:top)
 density!(ax1, S[varord[1],:])
 ax2 = Axis(gl[1,2]; ylabel="BIO $(model.v[varord[2]])", xaxisposition=:top, yaxisposition=:right)
 density!(ax2, S[varord[2],:])
+ax3 = Axis(gl[2,1]; ylabel="BIO $(model.v[varord[3]])", xaxisposition=:top, yaxisposition=:right)
+density!(ax3, S[varord[3],:])
 
 xmin, xmax = extrema(S)
-for ax in [ax1, ax2, ax3, ax4]
+for ax in [ax1, ax2, ax3]
     xlims!(ax, low=xmin, high=xmax)
     ylims!(ax, low=0.0)
     hideydecorations!(ax, label=false)
@@ -122,10 +121,11 @@ ax1 = Axis(f[1,1]; xlabel="BIO $(model.v[varord[1]])")
 scatter!(ax1, P[varord[1],:], S[varord[1],:]; args...)
 ax2 = Axis(f[1,2]; xlabel="BIO $(model.v[varord[2]])")
 scatter!(ax2, P[varord[2],:], S[varord[2],:]; args...)
-
+ax3 = Axis(f[2,1]; xlabel="BIO $(model.v[varord[3]])")
+scatter!(ax3, P[varord[3],:], S[varord[3],:]; args...)
 
 xmin, xmax = extrema(S)
-for ax in [ax1, ax2, ax3, ax4]
+for ax in [ax1, ax2, ax3]
     hlines!(ax, [0.0], color=:black, linestyle=:dash)
 end
 
@@ -148,7 +148,7 @@ end
 ```
 
 ```{julia}
-heatmap(V[varord[1]], colormap=nightfall, colorrange=(-0.2,0.2))
+heatmap(V[varord[3]], colormap=nightfall, colorrange=(-0.2,0.2))
 ```
 
 ```{julia}
