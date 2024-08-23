@@ -231,10 +231,11 @@ Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 tbl = []
 push!(tbl, ["@sec-classification baseline", "1,12", mean(mcc.(C0v))])
 push!(tbl, ["All variables", " ", mean(mcc.(CXv))])
-push!(tbl, ["Fwd. sel.", " ", mean(mcc.(Cf0v))])
+push!(tbl, ["Fwd. sel.", join(f0, ","), mean(mcc.(Cf0v))])
 push!(tbl, ["Constr. sel.", join(c0, ","), mean(mcc.(Cc0v))])
 push!(tbl, ["Backw. sel.", join(b0, ","), mean(mcc.(Cb0v))])
 push!(tbl, ["Var. infl. fac.", join(i0, ","), mean(mcc.(Ci0v))])
+
 pretty_table(
     permutedims(hcat(tbl...));
     backend = Val(:markdown),
@@ -251,40 +252,105 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 
 ```{julia}
 #| echo: false
-sel = ["Fwd." => forwardselection!, "Backw." => backwardselection!]
-trf = ["Raw data" => RawData, "PCA" => MultivariateTransform{PCA}, "Whitening" => MultivariateTransform{Whitening}]
-msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
+#| output: asis
+#| label: tbl-predictors-transformation
+#| tbl-cap: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictors-selection, and as we use the same folds for validation, can be directly compared.
+tbl = []
 
-hed = "| Selection | Transformation | Variables |"
-sep = "|------|------|----|"
-for (k,v) in msrs
-    hed *= " $(k) |"
-    sep *= "------|"
-end
-tbl = [hed, sep]
+# Baseline
+mod = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+train!(mod; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["@sec-classification baseline", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
-for (sk, sf) in sel
-    for (tk, tf) in trf
-        mod = SDM(tf(), NBC(), 0.5, X, y, [1,12])
-        reset!(mod)
-        sf(mod, folds; threshold=false)
-        vs = predictors(mod)
-        Csv, Cst = crossvalidate(mod, folds; threshold=false)
-        row = "| $(sk) | $(tk) | $(length(vs)) |"
-        for (m, p) in msrs
-            v = round(mean(p.(Csv)); digits=3)
-            row *= " $(v) |"
-        end
-        push!(tbl, row)
-    end
-end
+# Baseline + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
+train!(mod; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
-push!(tbl, "\n: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictors-selection, and as we use the same folds for validation, can be directly compared. {#tbl-predictors-transformation}")
-try
-    display("text/markdown", join(tbl, "\n"))
-catch e
-end
+# Baseline + Whitening
+mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
+train!(mod; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
+
+# Forward
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["Fwd. sel.", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+# Forward + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+# Forward + Whitening
+mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+
+# Backward
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+backwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["Backw. sel.", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+# Backward + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+backwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+# Backward + Whitening
+mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, collect(1:19))
+backwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+
+
+# Constrained
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+constrainedselection!(mod, folds, [1, 12]; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["Constr. sel.", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+# Constrained + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+constrainedselection!(mod, folds, [1, 12]; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+# Constrained + Whitening
+mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, collect(1:19))
+constrainedselection!(mod, folds, [1, 12]; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+
+pretty_table(
+    permutedims(hcat(tbl...));
+    backend = Val(:markdown),
+    header = ["Variable selection", "Transformation", "Nb. variables", "MCC (val.)", "MCC (train)"],
+    alignment = [:l, :l, :l, :l, :l]
+)
 ```
 
 ### Model selection
@@ -301,7 +367,6 @@ origmodel = loadsdm(modelpath; threshold=false)
 finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
 forwardselection!(finalmodel, folds; threshold=false)
-train!(finalmodel; threshold=false)
 
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
