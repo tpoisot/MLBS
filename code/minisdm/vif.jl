@@ -14,7 +14,10 @@ function stepwisevif!(model::SDM, threshold; kwargs...)
         linreg = GLM.lm(Xv[setdiff(eachindex(model.v), i), :]', Xv[i, :])
         vifs[i] = vif(linreg)
     end
-    all(vifs .<= threshold) && return model
+    if all(vifs .<= threshold)
+        train!(model; kwargs...)
+        return model
+    end
     drop = last(findmax(vifs))
     popat!(model.v, drop)
     #@info "Variables remaining: $(model.v)"

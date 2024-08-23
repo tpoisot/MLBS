@@ -1,5 +1,6 @@
 function noselection!(model, folds; verbose::Bool = false, kwargs...)
     model.v = collect(axes(model.X, 1))
+    train!(model; kwargs...)
     return model
 end
 
@@ -34,6 +35,7 @@ function backwardselection!(model, folds; verbose::Bool = false, optimality=mcc,
         end
     end
     model.v = pool
+    train!(model; kwargs...)
     return model
 end
 
@@ -69,6 +71,7 @@ function constrainedselection!(model, folds, pool; verbose::Bool = false, optima
         end
     end
     model.v = pool
+    train!(model; kwargs...)
     return model
 end
 
