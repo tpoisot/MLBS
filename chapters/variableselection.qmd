@@ -219,34 +219,28 @@ c0 = predictors(constrainedselection!(model, folds, [1,12]; threshold=false))
 Cc0v, Cc0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-i0 = predictors(stepwisevif!(model, 10.0; threshold=false))
+i0 = predictors(stepwisevif!(model, 50.0; threshold=false))
 Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 ```
 
 ```{julia}
 #| echo: false
-msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
-hed = "| Model | Variables |"
-sep = "|------|------|"
-for (k,v) in msrs
-    hed *= " $(k) |"
-    sep *= "------|"
-end
-tbl = [hed, sep]
-for (m, p) in ["@sec-classification baseline" => ([1,12], C0v), "All var." => (1:19, CXv), "Fwd." => (f0, Cf0v), "Fwd. (constr.)" => (c0, Cc0v), "Backw." => (b0, Cb0v), "VIF" => (i0, Ci0v)]
-    v, c = p
-    row = "| $(m) | $(length(v)) |"
-    for (pm, pf) in msrs
-        row *= " $(round(mean(pf.(c)); digits=3)) |"
-    end
-    push!(tbl, row)
-end
-
-push!(tbl, "\n: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC, NPV, PPV, accuracy, and True-Skill Statistic (TSS). {#tbl-predictors-selection}")
-try
-    display("text/markdown", join(tbl, "\n"))
-catch e
-end
+#| output: asis
+#| label: tbl-predictors-selection
+#| tbl-cap: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC. 
+tbl = []
+push!(tbl, ["@sec-classification baseline", "1,12", mean(mcc.(C0v))])
+push!(tbl, ["All variables", " ", mean(mcc.(CXv))])
+push!(tbl, ["Fwd. sel.", " ", mean(mcc.(Cf0v))])
+push!(tbl, ["Constr. sel.", join(c0, ","), mean(mcc.(Cc0v))])
+push!(tbl, ["Backw. sel.", join(b0, ","), mean(mcc.(Cb0v))])
+push!(tbl, ["Var. infl. fac.", join(i0, ","), mean(mcc.(Ci0v))])
+pretty_table(
+    permutedims(hcat(tbl...));
+    backend = Val(:markdown),
+    header = ["Model", "Variables", "MCC"],
+    alignment = [:l, :l, :l]
+)
 ```
 
 The best model is given by forward selection, although backwards selection also gives a very close performance. At this point, we may decide to keep these two strategies, and evaluate the effect of different transformations of the data.
@@ -271,7 +265,7 @@ tbl = [hed, sep]
 
 for (sk, sf) in sel
     for (tk, tf) in trf
-        mod = SDM(tf(), NBC(), 0.5, X, y, v0)
+        mod = SDM(tf(), NBC(), 0.5, X, y, [1,12])
         reset!(mod)
         sf(mod, folds; threshold=false)
         vs = predictors(mod)
