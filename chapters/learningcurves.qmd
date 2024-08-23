@@ -83,13 +83,7 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global coordinates = file["coordinates"]
 end;
 
-JLD2.jldopen(modelpath, "r") do file
-    global v0 = file["variables"]
-    global tr = file["transformation"]
-end;
-
-model = SDM(tr(), NBC(), 0.5, X, y, v0)
-train!(model; threshold=false)
+model = loadsdm(modelpath; threshold=false)
 ```
 
 ### Revisiting assumptions on cross-validation
@@ -177,7 +171,7 @@ T = LinRange(0.0, 1.0, 120)
 CT = threshold!(model, folds; endpoints=T)
 ```
 
-In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
+In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(model.τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
 
 ```{julia}
 #| echo: false
@@ -435,10 +429,5 @@ In this chapter, we have refined a model by adopting a principled approach to es
 #| output: false
 #| echo: false
 modelpath = joinpath(_models_path, "sdm-step-2.jld2")
-JLD2.jldsave(
-    modelpath;
-    transformation = typeof(model.transformer),
-    threshold = model.τ,
-    variables = model.v
-)
+savesdm(model, modelpath)
 ```

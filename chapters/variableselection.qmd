@@ -172,13 +172,7 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global folds = file["folds"]
     global coordinates = file["coordinates"]
 end;
-
-JLD2.jldopen(modelpath, "r") do file
-    global v0 = file["variables"]
-end;
-
-model = SDM(RawData(), NBC(), 0.5, X, y, v0)
-train!(model; threshold=false)
+model = loadsdm(modelpath; threshold=false)
 ```
 
 ```{julia}
@@ -308,8 +302,7 @@ These results are presented in @fig-predictors-rangediff.
 ```{julia}
 #| output: false
 #| echo: false
-origmodel = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
-train!(origmodel; threshold=false)
+origmodel = loadsdm(modelpath; threshold=false)
 
 finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
@@ -434,5 +427,5 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 #| output: false
 #| echo: false
 modelpath = joinpath(_models_path, "sdm-step-1.jld2")
-JLD2.jldsave(modelpath; transformation=typeof(finalmodel.transformer), variables=finalmodel.v)
+savesdm(finalmodel, modelpath)
 ```

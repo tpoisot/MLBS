@@ -47,7 +47,7 @@ JLD2.jldopen(modelpath, "r") do file
     global thr = file["threshold"]
 end;
 
-model = SDM(tr(), NBC(), thr, X, y, v0)
+model = SDM(MultivariateTransform{Whitening}(), NBC(), thr, X, y, v0)
 train!(model; threshold=true)
 ```
 
@@ -68,7 +68,7 @@ shaps = S[:,2]
 
 f = Figure()
 
-ax = Axis(f[1,1], yticks = ([3,2,1], ["BIO$(v)" for v in v0]))
+ax = Axis(f[1,1], yticks = (reverse(collect(1:length(v0))), ["BIO$(v)" for v in v0]))
 xlims!(ax, low=-0.5, high=0.5)
 
 vlines!([0.0], color=:black, linestyle=:dash)

@@ -24,6 +24,7 @@ include("mocks.jl")
 include("vif.jl")
 include("variableselection.jl")
 include("bootstrap.jl")
+include("io.jl")
 
 function train!(sdm::SDM; threshold=true, training=:, optimality=mcc)
     train!(sdm.transformer, sdm.X[sdm.v,training])

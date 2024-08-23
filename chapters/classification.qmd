@@ -490,7 +490,7 @@ Note that by visualizing the type of mis-classification from our training set, w
 #| echo: false
 #| output: false
 modelpath = joinpath(_models_path, "sdm-step-0.jld2")
-JLD2.jldsave(modelpath; variables=model.v)
+savesdm(model, modelpath)
 ```
 
 ## Conclusion
