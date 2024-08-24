@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.386">
+<meta name="generator" content="quarto-1.5.47">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Machine Learning for Biodiversity Scientists - 8&nbsp; Explaining predictions</title>
+<title>9&nbsp; Explaining predictions – Machine Learning for Biodiversity Scientists</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,10 +20,45 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -66,7 +101,9 @@ div.csl-indent {
   "type": "overlay",
   "limit": 10,
   "keyboard-shortcut": [
-    null
+    "f",
+    "/",
+    "s"
   ],
   "language": {
     "search-no-results-text": "No results",
@@ -76,6 +113,7 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -91,13 +129,13 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/explanations.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></a></li></ol></nav>
-        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/explanations.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
-      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -106,7 +144,7 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Machine Learning for Biodiversity Scientists</a> 
@@ -169,15 +207,21 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../chapters/bagging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bagging, ensembles, and uncertainty</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
  <span class="menu-text">Appendices</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
@@ -193,14 +237,15 @@ div.csl-indent {
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
     <h2 id="toc-title">Chapter overview</h2>
    
   <ul>
-  <li><a href="#bibliography" id="toc-bibliography" class="nav-link active" data-scroll-target="#bibliography">References</a></li>
+  <li><a href="#application" id="toc-application" class="nav-link active" data-scroll-target="#application"><span class="header-section-number">9.1</span> Application</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/explanations.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -209,7 +254,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-explanations" class="quarto-section-identifier"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></h1>
+<h1 class="title"><span id="sec-explanations" class="quarto-section-identifier"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></h1>
 </div>
 
 
@@ -227,39 +272,241 @@ div.csl-indent {
 
 
 <p>In this chapter, we will</p>
-<p>navigate the accuracy-explainability for public policy <span class="citation" data-cites="bell2022">Bell et al. (<a href="#ref-bell2022" role="doc-biblioref">2022</a>)</span></p>
-<p>what is explainable differs between stakeholders <span class="citation" data-cites="amarasinghe2023">Amarasinghe et al. (<a href="#ref-amarasinghe2023" role="doc-biblioref">2023</a>)</span></p>
-<p>biodiversity need sustained model uptake <span class="citation" data-cites="weiskopf2022">Weiskopf et al. (<a href="#ref-weiskopf2022" role="doc-biblioref">2022</a>)</span></p>
+<p>navigate the accuracy-explainability for public policy <span class="citation" data-cites="bell2022">Bell <em>et al.</em> (<a href="#ref-bell2022" role="doc-biblioref">2022</a>)</span></p>
+<p>what is explainable differs between stakeholders <span class="citation" data-cites="amarasinghe2023">Amarasinghe <em>et al.</em> (<a href="#ref-amarasinghe2023" role="doc-biblioref">2023</a>)</span></p>
+<p>biodiversity need sustained model uptake <span class="citation" data-cites="weiskopf2022">Weiskopf <em>et al.</em> (<a href="#ref-weiskopf2022" role="doc-biblioref">2022</a>)</span></p>
 <p><span class="citation" data-cites="strumbelj2013">Štrumbelj &amp; Kononenko (<a href="#ref-strumbelj2013" role="doc-biblioref">2013</a>)</span> monte carlo approximation of shapley values</p>
-<p><span class="citation" data-cites="wadoux2023">Wadoux et al. (<a href="#ref-wadoux2023" role="doc-biblioref">2023</a>)</span> mapping of shapley values</p>
-<p><span class="citation" data-cites="mesgaran2014">Mesgaran et al. (<a href="#ref-mesgaran2014" role="doc-biblioref">2014</a>)</span> mapping of most important covariates</p>
+<p><span class="citation" data-cites="wadoux2023">Wadoux <em>et al.</em> (<a href="#ref-wadoux2023" role="doc-biblioref">2023</a>)</span> mapping of shapley values</p>
+<p><span class="citation" data-cites="mesgaran2014">Mesgaran <em>et al.</em> (<a href="#ref-mesgaran2014" role="doc-biblioref">2014</a>)</span> mapping of most important covariates</p>
 <p><span class="citation" data-cites="lundberg2017">Lundberg &amp; Lee (<a href="#ref-lundberg2017" role="doc-biblioref">2017</a>)</span> SHAP</p>
 <p>transfo in model = we can still apply these techniques instead of asking “what does PC1 = 0.4 mean”</p>
+<section id="application" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="application"><span class="header-section-number">9.1</span> Application</h2>
+<div id="4" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>modelpath <span class="op">=</span> <span class="fu">joinpath</span>(_models_path, <span class="st">"sdm-step-0.jld2"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>JLD2.<span class="fu">jldopen</span>(<span class="fu">joinpath</span>(_models_path, <span class="st">"sdm-training-data.jld2"</span>), <span class="st">"r"</span>) <span class="cf">do</span> file</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> X <span class="op">=</span> file[<span class="st">"X"</span>]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> y <span class="op">=</span> file[<span class="st">"y"</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> folds <span class="op">=</span> file[<span class="st">"folds"</span>]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> coordinates <span class="op">=</span> file[<span class="st">"coordinates"</span>]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span>;</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> <span class="fu">loadsdm</span>(modelpath)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>model.v <span class="op">=</span> [<span class="fl">1</span>, <span class="fl">12</span>, <span class="fl">14</span>]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">train!</span>(model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>SDM{Float64, Bool}(RawData(), NBC(Normal[Distributions.Normal{Float64}(μ=96.03338632750398, σ=23.113480049774882), Distributions.Normal{Float64}(μ=953.8410174880763, σ=126.12637796807311), Distributions.Normal{Float64}(μ=16.308426073131955, σ=3.3118599229712005)], Normal[Distributions.Normal{Float64}(μ=150.5564304461942, σ=23.366532338807662), Distributions.Normal{Float64}(μ=775.2624671916011, σ=136.78744318795108), Distributions.Normal{Float64}(μ=12.060367454068242, σ=3.5694653692838823)], 0.6227722772277228), 0.2020283570366345, [84.0 139.0 … 79.0 134.0; 39.0 39.0 … 39.0 40.0; … ; 58.0 97.0 … 68.0 79.0; 241.0 250.0 … 266.0 314.0], Bool[1, 1, 1, 1, 1, 1, 1, 1, 0, 0  …  0, 0, 1, 1, 0, 1, 0, 1, 1, 0], [1, 12, 14])</code></pre>
+</div>
+</div>
+<div id="6" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>predictor <span class="op">=</span> (p) <span class="op">-&gt;</span> <span class="fu">predict</span>(model, p; threshold<span class="op">=</span><span class="cn">false</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> <span class="fu">zeros</span>(<span class="dt">Float64</span>, (<span class="fu">length</span>(model.v), <span class="fu">length</span>(y)))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (vidx, vpos) <span class="kw">in</span> <span class="fu">enumerate</span>(model.v)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> instance <span class="kw">in</span> <span class="fu">axes</span>(S, <span class="fl">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        S[vidx,instance] <span class="op">=</span> <span class="fu">shap_one_point</span>(predictor, X, X, instance, vpos, <span class="fl">100</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> X[model.v,<span class="op">:</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>3×1010 Matrix{Float64}:
+  84.0  139.0    74.0   103.0    98.0  …  100.0  166.0    93.0   79.0   134.0
+ 831.0  895.0  1146.0  1088.0  1059.0     810.0  816.0  1167.0  914.0  1042.0
+  12.0   21.0    22.0    17.0    21.0      13.0   15.0    24.0   14.0    17.0</code></pre>
+</div>
+</div>
+<div id="8" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>varimp <span class="op">=</span> <span class="fu">vec</span>(<span class="fu">mean</span>(<span class="fu">abs</span>.(S); dims<span class="op">=</span><span class="fl">2</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>varimp <span class="op">./=</span> <span class="fu">sum</span>(varimp)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>varord <span class="op">=</span> <span class="fu">sortperm</span>(varimp; rev<span class="op">=</span><span class="cn">true</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> v <span class="kw">in</span> varord</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    vname <span class="op">=</span> model.v[v]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    vctr <span class="op">=</span> <span class="fu">round</span>(<span class="dt">Int</span>, varimp[v]<span class="op">*</span><span class="fl">100</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">println</span>(<span class="st">"</span><span class="sc">$</span>(vname)<span class="st"> - </span><span class="sc">$</span>(vctr)<span class="st">%"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1 - 64%
+12 - 19%
+14 - 17%</code></pre>
+</div>
+</div>
+<div id="10" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>shaps <span class="op">=</span> S[<span class="op">:</span>,<span class="fl">2</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>], yticks <span class="op">=</span> (<span class="fu">reverse</span>(<span class="fu">collect</span>(<span class="fl">1</span><span class="op">:</span><span class="fu">length</span>(model.v))), [<span class="st">"BIO</span><span class="sc">$</span>(v)<span class="st">"</span> for v <span class="kw">in</span> model.v]))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">xlims!</span>(ax, low<span class="op">=-</span><span class="fl">0.5</span>, high<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">vlines!</span>([<span class="fl">0.0</span>], color<span class="op">=:</span>black, linestyle<span class="op">=:</span>dash)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>starts <span class="op">=</span> <span class="fu">cumsum</span>(shaps) <span class="op">.-</span> shaps</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>elev <span class="op">=</span> <span class="fu">reverse</span>(<span class="fu">collect</span>(<span class="fu">axes</span>(shaps, <span class="fl">1</span>)))</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>ydir <span class="op">=</span> <span class="fu">zeros</span>(<span class="fu">length</span>(shaps))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows!</span>(ax, starts, elev, shaps, ydir, align<span class="op">=:</span>tailhead)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax, [P[<span class="fl">1</span>]<span class="fu">-mean</span>(P)], [<span class="fl">1</span>], color<span class="op">=:</span>transparent, strokecolor<span class="op">=:</span>red, strokewidth<span class="op">=</span><span class="fl">3</span>, markersize<span class="op">=</span><span class="fl">25</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+<figure class="figure">
+<p><img src="explanations_files/figure-html/cell-6-output-1.png" class="figure-img" width="1600" height="1200"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="12" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>gl <span class="op">=</span> f[<span class="fl">1</span>,<span class="fl">1</span>] <span class="op">=</span> <span class="fu">GridLayout</span>()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">1</span>,<span class="fl">1</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(model.v[varord[<span class="fl">1</span>]])<span class="st">"</span>, xaxisposition<span class="op">=:</span>top)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(ax1, S[varord[<span class="fl">1</span>],<span class="op">:</span>])</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">1</span>,<span class="fl">2</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(model.v[varord[<span class="fl">2</span>]])<span class="st">"</span>, xaxisposition<span class="op">=:</span>top, yaxisposition<span class="op">=:</span>right)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(ax2, S[varord[<span class="fl">2</span>],<span class="op">:</span>])</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>ax3 <span class="op">=</span> <span class="fu">Axis</span>(gl[<span class="fl">2</span>,<span class="fl">1</span>]; ylabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(model.v[varord[<span class="fl">3</span>]])<span class="st">"</span>, xaxisposition<span class="op">=:</span>top, yaxisposition<span class="op">=:</span>right)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">density!</span>(ax3, S[varord[<span class="fl">3</span>],<span class="op">:</span>])</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>xmin, xmax <span class="op">=</span> <span class="fu">extrema</span>(S)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> [ax1, ax2, ax3]</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlims!</span>(ax, low<span class="op">=</span>xmin, high<span class="op">=</span>xmax)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylims!</span>(ax, low<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hideydecorations!</span>(ax, label<span class="op">=</span><span class="cn">false</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rowgap!</span>(gl, <span class="fl">0.0</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">colgap!</span>(gl, <span class="fl">0.0</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+<figure class="figure">
+<p><img src="explanations_files/figure-html/cell-7-output-1.png" class="figure-img" width="1600" height="1200"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="14" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>args <span class="op">=</span> (color<span class="op">=</span><span class="fu">predict</span>(model), markersize<span class="op">=</span><span class="fl">5</span>, colorrange<span class="op">=</span>(<span class="fl">0</span>., <span class="fl">1</span>.))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>ax1 <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(model.v[varord[<span class="fl">1</span>]])<span class="st">"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax1, P[varord[<span class="fl">1</span>],<span class="op">:</span>], S[varord[<span class="fl">1</span>],<span class="op">:</span>]; args<span class="op">...</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>ax2 <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">2</span>]; xlabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(model.v[varord[<span class="fl">2</span>]])<span class="st">"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax2, P[varord[<span class="fl">2</span>],<span class="op">:</span>], S[varord[<span class="fl">2</span>],<span class="op">:</span>]; args<span class="op">...</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>ax3 <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">2</span>,<span class="fl">1</span>]; xlabel<span class="op">=</span><span class="st">"BIO </span><span class="sc">$</span>(model.v[varord[<span class="fl">3</span>]])<span class="st">"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">scatter!</span>(ax3, P[varord[<span class="fl">3</span>],<span class="op">:</span>], S[varord[<span class="fl">3</span>],<span class="op">:</span>]; args<span class="op">...</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>xmin, xmax <span class="op">=</span> <span class="fu">extrema</span>(S)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> [ax1, ax2, ax3]</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hlines!</span>(ax, [<span class="fl">0.0</span>], color<span class="op">=:</span>black, linestyle<span class="op">=:</span>dash)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+<figure class="figure">
+<p><img src="explanations_files/figure-html/cell-8-output-1.png" class="figure-img" width="1600" height="1200"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="16" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>_layer_path <span class="op">=</span> <span class="fu">joinpath</span>(<span class="fu">dirname</span>(<span class="bu">Base</span>.<span class="fu">active_project</span>()), <span class="st">"data"</span>, <span class="st">"general"</span>, <span class="st">"layers.tiff"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>bio <span class="op">=</span> [SpeciesDistributionToolkit.<span class="fu">_read_geotiff</span>(_layer_path, SimpleSDMResponse; bandnumber<span class="op">=</span>i) for i <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">19</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>19-element Vector{SimpleSDMResponse{Float32}}:
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells
+ SDM response → 206×126 grid with 14432 Float32-valued cells</code></pre>
+</div>
+</div>
+<div id="18" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>V <span class="op">=</span> [<span class="fu">convert</span>(<span class="dt">Float32</span>, <span class="fu">similar</span>(bio[<span class="fl">1</span>])) for i <span class="kw">in</span> <span class="fu">axes</span>(model.v, <span class="fl">1</span>)]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> <span class="fu">Float64</span>.(<span class="fu">permutedims</span>(<span class="fu">hcat</span>(<span class="fu">values</span>.(bio)<span class="op">...</span>)))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="fu">axes</span>(model.v, <span class="fl">1</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    A <span class="op">=</span> <span class="fu">shap_all_points</span>(predictor, B, X, model.v[i], <span class="fl">10</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    V[i].grid[<span class="fu">findall</span>(!isnothing, V[i].grid)] <span class="op">.=</span> A</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="20" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">heatmap</span>(V[varord[<span class="fl">3</span>]], colormap<span class="op">=</span>nightfall, colorrange<span class="op">=</span>(<span class="op">-</span><span class="fl">0.2</span>,<span class="fl">0.2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+<figure class="figure">
+<p><img src="explanations_files/figure-html/cell-11-output-1.png" class="figure-img" width="1600" height="1200"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="22" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mostimp <span class="op">=</span> <span class="fu">mosaic</span>(x <span class="op">-&gt;</span> <span class="fu">argmax</span>(<span class="fu">abs</span>.(x)), V)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>cmap <span class="op">=</span> bright[<span class="fl">2</span><span class="op">:</span><span class="fu">length</span>(model.v)<span class="op">+</span><span class="fl">1</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> <span class="fu">Figure</span>()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> <span class="fu">Axis</span>(f[<span class="fl">1</span>,<span class="fl">1</span>])</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">heatmap!</span>(ax, mostimp, colormap<span class="op">=</span>cmap)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>cleg <span class="op">=</span> [<span class="fu">PolyElement</span>(color <span class="op">=</span> c, strokecolor <span class="op">=</span> <span class="op">:</span>transparent) for c <span class="kw">in</span> cmap]</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>clab <span class="op">=</span> [<span class="st">"BIO</span><span class="sc">$</span>(s)<span class="st">"</span> for s <span class="kw">in</span> model.v]</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">Legend</span>(f[<span class="fl">1</span>,<span class="fl">1</span>], cleg, clab; tellheight<span class="op">=</span><span class="cn">false</span>, tellwidth<span class="op">=</span><span class="cn">false</span>, halign<span class="op">=:</span>left, valign<span class="op">=:</span>top, margin<span class="op">=</span>(<span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>))</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="fu">current_figure</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+<figure class="figure">
+<p><img src="explanations_files/figure-html/cell-12-output-1.png" class="figure-img" width="1600" height="1200"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden">
+
+</div>
+</section>
 <section id="bibliography" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-amarasinghe2023" class="csl-entry" role="listitem">
-Amarasinghe K., Rodolfa K.T., Lamba H. &amp; Ghani R. 2023. <a href="https://doi.org/10.1017/dap.2023.2">Explainable machine learning for public policy: Use cases, gaps, and research directions</a>. Data &amp; Policy. <strong>5</strong>:
+Amarasinghe, K., Rodolfa, K.T., Lamba, H. &amp; Ghani, R. (2023). <a href="https://doi.org/10.1017/dap.2023.2">Explainable machine learning for public policy: Use cases, gaps, and research directions</a>. <em>Data &amp; Policy</em>, 5.
 </div>
 <div id="ref-bell2022" class="csl-entry" role="listitem">
-Bell A., Solano-Kamaiko I., Nov O. &amp; Stoyanovich J. 2022. <a href="https://doi.org/10.1145/3531146.3533090">It<span>’</span>s just not that simple: An empirical study of the accuracy-explainability trade-off in machine learning for public policy</a>. 2022 ACM Conference on Fairness, Accountability, and Transparency.
+Bell, A., Solano-Kamaiko, I., Nov, O. &amp; Stoyanovich, J. (2022). <a href="https://doi.org/10.1145/3531146.3533090">It<span>’</span>s just not that simple: An empirical study of the accuracy-explainability trade-off in machine learning for public policy</a>. <em>2022 ACM Conference on Fairness, Accountability, and Transparency</em>.
 </div>
 <div id="ref-lundberg2017" class="csl-entry" role="listitem">
-Lundberg S.M. &amp; Lee S.-I. 2017. <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf">A unified approach to interpreting model predictions</a>. 30,
+Lundberg, S.M. &amp; Lee, S.-I. (2017). <a href="https://proceedings.neurips.cc/paper_files/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf">A unified approach to interpreting model predictions</a>. In: <em>Advances in neural information processing systems</em> (eds. Guyon, I., Luxburg, U.V., Bengio, S., Wallach, H., Fergus, R., Vishwanathan, S., et al.). Curran Associates, Inc.
 </div>
 <div id="ref-mesgaran2014" class="csl-entry" role="listitem">
-Mesgaran M.B., Cousens R.D. &amp; Webber B.L. 2014. <a href="https://doi.org/10.1111/ddi.12209">Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models</a>. Diversity and Distributions. <strong>20</strong>: 1147–1159.
+Mesgaran, M.B., Cousens, R.D. &amp; Webber, B.L. (2014). <a href="https://doi.org/10.1111/ddi.12209">Here be dragons: a tool for quantifying novelty due to covariate range and correlation change when projecting species distribution models</a>. <em>Diversity and Distributions</em>, 20, 1147–1159.
 </div>
 <div id="ref-strumbelj2013" class="csl-entry" role="listitem">
-Štrumbelj E. &amp; Kononenko I. 2013. <a href="https://doi.org/10.1007/s10115-013-0679-x">Explaining prediction models and individual predictions with feature contributions</a>. Knowledge and Information Systems. <strong>41</strong>: 647–665.
+Štrumbelj, E. &amp; Kononenko, I. (2013). <a href="https://doi.org/10.1007/s10115-013-0679-x">Explaining prediction models and individual predictions with feature contributions</a>. <em>Knowledge and Information Systems</em>, 41, 647–665.
 </div>
 <div id="ref-wadoux2023" class="csl-entry" role="listitem">
-Wadoux A.M.J.-C., Saby N.P.A. &amp; Martin M.P. 2023. <a href="https://doi.org/10.5194/soil-9-21-2023">Shapley values reveal the drivers of soil organic carbon stock prediction</a>. SOIL. <strong>9</strong>: 21–38.
+Wadoux, A.M.J.-C., Saby, N.P.A. &amp; Martin, M.P. (2023). <a href="https://doi.org/10.5194/soil-9-21-2023">Shapley values reveal the drivers of soil organic carbon stock prediction</a>. <em>SOIL</em>, 9, 21–38.
 </div>
 <div id="ref-weiskopf2022" class="csl-entry" role="listitem">
-Weiskopf S.R., Harmáčková Z.V., Johnson C.G., Londoño-Murcia M.C., Miller B.W., Myers B.J.E., Pereira L., Arce-Plata M.I., Blanchard J.L., Ferrier S., Fulton E.A., Harfoot M., Isbell F., Johnson J.A., Mori A.S., Weng E. &amp; Rosa I.M.D. 2022. <a href="https://doi.org/10.1016/j.envsoft.2022.105318">Increasing the uptake of ecological model results in policy decisions to improve biodiversity outcomes</a>. Environmental Modelling &amp; Software. <strong>149</strong>: 105318.
+Weiskopf, S.R., Harmáčková, Z.V., Johnson, C.G., Londoño-Murcia, M.C., Miller, B.W., Myers, B.J.E., <em>et al.</em> (2022). <a href="https://doi.org/10.1016/j.envsoft.2022.105318">Increasing the uptake of ecological model results in policy decisions to improve biodiversity outcomes</a>. <em>Environmental Modelling &amp; Software</em>, 149, 105318.
 </div>
 </div>
 </section>
@@ -300,18 +547,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -343,7 +579,47 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -378,7 +654,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
@@ -393,38 +673,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    const typesetMath = (el) => {
-      if (window.MathJax) {
-        // MathJax Typeset
-        window.MathJax.typeset([el]);
-      } else if (window.katex) {
-        // KaTeX Render
-        var mathElements = el.getElementsByClassName("math");
-        var macros = [];
-        for (var i = 0; i < mathElements.length; i++) {
-          var texText = mathElements[i].firstChild;
-          if (mathElements[i].tagName == "SPAN") {
-            window.katex.render(texText.data, mathElements[i], {
-              displayMode: mathElements[i].classList.contains('display'),
-              throwOnError: false,
-              macros: macros,
-              fleqn: false
-            });
-          }
-        }
-      }
-    }
     if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
         }
-        typesetMath(container);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
         return container.innerHTML
       } else {
-        typesetMath(note);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -433,8 +703,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      typesetMath(note);
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
@@ -663,7 +940,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0 International License</a></p>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/explanations.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

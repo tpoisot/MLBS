@@ -241,6 +241,7 @@ One usual approach is to decide on a number of iterations (we need to start some
 ```{julia}
 #| label: tbl-gradient-attempt-one
 #| echo: false
+#| output: asis
 #| tbl-cap: This table shows the change in the model, as measured by the loss and by the estimates of the parameters, after an increasing amount of training epochs. The loss drops sharply in the first 500 iterations, but even after 20000 iterations, there are still some changes in the values of the parameters.
 df = DataFrame()
 for i in [1, 10, 30, 100, 300, 1000, 3000, 10000, 20000]
@@ -336,6 +337,7 @@ We could read the performance of the model using the data in @fig-gradient-loss-
 ```{julia}
 #| label: fig-gradient-fitted
 #| echo: false
+#| width: 100%
 #| fig-cap: Overview of the fitted model. The residuals (top panel) are mostly centered around 0, which suggests little bias towards over/under predicting interactions. The red line (based on the optimal coefficients) goes through the points, and indicates a rather good fit of the model.
 fig = Figure(; resolution=(500, 500))
 
