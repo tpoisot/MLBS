@@ -13,7 +13,8 @@ format:
       fontsize: 11pt
       linestretch: 1.15
       fig-cap-location: margin
-      tbl-cap-location: margin
+      tbl-cap-location: top
+      flw-cap-location: bottom
       geometry:
         - landscape
         - left=1in
