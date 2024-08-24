@@ -9,19 +9,21 @@ format:
     toc-expand: false
   pdf:
       documentclass: scrbook
-      keep-tex: true
       papersize: letter
-      fig-cap-location: bottom
-      tbl-cap-location: top
+      fontsize: 11pt
+      linestretch: 1.15
+      fig-cap-location: margin
+      tbl-cap-location: margin
       geometry:
-        - left=0.7in
-        - textwidth=5.2in
-        - marginparsep=0.2in
-        - marginparwidth=1.7in
+        - landscape
+        - left=1in
+        - textwidth=7in
+        - marginparsep=0.5in
+        - marginparwidth=2in
       linkcolor: SteelBlue4
       colorlinks: true
-      fig-pos: 'pbt'
-      tbl-pos: 'bt'
+      fig-pos: 'p'
+      tbl-pos: 'pbt'
       toc: true
       toc-depth: 3
       number-sections: true

@@ -308,6 +308,7 @@ Yet it is important to contextualize these results. What does it means for our p
 ```{julia}
 #| label: tbl-splits-performance-summary
 #| tbl-cap: TODO
+#| output: asis
 #| echo: false
 pretty_table(summary_table, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```

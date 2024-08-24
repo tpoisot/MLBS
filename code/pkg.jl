@@ -26,6 +26,7 @@ set_theme!()
 CairoMakie.activate!(; type = "png")
 update_theme!(;
     backgroundcolor = :transparent,
+    fontsize = 9,
     Figure = (; backgroundcolor = :transparent),
     Axis = (
         backgroundcolor = :white,
