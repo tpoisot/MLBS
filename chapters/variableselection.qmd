@@ -165,14 +165,17 @@ Another class of potentially very useful data transformations is whitening trans
 ```{julia}
 #| echo: false
 #| output: false
-modelpath = joinpath(_models_path, "sdm-step-0.jld2")
+modelpath = joinpath(_models_path, "sdm-steps.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
     global folds = file["folds"]
     global coordinates = file["coordinates"]
 end;
-model = loadsdm(modelpath; threshold=false)
+# Load the model
+f = JLD2.jldopen(modelpath, "r")
+model = f["00-baseline"]
+close(f)
 ```
 
 ```{julia}
@@ -362,7 +365,10 @@ These results are presented in @fig-predictors-rangediff.
 ```{julia}
 #| output: false
 #| echo: false
-origmodel = loadsdm(modelpath; threshold=false)
+reset!(model)
+model.v = [1, 12]
+train!(model; threshold=false)
+origmodel = model
 
 finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
@@ -485,6 +491,8 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 ```{julia}
 #| output: false
 #| echo: false
-modelpath = joinpath(_models_path, "sdm-step-1.jld2")
-savesdm(finalmodel, modelpath)
+modelpath = joinpath(_models_path, "sdm-steps.jld2")
+JLD2.jldopen(modelpath, "a+") do file
+    file["01-optimalvariables"] = finalmodel
+end
 ```

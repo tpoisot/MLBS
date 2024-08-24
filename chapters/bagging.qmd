@@ -39,7 +39,7 @@ In order for the bagging procedure to make sense, the component of the homogeneo
 ```{julia}
 #| echo: false
 #| output: false
-modelpath = joinpath(_models_path, "sdm-step-2.jld2")
+modelpath = joinpath(_models_path, "sdm-steps.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
@@ -47,7 +47,11 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global bags = file["bags"]
 end;
 
-model = loadsdm(modelpath)
+
+# Load the model
+f = JLD2.jldopen(modelpath, "r")
+model = f["02-thresholded"]
+close(f)
 
 ensemble = Bagging(model, bags)
 train!(ensemble)
@@ -73,7 +77,7 @@ Z = (X0 - μ)/σ
 ```{julia}
 #| echo: false
 #| output: false
-heatmap(Z; colorrange=(-0.2, 0.2), colormap=nightfall)
+heatmap(IQR; colorrange=(0.0, 0.2), colormap=nightfall)
 ```
 
 tpr ppv

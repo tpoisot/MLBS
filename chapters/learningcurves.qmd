@@ -75,7 +75,7 @@ In this section, we will finish the training of the model for the distribution o
 ```{julia}
 #| echo: false
 #| output: false
-modelpath = joinpath(_models_path, "sdm-step-1.jld2")
+modelpath = joinpath(_models_path, "sdm-steps.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
@@ -83,7 +83,10 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global coordinates = file["coordinates"]
 end;
 
-model = loadsdm(modelpath; threshold=false)
+# Load the model
+f = JLD2.jldopen(modelpath, "r")
+model = f["01-optimalvariables"]
+close(f)
 ```
 
 ### Revisiting assumptions on cross-validation
@@ -428,6 +431,8 @@ In this chapter, we have refined a model by adopting a principled approach to es
 ```{julia}
 #| output: false
 #| echo: false
-modelpath = joinpath(_models_path, "sdm-step-2.jld2")
-savesdm(model, modelpath)
+modelpath = joinpath(_models_path, "sdm-steps.jld2")
+JLD2.jldopen(modelpath, "a+") do file
+    file["02-thresholded"] = model
+end
 ```

@@ -1,40 +1,42 @@
-function savesdm(model::SDM, path)
-    transformer = Symbol(typeof(model.transformer))
-    classifier = Symbol(typeof(model.classifier))
-    JLD2.jldsave(
-        path;
-        y = model.y,
-        X = model.X,
-        threshold = model.τ,
-        variables = model.v,
-        transformer = transformer,
-        classifier = classifier,
+struct SDMSerialization
+    y::Vector
+    X::Matrix
+    threshold::AbstractFloat
+    variables::Vector{Int}
+    classifier::Symbol
+    transformer::Symbol
+end
+
+JLD2.writeas(::Type{SDM}) = SDMSerialization
+
+function __tosymbol(cl::Type{T}) where T <: Classifier
+    str = string(cl)
+    contains("NBC", str) && return :NBC
+    contains("BioClim", str) && return :BioClim
+    return :NBC
+end
+
+function __tosymbol(tr::Type{T}) where T <: Transformer
+    str = string(tr)
+    contains("PCA", str) && return Symbol("MultivariateTransform{PCA}")
+    contains("Whitening", str) && return Symbol("MultivariateTransform{Whitening}")
+    contains("ZScore", str) && return :ZScore
+    return :RawData
+end
+
+function Base.convert(::Type{SDMSerialization}, sdm::SDM)
+    return SDMSerialization(
+        model.y, model.X,
+        model.τ, model.v,
+        __tosymbol(model.classifier), __tosymbol(model.transformer)
     )
 end
 
-function loadsdm(path; kwargs...)
-    # List of transformers
-    __ltransfo = Dict([
-        :ZScore => ZScore,
-        :RawData => RawData,
-        Symbol("Main.Notebook.RawData") => RawData, # TODO Automate the way to prefix symbols when saving the models
-        Symbol("MultivariateTransform{Whitening}") => MultivariateTransform{Whitening},
-        Symbol("MultivariateTransform{PCA}") => MultivariateTransform{PCA},
-    ])
-    # List of classifiers
-    __lclass = Dict([
-        :NBC => NBC,
-        :BioClim => BioClim
-    ])
-    JLD2.jldopen(path) do modelspec
-        global X = modelspec["X"]
-        global y = modelspec["y"]
-        global threshold = modelspec["threshold"]
-        global variables = modelspec["variables"]
-        global transformer = __ltransfo[modelspec["transformer"]]
-        global classifier = __lclass[modelspec["classifier"]]
-    end
-    model = SDM(transformer(), classifier(), threshold, X, y, variables)
-    train!(model; kwargs...)
+function Base.convert(::Type{SDM}, sdm::SDMSerialization)
+    model = SDM(
+        eval(sdm.transformer), eval(sdm.classifier),
+        sdm.threshold, sdm.X, sdm.y,
+        sdm.variables
+    )
     return model
 end
