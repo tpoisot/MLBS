@@ -20,6 +20,7 @@ using Random
 import CSV
 using DataFrames
 using PrettyTables
+import JSON
 
 set_theme!()
 CairoMakie.activate!(; type = "png")

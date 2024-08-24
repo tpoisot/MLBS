@@ -34,7 +34,6 @@ transfo in model = we can still apply these techniques instead of asking "what d
 ## Application
 
 ```{julia}
-modelpath = joinpath(_models_path, "sdm-steps.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
@@ -43,9 +42,10 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
 end;
 
 # Load the model
-f = JLD2.jldopen(modelpath, "r")
-model = f["00-baseline"]
-close(f)
+modelpath = joinpath(_models_path, "sdm-baseline.json")
+model = loadsdm(modelpath)
+model.v = [1,2,3,4,12]
+train!(model)
 ```
 
 ```{julia}
@@ -149,13 +149,13 @@ end
 ```
 
 ```{julia}
-heatmap(V[varord[2]], colormap=nightfall, colorrange=(-0.2,0.2))
+heatmap(V[varord[1]], colormap=nightfall, colorrange=(-0.2,0.2))
 ```
 
 ```{julia}
 mostimp = mosaic(x -> argmax(abs.(x)), V)
 
-cmap = bright[1:length(model.v)]
+cmap = bright[2:length(model.v)+1]
 
 f = Figure()
 ax = Axis(f[1,1])

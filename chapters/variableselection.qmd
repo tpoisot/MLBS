@@ -165,7 +165,6 @@ Another class of potentially very useful data transformations is whitening trans
 ```{julia}
 #| echo: false
 #| output: false
-modelpath = joinpath(_models_path, "sdm-steps.jld2")
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
     global y = file["y"]
@@ -173,17 +172,16 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global coordinates = file["coordinates"]
 end;
 # Load the model
-f = JLD2.jldopen(modelpath, "r")
-model = f["00-baseline"]
-close(f)
+modelpath = joinpath(_models_path, "sdm-baseline.json")
+model = loadsdm(modelpath; threshold=false)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-C0v, C0t = crossvalidate(model, folds)
+C0v, C0t = crossvalidate(model, folds; threshold=false)
 reset!(model)
-CXv, CXt = crossvalidate(model, folds)
+CXv, CXt = crossvalidate(model, folds; threshold=false)
 ```
 
 Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
@@ -491,8 +489,6 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 ```{julia}
 #| output: false
 #| echo: false
-modelpath = joinpath(_models_path, "sdm-steps.jld2")
-JLD2.jldopen(modelpath, "a+") do file
-    file["01-optimalvariables"] = finalmodel
-end
+modelpath = joinpath(_models_path, "sdm-variables.json")
+writesdm(modelpath, finalmodel)
 ```

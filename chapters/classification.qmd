@@ -489,10 +489,8 @@ Note that by visualizing the type of mis-classification from our training set, w
 ```{julia}
 #| echo: false
 #| output: false
-modelpath = joinpath(_models_path, "sdm-steps.jld2")
-JLD2.jldopen(modelpath, "a+") do file
-    file["00-baseline"] = model
-end
+modelpath = joinpath(_models_path, "sdm-baseline.json")
+writesdm(modelpath, model)
 ```
 
 ## Conclusion
