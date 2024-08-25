@@ -9,9 +9,10 @@ format:
     toc-expand: false
   pdf:
       documentclass: scrbook
+      classoption:
+        - fontsize=10.5pt
       papersize: letter
-      fontsize: 11pt
-      linestretch: 1.15
+      linestretch: 1.1
       fig-cap-location: margin
       tbl-cap-location: top
       flw-cap-location: bottom
@@ -19,8 +20,9 @@ format:
         - landscape
         - left=1in
         - textwidth=7in
-        - marginparsep=0.5in
-        - marginparwidth=2in
+        - textheight=6in
+        - marginparsep=0.3in
+        - marginparwidth=2.2in
       linkcolor: SteelBlue4
       colorlinks: true
       fig-pos: 'p'
@@ -31,5 +33,5 @@ format:
       number-depth: 3
       mainfont: TeX Gyre Pagella
       mathfont: TeX Gyre Pagella Math
-      sansfont: TeX Gyre Adventor
+      sansfont: TeX Gyre Heros
       monofont: TeX Gyre Cursor

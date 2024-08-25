@@ -9,7 +9,6 @@ ispath(_models_path) || mkpath(_models_path)
 import JLD2
 import StatsAPI
 using CairoMakie
-import GeoMakie
 using Distributions
 using GLM
 using MultivariateStats
@@ -26,10 +25,10 @@ set_theme!()
 CairoMakie.activate!(; type = "png")
 update_theme!(;
     backgroundcolor = :transparent,
-    fontsize = 9,
+    fontsize = 10,
     Figure = (; backgroundcolor = :transparent),
     Axis = (
-        backgroundcolor = :white,
+        backgroundcolor = :transparent,
     ),
     CairoMakie = (; px_per_unit = 2),
 )

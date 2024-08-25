@@ -85,21 +85,21 @@ In @fig-classification-separability, we can see the temperature (in degrees) for
 #| label: fig-classification-separability
 #| echo: false
 #| fig-cap: This figures show the separability of the presences (orange) and pseudo-absences (grey) on the temperature and precipitation dimensions.
-f = Figure(; resolution=(500, 500))
+f = Figure(; size=(6, 6).*(96/2))
 
 gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
 c = vibrant[2]
-density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1)
 c = vibrant[1]
-density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf)
+density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1)
 
 axprec = Axis(gl[2,2])
 c = vibrant[2]
-density!(axprec, filter(r -> r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+density!(axprec, filter(r -> r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, direction=:y)
 c = vibrant[1]
-density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, normalization=:pdf, direction=:y)
+density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
 xp = 0.1filter(r -> r.presence, occdata).BIO1
@@ -283,7 +283,7 @@ Why not pick one of these instead of the MCC? Because all modeling is compromise
 #| echo: false
 #| fig-cap: Overview of the scores for the Matthew's correlation coefficient, as well as the positive and negative predictive values.
 fmat = [(mcc, "Matthew's corr. coeff.") (ppv, "Positive pred. val.") (npv, "Negative pred. val.")]
-f = Figure(; resolution=(600, 300))
+f = Figure(; size=(7, 4).*(96/2))
 
 for ci in CartesianIndices(fmat)
     cfunc, lab = fmat[ci]
@@ -339,7 +339,7 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| label: fig-classification-decision
 #| echo: false
 #| fig-cap: Overview of the decision boundary between the positive (orange) and negative (grey) classes using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
-f = Figure(; resolution=(500, 500))
+f = Figure(; size=(6, 6).*(96/2))
 ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
 pal = vibrant[[1,2]]
 heatmap!(ax, 0.1air, prc, SRF, colormap=pal, alpha=0.3)
@@ -374,13 +374,13 @@ bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; 
 pr = predict(model, bio; threshold=true)
 ```
 
-We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of *Sitta whiteheadi*. This result is reported in @fig-classification-range. Because we have used training data for which we know the labels, we can also map the *outcome* of applying the model, which it so say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.
+We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of *Sitta whiteheadi*. This result is reported in @fig-classification-range. Because we have used training data for which we know the labels, we can also map the *outcome* of applying the model, which is to say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.
 
 ```{julia}
 #| label: fig-classification-range
 #| echo: false
 #| fig-cap: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*, but would definitely stand to be improved, possibly by accounting for more features.
-f = Figure(; resolution = (700, 600))
+f = Figure(; size=(7, 6).*(96/2))
 
 gl = f[1, 1] = GridLayout()
 
@@ -436,7 +436,7 @@ scatter!(
     coordinates.latitude[trn];
     color = coordinates.presence[trn],
     colormap = [:black, vibrant[2]],
-    markersize = 4,
+    markersize = 2,
 )
 
 heatmap!(ax2, pr; colormap = [light[1]])
@@ -449,23 +449,23 @@ FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
 
 heatmap!(ax1, pr; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax1, latlon[TP, 2], latlon[TP, 1]; markersize = 3, color = vibrant[2])
+scatter!(ax1, latlon[TP, 2], latlon[TP, 1]; markersize = 2, color = vibrant[2])
 
 heatmap!(ax2, pr; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax2, latlon[FP, 2], latlon[FP, 1]; markersize = 5, color = :black, marker = :cross)
+scatter!(ax2, latlon[FP, 2], latlon[FP, 1]; markersize = 3, color = :black, marker = :cross)
 
 heatmap!(ax4, pr; colormap = vibrant[1:2], alpha = 0.4)
 scatter!(
     ax4,
     latlon[FN, 2],
     latlon[FN, 1];
-    markersize = 5,
+    markersize = 3,
     color = vibrant[2],
     marker = :cross,
 )
 
 heatmap!(ax5, pr; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax5, latlon[TN, 2], latlon[TN, 1]; markersize = 3, color = :black)
+scatter!(ax5, latlon[TN, 2], latlon[TN, 1]; markersize = 2, color = :black)
 
 for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
     ax.xticklabelpad = 0

@@ -12,7 +12,6 @@ As we progress into this book, the process of delivering a trained model is goin
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-#include(joinpath(_code_path, "splitters.jl"))
 ```
 
 Doing so will require to introduce several new concepts, and so the "correct" way to read this chapter is to focus on the high-level process. The problem we will try to solve (which is introduced in @sec-gradientdescent-problem) is very simple; in fact, the empirical data looks more fake than many simulated datasets!
@@ -56,7 +55,7 @@ ls = ls[ls.L .>= (ls.S .- 1), :]
 #| label: fig-gradient-data
 #| echo: false
 #| fig-cap: We have assumed that the relationship between $L$ and $S$ could be represented by $L \approx b\times S^a$, which gave us a reason to take the natural log of both variables. On this figure, we see that the relationship between the logs look linear, which means that linear regression has a good chance of estimating the values of the parameters.
-fig = Figure(; resolution=(345, 285))
+fig = Figure(; size=(6, 6).*(96/2))
 axs = Axis(fig[1,1]; xlabel="Number of species", ylabel="Number of interactions", xscale=log, yscale=log)
 scatter!(axs, ls.S, ls.L, color=:black, markersize=4)
 current_figure()
@@ -268,7 +267,7 @@ Underfitting is also a possible scenario, where the model is *not* learning from
 #| label: fig-gradient-loss-comparison
 #| echo: false
 #| fig-cap: This figures shows the change in the loss for the training and testing dataset. As the two curves converge on low values at the same rate, this suggests that the model is not over-fitting, and is therefore suitable for use.
-fig = Figure(; resolution=(345, 285))
+fig = Figure(; size=(6, 6).*(96/2))
 
 axs = Axis(fig[1,1]; xlabel="Training epoch", ylabel="L₂ loss", yscale=log10)
 lines!(axs, 0:epochs, loss_train, color=:black, label="Training")
@@ -305,7 +304,7 @@ end
 #| label: fig-gradient-param-change
 #| echo: false
 #| fig-cap: This figure shows the change in the parameters values over time. Note that the change is very large initially, because we make large steps when the gradient is strong. The rate of change gets much lower as we get nearer to the "correct" value.
-fig = Figure(; resolution=(345, 285))
+fig = Figure(; size=(7, 6).*(96/2))
 
 axp = fig[1,1] = GridLayout()
 
@@ -339,7 +338,7 @@ We could read the performance of the model using the data in @fig-gradient-loss-
 #| echo: false
 #| width: 100%
 #| fig-cap: Overview of the fitted model. The residuals (top panel) are mostly centered around 0, which suggests little bias towards over/under predicting interactions. The red line (based on the optimal coefficients) goes through the points, and indicates a rather good fit of the model.
-fig = Figure(; resolution=(345, 285))
+fig = Figure(; size=(7, 6).*(96/2))
 
 gl = fig[1,1] = GridLayout()
 
