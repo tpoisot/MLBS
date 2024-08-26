@@ -52,8 +52,9 @@ masked = map(collection, maskL8sr)
 composite = median(masked)
 
 # define a region to view results
-corsica = Point(9.141445, 41.455772)
+#corsica = Point(9.141445, 41.455772)
 #corsica = Point(-73.870354, 45.485857)
+corsica = Point(-1.082540, 45.643133)
 region = bounds(buffer(corsica, 1.1e4))
 
 # Get a link to view results in false color composite

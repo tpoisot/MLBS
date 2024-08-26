@@ -90,26 +90,20 @@ f = Figure(; size=(6, 6).*(96/2))
 gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
-c = vibrant[2]
-density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1)
-c = vibrant[1]
-density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=(c, 0.3), strokecolor=c, strokewidth=1)
+density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1)
+density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1)
 
 axprec = Axis(gl[2,2])
-c = vibrant[2]
-density!(axprec, filter(r -> r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, direction=:y)
-c = vibrant[1]
-density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=(c, 0.3), strokecolor=c, strokewidth=1, direction=:y)
+density!(axprec, filter(r -> r.presence, occdata).BIO12, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1, direction=:y)
+density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
 xp = 0.1filter(r -> r.presence, occdata).BIO1
 xn = 0.1filter(r -> !r.presence, occdata).BIO1
 yp = filter(r -> r.presence, occdata).BIO12
 yn = filter(r -> !r.presence, occdata).BIO12
-c = vibrant[2]
-scatter!(axboth, xp, yp, color=c, markersize=4, label="Presence")
-c = vibrant[1]
-scatter!(axboth, xn, yn, color=c, markersize=4, label="Pseudo-absence")
+scatter!(axboth, xn, yn, color=bkcol.sdm.absent, markersize=4, label="Pseudo-absence")
+scatter!(axboth, xp, yp, color=bkcol.sdm.present, markersize=4, label="Presence")
 
 axislegend(position = :lb)
 
@@ -334,13 +328,13 @@ for ci in CartesianIndices(fmat)
     vav = cfunc.(Cv)
     cx = vcat(fill(0, length(trv)), fill(1, length(vav)))
     cy = vcat(trv, vav)
-    boxplot!(ax, cx, cy; orientation=:vertical, color = map(d->d==1 ? muted[1] : muted[2], cx))
+    violin!(ax, cx, cy; orientation=:vertical, color = map(d->d==1 ? bkcol.cv.validation : bkcol.cv.training, cx))
     hidexdecorations!(ax, label=false)
     ylims!(ax, 0.6, 1.0)
 end
 
 group_color = [PolyElement(color = color, strokecolor = :transparent)
-    for color in muted[1:2]]
+    for color in [bkcol.cv.training, bkcol.cv.validation]]
 Legend(f[2,:], group_color, ["Training", "Validation"]; orientation=:horizontal)
 
 current_figure()
@@ -408,17 +402,40 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| echo: false
 #| fig-cap: Overview of the decision boundary between the positive (orange) and negative (grey) classes using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
 f = Figure(; size=(6, 6).*(96/2))
-ax = Axis(f[1,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-pal = vibrant[[1,2]]
-heatmap!(ax, 0.1air, prc, SRF, colormap=pal, alpha=0.3)
+
+gl = f[1,1] = GridLayout()
+
+axtemp = Axis(gl[1,1])
+density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1)
+density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1)
+
+axprec = Axis(gl[2,2])
+density!(axprec, filter(r -> r.presence, occdata).BIO12, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1, direction=:y)
+density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1, direction=:y)
+
+
+ax = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
+heatmap!(ax, 0.1air, prc, SRF, colormap=[bkcol.sdm.absent, bkcol.sdm.present], alpha=0.3)
 xp = 0.1filter(r -> r.presence, occdata).BIO1
 xn = 0.1filter(r -> !r.presence, occdata).BIO1
 yp = filter(r -> r.presence, occdata).BIO12
 yn = filter(r -> !r.presence, occdata).BIO12
-c = vibrant[2]
-scatter!(ax, xp, yp, color=c, markersize=4, label="Presence")
-c = vibrant[1]
-scatter!(ax, xn, yn, color=c, markersize=4, label="Pseudo-absence")
+scatter!(ax, xp, yp, color=bkcol.sdm.present, markersize=4, label="Presence")
+scatter!(ax, xn, yn, color=bkcol.sdm.absent, markersize=4, label="Pseudo-absence")
+
+
+hidespines!(axtemp, :l, :r, :t)
+hidespines!(axprec, :b, :r, :t)
+hidedecorations!(axtemp, grid = true)
+hidedecorations!(axprec, grid = true)
+ylims!(axtemp, low = 0)
+xlims!(axprec, low = 0)
+colgap!(gl, 0)
+rowgap!(gl, 0)
+
+colsize!(gl, 1, Relative(5/6))
+rowsize!(gl, 2, Relative(5/6))
+
 current_figure()
 ```
 
@@ -495,19 +512,18 @@ ax5 = Axis(
     title = "True negatives",
 )
 
-heatmap!(ax3, pr; colormap = vibrant[1:2])
+heatmap!(ax3, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 
-heatmap!(ax0, pr; colormap = [light[1]])
+heatmap!(ax0, pr; colormap = [bkcol.nodata])
 scatter!(
     ax0,
     coordinates.longitude[trn],
     coordinates.latitude[trn];
     color = coordinates.presence[trn],
-    colormap = [:black, vibrant[2]],
+    colormap = [bkcol.sdm.absent, bkcol.sdm.present],
     markersize = 2,
 )
 
-heatmap!(ax2, pr; colormap = [light[1]])
 prd = predict(model, X; threshold = true)
 grd = coordinates.presence[trn]
 
@@ -516,24 +532,24 @@ TN = findall((.!prd) .& (.!grd))
 FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
 
-heatmap!(ax1, pr; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax1, latlon[TP, 2], latlon[TP, 1]; markersize = 2, color = vibrant[2])
+heatmap!(ax1, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax1, latlon[TP, 2], latlon[TP, 1]; markersize = 2, color = bkcol.sdm.present)
 
-heatmap!(ax2, pr; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax2, latlon[FP, 2], latlon[FP, 1]; markersize = 3, color = :black, marker = :cross)
+heatmap!(ax2, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax2, latlon[FP, 2], latlon[FP, 1]; markersize = 3, color = bkcol.sdm.absent, marker = :cross)
 
-heatmap!(ax4, pr; colormap = vibrant[1:2], alpha = 0.4)
+heatmap!(ax4, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 scatter!(
     ax4,
     latlon[FN, 2],
     latlon[FN, 1];
     markersize = 3,
-    color = vibrant[2],
+    color = bkcol.sdm.present,
     marker = :cross,
 )
 
-heatmap!(ax5, pr; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax5, latlon[TN, 2], latlon[TN, 1]; markersize = 2, color = :black)
+heatmap!(ax5, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax5, latlon[TN, 2], latlon[TN, 1]; markersize = 2, color = bkcol.sdm.absent)
 
 for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
     ax.xticklabelpad = 0

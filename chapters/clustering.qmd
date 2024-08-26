@@ -80,7 +80,7 @@ veg_cube = colorcube(SWIR1, NIR, R)
 fci_cube = colorcube(NIR, R, G)
 urb_cube = colorcube(SWIR2, SWIR1, R)
 
-fig = Figure(resolution=(500, 390))
+fig = Figure(; size=(7, 6).*(96/2))
 
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[2,1], aspect=DataAspect())
@@ -100,7 +100,7 @@ hidedecorations!(ax_urb)
 current_figure()
 ```
 
-In @fig-kmeans-composites, we compare the natural color reconstruction (top) to a false color composite. All of the panels in @fig-kmeans-composites represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: *what we measure defines what we can see*. In order to tell something ecologically meaningful about this place, we need to look at it in the "right" way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale [@gonzalez2023], there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily right for all problems.
+In @fig-kmeans-composites, we compare the natural color reconstruction (top) to a false color composite. All of the panels in @fig-kmeans-composites represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: *what we measure defines what we can see*. In order to tell something ecologically meaningful about this place, we need to look at it in the "right" way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale [@gonzalez2023], there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily awlays adequate, and just because an equipment is very expensive does not mean it will provide the information we *need*.
 
 ::: column-margin
 We will revisit the issue of variable selection and feature engineering in @sec-predictors.
@@ -144,9 +144,9 @@ We can look at the pairwise relationships between these derived measures [@fig-k
 #| label: fig-kmeans-hexbin
 #| echo: false
 #| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, NBR, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
-fig = Figure(resolution=(500,300))
+fig = Figure(; size=(6, 6).*(96/2))
 ax = Makie.Axis(fig[1,1]; xlabel="NBR", ylabel="NDWI", aspect=DataAspect())
-hexbin!(ax, NBR, NDWI, colormap=cgrad(iridescent), bins=50)
+hexbin!(ax, NBR, NDWI, colormap=cgrad(bkcol.seq), bins=50)
 tightlimits!(ax)
 vlines!(ax, [0.0]; color=:black, linewidth=0.5)
 hlines!(ax, [0.0]; color=:black, linewidth=0.5)
@@ -288,24 +288,18 @@ using Clustering
 begin
     clusters = kmeans(X, 3)
 end
+C = permutedims(reshape(assignments(clusters), size(NDVI)))
 ```
 
 Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using $k = 3$, we get the results presented in @fig-kmeans-initial-landscape. Why $k=3$? Why not! The point of *k*-means is to provide a division of data in a small (manageable) number of classes, and the folklore around this method suggests that two is too few, and four is initially too much. Therefore, $k=3$. We can tweak it later, and indeed we will, but what matters immediately is to generate a result to kickstart our learning process.
 
 ```{julia}
-#| label: permute-cluster-dimensions
-#| echo: false
-#| output: false
-C = permutedims(reshape(assignments(clusters), size(NDVI)))
-```
-
-```{julia}
 #| label: fig-kmeans-initial-landscape
 #| echo: false
 #| fig-cap: After iterating the k-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, i.e. we want to see what the landscape would look like when divided into three categories.
-fig = Figure(; resolution=(500, 240))
+fig = Figure(; size=(7, 6).*(96/2))
 ax = CairoMakie.Axis(fig[1,1]; aspect=DataAspect())
-heatmap!(ax, C; colormap=medium[1:3])
+heatmap!(ax, C; colormap=bkcol.cat)
 hidedecorations!(ax)
 current_figure()
 ```
@@ -379,17 +373,17 @@ end
 #| label: fig-kmeans-tuning
 #| echo: false
 #| fig-cap: Results of running the *k*-means algorithm ten times for each number of clusters between 3 and 10. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
-f = Figure(; resolution=(500,500))
+f = Figure(; size=(7, 6).*(96/2))
 
 gl = f[1,1] = GridLayout()
 
 ax1 = CairoMakie.Axis(gl[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index", xticks=3:maximum(k_trial))
 scatterlines!(ax1, k_trial, score, color=:black)
-errorbars!(ax1, k_trial, score, .5vscore, .5vscore, whiskerwidth = 10)
+errorbars!(ax1, k_trial, score, .5vscore, .5vscore, whiskerwidth = 10, color=:black)
 
 ax2 = CairoMakie.Axis(gl[2,1]; xlabel="Number of clusters", ylabel="Total cost", xticks=3:maximum(k_trial))
 scatterlines!(ax2, k_trial, costs, color=:black)
-errorbars!(ax2, k_trial, costs, .5vcosts, .5vcosts, whiskerwidth = 10)
+errorbars!(ax2, k_trial, costs, .5vcosts, .5vcosts, whiskerwidth = 10, color=:black)
 
 hidexdecorations!(ax1, grid=false)
 
@@ -399,7 +393,7 @@ current_figure()
 ```
 
 ::: column-margin
-Note that using $k=3$ on the non-water pixel is *different* from using $k=4$ on all pixels! This is an important distinction, as it accentuates the importance of data selection and preparation on the process of picking good hyper-parameters.
+Note that using $k=3$ on the non-water pixels is *different* from using $k=4$ on all pixels! This is an important distinction, as it accentuates the importance of data selection and preparation on the process of picking good hyper-parameters.
 :::
 
 There are two interesting things in @fig-kmeans-tuning. First, note that for $k=\{3,4,5\}$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! This is a good sign, and, anecdotally, something that might suggest a really information separation of the points. Second, $k = 3$ has by far the lowest Davies-Bouldin index of all values we tried, and is therefore strongly suggestive of an optimal hyper-parameter. Because we used the information in @fig-kmeans-initial-landscape to remove the water pixels, we can then probably move forward with this value.
@@ -408,7 +402,7 @@ There are two interesting things in @fig-kmeans-tuning. First, note that for $k=
 #| label: re-cluster
 #| echo: false
 #| output: false
-k = 3
+k = 7
 clusters = kmeans(X, k)
 C = zeros(size(NDVI))
 C[findall(!isnothing, msk.grid)] .= clusters.assignments
@@ -424,9 +418,9 @@ The clustering of pixels using $k = 3$ is presented in @fig-kmeans-optimal-lands
 #| echo: false
 #| fig-cap: Results of the landscape clustering with k=5 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
 
-fig = Figure(resolution=(500, 240))
+fig = Figure(; size=(7, 6).*(96/2))
 ax_clust = CairoMakie.Axis(fig[1,1], aspect=DataAspect())
-heatmap!(ax_clust, permutedims(C); colormap=medium[2:(k+1)])
+heatmap!(ax_clust, permutedims(C); colormap=bkcol.cat)
 hidedecorations!(ax_clust)
 current_figure()
 ```
@@ -475,9 +469,9 @@ By opposition to a model based on, for example, mixtures of Gaussians, the assig
 #| label: fig-kmeans-clustering
 #| echo: false
 #| fig-cap: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
-fig = Figure(resolution=(500,300))
+fig = Figure(; size=(7, 6).*(96/2))
 ax = CairoMakie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-scatter!(ax, values(mask(msk, NDVI)), values(mask(msk, NDMI)), color=clusters.assignments, colormap=medium[2:(k+1)], markersize=2)
+scatter!(ax, values(mask(msk, NDVI)), values(mask(msk, NDMI)), color=clusters.assignments, colormap=bkcol.cat, markersize=2)
 tightlimits!(ax)
 current_figure()
 ```
