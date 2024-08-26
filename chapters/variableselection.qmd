@@ -102,7 +102,7 @@ If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X
 
 The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$. This is illustrated in @fig-predictors-leakage.
 
-#### How to work in practice?
+### How to work in practice?
 
 Although avoiding data leakage is a tricky problem, there is a very specific mindset we can adopt that goes a long way towards not introducing it in our analyses, and it is as follows: *every data transformation step is a modeling step that is part of the learning process*. We do not, for example, apply a PCA and train the model on the projected variables -- we feed raw data into a model, the first step of which is to perform this PCA for us.
 
@@ -158,7 +158,11 @@ Principal Component Analysis (PCA) is one of the most widely used multi-variate 
 
 ### Whitening transforms
 
-Another class of potentially very useful data transformations is whitening transforms, which belongs to the larger category of decorrelation methods. These methods do not perform any dimensionality reduction, but instead remove the covariance in the datasets. Whitening has proven to be particularly effective at improving the predictive ability of models applied to data with strong covariance structure [@koivunen1999]. In essence, given a matrix of features $\mathbf{x}$, with averages $\mathbf{\mu}$ and covariance $\mathbf{C}$, a whitening transform $\mathbf{W}$ is the *one of the matrices* that satisfies $\mathbf{W}^\top\mathbf{C}\mathbf{W} = \mathbf{I}$. In other words, the whitening transform results in a new set of features with unit variance and no covariance: the dimensionality of the problem remains the same but the new random variables are independent. Given any dataset with covariance matrix $\mathbf{C}$, if any $\mathbf{W}$ is a whitening transform, then so to are any matrices $\mathbf{W}\mathbf{R}$ where $\mathbf{R}$ performs a rotation with $\mathbf{R}^\top\mathbf{R} = \mathbf{I}$. The optimal whitening transform can be derived through a variety of ways [see *e.g.* @kessy2018]. The whitening transform is applied to the input vector using $\mathbf{W}^\top (\mathbf{x}-\mathbf{\mu})$: this results in new random variables that have a mean of 0, and unit variance. The new input vector after the transformation is therefore an instance of "white noise" [@vasseur2004].
+Another class of potentially very useful data transformations is whitening transforms, which belongs to the larger category of decorrelation methods. These methods do not perform any dimensionality reduction, but instead remove the covariance in the datasets. Whitening has proven to be particularly effective at improving the predictive ability of models applied to data with strong covariance structure [@koivunen1999]. In essence, given a matrix of features $\mathbf{x}$, with averages $\mathbf{\mu}$ and covariance $\mathbf{C}$, a whitening transform $\mathbf{W}$ is *one of the matrices* that satisfies $\mathbf{W}^\top\mathbf{C}\mathbf{W} = \mathbf{I}$. 
+
+In other words, the whitening transform results in a new set of features with unit variance and no covariance: the dimensionality of the problem remains the same but the new random variables are independent. Given any dataset with covariance matrix $\mathbf{C}$, if any $\mathbf{W}$ is a whitening transform, then so to are any matrices $\mathbf{W}\mathbf{R}$ where $\mathbf{R}$ performs a rotation with $\mathbf{R}^\top\mathbf{R} = \mathbf{I}$. The optimal whitening transform can be derived through a variety of ways [see *e.g.* @kessy2018]. The whitening transform is applied to the input vector using $\mathbf{W}^\top (\mathbf{x}-\mathbf{\mu})$: this results in new random variables that have a mean of 0, and unit variance. The new input vector after the transformation is therefore an instance of "white noise" [@vasseur2004].
+
+When performing Whitening transformation, the first variable in the new space will usually have pretty high correlation to the first raw variable. But because the purpose of Whitening is to remove the covariance (and ensure unit variance), this gets less and less true as we increase the rank of the variables. By the time the last selected variable is reached, we should expect it to be almost purely noise.
 
 ## Application: optimal variables for Corsican nuthatch
 
@@ -228,7 +232,7 @@ Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 #| echo: false
 #| output: asis
 #| label: tbl-predictors-selection
-#| tbl-cap: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC. 
+#| tbl-cap: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC averaged over the validation datasets. The highest MCC value, corresponding to the best model, is in bold.
 tbl = []
 push!(tbl, ["@sec-classification baseline", "1,12", mean(mcc.(C0v))])
 push!(tbl, ["All variables", " ", mean(mcc.(CXv))])
@@ -237,11 +241,20 @@ push!(tbl, ["Constr. sel.", join(c0, ","), mean(mcc.(Cc0v))])
 push!(tbl, ["Backw. sel.", join(b0, ","), mean(mcc.(Cb0v))])
 push!(tbl, ["Var. infl. fac.", join(i0, ","), mean(mcc.(Ci0v))])
 
+D = permutedims(hcat(tbl...))
+
+hl_maxval = MarkdownHighlighter(
+           (data, i, j) -> (j == 3) && (D[i,3] == maximum(Float64.(D[:,3]))),
+           MarkdownDecoration(bold = true)
+       );
+
 pretty_table(
-    permutedims(hcat(tbl...));
+    D;
     backend = Val(:markdown),
     header = ["Model", "Variables", "MCC"],
-    alignment = [:l, :l, :l]
+    alignment = [:l, :l, :l],
+    formatters = ft_printf("%5.4f", 3),
+    highlighters = hl_maxval
 )
 ```
 
@@ -346,17 +359,26 @@ vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
 push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
+D = permutedims(hcat(tbl...))
+
+hl_maxval = MarkdownHighlighter(
+           (data, i, j) -> (j == 4) && (D[i,4] == maximum(Float64.(D[:,4]))),
+           MarkdownDecoration(bold = true)
+       );
+
 pretty_table(
-    permutedims(hcat(tbl...));
+    D;
     backend = Val(:markdown),
     header = ["Variable selection", "Transformation", "Nb. variables", "MCC (val.)", "MCC (train)"],
-    alignment = [:l, :l, :l, :l, :l]
+    alignment = [:l, :l, :l, :l, :l],
+    formatters = ft_printf("%5.3f", [4,5]),
+    highlighters = hl_maxval
 )
 ```
 
 ### Model selection
 
-In @tbl-predictors-selection and @tbl-predictions-transformation, we have evaluated a series of several modeling strategies, defined by a variable selection and transformation technique. Using the MCC as our reference for what constitutes the best model, we can now apply the model to the relevant set of predictors, in order to see how these refinements result in a new predicted range for the species.
+In @tbl-predictors-selection and @tbl-predictors-transformation, we have evaluated a series of several modeling strategies, defined by a variable selection and transformation technique. Using the MCC as our reference for what constitutes the best model, we can now apply the model to the relevant set of predictors, in order to see how these refinements result in a new predicted range for the species.
 
 These results are presented in @fig-predictors-rangediff.
 
@@ -370,7 +392,7 @@ origmodel = model
 
 finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
-forwardselection!(finalmodel, folds; threshold=false)
+backwardselection!(finalmodel, folds; threshold=false)
 
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
@@ -387,11 +409,12 @@ end
 ```{julia}
 #| label: fig-predictors-rangediff
 #| echo: false
+#| fig-scap: Updated range map for *Sitta whiteheadi* after variable selection.
 #| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
 final_range = vpr .> 0.5
 old_range = opr .> 0.5
 
-f = Figure(; resolution = (700, 600))
+f = Figure(; size=(7, 6).*(96/2))
 
 gl = f[1, 1] = GridLayout()
 

@@ -101,5 +101,3 @@ current_figure()
 ```
 
 ## Conclusion
-
-# Bagging and ensembles {#sec-bagging-ensembles}

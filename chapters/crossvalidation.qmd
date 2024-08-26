@@ -116,8 +116,9 @@ Long-term time series of the date of first bloom in Japan reveal that in the las
 ```{julia}
 #| label: fig-splits-rawdata
 #| echo: false
+#| fig-scap: Relationship between temperature in March and day of blooming.
 #| fig-cap: The raw data show a negative relationship between the temperature in March, and the bloom time. This suggests that when the trees have accumulated enough temperature, they can bloom early. In a context of warming, we should therefore see earlier blooms with rising temperatures.
-f = Figure(; resolution=(500, 300))
+f = Figure(; size=(7, 4).*(96/2))
 ax = Axis(f[1,1]; xlabel="March temperature (°C)", ylabel="Bloom time (day of year)")
 scatter!(ax, sakura.temperature, sakura.flowering, color=:lightgrey)
 current_figure()
@@ -183,21 +184,22 @@ When the data have some specific structure, it can be a good thing to manipulate
 ```{julia}
 #| label: fig-splits-illustration
 #| echo: false
+#| fig-scap: Illustration of different folds on a timeseries.
 #| fig-cap: An illustration of a series of folds on a timeseries. The grey data are used for training, the green data for validation, and the purple data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.
-f = Figure()
+f = Figure(; size=(7, 5).*(96/2))
 s1 = Axis(f[1,1])
 s2 = Axis(f[2,1])
 s3 = Axis(f[3,1])
 s4 = Axis(f[4,1])
 for (i,s) in enumerate([s1, s2, s3, s4])
     scatter!(s, sakuratrain.year, sakuratrain.flowavg, color=:lightgrey)
-    scatter!(s, sakuratest.year, sakuratest.flowavg, color=Makie.wong_colors()[4], linewidth=4)
+    scatter!(s, sakuratest.year, sakuratest.flowavg, color=Makie.wong_colors()[4])
     j = 2i-1
     valid_idx = folds[j]:folds[j+1]
     train_idx = filter(n -> !(n in valid_idx), 1:size(sakuratrain, 1))
     valid = sakuratrain[valid_idx, :]
     train = sakuratrain[train_idx, :]
-    scatter!(s, valid.year, valid.flowavg, color=Makie.wong_colors()[3], linewidth=2)
+    scatter!(s, valid.year, valid.flowavg, color=Makie.wong_colors()[3])
     hidedecorations!(s)
     hidespines!(s)
 end
@@ -281,9 +283,10 @@ sort!(summary_table, [:Measure, :Dataset])
 
 ```{julia}
 #| label: fig-splits-performance
+#| fig-scap: Model performance according to three loss functions.
 #| fig-cap: Visualisation of the model performance for three loss functions (MA, RMSE, MBE, as defined in @tbl-gradientdescent-regressionloss). The colors are the same as in @fig-splits-illustration, *i.e.* grey for the training data, green for the validation data, and purple for the testing data.
 #| echo: false
-f = Figure(; resolution=(500, 300))
+f = Figure(; size=(7, 5).*(96/2))
 model_results = copy(test_results)
 for (i,m) in enumerate([:MAE, :RMSE, :MBE])
     ax = Axis(f[i,1]; ylabel=String(m))
@@ -307,7 +310,7 @@ Yet it is important to contextualize these results. What does it means for our p
 
 ```{julia}
 #| label: tbl-splits-performance-summary
-#| tbl-cap: TODO
+#| tbl-cap: Summary of the model performance after cross-validation.
 #| output: asis
 #| echo: false
 pretty_table(summary_table, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
@@ -324,12 +327,13 @@ The predictions of our model are presented in @fig-splits-prediction; these are 
 ```{julia}
 #| label: fig-splits-prediction
 #| echo: false
+#| fig-scap: Fit of the final model, after training on all instances.
 #| fig-cap: Overview of the fit of the final model (trained on all the training examples), visualized as the time series. Note that the year was not used as a variable in the model. The purple part of the prediction corresponds to the prediction of the model for the testing data, which are zoomed-in on in @fig-splits-detail. Although the model captures the cycles reasonably well, it tends to smooth out a lot of extreme events.
-f = Figure(; resolution=(500, 300))
+f = Figure(; size=(7, 5).*(96/2))
 ax = Axis(f[1,1]; xlabel="Year", ylabel="Day of bloom")
 scatter!(ax, sakura.year, sakura.flowavg, color=:lightgrey, markersize=6)
-lines!(ax, sakuratrain.year, predict(model, sakuratrain), color=:black, linewidth=1)
-lines!(ax, sakuratest.year, predict(model, sakuratest), color=Makie.wong_colors()[4], linewidth=2)
+lines!(ax, sakuratrain.year, convert(Vector{Float64}, predict(model, sakuratrain)), color=:black, linewidth=1)
+lines!(ax, sakuratest.year, convert(Vector{Float64}, predict(model, sakuratest)), color=Makie.wong_colors()[4], linewidth=2)
 current_figure()
 ```
 
@@ -354,11 +358,12 @@ We will often be confronted to this question when working with prediction. There
 ```{julia}
 #| label: fig-splits-detail
 #| echo: false
+#| fig-scap: Model predictions on the testing data.
 #| fig-cap: Overview of the model predictions on the testing data. Note that the model still smoothes out some of the extreme values. More importantly, it seems that it is under-estimating the sharp decline in the day of first bloom that happens starting in 1950; this suggests that the model is not adequately capturing important processes shaping the data.
-f = Figure()
+f = Figure(; size=(7, 5).*(96/2))
 ax = Axis(f[1,1])
 scatter!(ax, sakuratest.year, sakuratest.flowavg, color=:lightgrey)
-lines!(ax, sakuratest.year, predict(model, sakuratest), color=:red)
+lines!(ax, sakuratest.year, convert(Vector{Float64}, predict(model, sakuratest)), color=:red)
 current_figure()
 ```
 

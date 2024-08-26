@@ -154,9 +154,13 @@ As there are many different possible measures on this matrix, we will introduce 
 
 Balance refers to the proportion of the positive class. Whenever this balance is not equal to 1/2 (there are as many positives as negative cases), we are performing *imbalanced* classification, which comes with additional challenges; few ecological problems are balanced.
 
-### The no-skill classifier
+### Null classifiers {#sec-classification-null}
 
-There is a specific hypothetical classifier, called the *no-skill classifier*, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note $b$ the proportion of positive classes, the no-skill classifier will guess $+$ with probability $b$, and $-$ with probability $1-b$. Because these are also the proportion in the data, we can write the adjacency matrix as
+A useful baseline to establish whether a model "works" is to measure whether the model performs better than at random. For classification problems, a good baseline is provided by "null" classifiers, in which the underlying structure of the data is known (and respects class balance), but the classifier itself makes guesses at random, for different definitions of random. Because these classifiers are very simple, they are not in fact models; we can directly write their confusion matrix, and apply different measures of model performance to it.
+
+#### The no-skill classifier
+
+There is a specific hypothetical classifier, called the *no-skill classifier*, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note $b$ the proportion of positive classes, the no-skill classifier will guess $+$ with probability $b$, and $-$ with probability $1-b$. Because these are also the proportion in the data, we can write the confusion matrix as
 
 $$
 \begin{pmatrix}
@@ -167,11 +171,44 @@ $$ {#eq-classification-noskill}
 
 The proportion of elements that are on the diagonal of this matrix is $b^2 + (1-b)^2$. When $b$ gets lower, this value actually increases: the more difficult a classification problem is, the more accurate random guesses *look like*. This has a simple explanation, which we expand @sec-classification-accuracy : when most of the cases are negative, if you predict a negative case often, you will by chance get a very high true negative score. For this reason, measures of model performance will combine the positions of the confusion table to avoid some of these artifacts.
 
-::: column-margin
-An alternative to the no-skill classifier is the coin-flip classifier, in which classes have their correct prevalence $b$, but the model picks at random with probability $1/2$ within these classes. This differs from the no-skill classifier by adopting a different random chance of picking a class while still respecting the prevalence of the positive class.
-:::
-
 Bias refers to the fact that a model can recommend more (or fewer) positive or negative classes than it should. An extreme example is the *zero-rate classifier*, which will always guess the most common class, and which is commonly used as a baseline for imbalanced classification. A good classifier has high skill (which we can measure by whether it beats the no-skill classifier for our specific problem) and low bias. In this chapter, we will explore different measures on the confusion table the inform us about these aspects of model performance, using the Naive Bayes Classifier.
+
+#### The coin-flip classifier
+
+An alternative to the no-skill classifier is the coin-flip classifier, in which classes have their correct prevalence $b$, but the model picks at random with probability $1/2$ within these classes. This differs from the no-skill classifier by adopting a different random chance of picking a class while still respecting the prevalence of the positive class.
+
+The confusion matrix of the coin-flip classifier is:
+
+$$
+\begin{pmatrix}
+\frac{b}{2} & \frac{1-b}{2}\\
+\frac{b}{2} & \frac{1-b}{2}
+\end{pmatrix} \,.
+$$
+
+#### The constant classifier
+
+The last null classifier we can use is the constant classifier, in which we assume that the model will *always* return some specific class. This is useful to anticipate what the model performance would look like if, for example, the model always predicted the negative outcome (which is a notion we will return to in @sec-classification-accuracy).
+
+This classifier has the confusion matrix
+
+$$
+\begin{pmatrix}
+b & 1-b\\
+0 & 0
+\end{pmatrix}
+$$
+
+if it always predicts the positive class, and
+
+$$
+\begin{pmatrix}
+0 & 0\\
+b & 1-b
+\end{pmatrix}
+$$
+
+if it always predicts the negative class.
 
 ### A note on accuracy {#sec-classification-accuracy}
 
@@ -192,6 +229,8 @@ Whenever possible, avoid using accuracy except to communicate the skill of the m
 :::
 
 This is an issue inherent to accuracy: it can tell you that a classifier is bad (when it is low), but it cannot really tell you when a classifier is *good*, as no-skill (or worse-than-no-skill) classifiers can have very high values. It remains informative as an *a posteriori* measure of performance, but only after using reliable measures to ensure that the model means something.
+
+More generally, this also illustrates why relying on null classifiers is a good idea: we want to make sure that we are making better predictions than an heavily biased, uninformative model would.
 
 ## The Naive Bayes Classifier
 
@@ -257,6 +296,9 @@ In order to see how good our model really is, we will also compare its performan
 #| echo: false
 #| output: false
 Cnoskill = noskill(y)
+Cflip = coinflip(y)
+Cpos = constantpositive(y)
+Cneg = constantnegative(y)
 folds = montecarlo(y, X; n=100)
 model = SDM(RawData(), NBC(), 0.5, X, y, [1, 12])
 Cv, Ct = crossvalidate(model, folds)
@@ -294,6 +336,7 @@ for ci in CartesianIndices(fmat)
     cy = vcat(trv, vav)
     boxplot!(ax, cx, cy; orientation=:vertical, color = map(d->d==1 ? muted[1] : muted[2], cx))
     hidexdecorations!(ax, label=false)
+    ylims!(ax, 0.6, 1.0)
 end
 
 group_color = [PolyElement(color = color, strokecolor = :transparent)
@@ -305,14 +348,39 @@ current_figure()
 
 The output of cross-validation is given in @fig-classification-crossvalidation (and compared to the no-skill classifier in @tbl-classification-crossvalidation). As we are satisfied with the model performance, we can re-train it using all the data (*but not the part used for testing*) in order to make our first series of predictions.
 
-| Measure | Training | Validation | No-skill |
-|------------------|------------------|------------------|------------------|
-| Accuracy | `{julia} round(mean(accuracy.(Ct)); digits=3)` | `{julia} round(mean(accuracy.(Cv)); digits=3)` | `{julia} round(accuracy(Cnoskill); digits=3)` |
-| NPV | `{julia} round(mean(npv.(Ct)); digits=3)` | `{julia} round(mean(npv.(Cv)); digits=3)` | `{julia} round(npv(Cnoskill); digits=3)` |
-| PPV | `{julia} round(mean(ppv.(Ct)); digits=3)` | `{julia} round(mean(ppv.(Cv)); digits=3)` | `{julia} round(ppv(Cnoskill); digits=3)` |
-| MCC | `{julia} round(mean(mcc.(Ct)); digits=3)` | `{julia} round(mean(mcc.(Cv)); digits=3)` | `{julia} round(mcc(Cnoskill); digits=3)` |
+```{julia}
+#| echo: false
+#| output: asis
+#| label: tbl-classification-crossvalidation
+#| tbl-cap: Overview of the data presented in @fig-classification-crossvalidation, compared to the null classifiers from @sec-classification-null. Note that the MCC gives values of 0 for *most* null classifiers, which is not the case with other measures of performance. Missing values cannot be calculated as they involved a denominator of 0.
+measures = [
+    "Accuracy" => accuracy,
+    "NPV" => npv,
+    "PPV" => ppv,
+    "MCC" => mcc
+    ]
 
-: Overview of the data presented in @fig-classification-crossvalidation, compared to the no-skill classifier. {#tbl-classification-crossvalidation}
+content = Vector[]
+for (k, v) in measures
+    push!(content,
+    [
+        k,
+        mean(v.(Ct)), mean(v.(Cv)),
+        v(Cnoskill), v(Cflip), v(Cpos), v(Cneg)
+    ])
+end
+
+T = permutedims(hcat(content...))
+T[findall(t -> t isa Float64 ? isnan(t) : false, T)] .= ""
+
+pretty_table(
+    T;
+    backend = Val(:markdown),
+    header = ["Measure", "Training", "Validation", "No-skill", "Coin-flip", "Positive", "Negative"],
+    alignment = [:c, :l, :l, :l, :l, :l, :l],
+    formatters = ft_printf("%5.2f", 2:7)
+)
+```
 
 ### The decision boundary
 
@@ -356,11 +424,11 @@ current_figure()
 
 The output of this simulation is given in @fig-classification-decision. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.
 
-The line that separates the two classes is usually referred to as the "decision boundary" of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.
-
 ::: column-margin
 Take a minute to think about which places are more likely to have lower temperatures on an island. Is there an additional layer of geospatial information we could add that would be informative?
 :::
+
+The line that separates the two classes is usually referred to as the "decision boundary" of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.
 
 It is interesting to compare @fig-classification-decision with, for example, the distribution of the raw data presented in @fig-classification-separability. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that Corsican nuthatches enjoy colder climates with more rainfall.
 
