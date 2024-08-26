@@ -47,3 +47,13 @@ end
 function shap_all_points(f, X, Z, j, n)
     return shap_list_points(f, X, Z, axes(X, 2), j, n)
 end
+
+function explain(model::SDM, j; observation=nothing, instances=nothing, samples=100, kwargs...)
+    predictor = (x) -> predict(model, x; kwargs...)
+    instances = isnothing(instances) ? model.X : instances
+    if isnothing(observation)
+        return shap_all_points(predictor, instances, model.X, j, samples)
+    else
+        return shap_one_point(predictor, instances, model.X, i, j, samples)
+    end
+end

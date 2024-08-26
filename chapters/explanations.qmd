@@ -49,35 +49,53 @@ train!(model)
 ```
 
 ```{julia}
-predictor = (p) -> predict(model, p; threshold=false)
-
 S = zeros(Float64, (length(model.v), length(y)))
 for (vidx, vpos) in enumerate(model.v)
-    for instance in axes(S, 2)
-        S[vidx,instance] = shap_one_point(predictor, X, X, instance, vpos, 100)
-    end
+    S[vidx,:] = explain(model, vpos; threshold=false, samples=200)
 end
 P = X[model.v,:]
 ```
 
 ```{julia}
+#| echo: false
+#| output: asis
+#| label: tbl-explanations-importance
+#| tbl-cap: blah blah blah
 varimp = vec(mean(abs.(S); dims=2))
 varimp ./= sum(varimp)
 varord = sortperm(varimp; rev=true)
+
+content = Vector{Any}[]
 for v in varord
     vname = model.v[v]
     vctr = round(Int, varimp[v]*100)
-    println("$(vname) - $(vctr)%")
+    push!(content, [
+        vname, 100varimp[v], minimum(S[v,:]), median(S[v,:]), maximum(S[v,:])
+    ])
 end
+
+D = permutedims(hcat(content...))
+
+pretty_table(
+    D;
+    backend = Val(:markdown),
+    header = ["Variable", "Importance", "Min.", "Med.", "Max."],
+    alignment = [:c, :l, :l, :l, :l, :l],
+    formatters = (ft_printf("%1i", 1), ft_printf("%5.2f%%", 2), ft_printf("%5.2f", [3,4,5])),
+)
 ```
 
 ```{julia}
-shaps = S[:,2]
+#| echo: false
+#| label: fig-explanation-waterfall
+#| fig-scap: Waterfall diagram for a single prediction.
+#| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
+shaps = S[:,2][varord]
 
-f = Figure()
+f = Figure(; size=(4, 6).*(96/2))
 
-ax = Axis(f[1,1], yticks = (reverse(collect(1:length(model.v))), ["BIO$(v)" for v in model.v]))
-xlims!(ax, low=-0.5, high=0.5)
+ax = Axis(f[1,1], yticks = (reverse(collect(1:length(model.v))), ["BIO$(v)" for v in model.v[varord]]))
+xlims!(ax, low=-0.6, high=0.6)
 
 vlines!([0.0], color=:black, linestyle=:dash)
 
@@ -92,19 +110,28 @@ current_figure()
 ```
 
 ```{julia}
-f = Figure()
+#| echo: false
+#| label: fig-explanation-effects
+#| fig-scap: Distribution of the effects on the average prediction for the three most important variables.
+#| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
+f = Figure(; size=(7, 6).*(96/2))
 gl = f[1,1] = GridLayout()
-ax1 = Axis(gl[1,1]; ylabel="BIO $(model.v[varord[1]])", xaxisposition=:top)
-density!(ax1, S[varord[1],:])
-ax2 = Axis(gl[1,2]; ylabel="BIO $(model.v[varord[2]])", xaxisposition=:top, yaxisposition=:right)
-density!(ax2, S[varord[2],:])
-ax3 = Axis(gl[2,1]; ylabel="BIO $(model.v[varord[3]])", xaxisposition=:top, yaxisposition=:right)
-density!(ax3, S[varord[3],:])
 
 xmin, xmax = extrema(S)
+
+ax1 = Axis(gl[1,1]; ylabel="BIO $(model.v[varord[1]])", xaxisposition=:top)
+hist!(ax1, S[varord[1],:], color=:grey, bins=LinRange(xmin, xmax, 50))
+ax2 = Axis(gl[2,1]; ylabel="BIO $(model.v[varord[2]])", xaxisposition=:top, yaxisposition=:right)
+hist!(ax2, S[varord[2],:], color=:grey, bins=LinRange(xmin, xmax, 50))
+ax3 = Axis(gl[3,1]; ylabel="BIO $(model.v[varord[3]])", xaxisposition=:bottom, yaxisposition=:left)
+hist!(ax3, S[varord[3],:], color=:grey, bins=LinRange(xmin, xmax, 50))
+
+hidexdecorations!(ax2, label=false, grid=false)
+
 for ax in [ax1, ax2, ax3]
     xlims!(ax, low=xmin, high=xmax)
     ylims!(ax, low=0.0)
+    vlines!(ax, [0.0], color=:black, linestyle=:dash)
     hideydecorations!(ax, label=false)
 end
 
@@ -143,27 +170,27 @@ V = [convert(Float32, similar(bio[1])) for i in axes(model.v, 1)]
 
 B = Float64.(permutedims(hcat(values.(bio)...)))
 for i in axes(model.v, 1)
-    A = shap_all_points(predictor, B, X, model.v[i], 10)
+    A = explain(model, model.v[i]; instances=B, threshold=false)
     V[i].grid[findall(!isnothing, V[i].grid)] .= A
 end
 ```
 
 ```{julia}
-heatmap(V[varord[1]], colormap=nightfall, colorrange=(-0.2,0.2))
+heatmap(V[varord[1]], colormap=nightfall, colorrange=(-0.5,0.5))
 ```
 
 ```{julia}
 mostimp = mosaic(x -> argmax(abs.(x)), V)
 
-cmap = bright[2:length(model.v)+1]
+cmap = bright[2:length(model.v)+1][varord]
 
 f = Figure()
-ax = Axis(f[1,1])
+ax = Axis(f[1,1], aspect=DataAspect())
 
 heatmap!(ax, mostimp, colormap=cmap)
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in cmap]
-clab = ["BIO$(s)" for s in model.v]
+clab = ["BIO$(s)" for s in model.v[varord]]
 Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10))
 
 current_figure()
