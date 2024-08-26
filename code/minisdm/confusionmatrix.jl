@@ -55,6 +55,7 @@ f1(M::ConfusionMatrix) = 2 * (ppv(M) * tpr(M)) / (ppv(M) + tpr(M))
 trueskill(M::ConfusionMatrix) = tpr(M) + tnr(M) - 1.0
 markedness(M::ConfusionMatrix) = ppv(M) + npv(M) - 1.0
 dor(M::ConfusionMatrix) = plr(M) / nlr(M)
+prevalence(M::ConfusionMatrix) = (M.tp + M.fn) / (M.tp + M.fp + M.tn + M.fn)
 
 function κ(M::ConfusionMatrix)
     return 2.0 * (M.tp * M.tn - M.fn * M.fp) /

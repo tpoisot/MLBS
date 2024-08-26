@@ -1,0 +1,98 @@
+---
+engine: julia
+---
+
+# The machine learning squint {#sec-squint}
+
+In this chapter, we are going to take a break from using the Naive Bayes Classifier, which has been our model of choice since @sec-classification. Instead, we will revisit our biological problem with a tool that will be both familiar to many ecologists, and usually not considered part of the family of machine learning: the bioclim model [@booth2013]. You may notice that this shares a name with the BIOCLIM variables. This is correct! Ecologists are, as a rule, not keen on making much sense when naming things.
+
+@scott2012 makes an interesting point that sometimes, using the "anarchist squint", which is, borrowing from anarchist theory to look at contemporary issues in society, provides a unique perspective on the situation that would have been missed with more dominant frames of references. In this chapter, I am advocating for a sort of "machine learning squint": the overall process of coming up with a model, which we presented in @flw-overview, can be applied very broadly.
+
+## A digression: what is machine learning?
+
+not a list of algorithms
+
+what is machine learning?
+
+## The bioclim model
+
+presence only
+
+envelopes
+
+score to decision
+
+## Application: bioclim in a machine learning pipeline
+
+show using bioclim
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+include(joinpath(_code_path, "minisdm/bioclim.jl"))
+include(joinpath(_code_path, "minisdm/shapley.jl"))
+```
+
+sdsd
+
+```{julia}
+#| echo: false
+#| output: false
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+    global folds = file["folds"]
+    global coordinates = file["coordinates"]
+end;
+```
+
+```{julia}
+model = SDM(MultivariateTransform{PCA}(), BIOCLIM(), 0.001, X, y, [1,12])
+reset!(model)
+backwardselection!(model, folds; threshold=true)
+train!(model; threshold=true)
+```
+
+TPSP
+
+```{julia}
+threshold = LinRange(0.0, 0.5, 100)
+pr = Float64[]
+sp = Float64[]
+for t in threshold
+    model.τ = t
+    p = predict(model)
+    push!(pr, mean(p))
+    push!(sp, tnr(ConfusionMatrix(p, model.y)))
+end
+```
+
+crossval
+
+```{julia}
+Cv, Ct = crossvalidate(model, folds; threshold=true)
+```
+
+```{julia}
+mean(fnr.(Ct))
+```
+
+```{julia}
+#| echo: false
+#| output: false
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+pr = predict(model, bio; threshold=true)
+```
+
+```{julia}
+heatmap(pr)
+```
+
+```{julia}
+S = explain(model, 12; threshold=true)
+scatter(model.X[12,:], S, colormap=[bkcol.sdm.absent, bkcol.sdm.present], color=model.y)
+```

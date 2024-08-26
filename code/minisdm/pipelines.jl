@@ -33,7 +33,7 @@ function train!(sdm::SDM; threshold=true, training=:, optimality=mcc)
     ŷ = predict(sdm.classifier, X₁)
     ŷ[findall(isnan.(ŷ))] .= 0.0
     if threshold
-        thr_range = LinRange(extrema(ŷ)..., 100)
+        thr_range = LinRange(extrema(ŷ)..., 200)
         C = [ConfusionMatrix(ŷ, sdm.y[training], thr) for thr in thr_range]
         sdm.τ = thr_range[last(findmax(optimality, C))]
     end
