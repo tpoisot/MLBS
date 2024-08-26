@@ -61,6 +61,7 @@ train!(model; threshold=true)
 ```{julia}
 # Latent variables
 L = MultivariateStats.transform(model.transformer, model.X[model.v,:])
+scatter(L, color=model.y, colormap=[bkcol.sdm.absent, bkcol.sdm.present])
 ```
 
 crossval
