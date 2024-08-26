@@ -36,7 +36,7 @@ include(joinpath(_code_path, "minisdm/bioclim.jl"))
 include(joinpath(_code_path, "minisdm/shapley.jl"))
 ```
 
-sdsd
+sdsd **TODO** only positives
 
 ```{julia}
 #| echo: false
@@ -66,7 +66,7 @@ for t in threshold
     model.τ = t
     p = predict(model)
     push!(pr, mean(p))
-    push!(sp, tnr(ConfusionMatrix(p, model.y)))
+    push!(sp, tpr(ConfusionMatrix(p, model.y)))
 end
 ```
 
