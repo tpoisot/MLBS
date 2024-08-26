@@ -49,6 +49,8 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
 end;
 ```
 
+@kriticos2014 has suggested that PCA transformation of the bioclim variables is more relevant, we will use this approach to retain many variables with backward selection but transform them to do the prediction on fewer latent variables
+
 ```{julia}
 model = SDM(MultivariateTransform{PCA}(), BIOCLIM(), 0.001, X, y, [1,12])
 reset!(model)
@@ -56,18 +58,9 @@ backwardselection!(model, folds; threshold=true)
 train!(model; threshold=true)
 ```
 
-TPSP
-
 ```{julia}
-threshold = LinRange(0.0, 0.5, 100)
-pr = Float64[]
-sp = Float64[]
-for t in threshold
-    model.τ = t
-    p = predict(model)
-    push!(pr, mean(p))
-    push!(sp, tpr(ConfusionMatrix(p, model.y)))
-end
+# Latent variables
+L = MultivariateStats.transform(model.transformer, model.X[model.v,:])
 ```
 
 crossval
@@ -77,7 +70,7 @@ Cv, Ct = crossvalidate(model, folds; threshold=true)
 ```
 
 ```{julia}
-mean(fnr.(Ct))
+mean(mcc.(Ct))
 ```
 
 ```{julia}
@@ -89,10 +82,10 @@ pr = predict(model, bio; threshold=true)
 ```
 
 ```{julia}
-heatmap(pr)
+heatmap(pr, colormap=[bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 ```
 
 ```{julia}
-S = explain(model, 12; threshold=true)
-scatter(model.X[12,:], S, colormap=[bkcol.sdm.absent, bkcol.sdm.present], color=model.y)
+S = explain(model, 1; threshold=true)
+scatter(model.X[1,:], S, colormap=[bkcol.sdm.absent, bkcol.sdm.present], color=model.y)
 ```
