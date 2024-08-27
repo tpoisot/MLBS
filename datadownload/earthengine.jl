@@ -40,7 +40,7 @@ end
 # get the landsat collection and filter by date
 collection = filterDate(
     EE.ImageCollection("LANDSAT/LC08/C02/T1_L2"),
-    "2017-03-01", "2017-10-31",
+    "2017-05-15", "2017-07-31",
 )
 
 # Data spec: https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2#bands
@@ -54,8 +54,8 @@ composite = median(masked)
 # define a region to view results
 #corsica = Point(9.141445, 41.455772)
 #corsica = Point(-73.870354, 45.485857)
-corsica = Point(-1.082540, 45.643133)
-region = bounds(buffer(corsica, 1.1e4))
+centerpoint = Point(-1.082540, 45.656133)
+region = bounds(buffer(centerpoint, 4e3))
 
 # Get a link to view results in false color composite
 getThumbURL(
@@ -78,6 +78,6 @@ getDownloadURL(
         :name => "LandSat",
         :bands => ["SR_B2", "SR_B3", "SR_B4", "SR_B5", "SR_B6", "SR_B7"],
         :region => region,
-        :scale => 25,
+        :scale => 15,
     ),
 )

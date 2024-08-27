@@ -80,7 +80,7 @@ veg_cube = colorcube(SWIR1, NIR, R)
 fci_cube = colorcube(NIR, R, G)
 urb_cube = colorcube(SWIR2, SWIR1, R)
 
-fig = Figure(; size=(7, 6).*(96/2))
+fig = Figure(; size=(7, 6).*(600/6))
 
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[2,1], aspect=DataAspect())
@@ -144,7 +144,7 @@ We can look at the pairwise relationships between these derived measures [@fig-k
 #| label: fig-kmeans-hexbin
 #| echo: false
 #| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, NBR, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
-fig = Figure(; size=(6, 6).*(96/2))
+fig = Figure(; size=(6, 6).*(600/6))
 ax = Makie.Axis(fig[1,1]; xlabel="NBR", ylabel="NDWI", aspect=DataAspect())
 hexbin!(ax, NBR, NDWI, colormap=cgrad(bkcol.seq), bins=50)
 tightlimits!(ax)
@@ -297,7 +297,7 @@ Before we do anything else, we need to run our algorithm with a random pick of h
 #| label: fig-kmeans-initial-landscape
 #| echo: false
 #| fig-cap: After iterating the k-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, i.e. we want to see what the landscape would look like when divided into three categories.
-fig = Figure(; size=(7, 6).*(96/2))
+fig = Figure(; size=(7, 6).*(600/6))
 ax = CairoMakie.Axis(fig[1,1]; aspect=DataAspect())
 heatmap!(ax, C; colormap=bkcol.cat)
 hidedecorations!(ax)
@@ -373,7 +373,7 @@ end
 #| label: fig-kmeans-tuning
 #| echo: false
 #| fig-cap: Results of running the *k*-means algorithm ten times for each number of clusters between 3 and 10. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
-f = Figure(; size=(7, 6).*(96/2))
+f = Figure(; size=(7, 6).*(600/6))
 
 gl = f[1,1] = GridLayout()
 
@@ -402,7 +402,7 @@ There are two interesting things in @fig-kmeans-tuning. First, note that for $k=
 #| label: re-cluster
 #| echo: false
 #| output: false
-k = 7
+k = 4
 clusters = kmeans(X, k)
 C = zeros(size(NDVI))
 C[findall(!isnothing, msk.grid)] .= clusters.assignments
@@ -418,7 +418,7 @@ The clustering of pixels using $k = 3$ is presented in @fig-kmeans-optimal-lands
 #| echo: false
 #| fig-cap: Results of the landscape clustering with k=5 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
 
-fig = Figure(; size=(7, 6).*(96/2))
+fig = Figure(; size=(7, 6).*(600/6))
 ax_clust = CairoMakie.Axis(fig[1,1], aspect=DataAspect())
 heatmap!(ax_clust, permutedims(C); colormap=bkcol.cat)
 hidedecorations!(ax_clust)
@@ -469,7 +469,7 @@ By opposition to a model based on, for example, mixtures of Gaussians, the assig
 #| label: fig-kmeans-clustering
 #| echo: false
 #| fig-cap: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
-fig = Figure(; size=(7, 6).*(96/2))
+fig = Figure(; size=(7, 6).*(600/6))
 ax = CairoMakie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
 scatter!(ax, values(mask(msk, NDVI)), values(mask(msk, NDMI)), color=clusters.assignments, colormap=bkcol.cat, markersize=2)
 tightlimits!(ax)

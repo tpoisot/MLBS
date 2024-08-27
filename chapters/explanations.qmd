@@ -92,7 +92,7 @@ pretty_table(
 #| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
 shaps = S[:,2][varord]
 
-f = Figure(; size=(4, 6).*(96/2))
+f = Figure(; size=(4, 6).*(600/6))
 
 ax = Axis(f[1,1], yticks = (reverse(collect(1:length(model.v))), ["BIO$(v)" for v in model.v[varord]]))
 xlims!(ax, low=-0.6, high=0.6)
@@ -114,7 +114,7 @@ current_figure()
 #| label: fig-explanation-effects
 #| fig-scap: Distribution of the effects on the average prediction for the three most important variables.
 #| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
-f = Figure(; size=(7, 6).*(96/2))
+f = Figure(; size=(7, 6).*(600/6))
 gl = f[1,1] = GridLayout()
 
 xmin, xmax = extrema(S)

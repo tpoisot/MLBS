@@ -8,23 +8,7 @@ In this chapter, we are going to take a break from using the Naive Bayes Classif
 
 @scott2012 makes an interesting point that sometimes, using the "anarchist squint", which is, borrowing from anarchist theory to look at contemporary issues in society, provides a unique perspective on the situation that would have been missed with more dominant frames of references. In this chapter, I am advocating for a sort of "machine learning squint": the overall process of coming up with a model, which we presented in @flw-overview, can be applied very broadly.
 
-## A digression: what is machine learning?
-
-not a list of algorithms
-
-what is machine learning?
-
-## The bioclim model
-
-presence only
-
-envelopes
-
-score to decision
-
-## Application: bioclim in a machine learning pipeline
-
-show using bioclim
+This chapter is the last of this book, and so it is important to me to achieve two things. First, to re-emphasize the message that machine learning is, in addition to a set of algorithms and techniques, a way to approach the problem of fitting a model for prediction. Second, to show that a lot of usual problems in biodiversity are quite naturally "machine-learning-shaped".
 
 ```{julia}
 #| echo: false
@@ -36,7 +20,6 @@ include(joinpath(_code_path, "minisdm/bioclim.jl"))
 include(joinpath(_code_path, "minisdm/shapley.jl"))
 ```
 
-sdsd **TODO** only positives
 
 ```{julia}
 #| echo: false
@@ -49,17 +32,110 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
 end;
 ```
 
+
+```{julia}
+#| echo: false
+#| output: false
+baselinemodel = SDM(ZScore(), BIOCLIM(), 0.0001, X, y, [1,12])
+reset!(baselinemodel)
+train!(baselinemodel; threshold=true)
+```
+
+## A digression: what is machine learning?
+
+not a list of algorithms
+
+what is machine learning?
+
+## The bioclim model
+
+presence only
+
+envelopes
+
+
+```{julia}
+#| label: fig-squint-envelope
+#| echo: false
+#| fig-scap: Decision boundary (presence) for the bioclim model.
+#| fig-cap: Environmental envelope for temperature and precipitation that the bioclim model uses to determine presence (inside the box) and absence (outside). Note that in this example, *most* of the pseudo-absence data are within the envelope as defined by the two variables.
+f = Figure(; size=(7, 4).*(600/6))
+ax = Axis(f[1,1]; xlabel="Temperature", ylabel="Precipitation", aspect=1)
+prs = findall(baselinemodel.y)
+mt, Mt = extrema(baselinemodel.X[1,prs])
+mp, Mp = extrema(baselinemodel.X[12,prs])
+poly!(ax, Point2f[(mt, mp), (mt, Mp), (Mt, Mp), (Mt, mp)], color=:transparent, strokewidth=1, linestyle=:dash, strokecolor=bkcol.sdm.present)
+scatter!(ax, baselinemodel.X[1,:], baselinemodel.X[12,:], color=baselinemodel.y, colormap=[bkcol.sdm.absent, bkcol.sdm.present])
+current_figure()
+```
+
+score to decision
+
+## Application: bioclim in a machine learning pipeline
+
+show using bioclim
+
+@fig-squint-envelope is a good starting point to our problem. As it stands, all the data that correspond to absences are within the envelope for the presences, so although our model would likely score well at predicting presences, it would almost surely do a poor job at predicting absences.
+
+```{julia}
+#| echo: false
+#| output: false
+Cnoskill = noskill(baselinemodel.y)
+Cpos = constantpositive(baselinemodel.y)
+Cv, Ct = crossvalidate(baselinemodel, folds)
+```
+
+We can confirm this intuition. In fact, using the information about null classifiers from @sec-classification-null, we can measure how much better (or worse) our model is compared to a no-skill classifier, and to a constant classifier that would always return presence as its decision.
+
+```{julia}
+#| echo: false
+#| output: asis
+#| label: tbl-squint-benchmark
+#| tbl-cap: TODO
+measures = [
+    "Accuracy" => accuracy,
+    "TPR" => tpr,
+    "FPR" => fpr,
+    "TNR" => tnr,
+    "FNR" => fnr,
+    "MCC" => mcc
+    ]
+
+content = Vector[]
+for (k, v) in measures
+    push!(content,
+    [
+        k,
+        v(Cpos), mean(v.(Cv)), v(Cnoskill)
+    ])
+end
+
+T = permutedims(hcat(content...))
+T[findall(t -> t isa Float64 ? isnan(t) : false, T)] .= ""
+
+pretty_table(
+    T;
+    backend = Val(:markdown),
+    header = ["Measure", "Constant (pos.)", "Model", "No-skill"],
+    alignment = [:c, :l, :l, :l],
+    formatters = ft_printf("%5.3f", 2:4)
+)
+```
+
 @kriticos2014 has suggested that PCA transformation of the bioclim variables is more relevant, we will use this approach to retain many variables with backward selection but transform them to do the prediction on fewer latent variables
 
 ```{julia}
-model = SDM(MultivariateTransform{PCA}(), BIOCLIM(), 0.001, X, y, [1,12])
+#| echo: false
+#| output: false
+model = SDM(MultivariateTransform{PCA}(), BIOCLIM(), 0.0001, X, y, [1,12])
 reset!(model)
 backwardselection!(model, folds; threshold=true)
 train!(model; threshold=true)
 ```
 
 ```{julia}
-# Latent variables
+#| echo: false
+#| output: false
 L = MultivariateStats.transform(model.transformer, model.X[model.v,:])
 scatter(L, color=model.y, colormap=[bkcol.sdm.absent, bkcol.sdm.present])
 ```
@@ -67,10 +143,9 @@ scatter(L, color=model.y, colormap=[bkcol.sdm.absent, bkcol.sdm.present])
 crossval
 
 ```{julia}
+#| echo: false
+#| output: false
 Cv, Ct = crossvalidate(model, folds; threshold=true)
-```
-
-```{julia}
 mean(mcc.(Ct))
 ```
 
@@ -87,6 +162,13 @@ heatmap(pr, colormap=[bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 ```
 
 ```{julia}
-S = explain(model, 1; threshold=true)
-scatter(model.X[1,:], S, colormap=[bkcol.sdm.absent, bkcol.sdm.present], color=model.y)
+nvar = 12
+S = explain(model, nvar; threshold=false)
+prsc = findall(model.y)
+absc = findall(.!model.y)
+
+f = Figure(; size=(6, 6).*(600/6))
+ax = Axis(f[1,1])
+scatter!(ax, model.X[nvar,:], S, colormap=[bkcol.sdm.absent, bkcol.sdm.present], color=model.y)
+current_figure()
 ```

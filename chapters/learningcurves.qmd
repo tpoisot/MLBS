@@ -114,7 +114,7 @@ Most things related to cross-validation *are* hyper-parameters, in that they wil
 #| label: fig-tuning-holdout
 #| fig-scap: Learning curve for the proportion of data used in cross-validation.
 #| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 50 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
-fig = Figure(; size=(7, 5).*(96/2))
+fig = Figure(; size=(7, 5).*(600/6))
 ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="MCC")
 
 μ = vec(mean(valm; dims=2))
@@ -180,7 +180,7 @@ In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1
 #| label: fig-tuning-threshold
 #| fig-scap: Learning curve for the threshold of the NBC model.
 #| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
-fig = Figure(; size=(7, 5).*(96/2))
+fig = Figure(; size=(7, 5).*(600/6))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
 series!(ax, T, mcc.(CT), solid_color=light[1])
 lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=light[2], linewidth=2, linestyle=:dash)
@@ -198,7 +198,7 @@ To do so, we can look at the distribution of probabilities returned by the NBC, 
 #| fig-scap: Probabilities assigned to each pixel and position of the threshold.
 #| fig-cap: Probabilities assigned to each pixel (bottom), color-coded by their value in the validation set (top scatterplots). The NBC is making a lot of recommendations very close to 0 or very close to 1, and for this reason, positioning the threshold anywhere in the middle of the range would give almost similar results in terms of the MCC.
 P = predict(model; threshold=false)
-f = Figure(; size=(7, 5).*(96/2))
+f = Figure(; size=(7, 5).*(600/6))
 
 ax = Axis(f[2,1]; xlabel="Probability of presence")
 xlims!(ax, (0, 1))
@@ -232,7 +232,7 @@ Looking at @fig-tuning-probabilities, it appears that changing the threshold is 
 #| label: fig-tuning-ppvnpv
 #| fig-scap: Changes in PPV and NPV with increasing threshold values.
 #| fig-cap: Learning curve for the threshold of the NBC model, showing the PPV (solid line) and the NPV (dashed line). This figure shows how increasing the threshold leads to a better positive predictive value (we are more confident in the predicti class) at the cost of a loss in the negative predictive value (the pixels classified as negative are not meaningful). Essentially, moving the threshold (and indeed, tuning any other hyper-parameter) is a way to find a position in this space where the balance between errors maximizes the skill of our classifier.
-fig = Figure(; size=(7, 4).*(96/2))
+fig = Figure(; size=(7, 4).*(600/6))
 
 ax1 = Axis(fig[1,1]; xlabel="Threshold", ylabel="Positive Predictive value", aspect=1)
 ax2 = Axis(fig[1,2]; xlabel="Threshold", ylabel="Negative Predictive value", aspect=1)
@@ -257,7 +257,7 @@ After picking a threshold and seeing how it relates to the distribution of proba
 #| label: fig-tuning-roc-pr
 #| fig-scap: ROC and PR curve for the trained classifier.
 #| fig-cap: ROC and PR curve for each fold, calculated on the validation datasets. The area highlighted in green corresponds to perfect classifiers, and the dashed line is the no-skill classifier. The solid arrow shows direction alongside which model performance increases in both cases.
-f = Figure(; size=(7, 4).*(96/2))
+f = Figure(; size=(7, 4).*(600/6))
 
 roc = Axis(f[1,1], xlabel="False Positive Rate", ylabel="True Positive Rate", aspect=1)
 pr = Axis(f[1,2], xlabel="True Positive Rate", ylabel="Positive Pred. Value", aspect=1)
@@ -339,7 +339,7 @@ The final predictions are shown in @fig-tuning-map. Although the range map is ve
 #| label: fig-tuning-map
 #| fig-scap: Update range map for *Sitta whiteheadi* after thresholding.
 #| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
-f = Figure(; size=(7, 6).*(96/2))
+f = Figure(; size=(7, 6).*(600/6))
 
 gl = f[1, 1] = GridLayout()
 
