@@ -74,7 +74,7 @@ _range = (
 # Semantic colors for the book
 bkcol = (
     nodata = colorant"#DDDDDD",
-    generic = colorant"#224433",
+    generic = colorant"#222222",
     seq = _sequential,
     div = _diverging,
     cat = _categorical,
@@ -109,12 +109,12 @@ function _colpal(cname, cval)
     if ~ispath("resources/colordots/")
         mkpath("resources/colordots")
     end
-    Drawing(600, 100, "resources/colordots/$(cname).png")
+    Drawing(400, 50, "resources/colordots/$(cname).png")
     origin()
     for (i,c) in enumerate(cval)
         sethue(c)
-        p = (i-1)/(length(cval)-1)*500 - 250
-        circle(Luxor.Point(p, 0), 50, action = :fill)
+        p = (i-1)/(length(cval)-1)*350 - 175
+        circle(Luxor.Point(p, 0), 25, action = :fill)
     end
     finish()
 end
