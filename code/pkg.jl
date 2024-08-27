@@ -33,7 +33,7 @@ update_theme!(;
     CairoMakie = (; px_per_unit = 6),
 )
 
-include(joinpath(_code_path, "palettes.jl"))
-
 rng = Random.default_rng()
 Random.seed!(rng, 42069)
+
+include(joinpath(_code_path, "palettes.jl"))

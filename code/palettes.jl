@@ -71,13 +71,36 @@ _range = (
     loss = _diverging[7],
 )
 
-
 # Semantic colors for the book
 bkcol = (
     nodata = colorant"#DDDDDD",
+    generic = colorant"#224433",
     seq = _sequential,
     div = _diverging,
     cat = _categorical,
     cv = _crossvalidation,
     sdm = _range,
 )
+
+using Luxor
+function _coldot(cname, cval)
+    if ~ispath("resources/colordots/")
+        mkpath("resources/colordots")
+    end
+    Drawing(100, 100, "resources/colordots/$(cname).png")
+    origin()
+    sethue(cval)
+    circle(Luxor.Point(0, 0), 50, action = :fill)
+    finish()
+end
+
+_coldot("bkcol.generic", bkcol.generic)
+_coldot("bkcol.sdm.present", bkcol.sdm.present)
+_coldot("bkcol.sdm.absent", bkcol.sdm.absent)
+_coldot("bkcol.nodata", bkcol.nodata)
+_coldot("bkcol.sdm.loss", bkcol.sdm.loss)
+_coldot("bkcol.sdm.nochange", bkcol.sdm.nochange)
+_coldot("bkcol.sdm.gain", bkcol.sdm.gain)
+_coldot("bkcol.cv.testing", bkcol.cv.testing)
+_coldot("bkcol.cv.validation", bkcol.cv.validation)
+_coldot("bkcol.cv.training", bkcol.cv.training)

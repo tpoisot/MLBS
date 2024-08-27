@@ -107,7 +107,53 @@ In @sec-bagging, ...
 
 ## A note on colors
 
-note on the meaning of colors
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+```
+
+| Type             | Meaning    |  Color  |
+|------------------|------------|:-------:|
+| All              | generic    | ![][1]  |
+|                  | no data    | ![][2]  |
+| Cross-validation | training   | ![][3]  |
+|                  | validation | ![][4]  |
+|                  | testing    | ![][5]  |
+| Species range    | presence   | ![][6]  |
+|                  | absence    | ![][7]  |
+| Range change     | loss       | ![][8]  |
+|                  | no change  | ![][9]  |
+|                  | gain       | ![][10] |
+
+  [1]: resources/colordots/bkcol.generic.png {width="7%"}
+  [2]: resources/colordots/bkcol.nodata.png {width="7%"}
+  [3]: resources/colordots/bkcol.cv.training.png {width="7%"}
+  [4]: resources/colordots/bkcol.cv.validation.png {width="7%"}
+  [5]: resources/colordots/bkcol.cv.testing.png {width="7%"}
+  [6]: resources/colordots/bkcol.sdm.present.png {width="7%"}
+  [7]: resources/colordots/bkcol.sdm.absent.png {width="7%"}
+  [8]: resources/colordots/bkcol.sdm.loss.png {width="7%"}
+  [9]: resources/colordots/bkcol.sdm.nochange.png {width="7%"}
+  [10]: resources/colordots/bkcol.sdm.gain.png {width="7%"}
+
+In addition, there are three important color *palettes*. Information that is *sequential* is nature, which is to say it increases on a continuous scale without a logical midpoint, is rendered with these colors (from low to the left, to high values to the right):
+
+```{julia}
+#| echo: false
+bkcol.seq
+```
+
+```{julia}
+#| echo: false
+bkcol.div
+```
+
+```{julia}
+#| echo: false
+bkcol.cat
+```
 
 ## Some rules about this book
 
