@@ -104,3 +104,21 @@ _coldot("bkcol.sdm.gain", bkcol.sdm.gain)
 _coldot("bkcol.cv.testing", bkcol.cv.testing)
 _coldot("bkcol.cv.validation", bkcol.cv.validation)
 _coldot("bkcol.cv.training", bkcol.cv.training)
+
+function _colpal(cname, cval)
+    if ~ispath("resources/colordots/")
+        mkpath("resources/colordots")
+    end
+    Drawing(600, 100, "resources/colordots/$(cname).png")
+    origin()
+    for (i,c) in enumerate(cval)
+        sethue(c)
+        p = (i-1)/(length(cval)-1)*500 - 250
+        circle(Luxor.Point(p, 0), 50, action = :fill)
+    end
+    finish()
+end
+
+_colpal("bkcol.div", bkcol.div)
+_colpal("bkcol.seq", bkcol.seq)
+_colpal("bkcol.cat", bkcol.cat)

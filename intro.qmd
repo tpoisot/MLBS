@@ -140,20 +140,21 @@ include(joinpath(_code_path, "pkg.jl"))
 
 In addition, there are three important color *palettes*. Information that is *sequential* is nature, which is to say it increases on a continuous scale without a logical midpoint, is rendered with these colors (from low to the left, to high values to the right):
 
-```{julia}
-#| echo: false
-bkcol.seq
-```
+![][11]
 
-```{julia}
-#| echo: false
-bkcol.div
-```
+  [11]: resources/colordots/bkcol.seq.png {fig-align="center"}
 
-```{julia}
-#| echo: false
-bkcol.cat
-```
+diverging
+
+![][12]
+
+  [12]: resources/colordots/bkcol.div.png {fig-align="center"}
+
+cat
+
+![][13]
+
+  [13]: resources/colordots/bkcol.cat.png {fig-align="center"}
 
 ## Some rules about this book
 
