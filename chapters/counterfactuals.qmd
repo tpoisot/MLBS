@@ -8,6 +8,7 @@ engine: julia
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "minisdm/pipelines.jl"))
+include(joinpath(_code_path, "minisdm/counterfactuals.jl"))
 
 JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
     global X = file["X"]
@@ -22,7 +23,7 @@ model = SDM(ZScore(), NBC(), 0.5, X, y, [1,12])
 train!(model; threshold=true)
 ```
 
-# Generating what-if scenarios
+# Generating counterfactuals
 
 In @sec-explanations, we have introduced a methodology to re-use our model on mock inputs in order to figure out the effect of the specific value of a specific variable on the prediction that is made. This is a powerful approach to formulating explanations. In this chapter, we will introduce a related concept, namely the generation of counterfactuals.
 
@@ -40,7 +41,7 @@ end
 pscore = predict(model, cnd; threshold=false)
 ```
 
-## An illustration
+## Illustration: changing the temperature
 
 Before introducing some elements of theory, it helps to think about what we want to achieve in a more general, intuitive way. Going all the way back to the model of @sec-classification (a NBC with no data transformation, using BIO1 and BIO12 to make predictions), we can input any pair of temperature and precipitation, and get a probability that the site is suitable to the species.
 
@@ -69,13 +70,13 @@ tempdiff = abs(cnd[1]-lasttemp)
 
 This approach is both generating perturbations of our initial prediction, and expressing these predictions as a function of whether they lead the model to change its outcome. Conceptually, we are 80% of our way to understanding counterfactuals (in practical terms, we are still on square one, but let's give it time).
 
-The outcome of running this simple simulations is given in @fig-counterfactuals-illustration. From this figure, we can see that the closest temperature that would lead to the model predicting a presence is `{julia} lasttemp`, which requires a temperature difference of `{julia} tempdiff`.
+The outcome of running this simple simulations is given in @fig-counterfactuals-illustration. From this figure, we can see that the closest temperature that would lead to the model predicting a presence is TODO, which requires a temperature difference of TODO.
 
 ```{julia}
 #| label: fig-counterfactuals-illustration
 #| echo: false
 #| fig-scap: What temperature change is required to turn a prediction into the other outcome?
-#| fig-cap: todo
+#| fig-cap: Effect of changing the temperature for a single observation (marked as a black dot) on the probability returned by the trained SDM (as a black line). There is a value above which the prediction leads to the positive class (the SDM predicts that the conditions are suitable to the species), marked by a dashed line. The generation of counterfactuals is a way to generalize this approach, by also introducing notions of optimality.
 
 f = Figure(; size=(6, 6).*(600/6))
 ax = Axis(f[1,1], xlabel="Temperature", ylabel="P(presence) according to the NBC")
@@ -98,3 +99,82 @@ Is this a *large* difference? This is a rather subjective question; one we can a
 At this point, it is important to note that we will not be addressing the *feasibility* of making these changes. There are specific algorithms that penalize some variables that are more difficult (or impossible) to change, but they follow the same principles as what we will discuss here. Their inner workings are, quite simply put, orders of magnitude more complex. For an example, and a discussion of why changing features that people can act upon is essential to algorithmic fairness, see @schleich2021.
 
 ## Theory on counterfactuals
+
+In this section, we will look at the method introduced by @wachter2017, and spend a bit of time linking it to concepts we have seen in other chapters of the book. In the first section, we have defined two components to the problem of generating counterfactuals: given a vector of features $\mathbf{x}$, we want to generate a new vector of features $\mathbf{x}'$, such that a model $f$ would return $\hat y = f(\mathbf{x})$, and $\hat y' \approx f(\mathbf{x}')$. Because we are working on a classification problem, we *might* assume that we want $\hat y ' = \neg \hat y$, but recall from @sec-learningcurves-probabilistic that we are getting to the binary classification of presence/absence by comparing the probability to an optimized threshold $\tau$, so we can also aim for $\hat y' = \tau + \varepsilon$, where $\varepsilon$ is a very small perturbation (positive or negative) that would make us cross the decision threshold.
+
+### Loss function
+
+In @sec-gradientdescent, we have established the idea of a loss function, that measures how far away a specific instance is to an optimal solution. What does it means for a countefactual to be optimal? We want the distance between $\hat y$ and $\hat y'$ to be as small as possible (we are meeting the criteria of "the prediction has changed"), while also ensuring that the distance between $\mathbf{x}$ and $\mathbf{x}'$ remains small (we are meeting the criteria of parsimonious explanations).
+
+@wachter2017 suggest that the appropriate loss function to use is
+
+$$
+L(\mathbf{x}, \mathbf{x}', \hat y', f) = \lambda \times (f(\mathbf{x}') - \hat y')^2 + \text{d}(\mathbf{x}, \mathbf{x}')
+$$ {#eq-counterfactuals-loss}
+
+where $\lambda$ is a learning rate (as defined in @sec-gradientdescent-learningrate), and $\text{d}$ is a distance function between the input vectors. In this formulation, the loss function is not handling categorical predictors (which is an acceptable compromise, because we are not using any in this illustration).
+
+In @wachter2017, the distance function for $m$ features is defined as
+
+$$
+\text{d}(\mathbf{x}, \mathbf{x}') = \sum_{i=1}^{m}\frac{\|\mathbf{x}_i-\mathbf{x}_i'\|}{\text{MAD}_i}
+$$ {#eq-counterfactuals-distance}
+
+where $\text{MAD}_i$ is the median absolute deviation for this feature over the entire dataset. The median absolute deviation for an instance $j$ of a feature $i$ drawn from the entire dataset $\mathbf{X}$ is
+
+$$
+\text{median}\left(\|\mathbf{x}_i-\text{median}(\mathbf{X}_{,j})\|\right) \,.
+$$
+
+This indicator is very robust to outliers, and returns a scale-free value that allows comparing the distributions of different variables.
+
+### Learning rate
+
+In @eq-counterfactuals-distance, we introduced a learning rate $\lambda$. The interpretation of this term is relatively straightforward, as it measures the *relative* importance of getting close to $\hat y'$ compared to keeping $\mathbf{x}'$ close to $\mathbf{x}$. Therefore, using $\lambda = 2$ means that getting a good switch of the prediction is twice as important as keeping a parsimonious counterfactual.
+
+```{julia}
+#| echo: false
+#| output: false
+learningrate = LinRange(0.0, 100.0, 55)
+closs = zeros(Float64, length(temp), length(learningrate))
+for i in eachindex(temp)
+    tcnd = copy(cnd)
+    tcnd[1] = temp[i]
+    for j in eachindex(learningrate)
+        closs[i,j] = loss(model, cnd, tcnd, model.τ .+ 0.01, learningrate[j]; threshold=false)
+    end
+end
+```
+
+Because the *a priori* value of $\lambda$ may not be intuitive to define, we can rely on the techniques introduced in @sec-tuning, and treat this as an hyper-parameter. Alternatively, @wachter2017 suggest the use of a *threshold* for the distance between the outcome of $f(\mathbf{x}')$ and the desired value of $\hat y'$, which is a trick used in other techniques like acceptance-rejection sampling [@flury1990]. This threshold too must be decided upon before running the algorithm.
+
+```{julia}
+#| label: fig-counterfactuals-loss
+#| echo: false
+#| fig-scap: Loss when changing the temperature for a single observation
+#| fig-cap: Consequences of changing only the temperature (as in @fig-counterfactuals-illustration) on the loss function (@eq-counterfactuals-loss) for a single prediction. Notice that changing the value of the learning rate (indicated by the color gradient) to get to a point where we can conclude that the suggested counterfactual is optimal.
+
+f = Figure(; size=(6, 6).*(600/6))
+ax = Axis(f[2,1], xlabel="Temperature", ylabel="Loss")
+
+for j in eachindex(learningrate)
+    lines!(ax, temp, closs[:,j], color=learningrate[j], colorrange=extrema(learningrate), colormap=bkcol.seq)
+end
+vlines!(ax, [cnd[1]], color=bkcol.generic, linestyle=:dash)
+scatter!(ax, [temp[findlast(npred .>= model.τ)]], [closs[findlast(npred .>= model.τ),1]], color=bkcol.generic, markersize=12)
+
+ylims!(ax, extrema(closs))
+xlims!(ax, extrema(temp))
+
+Colorbar(f[1,1], colorrange=extrema(learningrate), colormap=bkcol.seq, vertical=false)
+
+current_figure()
+```
+
+In @fig-counterfactuals-loss, we can see the effect of changing the learning rate on the value of the loss function when only changing the temperature as we did for @fig-counterfactuals-illustration. Notice that for values of the learning rate that are too small, there is not counterfactual for which the loss is *lower* than the original datapoint, and therefore we need to increase the learning rate until the optimum (smallest point that brings us above the threshold) can be reached. The shape of the response of the loss function to the change in temperature is also informative. In one direction, it increases linearly: $\mathbf{x}'$ is getting further and further away from $\mathbf{x}$ without the *prediction* getting closer to $\hat y'$. On the other direction, it is more or less hump-shaped, with an optimal point. When we increase the learning rate (possibly by *a lot*), the behavior in which $\mathbf{x}$ is an optimum of this problem disappears.
+
+### Optimization
+
+## Application: todo
+
+## Conclusion
