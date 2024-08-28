@@ -173,6 +173,8 @@ current_figure()
 
 In @fig-counterfactuals-loss, we can see the effect of changing the learning rate on the value of the loss function when only changing the temperature as we did for @fig-counterfactuals-illustration. Notice that for values of the learning rate that are too small, there is not counterfactual for which the loss is *lower* than the original datapoint, and therefore we need to increase the learning rate until the optimum (smallest point that brings us above the threshold) can be reached. The shape of the response of the loss function to the change in temperature is also informative. In one direction, it increases linearly: $\mathbf{x}'$ is getting further and further away from $\mathbf{x}$ without the *prediction* getting closer to $\hat y'$. On the other direction, it is more or less hump-shaped, with an optimal point. When we increase the learning rate (possibly by *a lot*), the behavior in which $\mathbf{x}$ is an optimum of this problem disappears.
 
+**TK** the threshold is important because it ensures we will only look at the space of parameters around the optimal solution - but making assumptions about the shape of the loss landscape
+
 ### Optimization
 
 ## Application: todo
