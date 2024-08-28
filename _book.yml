@@ -39,7 +39,8 @@ book:
     - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
     - chapters/explanations.qmd
-    - chapters/squint.qmd
+    - chapters/counterfactuals.qmd
     - chapters/bagging.qmd
+    - chapters/squint.qmd
   appendices:
     - appendices/instructornotes.qmd

@@ -1,0 +1,100 @@
+---
+engine: julia
+---
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+    global folds = file["folds"]
+    global coordinates = file["coordinates"]
+end;
+
+# Load the model
+modelpath = joinpath(_models_path, "sdm-baseline.json")
+model = SDM(ZScore(), NBC(), 0.5, X, y, [1,12])
+train!(model; threshold=true)
+```
+
+# Generating what-if scenarios
+
+In @sec-explanations, we have introduced a methodology to re-use our model on mock inputs in order to figure out the effect of the specific value of a specific variable on the prediction that is made. This is a powerful approach to formulating explanations. In this chapter, we will introduce a related concept, namely the generation of counterfactuals.
+
+Counterfactuals [@wachter2017] are defined as small perturbations on an actual input instance that yield the *opposite* prediction. In other words, counterfactuals are mock instances that are as close as possible to an observed data point, but that would lead the model to making the inverse recommendation.
+
+```{julia}
+#| echo: false
+#| output: false
+i = rand(findall(!, y))
+cnd = X[:,i]
+while predict(model, cnd)
+    i = rand(findall(!, y))
+    cnd = X[:,i]
+end
+pscore = predict(model, cnd; threshold=false)
+```
+
+## An illustration
+
+Before introducing some elements of theory, it helps to think about what we want to achieve in a more general, intuitive way. Going all the way back to the model of @sec-classification (a NBC with no data transformation, using BIO1 and BIO12 to make predictions), we can input any pair of temperature and precipitation, and get a probability that the site is suitable to the species.
+
+::: column-margin
+Note that for this chapter, we have also re-trained the model to optimize its threshold, as opposed to using 0.5 as in @sec-classification.
+:::
+
+For example, with a temperature of `{julia} 0.1cnd[1]` degrees, and a precipitation volume of `{julia} cnd[12]`, the model would give a probability of `{julia} pscore`. You can compare with @fig-classification-decision to see that this is associated to a negative prediction.
+
+Is there a temperature at which we would expect the model to make the opposite prediction? Perhaps the simplest approach to this question is to feed our trained model different values of the temperature, and measure the output. What if the location was a degree warmer? A degree colder? Ten?
+
+```{julia}
+#| echo: false
+#| output: false
+temp = cnd[1] .+ LinRange(-50, 50, 200)
+npred = zeros(Float64, length(temp))
+for i in eachindex(npred)
+    tcnd = copy(cnd)
+    tcnd[1] = temp[i]
+    npred[i] = predict(model, tcnd; threshold=false)
+end
+
+lasttemp = temp[findlast(npred .>= model.τ)]
+tempdiff = abs(cnd[1]-lasttemp)
+```
+
+This approach is both generating perturbations of our initial prediction, and expressing these predictions as a function of whether they lead the model to change its outcome. Conceptually, we are 80% of our way to understanding counterfactuals (in practical terms, we are still on square one, but let's give it time).
+
+The outcome of running this simple simulations is given in @fig-counterfactuals-illustration. From this figure, we can see that the closest temperature that would lead to the model predicting a presence is `{julia} lasttemp`, which requires a temperature difference of `{julia} tempdiff`.
+
+```{julia}
+#| label: fig-counterfactuals-illustration
+#| echo: false
+#| fig-scap: What temperature change is required to turn a prediction into the other outcome?
+#| fig-cap: todo
+
+f = Figure(; size=(6, 6).*(600/6))
+ax = Axis(f[1,1], xlabel="Temperature", ylabel="P(presence) according to the NBC")
+
+poly!(ax, Point2f[(temp[1], 0), (temp[end], 0), (temp[end], model.τ), (temp[1], model.τ)], color=bkcol.sdm.absentbg)
+poly!(ax, Point2f[(temp[1], 1), (temp[end], 1), (temp[end], model.τ), (temp[1], model.τ)], color=bkcol.sdm.presentbg)
+hlines!([model.τ], color=bkcol.generic, linestyle=:dash)
+
+lines!(ax, temp, npred, color=bkcol.generic)
+scatter!(ax, [cnd[1]], [pscore], color=bkcol.generic, markersize=12)
+
+ylims!(ax, extrema(npred))
+xlims!(ax, extrema(temp))
+
+current_figure()
+```
+
+Is this a *large* difference? This is a rather subjective question; one we can ask instead is whether this is an *optimal* difference, and specifically whether we can find other alternatives inputs to the model that would be less costly (in terms of distance) and more efficient (in terms of effect on the model).
+
+At this point, it is important to note that we will not be addressing the *feasibility* of making these changes. There are specific algorithms that penalize some variables that are more difficult (or impossible) to change, but they follow the same principles as what we will discuss here. Their inner workings are, quite simply put, orders of magnitude more complex. For an example, and a discussion of why changing features that people can act upon is essential to algorithmic fairness, see @schleich2021.
+
+## Theory on counterfactuals
