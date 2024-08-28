@@ -177,6 +177,30 @@ In @fig-counterfactuals-loss, we can see the effect of changing the learning rat
 
 ### Optimization
 
+In @sec-gradientdescent, we were able to write down an analytical expression of the gradient for our model (and its associated loss function). This may not be the case for the specific problem we are trying to solve. In addition, the surface of the loss function over possibly many parameters may not be smooth; in fact, if we used tree-based classifiers, it would be a guarantee that it would not. For this reason, we will introduce alternative methods to perform the optimization. The general shape of the problem we are tying to solve is the same as in @sec-gradientdescent: given an input $\mathbf{x}$, we are interested in generating $\mathbf{x}'$ that minimizes loss.
+
+| Parameter | Step        | Default value | Constraints                     |
+|-----------|-------------|---------------|---------------------------------|
+| $\alpha$  | reflection  | $1$           | $\alpha > 0$                    |
+| $\beta$   | contraction | $1/2$         | $0 < \beta < 1$                 |
+| $\gamma$  | expansion   | $2$           | $\gamma > 1$, $\gamma > \alpha$ |
+| $\delta$  | shrinkage   | $1/2$         | $0 < \delta < 1$                |
+
+```{julia}
+f = Figure()
+ax = Axis(f[1,1])
+scatter!(ax, tuple(x[model.v]...), marker=:diamond, color=bkcol.generic, markersize=12)
+for _ in 1:80
+    xc = counterfactual(model, x, 0.35, 50.0; threshold=false)
+    ccol = predict(model, xc; threshold=true) ? bkcol.sdm.present : bkcol.sdm.absent
+    bcol = predict(model, xc; threshold=true) ? bkcol.sdm.presentbg : bkcol.sdm.absentbg
+    scatter!(ax, tuple(xc[model.v]...), strokecolor=ccol, strokewidth=2, color=bcol, markersize=12)
+end
+xlims!(ax, extrema(model.X[1,:]))
+ylims!(ax, extrema(model.X[12,:]))
+current_figure()
+```
+
 ## Application: todo
 
 ## Conclusion
