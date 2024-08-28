@@ -207,12 +207,27 @@ current_figure()
 
 ## Application: todo
 
+filter by conditions existing in the dataset
+
 ```{julia}
-validproposals = filter(p -> predict(model, p; threshold=true), proposals)
-L = [loss(model, x, xp, model.τ + 0.015, 100.0; threshold=false) for xp in validproposals]
-top5 = validproposals[partialsortperm(L, 1:10)]
+#| echo: false
+#| output: false
+newmodel = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,3,8,12,16])
+train!(newmodel; threshold=true)
 ```
 
-filter by conditions existing in the dataset
+```{julia}
+#| echo: false
+#| output: false
+proposals = [counterfactual(newmodel, cnd, newmodel.τ + 0.015, 500.0; threshold=false) for _ in 1:200]
+```
+
+```{julia}
+filter!(p -> predict(newmodel, p), proposals)
+L = [loss(newmodel, cnd, xp, newmodel.τ + 0.015, 500.0; threshold=false) for xp in proposals]
+ord = partialsortperm(L, 1:10)
+[proposals[o][newmodel.v] for o in ord] # Turn into a table
+[abs.(cnd[newmodel.v] .- proposals[o][newmodel.v])./cnd[newmodel.v].*100 for o in ord] # Turn into a table
+```
 
 ## Conclusion
