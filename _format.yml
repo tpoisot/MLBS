@@ -30,7 +30,7 @@ format:
       tbl-pos: 'pbt'
       toc: true
       lof: true
-      toc-depth: 3
+      toc-depth: 2
       number-sections: true
       number-depth: 3
       mainfont: TeX Gyre Pagella
