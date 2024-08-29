@@ -18,9 +18,8 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
 end;
 
 # Load the model
-modelpath = joinpath(_models_path, "sdm-baseline.json")
-model = SDM(ZScore(), NBC(), 0.5, X, y, [1,12])
-train!(model; threshold=true)
+modelpath = joinpath(_models_path, "sdm-threshold.json")
+model = loadsdm(modelpath; threshold=false)
 ```
 
 # Generating counterfactuals
@@ -32,22 +31,14 @@ Counterfactuals [@wachter2017] are defined as small perturbations on an actual i
 ```{julia}
 #| echo: false
 #| output: false
-i = rand(findall(!, y))
+i = rand(findall(p -> model.τ - 0.4 <= p <= model.τ - 0.3, predict(model; threshold=false)))
 cnd = X[:,i]
-while predict(model, cnd)
-    i = rand(findall(!, y))
-    cnd = X[:,i]
-end
 pscore = predict(model, cnd; threshold=false)
 ```
 
 ## Illustration: changing the temperature
 
-Before introducing some elements of theory, it helps to think about what we want to achieve in a more general, intuitive way. Going all the way back to the model of @sec-classification (a NBC with no data transformation, using BIO1 and BIO12 to make predictions), we can input any pair of temperature and precipitation, and get a probability that the site is suitable to the species.
-
-::: column-margin
-Note that for this chapter, we have also re-trained the model to optimize its threshold, as opposed to using 0.5 as in @sec-classification.
-:::
+Before introducing some elements of theory, it helps to think about what we want to achieve in a more general, intuitive way. For this chapter, we will re-use the model we ended up with in @sec-explanations, **TK**
 
 For example, with a temperature of `{julia} 0.1cnd[1]` degrees, and a precipitation volume of `{julia} cnd[12]`, the model would give a probability of `{julia} pscore`. You can compare with @fig-classification-decision to see that this is associated to a negative prediction.
 
@@ -56,7 +47,7 @@ Is there a temperature at which we would expect the model to make the opposite p
 ```{julia}
 #| echo: false
 #| output: false
-temp = cnd[1] .+ LinRange(-50, 50, 200)
+temp = cnd[1] .+ LinRange(-70, 70, 200)
 npred = zeros(Float64, length(temp))
 for i in eachindex(npred)
     tcnd = copy(cnd)
@@ -120,15 +111,15 @@ $$
 \text{d}(\mathbf{x}, \mathbf{x}') = \sum_{i=1}^{m}\frac{\|\mathbf{x}_i-\mathbf{x}_i'\|}{\text{MAD}_i}
 $$ {#eq-counterfactuals-distance}
 
-where $\text{MAD}_i$ is the median absolute deviation for this feature over the entire dataset. The median absolute deviation for an instance $j$ of a feature $i$ drawn from the entire dataset $\mathbf{X}$ is
+where $\text{MAD}_i$ is the median absolute deviation for this feature over the entire dataset. The median absolute deviation for an instance $j$ of a feature $i$ drawn from the entire training dataset $\mathbf{X}$ is
 
 $$
 \text{median}\left(\|\mathbf{x}_i-\text{median}(\mathbf{X}_{,j})\|\right) \,.
 $$
 
-This indicator is very robust to outliers, and returns a scale-free value that allows comparing the distributions of different variables.
+This indicator is very robust to outliers, and returns a scale-free value that allows comparing the distributions of different variables. Although MAD can be used to *detect* outliers [@shimizu2022; @benhadi-marín2018], this is not its purpose here: instead, it is used to penalize datapoints that would be outliers in the space of distances we care about (namely, between $\mathbf{x}$ and $\mathbf{x}'$).
 
-### Learning rate
+### Learning rate {#sec-counterfactuals-learningrate}
 
 In @eq-counterfactuals-distance, we introduced a learning rate $\lambda$. The interpretation of this term is relatively straightforward, as it measures the *relative* importance of getting close to $\hat y'$ compared to keeping $\mathbf{x}'$ close to $\mathbf{x}$. Therefore, using $\lambda = 2$ means that getting a good switch of the prediction is twice as important as keeping a parsimonious counterfactual.
 
@@ -146,7 +137,7 @@ for i in eachindex(temp)
 end
 ```
 
-Because the *a priori* value of $\lambda$ may not be intuitive to define, we can rely on the techniques introduced in @sec-tuning, and treat this as an hyper-parameter. Alternatively, @wachter2017 suggest the use of a *threshold* for the distance between the outcome of $f(\mathbf{x}')$ and the desired value of $\hat y'$, which is a trick used in other techniques like acceptance-rejection sampling [@flury1990]. This threshold too must be decided upon before running the algorithm.
+Because the *a priori* value of $\lambda$ may not be intuitive to define, we can rely on the techniques introduced in @sec-tuning, and treat this as an hyper-parameter. Alternatively, @wachter2017 suggest the use of a *threshold* $\sigma$ for the distance between the outcome of $f(\mathbf{x}')$ and the desired value of $\hat y'$, which is a trick used in other techniques like acceptance-rejection sampling [@flury1990]. This threshold too must be decided upon before running the algorithm. Note that because the distance component of the loss function (@eq-counterfactuals-distance) uses the median absolute deviation, we can follow @leys2013 that suggest to use the thresholds introduced by @miller1991 to also eliminate proposals of $\mathbf{x}'$ that are too far away from the original input $\mathbf{x}$.
 
 ```{julia}
 #| label: fig-counterfactuals-loss
@@ -185,6 +176,45 @@ The specific details of
 
 also simulated annealing
 
+But let us get back to the issue we discussed in @sec-counterfactuals-learningrate: the value of $\lambda$ is not easy to determine *a priori*. And as we show in @fig-counterfactuals-illustration, a learning rate that is too low can get us to a situation where $\mathbf{x}$ is a *local* optimal for the loss function, which would make the generation of counterfactuals more difficult. On the other hand, a learning rate that is introducing the problems we discussed in @sec-gradientdescent-learningrate. We want the valuer of the learning rate to be "just right". For this reason, a common approach is to re-start the algorithm to generate a counterfactual, and if this counterfactual is not adequate, to re-try with a larger learning rate.
+
+```{julia}
+#| label: fig-counterfactuals-optimize
+#| echo: false
+#| fig-scap: Sequential increase of the learning rate until the threshold is reached
+#| fig-cap: Because the learning rate is difficult to guess, we start with a low value of $\lambda$, and increase it (here by 2 percent) until the counterfactual is within a small range of the desired $\hat y'$ value. This method sets a *tolerance* on the error we are willing to make on the final prediction, and optimizes the learning rate accordingly. In a sense, this is an instance of a learning curve as in @sec-tuning.
+
+lr = 1.0
+yhat = model.τ + 0.015
+xc = counterfactual(model, cnd, yhat, lr; threshold=false)
+pc = predict(model, xc; threshold=false)
+LR = [lr]
+PC = [pc]
+for i in 1:350
+    lr *= 1.02
+    xc = counterfactual(model, cnd, yhat, lr; threshold=false)
+pc = predict(model, xc; threshold=false)
+    push!(LR, lr)
+    push!(PC, pc)
+end
+cls = map(x -> yhat - 0.02 < x < yhat + 0.02 ? bkcol.generic : bkcol.nodata, PC)
+
+f = Figure(; size=(6, 6).*(600/6))
+ax = Axis(f[1,1], xscale=log10, xlabel="Learning rate", ylabel="P(presence) for the counterfactual")
+scatter!(ax, LR, PC, color=cls, strokecolor=bkcol.generic, strokewidth=1)
+hlines!(ax, [yhat-0.02, yhat+0.02], color=bkcol.generic, linestyle=:dot)
+hlines!(ax, [yhat], color=bkcol.generic, linestyle=:dash)
+
+xlims!(ax, 1.0, 1e3)
+ylims!(ax, 0.0, 0.7)
+
+current_figure()
+```
+
+This approach is illustrated in @fig-counterfactuals-optimize. Note that there is still a variation in whether the counterfactual is within the threshold when we use a large learning rate. This is because the optimization process is stochastic, and can have worse performance when we start the Nelder-Mead algorithm (which we use in this chapter) with less than ideal configurations. In practice, for the rest of the examples, we will generate more counterfactuals than we need, and *filter* the ones that are within the threshold.
+
+## Application: todo
+
 ```{julia}
 #| label: fig-counterfactuals-generation
 #| echo: false
@@ -192,42 +222,61 @@ also simulated annealing
 #| fig-cap: Generation of a number of counterfactual samples for an actual observation (black diamond), color-coded by whether or not the prediction for each counterfactual is positive or negative. The target $\hat y'$ is set to $\tau + 0.015$, which explains why the generated counterfactuals lie on the separation between the positive and the negative class.
 f = Figure(; size=(6, 6).*(600/6))
 ax = Axis(f[1,1])
-scatter!(ax, tuple(cnd[model.v]...), marker=:diamond, color=bkcol.generic, markersize=12)
-proposals = [counterfactual(model, cnd, model.τ + 0.015, 100.0; threshold=false) for _ in 1:100]
+proposals = [counterfactual(model, cnd, model.τ + 0.015, 150.0; threshold=false) for _ in 1:100]
 for i in eachindex(proposals)
     xc = proposals[i]
     ccol = predict(model, xc; threshold=true) ? bkcol.sdm.present : bkcol.sdm.absent
     bcol = predict(model, xc; threshold=true) ? bkcol.sdm.presentbg : bkcol.sdm.absentbg
     scatter!(ax, tuple(xc[model.v]...), strokecolor=ccol, strokewidth=2, color=bcol, markersize=12)
 end
+scatter!(ax, tuple(cnd[model.v]...), marker=:diamond, color=bkcol.generic, markersize=12)
 #xlims!(ax, extrema(model.X[1,:]))
 #ylims!(ax, extrema(model.X[12,:]))
 current_figure()
 ```
 
-## Application: todo
-
 filter by conditions existing in the dataset
 
 ```{julia}
+#| label: tbl-counterfactuals-top10
 #| echo: false
-#| output: false
-newmodel = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,3,8,12,16])
-train!(newmodel; threshold=true)
+#| output: asis
+#| tbl-cap: Values of the model variables for the ten counterfactuals with the lowest loss, sampled from the outputs in @fig-counterfactuals-generation that had sucessfully flipped their prediction. Note that the values given in this table are the *raw* values of the bioclimatic variables, and not expressed in particular units.
+filter!(p -> predict(model, p), proposals)
+L = [loss(model, cnd, xp, model.τ + 0.015, 150.0; threshold=false) for xp in proposals]
+ord = partialsortperm(L, 1:5)
+tbl = [proposals[o][model.v] for o in ord] # Turn into a table
+
+D = hcat(L[ord], permutedims(hcat(tbl...)))
+hd = ["Loss (@eq-counterfactuals-loss)", "BIO" .* string.(model.v)...]
+
+al = fill(:l, length(hd))
+
+pretty_table(
+    D;
+    backend = Val(:markdown),
+    header = hd,
+    alignment = al,
+    formatters = ft_printf("%5.3f", 1:length(al))
+)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-proposals = [counterfactual(newmodel, cnd, newmodel.τ + 0.015, 500.0; threshold=false) for _ in 1:200]
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+B = []
 ```
 
 ```{julia}
-filter!(p -> predict(newmodel, p), proposals)
-L = [loss(newmodel, cnd, xp, newmodel.τ + 0.015, 500.0; threshold=false) for xp in proposals]
-ord = partialsortperm(L, 1:10)
-[proposals[o][newmodel.v] for o in ord] # Turn into a table
-[abs.(cnd[newmodel.v] .- proposals[o][newmodel.v])./cnd[newmodel.v].*100 for o in ord] # Turn into a table
+Lmap = convert(Float64, replace!(predict(model, bio), false => nothing))
+
+Threads.@threads for k in keys(Lmap)
+    v = [bio[i][k] for i in eachindex(bio)]
+    proposals = [counterfactual(model, v, model.τ - 0.015, 150.0; threshold=false) for _ in 1:10]
+    Lmap[k] = minimum([dmad(model, v, xp) for xp in proposals])
+end
 ```
 
 ## Conclusion

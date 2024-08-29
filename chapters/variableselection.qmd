@@ -150,6 +150,8 @@ Keep in mind that we do not know the number of variables we should use; therefor
 
 Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there **THIS PARAGRAPH IS NOT FINISHED**
 
+## Univariate transformations
+
 ## Multivariate transformations
 
 ### PCA-based transforms
@@ -390,9 +392,9 @@ model.v = [1, 12]
 train!(model; threshold=false)
 origmodel = model
 
-finalmodel = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
+finalmodel = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
-backwardselection!(finalmodel, folds; threshold=false)
+constrainedselection!(finalmodel, folds, [1,12]; threshold=false)
 
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
@@ -454,8 +456,8 @@ ax5 = Axis(
     title = "True negatives",
 )
 
-rm_pal = cgrad(reverse(nightfall), 3, categorical=true)
-heatmap!(ax0, final_range, colormap=[vibrant[1], vibrant[1]], alpha=0.7)
+rm_pal = cgrad([bkcol.sdm.loss, bkcol.sdm.nochange, bkcol.sdm.gain], 3, categorical=true)
+heatmap!(ax0, final_range, colormap=[bkcol.nodata, bkcol.nodata], alpha=0.7)
 heatmap!(ax0, rangediff(final_range, old_range); colormap = rm_pal)
 
 
@@ -471,24 +473,24 @@ TN = findall((.!prd) .& (.!grd))
 FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
 
-heatmap!(ax1, final_range; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 3, color = vibrant[2])
+heatmap!(ax1, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 3, color = bkcol.sdm.present)
 
-heatmap!(ax2, final_range; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 5, color = :black, marker = :cross)
+heatmap!(ax2, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 5, color = bkcol.sdm.absent, marker = :cross)
 
-heatmap!(ax4, final_range; colormap = vibrant[1:2], alpha = 0.4)
+heatmap!(ax4, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 scatter!(
     ax4,
     coordinates[FN, 2],
     coordinates[FN, 1];
     markersize = 5,
-    color = vibrant[2],
+    color = bkcol.sdm.present,
     marker = :cross,
 )
 
-heatmap!(ax5, final_range; colormap = vibrant[1:2], alpha = 0.4)
-scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = :black)
+heatmap!(ax5, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = bkcol.sdm.absent)
 
 for ax in [ax0, ax1, ax2, ax4, ax5]
     ax.xticklabelpad = 0
