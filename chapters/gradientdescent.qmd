@@ -319,7 +319,7 @@ rowgap!(axp, 0)
 
 axl = Axis(fig[1,2], xlabel="β₀", ylabel="β₁")
 
-contourf!(axl, p0, p1, log.(S), colormap=iridescent, levels=12)
+contourf!(axl, p0, p1, log.(S), colormap=bkcol.seq, levels=12)
 lines!(axl, track_p1, track_p2, color=:black)
 
 current_figure()
