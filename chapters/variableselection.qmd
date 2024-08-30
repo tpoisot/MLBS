@@ -278,77 +278,70 @@ mod = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
 train!(mod; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["@sec-classification baseline", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["@sec-classification baseline", "none", length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Baseline + PCA
 mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
 train!(mod; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
-
-# Baseline + Whitening
-mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, [1,12])
-train!(mod; threshold=false)
-vs = predictors(mod)
-Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Forward
 mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
 forwardselection!(mod, folds; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["Fwd. sel.", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["Fwd. sel.", "none", length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Forward + PCA
 mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
 forwardselection!(mod, folds; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Backward
 mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
 backwardselection!(mod, folds; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["Backw. sel.", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["Backw. sel.", "none", length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Backward + PCA
 mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
 backwardselection!(mod, folds; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Constrained
 mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
 constrainedselection!(mod, folds, [1, 12]; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["Constr. sel.", "none", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["Constr. sel.", "none", length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 # Constrained + PCA
 mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
 constrainedselection!(mod, folds, [1, 12]; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 D = permutedims(hcat(tbl...))
 
 hl_maxval = MarkdownHighlighter(
-           (data, i, j) -> (j == 4) && (D[i,4] == maximum(Float64.(D[:,4]))),
+           (data, i, j) -> (j == 6) && (D[i,6] == maximum(Float64.(D[:,6]))),
            MarkdownDecoration(bold = true)
        );
 
 pretty_table(
     D;
     backend = Val(:markdown),
-    header = ["Variable selection", "Transformation", "Nb. variables", "MCC (val.)", "MCC (train)"],
-    alignment = [:l, :l, :l, :l, :l],
-    formatters = ft_printf("%5.3f", [4,5]),
+    header = ["Variable selection", "Transformation", "Nb. variables", "Latent var.", "Var. expl.", "MCC (val.)", "MCC (train)"],
+    alignment = [:l, :l, :l, :l, :l, :l, :l],
+    formatters = (ft_printf("%5.3f", [6,7]), ft_printf("%4.2f", [5])),
     highlighters = hl_maxval
 )
 ```
