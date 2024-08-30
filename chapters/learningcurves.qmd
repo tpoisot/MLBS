@@ -297,6 +297,16 @@ current_figure()
 
 In a sense, the ROC and PR curves are another projection of the results from @fig-tuning-ppvnpv: a good classifier makes credible recommendations for its positive class, while maintaining credible recommendations for the negative class. Looking at several ways to express the performance of the classifier is a good idea, as a good understanding of how reliable our predicitions are depends on our ability to appraise these different sources of error.
 
+### Optimizing the prior
+
+update on NBC prior
+
+how to update? also threshold
+
+illustration of result
+
+discuss imbalance again
+
 ### Testing and visualizing the final model
 
 As we are now considering that our model is adequately trained, we can apply it to the testing data we had set aside early in @sec-classification. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important.
