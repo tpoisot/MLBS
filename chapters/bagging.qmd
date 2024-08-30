@@ -48,8 +48,8 @@ end;
 
 
 # Load the model
-modelpath = joinpath(_models_path, "sdm-baseline.json")
-model = loadsdm(modelpath; threshold=true)
+modelpath = joinpath(_models_path, "sdm-threshold.json")
+model = loadsdm(modelpath)
 
 ensemble = Bagging(model, bags)
 train!(ensemble)
@@ -75,7 +75,7 @@ Z = (X0 - μ)/σ
 ```{julia}
 #| echo: false
 #| output: false
-heatmap(IQR; colorrange=(0.0, 0.06), colormap=iridescent)
+heatmap(IQR)
 ```
 
 tpr ppv
@@ -89,13 +89,13 @@ C = ConfusionMatrix(ensemble.model)
 OOB = outofbag(ensemble)
 E = ConfusionMatrix(ensemble)
 
-scatter!(ax1, fpr.(E), tpr.(E), color=vibrant[1], marker=:cross)
+scatter!(ax1, fpr.(E), tpr.(E), color=:red, marker=:cross)
 scatter!(ax1, (fpr(C), tpr(C)), color=:black)
-scatter!(ax1, (fpr(OOB), tpr(OOB)), color=vibrant[2])
+scatter!(ax1, (fpr(OOB), tpr(OOB)), color=:blue)
 
-scatter!(ax2, tpr.(E), ppv.(E), color=vibrant[1], marker=:cross)
+scatter!(ax2, tpr.(E), ppv.(E), color=:red, marker=:cross)
 scatter!(ax2, (tpr(C), ppv(C)), color=:black)
-scatter!(ax2, (tpr(OOB), ppv(OOB)), color=vibrant[2])
+scatter!(ax2, (tpr(OOB), ppv(OOB)), color=:orange)
 
 current_figure()
 ```

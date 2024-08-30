@@ -294,7 +294,6 @@ vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
 push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
-
 # Forward
 mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
 forwardselection!(mod, folds; threshold=false)
@@ -308,14 +307,6 @@ forwardselection!(mod, folds; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
 push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
-
-# Forward + Whitening
-mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, collect(1:19))
-forwardselection!(mod, folds; threshold=false)
-vs = predictors(mod)
-Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
-
 
 # Backward
 mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
@@ -331,15 +322,6 @@ vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
 push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
-# Backward + Whitening
-mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, collect(1:19))
-backwardselection!(mod, folds; threshold=false)
-vs = predictors(mod)
-Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
-
-
-
 # Constrained
 mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
 constrainedselection!(mod, folds, [1, 12]; threshold=false)
@@ -353,13 +335,6 @@ constrainedselection!(mod, folds, [1, 12]; threshold=false)
 vs = predictors(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
 push!(tbl, ["", "PCA", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
-
-# Constrained + Whitening
-mod = SDM(MultivariateTransform{Whitening}(), NBC(), 0.5, X, y, collect(1:19))
-constrainedselection!(mod, folds, [1, 12]; threshold=false)
-vs = predictors(mod)
-Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "Whitening", length(predictors(mod)), mean(mcc.(Csv)), mean(mcc.(Cst))])
 
 D = permutedims(hcat(tbl...))
 
@@ -394,18 +369,12 @@ origmodel = model
 
 finalmodel = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
-constrainedselection!(finalmodel, folds, [1,12]; threshold=false)
+forwardselection!(finalmodel, folds; threshold=false)
 
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
-opr = convert(Float64, similar(first(bio)))
-vpr = convert(Float64, similar(first(bio)))
-
-Threads.@threads for k in keys(opr)
-    preds = [bio[i][k] for i in 1:19]
-    opr[k] = predict(origmodel, preds)
-    vpr[k] = predict(finalmodel, preds)
-end
+opr = predict(origmodel, bio)
+vpr = predict(finalmodel, bio)
 ```
 
 ```{julia}

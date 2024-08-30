@@ -19,8 +19,7 @@ function shrink!(xn, xl; α = 1.0, β = 0.5, γ = 2.0, δ = 0.5)
     return xn
 end
 
-function neldermead!(xn, model, x, yhat, λ; α = 1.0, β = 0.5, γ = 2.0, δ = 0.5, kwargs...)
-    L = [loss(model, x, xp, yhat, λ; kwargs...) for xp in xn]
+function neldermead!(xn, L, model, x, yhat, λ; α = 1.0, β = 0.5, γ = 2.0, δ = 0.5, kwargs...)
 
     best = partialsortperm(L, 1)
     second = partialsortperm(L, length(L) - 1)
@@ -93,8 +92,14 @@ end
 
 function counterfactual(model, x, yhat, λ; kwargs...)
     xn = initialprop(model, x)
-    for _ in 1:50
-        neldermead!(xn, model, x, yhat, λ; kwargs...)
+    L = [loss(model, x, xp, yhat, λ; kwargs...) for xp in xn]
+    L0 = var(L)
+    for iter in 1:100
+        neldermead!(xn, L, model, x, yhat, λ; kwargs...)
+        L = [loss(model, x, xp, yhat, λ; kwargs...) for xp in xn]
+        if var(L)/L0 <= 0.00005
+            break
+        end
     end
-    return xncenter(xn)
+    return xn[last(findmin(L))]
 end

@@ -295,7 +295,7 @@ Cpos = constantpositive(y)
 Cneg = constantnegative(y)
 folds = montecarlo(y, X; n=100)
 model = SDM(RawData(), NBC(), 0.5, X, y, [1, 12])
-Cv, Ct = crossvalidate(model, folds)
+Cv, Ct = crossvalidate(model, folds; threshold=true)
 ```
 
 ### Performance evaluation of the model
