@@ -2,6 +2,8 @@
 engine: julia
 ---
 
+# Generating counterfactuals
+
 ```{julia}
 #| echo: false
 #| output: false
@@ -18,11 +20,9 @@ JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
 end;
 
 # Load the model
-modelpath = joinpath(_models_path, "sdm-threshold.json")
+modelpath = joinpath(_models_path, "sdm-importance.json")
 model = loadsdm(modelpath; threshold=false)
 ```
-
-# Generating counterfactuals
 
 In @sec-explanations, we have introduced a methodology to re-use our model on mock inputs in order to figure out the effect of the specific value of a specific variable on the prediction that is made. This is a powerful approach to formulating explanations. In this chapter, we will introduce a related concept, namely the generation of counterfactuals.
 
@@ -31,7 +31,7 @@ Counterfactuals [@wachter2017] are defined as small perturbations on an actual i
 ```{julia}
 #| echo: false
 #| output: false
-i = rand(findall(p -> model.τ - 0.22 <= p <= model.τ - 0.20, predict(model; threshold=false)))
+i = rand(findall(p -> model.τ - 0.32 <= p <= model.τ - 0.30, predict(model; threshold=false)))
 cnd = X[:,i]
 pscore = predict(model, cnd; threshold=false)
 ```
@@ -47,16 +47,16 @@ Is there a temperature at which we would expect the model to make the opposite p
 ```{julia}
 #| echo: false
 #| output: false
-temp = cnd[6] .+ LinRange(-70, 70, 200)
+temp = cnd[model.v[1]] .+ LinRange(-70, 70, 200)
 npred = zeros(Float64, length(temp))
 for i in eachindex(npred)
     tcnd = copy(cnd)
-    tcnd[6] = temp[i]
+    tcnd[model.v[1]] = temp[i]
     npred[i] = predict(model, tcnd; threshold=false)
 end
 
 lasttemp = temp[findlast(npred .>= model.τ)]
-tempdiff = abs(cnd[1]-lasttemp)
+tempdiff = abs(cnd[model.v[1]]-lasttemp)
 ```
 
 This approach is both generating perturbations of our initial prediction, and expressing these predictions as a function of whether they lead the model to change its outcome. Conceptually, we are 80% of our way to understanding counterfactuals (in practical terms, we are still on square one, but let's give it time).
@@ -77,7 +77,7 @@ poly!(ax, Point2f[(temp[1], 1), (temp[end], 1), (temp[end], model.τ), (temp[1],
 hlines!([model.τ], color=bkcol.generic, linestyle=:dash)
 
 lines!(ax, temp, npred, color=bkcol.generic)
-scatter!(ax, [cnd[6]], [pscore], color=bkcol.generic, markersize=12)
+scatter!(ax, [cnd[model.v[1]]], [pscore], color=bkcol.generic, markersize=12)
 
 ylims!(ax, extrema(npred))
 xlims!(ax, extrema(temp))
@@ -130,7 +130,7 @@ learningrate = LinRange(0.0, 100.0, 55)
 closs = zeros(Float64, length(temp), length(learningrate))
 for i in eachindex(temp)
     tcnd = copy(cnd)
-    tcnd[6] = temp[i]
+    tcnd[model.v[1]] = temp[i]
     for j in eachindex(learningrate)
         closs[i,j] = loss(model, cnd, tcnd, model.τ .+ 0.01, learningrate[j]; threshold=false)
     end
@@ -151,7 +151,7 @@ ax = Axis(f[2,1], xlabel="Temperature", ylabel="Loss")
 for j in eachindex(learningrate)
     lines!(ax, temp, closs[:,j], color=learningrate[j], colorrange=extrema(learningrate), colormap=bkcol.seq)
 end
-vlines!(ax, [cnd[1]], color=bkcol.generic, linestyle=:dash)
+vlines!(ax, [cnd[model.v[1]]], color=bkcol.generic, linestyle=:dash)
 scatter!(ax, [temp[findlast(npred .>= model.τ)]], [closs[findlast(npred .>= model.τ),1]], color=bkcol.generic, markersize=12)
 
 ylims!(ax, extrema(closs))
@@ -191,7 +191,7 @@ pc = predict(model, xc; threshold=false)
 LR = [lr]
 PC = [pc]
 for i in 1:350
-    if lr <= 1000
+    if lr <= 1500
         lr *= 1.02
         xc = counterfactual(model, cnd, yhat, lr; threshold=false)
         pc = predict(model, xc; threshold=false)
@@ -207,7 +207,7 @@ scatter!(ax, LR, PC, color=cls, strokecolor=bkcol.generic, strokewidth=1)
 hlines!(ax, [yhat-0.02, yhat+0.02], color=bkcol.generic, linestyle=:dot)
 hlines!(ax, [yhat], color=bkcol.generic, linestyle=:dash)
 
-xlims!(ax, 1.0, 1e3)
+xlims!(ax, 1.0, 15e2)
 ylims!(ax, 0.0, 0.7)
 
 current_figure()
@@ -220,7 +220,7 @@ This approach is illustrated in @fig-counterfactuals-optimize. Note that there i
 ```{julia}
 #| echo: false
 #| output: false
-proposals = [counterfactual(model, cnd, model.τ + 0.015, 250.0; threshold=false) for _ in 1:100]
+proposals = [counterfactual(model, cnd, model.τ + 0.015, 500.0; threshold=false) for _ in 1:50]
 ```
 
 ```{julia}
@@ -234,11 +234,11 @@ for i in eachindex(proposals)
     xc = proposals[i]
     ccol = predict(model, xc; threshold=true) ? bkcol.sdm.present : bkcol.sdm.absent
     bcol = predict(model, xc; threshold=true) ? bkcol.sdm.presentbg : bkcol.sdm.absentbg
-    scatter!(ax, [xc[6]], [xc[3]], strokecolor=ccol, strokewidth=2, color=bcol, markersize=12)
+    scatter!(ax, [xc[model.v[1]]], [xc[model.v[2]]], strokecolor=ccol, strokewidth=2, color=bcol, markersize=12)
 end
-vlines!(ax, [cnd[6]], color=bkcol.generic, linestyle=:dash)
-hlines!(ax, [cnd[3]], color=bkcol.generic, linestyle=:dash)
-scatter!(ax, [cnd[6]], [cnd[3]], color=bkcol.generic, markersize=12)
+vlines!(ax, [cnd[model.v[1]]], color=bkcol.generic, linestyle=:dash)
+hlines!(ax, [cnd[model.v[2]]], color=bkcol.generic, linestyle=:dash)
+scatter!(ax, [cnd[model.v[1]]], [cnd[model.v[2]]], color=bkcol.generic, markersize=12)
 #xlims!(ax, extrema(model.X[1,:]))
 #ylims!(ax, extrema(model.X[12,:]))
 current_figure()

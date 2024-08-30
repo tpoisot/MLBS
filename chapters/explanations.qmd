@@ -200,3 +200,12 @@ Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, vali
 
 current_figure()
 ```
+
+
+```{julia}
+#| output: false
+#| echo: false
+modelpath = joinpath(_models_path, "sdm-importance.json")
+model.v = model.v[varord]
+writesdm(modelpath, model)
+```
