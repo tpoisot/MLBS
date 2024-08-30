@@ -362,7 +362,7 @@ origmodel = model
 
 finalmodel = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
 reset!(finalmodel)
-forwardselection!(finalmodel, folds; threshold=false)
+backwardselection!(finalmodel, folds; threshold=false)
 
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
