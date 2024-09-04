@@ -299,6 +299,17 @@ In a sense, the ROC and PR curves are another projection of the results from @fi
 
 ### Optimizing the prior
 
+```{julia}
+P0 = model.classifier.prior
+Pi = LinRange(0.01, 0.99, 20)
+Pm = [deepcopy(model) for _ in axes(Pi, 1)]
+for (i, P) in enumerate(Pi)
+    Pm[i].classifier.prior = P
+    @info mcc.(crossvalidate(Pm[i], folds; threshold=true)[1]) |> mean
+    @info Pm[i].classifier.prior
+end
+```
+
 update on NBC prior
 
 how to update? also threshold

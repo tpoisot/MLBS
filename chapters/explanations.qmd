@@ -182,7 +182,7 @@ heatmap(V[varord[1]], colormap=bkcol.div, colorrange=(-0.5,0.5))
 ```{julia}
 mostimp = mosaic(x -> argmax(abs.(x)), V)
 
-nvars = 4
+nvars = 6
 cmap = [bkcol.cat[1:nvars]..., bkcol.nodata]
 clab = push!("BIO" .* string.(model.v[varord][1:nvars]), "other")
 
@@ -201,4 +201,13 @@ cleg = [PolyElement(color = c, strokecolor = :transparent) for c in cmap]
 Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10))
 
 current_figure()
+```
+
+
+```{julia}
+#| output: false
+#| echo: false
+modelpath = joinpath(_models_path, "sdm-importance.json")
+model.v = model.v[varord]
+writesdm(modelpath, model)
 ```

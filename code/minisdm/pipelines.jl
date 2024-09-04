@@ -70,21 +70,6 @@ function predictors(sdm::SDM)
     return copy(sdm.v)
 end
 
-#=
-# Demo data
-
-X = rand(Float64, 8, 100)
-v = 1:4
-training = unique(rand(axes(X, 2), 70))
-y = rand(Bool, size(X, 2))
-X[:,findall(y)] .+= 0.25
-
-sdm = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, v)
-train!(sdm; training=training)
-yhat = predict(sdm, X)
-ConfusionMatrix(yhat, y) |> mcc
-=#
-
 function StatsAPI.predict(sdm::SDM, layers::Vector{T}; kwargs...) where {T <: SimpleSDMLayer}
     pr = convert(Float64, similar(first(layers)))
     F = permutedims(hcat(values.(layers)...))
