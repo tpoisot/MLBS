@@ -54,6 +54,8 @@ end
 P = X[model.v,:]
 ```
 
+TODO redraw the stemplot from the variable selection chapter to compare prediction v. explanation
+
 ```{julia}
 #| echo: false
 #| output: asis

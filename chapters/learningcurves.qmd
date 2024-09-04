@@ -305,6 +305,39 @@ how to update? also threshold
 
 illustration of result
 
+```{julia}
+#| echo: false
+#| label: fig-tuning-prior
+#| fig-scap: Tuning of the NBC prior probability (see @eq-nbc-onevar) that a location is favorable to the presence of the species. As in @fig-tuning-threshold, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset: the optimal prior for this model is informed by the relative proportion of presences in the training data.
+#| fig-cap: The 
+P0 = LinRange(0.0, 1.0, 80)
+Mm = zeros(length(P0))
+Ms = zeros(length(P0))
+for (i, Pi) in enumerate(P0)
+    M = zeros(length(folds))
+    for (j, fold) in enumerate(folds)
+        tv, tt = fold
+        mi = deepcopy(model)
+        train!(mi; training=tt)
+        mi.classifier.prior = Pi
+        M[j] = mcc(ConfusionMatrix(predict(mi, mi.X[:,tv]), mi.y[tv]))
+    end
+    Mm[i] = mean(M)
+    Ms[i] = std(M)
+end
+
+f = Figure(; size=(6, 6).*(600/6))
+ax = Axis(f[1,1], xlabel="Prior", ylabel="MCC", aspect=1)
+band!(ax, P0, Mm .- Ms, Mm .+ Ms, color=bkcol.nodata)
+lines!(ax, P0, Mm, color=bkcol.generic)
+bst = findmax(Mm)
+scatter!(ax, P0[last(bst)], bst[1], strokewidth=1, color=:white, strokecolor=bkcol.generic, markersize=18)
+vlines!(ax, [mean(model.y)], color=bkcol.generic, linestyle=:dash)
+xlims!(ax, 0, 1)
+ylims!(ax, 0, 1)
+current_figure()
+```
+
 discuss imbalance again
 
 ### Testing and visualizing the final model
