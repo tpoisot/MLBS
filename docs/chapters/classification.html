@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.47">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -194,7 +194,7 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Selecting variables</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing features</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -213,6 +213,18 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/counterfactuals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Generating counterfactuals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/squint.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The machine learning squint</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -311,7 +323,7 @@ window.Quarto = {
 <section id="separability" class="level3 page-columns page-full" data-number="5.2.1">
 <h3 data-number="5.2.1" class="anchored" data-anchor-id="separability"><span class="header-section-number">5.2.1</span> Separability</h3>
 <p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <a href="variableselection.html#sec-predictors-curse" class="quarto-xref"><span>Section 6.4.1</span></a>, simply adding more predictors is not the right thing to do.</p>
-<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <span class="quarto-unresolved-ref">?sec-variable-selection</span>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 10°C, presences are far more likely. For a location with a temperature warmer than 15°C, absences become overwhelmingly more likely. The locations with a temperature between 10°C and 15°C can go either way.</p>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <a href="variableselection.html" class="quarto-xref"><span>Chapter 6</span></a>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 10°C, presences are far more likely. For a location with a temperature warmer than 15°C, absences become overwhelmingly more likely. The locations with a temperature between 10°C and 15°C can go either way.</p>
 <div id="cell-fig-classification-separability" class="cell page-columns page-full" data-execution_count="1">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
 <div id="fig-classification-separability" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
@@ -408,7 +420,7 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <p>The most delicate problem is to figure out <span class="math inline">\(P(x|c)\)</span>, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in <span class="math inline">\(x\)</span>; as we work with continuous variables, we will rely on Gaussian NBC. In Gaussian NBC, we will consider that <span class="math inline">\(x\)</span> comes from a normal distribution <span class="math inline">\(\mathcal{N}(\mu_{x,c},\sigma_{x,c})\)</span>, and therefore we simply need to evaluate the probability density function of this distribution at the point <span class="math inline">\(x\)</span>. Other types of data are handled in the same way, with the difference that they use a different set of distributions; for example, categorical variables can be represented using multinomial distributions <span class="citation" data-cites="abbood2020">(<a href="#ref-abbood2020" role="doc-biblioref">Abbood <em>et al.</em> 2020</a>)</span>.</p>
 
 <div class="no-row-height column-margin column-container"><div class="">
-<p>We could use different approaches to NBC, by using (for example) the empirical CDF function of the training data for each class. We will revisit this idea in chapter <span class="quarto-unresolved-ref">?sec-bioclim</span>, as it establishes an interesting parallel between different methods.</p>
+<p>We could use different approaches to NBC, by using (for example) the empirical CDF function of the training data for each class. We will revisit this idea in chapter <a href="squint.html" class="quarto-xref"><span>Chapter 11</span></a>, as it establishes an interesting parallel between different methods.</p>
 </div></div><p>Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, the learning phase only involves a single epoch: measuring the mean and standard deviation. This yields a Gaussian NBC with the assumption that variables are normally distributed, because the normal distribution is the maximal entropy distribution when we know these two moments. This also reveals an interesting feature of NBC: it can work when we do not have access to the underlying training data. Imagine a situation where we only have access to published summary statistics about the environmental variables for which the species was observed / not observed: we can use these to establish the Normal distributions for each feature for each class, and use the NBC. Its ability to work under extreme data scarcity (assuming we are comfortable with the assumptions about the shape of the distribution) makes NBC a surprisingly versatile classifier.</p>
 </section>
 </section>
@@ -419,7 +431,7 @@ P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
 <h3 data-number="5.4.1" class="anchored" data-anchor-id="training-and-validation-strategy"><span class="header-section-number">5.4.1</span> Training and validation strategy</h3>
 <p>To evaluate our model, as we discussed in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter 4</span></a>, we will keep a holdout testing set, that will be composed of 20% of the observations. In this chapter, we will not be using these data, because in order to use them as a stand-in for future predictions, it is important that the model only sees them once (this will happen at the end of <a href="learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>). Therefore, for the next chapters, we will limit ourselves to an evaluation of the model performance based on the average values of the performance measure we picked as the most informative, calculated on the validation datasets. When, based on this criteria, we have identified and validated the best model, we will evaluate it on the testing data.</p>
 <p>In this chapter, we will rely on Monte-Carlo cross validation (MCCV; see <a href="crossvalidation.html#sec-crossvalidation-montecarlo" class="quarto-xref"><span>Section 4.3.5</span></a>), using 100 replicates. In the following chapters, we will revert to using k-folds cross-validation, but using MCCV here is a good enough starting point.</p>
-<p>In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works <em>at all</em>. In <span class="quarto-unresolved-ref">?sec-bioclim</span>, we will introduce a slightly more domain-specific model to provide a baseline that would look like an actual model we would like to out-perform (but mostly to make the general point that any problem can be approached like a machine learning problem).</p>
+<p>In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works <em>at all</em>. In <a href="squint.html" class="quarto-xref"><span>Chapter 11</span></a>, we will introduce a slightly more domain-specific model to provide a baseline that would look like an actual model we would like to out-perform (but mostly to make the general point that any problem can be approached like a machine learning problem).</p>
 </section>
 <section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="5.4.2">
 <h3 data-number="5.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">5.4.2</span> Performance evaluation of the model</h3>
@@ -470,26 +482,26 @@ Table&nbsp;5.1: Overview of the data presented in <a href="#fig-classification-c
 <tbody>
 <tr class="odd">
 <td>Accuracy</td>
+<td>0.877</td>
 <td>0.872</td>
-<td>0.873</td>
-<td>0.534</td>
+<td>0.535</td>
 </tr>
 <tr class="even">
 <td>NPV</td>
-<td>0.82</td>
-<td>0.821</td>
-<td>0.369</td>
+<td>0.824</td>
+<td>0.815</td>
+<td>0.367</td>
 </tr>
 <tr class="odd">
 <td>PPV</td>
-<td>0.903</td>
-<td>0.905</td>
-<td>0.631</td>
+<td>0.91</td>
+<td>0.907</td>
+<td>0.633</td>
 </tr>
 <tr class="even">
 <td>MCC</td>
-<td>0.725</td>
-<td>0.729</td>
+<td>0.738</td>
+<td>0.726</td>
 <td>0.0</td>
 </tr>
 </tbody>
@@ -524,13 +536,13 @@ Figure&nbsp;5.3: Overview of the decision boundary between the positive (orange)
 </section>
 <section id="visualizing-the-trained-model" class="level3 page-columns page-full" data-number="5.4.4">
 <h3 data-number="5.4.4" class="anchored" data-anchor-id="visualizing-the-trained-model"><span class="header-section-number">5.4.4</span> Visualizing the trained model</h3>
-<p>We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of <em>Sitta whiteheadi</em>. This result is reported in <a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>. Because we have used training data for which we know the labels, we can also map the <em>outcome</em> of applying the model, which it so say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.</p>
+<p>We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of <em>Sitta whiteheadi</em>. This result is reported in <a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>. Because we have used training data for which we know the labels, we can also map the <em>outcome</em> of applying the model, which is to say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.</p>
 <div id="cell-fig-classification-range" class="cell page-columns page-full" data-execution_count="1">
 <div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
 <div id="fig-classification-range" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
 <figure class="quarto-float quarto-float-fig figure page-columns page-full">
 <div aria-describedby="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="classification_files/figure-html/fig-classification-range-output-1.png" width="1400" height="1200" class="figure-img">
+<img src="classification_files/figure-html/fig-classification-range-output-1.png" width="690" height="570" class="figure-img">
 </div>
 <figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;5.4: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of <em>Sitta whiteheadi</em>, but would definitely stand to be improved, possibly by accounting for more features.
@@ -543,7 +555,7 @@ Figure&nbsp;5.4: Occurence data (left; presences are in orange and pseudo-absenc
 <section id="what-is-an-acceptable-model" class="level3" data-number="5.4.5">
 <h3 data-number="5.4.5" class="anchored" data-anchor-id="what-is-an-acceptable-model"><span class="header-section-number">5.4.5</span> What is an acceptable model?</h3>
 <p>When comparing the prediction to the spatial distribution of occurrences (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>), it appears that the model identifies an area in the northeast where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the <em>purpose</em> of running this model – if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model. For now, we have established a basic training routine for our model, and have started thinking spatially about <em>where</em> it is making errors (in space).</p>
-<p>Note that by visualizing the type of mis-classification from our training set, we gain a better understanding of <em>how</em> the model is wrong. False positives, for example, tends to be clustered either at the western margin of the main patch of the predicted range, and in a small number of clusters in the North. False negatives are also fairly close to the edge of the predicted range, but clustered towards the center of the island. This is a good sign! The errors that our model is mkaing seem to be mostly at the margin of the habitat of the species, for which we know, ecologically, that it is more difficult to properly map out.</p>
+<p>Note that by visualizing the type of mis-classification from our training set, we gain a better understanding of <em>how</em> the model is wrong. False positives, for example, tends to be clustered either at the western margin of the main patch of the predicted range, and in a small number of clusters in the North. False negatives are also fairly close to the edge of the predicted range, but clustered towards the center of the island. This is a good sign! The errors that our model is making appear to be mostly at the margin of the habitat of the species, which we know (ecologically) is more difficult to properly map out.</p>
 </section>
 </section>
 <section id="conclusion" class="level2" data-number="5.5">
