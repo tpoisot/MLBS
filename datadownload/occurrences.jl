@@ -47,7 +47,7 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = backgroundpoints((x -> x^0.6).(bgmask), round(Int, 0.8sum(presencelayer)); replace=false)
+bgpoints = backgroundpoints((x -> x^0.7).(bgmask), round(Int, 0.75sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
 replace!(presencelayer, false => nothing)
 

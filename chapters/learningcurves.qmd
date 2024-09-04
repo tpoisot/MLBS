@@ -319,8 +319,8 @@ illustration of result
 ```{julia}
 #| echo: false
 #| label: fig-tuning-prior
-#| fig-scap: Tuning of the NBC prior probability (see @eq-nbc-onevar) that a location is favorable to the presence of the species. As in @fig-tuning-threshold, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset: the optimal prior for this model is informed by the relative proportion of presences in the training data.
-#| fig-cap: The 
+#| fig-cap: Tuning of the NBC prior probability (see @eq-nbc-onevar) that a location is favorable to the presence of the species. As in @fig-tuning-threshold, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset: the optimal prior for this model is informed by the relative proportion of presences in the training data.
+#| fig-scap: The 
 P0 = LinRange(0.0, 1.0, 80)
 Mm = zeros(length(P0))
 Ms = zeros(length(P0))
