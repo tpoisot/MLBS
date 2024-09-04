@@ -8,6 +8,9 @@ data/**/raw/*
 data/**/*.tiff
 !data/general/layers.tiff
 
+chapters/**_files/
+chapters/resources/
+
 # Quarto files
 _freeze/
 getopt
