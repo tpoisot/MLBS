@@ -112,7 +112,7 @@ But can we classify these different environments starting in an ecologically rel
 
 One way to do this is to calculate the normalized difference vegetation index, or NDVI [@kennedy2020]. NDVI is derived from the band data (NIR and Red), and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. NDVI is a normalized difference index, which is a function of the form $f(x,y) = (x-y)/(x+y)$. Because plants are immediately tied to water, we can also consider the NDWI (water; Green and NIR), NDMI (moisture; NIR and SWIR1), and the NBR (normalized burn ratio; NIR and SWIR2) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), whether this pixel is a water body (NDWI), and whether this pixel is recovering following a fire (NBR). @roy2006 have challenged the idea that the NBR is relevant immediately post-fire, but negative NBR values can suggest re-growth after a fire.
 
-Normalized differences indices are really fascinating measures to apply when you have two different quantities $u$ and $w$. The formula for the normalized difference index is
+Normalized differences indices\index{Normalized difference} are really fascinating measures to apply when you have two different quantities $u$ and $w$. The formula for the normalized difference index is
 
 $$\frac{u-w}{u+w}$$
 
@@ -198,7 +198,7 @@ Throughout this book, we will use $\mathbf{X}$ to note the matrix of features, a
 
 In *k*-means, a set of observations $\mathbf{x}_i$ are assigned to a set of classes $\mathbf{C}$, also called the clusters. All $\mathbf{x}_i$ are vectors with the same dimension (we will call it $f$, for *features*), and we can think of our observations as a matrix of features $\mathbf{X}$ of size $(f, n)$, with $f$ features and $n$ observations (the columns of this matrix).
 
-The number of classes of $\mathbf{C}$ is $|\mathbf{C}| = k$, and $k$ is an hyper-parameter of the model, as it needs to fixed before we start running the algorithm. Each class is defined by its centroid, a vector $\mathbf{c}$ with $f$ dimensions (*i.e.* the centroid corresponds to a potential "idealized" observation of this class in the space of the features), which *k*-means progressively refines.
+The number of classes of $\mathbf{C}$ is $|\mathbf{C}| = k$, and $k$ is an hyper-parameter\index{Hyper-parameters} of the model, as it needs to fixed before we start running the algorithm. Each class is defined by its centroid, a vector $\mathbf{c}$ with $f$ dimensions (*i.e.* the centroid corresponds to a potential "idealized" observation of this class in the space of the features), which *k*-means progressively refines.
 
 ### Assigning instances to classes
 
@@ -212,11 +212,11 @@ $$
 \text{argmin}_j \left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2 \,,
 $$ {#eq-clustering-onepoint}
 
-which is the value of $j$ that minimizes the $L^2$ norm ($\|\cdot\|_2$, the Euclidean distance) between the instance and the centroid; $\text{argmin}_j$ is the function returning the value of $j$ that minimizes its argument. For example, $\text{argmin}(0.2,0.8,0.0)$ is $3$, as the third argument is the smallest. There exists an $\text{argmax}$ function, which works in the same way.
+which is the value of $j$ that minimizes the $L^2$ norm ($\|\cdot\|_2$, the Euclidean distance\index{Distances!Euclidean}) between the instance and the centroid; $\text{argmin}_j$ is the function returning the value of $j$ that minimizes its argument. For example, $\text{argmin}(0.2,0.8,0.0)$ is $3$, as the third argument is the smallest. There exists an $\text{argmax}$ function, which works in the same way.
 
 ### Optimizing the centroids
 
-Of course, what we really care about is the assignment of *all* instances to the classes. For this reason, the configuration (the disposition of the centroids) that solves our specific problem is the one that leads to the lowest possible variance within the clusters. As it turns out, it is not that difficult to go from @eq-clustering-onepoint to a solution for the entire problem: we simply have to sum over all points!
+Of course, what we really care about is the assignment of *all* instances to the classes. For this reason, the configuration (the disposition of the centroids) that solves our specific problem is the one that leads to the lowest possible variance\index{Variance} within the clusters. As it turns out, it is not that difficult to go from @eq-clustering-onepoint to a solution for the entire problem: we simply have to sum over all points!
 
 This leads to a measure of the variance, which we want to minimize, expressed as
 
@@ -240,13 +240,13 @@ where $|\cdot|$ is the cardinality of (number of instances in) $\mathbf{C}_j$, a
 Repeating a step multiple times in a row is called an iterative process, and we will see a *lot* of them. @sec-gradientdescent relies almost entirely on iteration, in fact.
 :::
 
-Once we have applied @eq-clustering-centroid-update to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.
+Once we have applied @eq-clustering-centroid-update to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.\index{Iteration}
 
 But until when?
 
-Finding the optimal solution for a set of points is an NP-hard problem [@aloise2009], which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is *global* and not *local*.
+Finding the optimal solution\index{Optimality} for a set of points is an NP-hard problem [@aloise2009], which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is *global* and not *local*.
 
-A global optimum is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is *greedy*, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum.
+A global optimum\index{Optimality!global} is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is *greedy*, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum\index{Optimality!local}.
 
 In order to get the best possible solution, it is therefore common to run *k*-means multiple times for a given $k$, and to pick the positions of the centroids that give the best overall fit.
 
@@ -320,7 +320,7 @@ We will revisit the issue of tuning the hyper-parameters in more depth in @sec-t
 
 In order to produce @fig-kmeans-initial-landscape, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in @sec-kmeans-initial, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of $k$; we know that it is more than 3, but how much more?
 
-We will now change the values of $k$ and use the @davies1979 measure introduced in @sec-clustering-optimality to identify the optimal value of $k$. The results are presented in @fig-kmeans-tuning. Note that we only explore $k \in [3, 10]$. More than 10 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.
+We will now change the values of $k$ and use the @davies1979 measure introduced in @sec-clustering-optimality to identify the optimal value of $k$. The results are presented in @fig-kmeans-tuning. Note that we only explore $k \in [3, 10]$. More than 10 categories is probably not very actionable\index{Actionable models}, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.
 
 Note that we will play a little trick on our data here. We know from @fig-kmeans-initial-landscape that with $k=3$, we can do a good job at removing water pixels, which seem to cover about a third of the image. If we are interested in land-based questions, this is quite a lot of information we do not really care about. In order to make the clustering more relevant to our interests, we will therefore extract the pixels that are *not* classified as water before doing the clustering. This *will* miss a few relevant pixels, but for now we can consider this an acceptable trade-off in order to have a better classification of land pixels.
 
@@ -340,7 +340,7 @@ X[3,:] .= values(SpeciesDistributionToolkit.mask(msk, NDMI))
 X[4,:] .= values(SpeciesDistributionToolkit.mask(msk, NBR))
 ```
 
-What would make such a classification better? Recall from the @sec-kmeans-theory that the assignment of instances to classes is done based on the distance to the centroid, which it itself the average of the features of the members of each class. By removing the pixels that are not relevant to our question (such as using water pixels to classify the image using data relevant to vegetation), we are taking steps to ensure that the space in which the centroids can exist is more rigorously defined for the question we are interested in.
+What would make such a classification better? Recall from the @sec-kmeans-theory that the assignment of instances to classes is done based on the distance to the centroid, which it itself the average of the features of the members of each class. By removing the pixels that are not relevant to our question (such as using water pixels to classify the image using data relevant to vegetation), we are taking steps to ensure that the space in which the centroids can exist is more rigorously defined for the question we are interested in.\index{Data preparation}
 
 ```{julia}
 #| label: run-davies-bouldin
@@ -471,7 +471,7 @@ By opposition to a model based on, for example, mixtures of Gaussians, the assig
 #| fig-cap: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
 fig = Figure(; size=(7, 6).*(600/6))
 ax = CairoMakie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-scatter!(ax, values(mask(msk, NDVI)), values(mask(msk, NDMI)), color=clusters.assignments, colormap=bkcol.cat, markersize=2)
+scatter!(ax, values(SpeciesDistributionToolkit.mask(msk, NDVI)), values(SpeciesDistributionToolkit.mask(msk, NDMI)), color=clusters.assignments, colormap=bkcol.cat, markersize=2)
 tightlimits!(ax)
 current_figure()
 ```

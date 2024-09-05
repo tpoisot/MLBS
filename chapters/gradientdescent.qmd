@@ -24,7 +24,7 @@ As we will see in this chapter, then in @sec-crossvalidation, and finally in @se
 
 Therefore, a trained model is never independent from its training data: they describe the scope of the problem we want to address with this model. In @sec-clustering, we ended up with a machine (the trained *k*-means algorithm) whose parameters (the centroids of the classes) made sense in the specific context of the training data we used; applied to a different dataset, there are no guarantees that our model would deliver useful information.
 
-For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to *explain* how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in @sec-explanations), and is more related to explaining the process, the "outer core" of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?
+For the purpose of this book, we will consider that a model is trained when we have defined the algorithm, the data, the measure through which we will evaluate the model performance\index{Model performance}, and then measured the performance on a dataset built specifically for this task. All of these elements are important, as they give us the possibility to *explain* how we came up with the model, and therefore, how we made the predictions. This is different from reasoning about why the model is making a specific prediction (we will discuss this in @sec-explanations), and is more related to explaining the process, the "outer core" of the model. As you read this chapter, pay attention to these elements: what algorithm are we using, on what data, how do we measure its performance, and how well does it perform?
 
 ## The problem: how many interactions in a food web? {#sec-gradientdescent-problem}
 
@@ -63,21 +63,21 @@ current_figure()
 
 ## Gradient descent {#sec-gradientdescent-explanation}
 
-Gradient descent is built around a remarkably simple intuition: knowing the formula that gives rise to our prediction, and the value of the error we made for each point, we can take the derivative of the error with regards to each parameter, and this tells us how much this parameter contributed to the error. Because we are taking the derivative, we can futher know whether to increase, or decrease, the value of the parameter in order to make a smaller error next time.
+Gradient descent\index{Gradient descent} is built around a remarkably simple intuition: knowing the formula that gives rise to our prediction, and the value of the error we made for each point, we can take the derivative of the error with regards to each parameter, and this tells us how much this parameter contributed to the error. Because we are taking the derivative, we can futher know whether to increase, or decrease, the value of the parameter in order to make a smaller error next time.
 
-In this section, we will use linear regression as an example, because it is the model we have decided to use when exploring our ecological problem in @sec-gradientdescent-problem, and because it is suitably simple to keep track of everything when writing down the gradient by hand.
+In this section, we will use linear regression\index{Linear regression} as an example, because it is the model we have decided to use when exploring our ecological problem in @sec-gradientdescent-problem, and because it is suitably simple to keep track of everything when writing down the gradient by hand.
 
 Before we start assembling the different pieces, we need to decide what our model is. We have settled on a linear model, which will have the form $\hat y = m\times x + b$. The little hat on $\hat y$ indicates that this is a prediction. The input of this model is $x$, and its parameters are $m$ (the slope) and $b$ (the intercept). Using the notation we adopted in @sec-gradientdescent-problem, this would be $\hat l = a \times s + b$, with $l = \text{log} L$ and $s = \text{log} S$.
 
 ### Defining the loss function {#sec-gradientdescent-lossfunctions}
 
-The loss function is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions *do*.
+The loss function\index{Loss functions} is an important concept for anyone attempting to compare predictions to outcomes: it quantifies how far away an ensemble of predictions is from a benchmark of known cases. There are many loss functions we can use, and we will indeed use a few different ones in this book. But for now, we will start with a very general understanding of what these functions *do*.
 
 Think of prediction as throwing a series of ten darts on ten different boards. In this case, we know what the correct outcome is (the center of the board, I assume, although I can be mistaken since I have only played darts once, and lost). A cost function would be any mathematical function that compares the position of each dart on each board, the position of the correct event, and returns a score that informs us about how poorly our prediction lines up with the reality.
 
-In the above example, you may be tempted to say that we can take the Euclidean distance of each dart to the center of each board, in order to know, for each point, how far away we landed. Because there are several boards, and because we may want to vary the number of boards while still retaining the ability to compare our performances, we would then take the average of these measures.
+In the above example, you may be tempted to say that we can take the Euclidean\index{Distances!Euclidean} distance of each dart to the center of each board, in order to know, for each point, how far away we landed. Because there are several boards, and because we may want to vary the number of boards while still retaining the ability to compare our performances, we would then take the average of these measures.
 
-We will note the position of our dart as being $\hat y$, the position of the center as being $y$ (we will call this the *ground truth*), and the number of attempts $n$, and so we can write our loss function as
+We will note the position of our dart as being $\hat y$, the position of the center as being $y$ (we will call this the *ground truth*), and the number of attempts $n$, and so we can write our loss function as\index{Loss functions!Mean squared error}
 
 $$
 \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat y_i)^2
@@ -142,17 +142,17 @@ With the gradient written down in @eq-gradientdescent-gradientexplicit, we can n
 
 ### Descending the gradient
 
-Recall from @sec-gradientdescent-gradient that the gradient measures how far we *increase* the function of which we are taking the gradient. Therefore, it measures how much each parameter contributes to the loss value. Our working definition for a trained model is "one that has little loss", and so in an ideal world, we could find a point $p$ for which the gradient is as small as feasible.
+Recall from @sec-gradientdescent-gradient that the gradient measures how far we *increase* the function of which we are taking the gradient. Therefore, it measures how much each parameter contributes to the loss value. Our working definition for a trained model is "one that has little loss", and so in an ideal world, we could find a point $p$ for which the gradient is as small as feasible\index{Optimality}.
 
 Because the gradient measures how far away we increase error, and intuitive way to use it is to take steps in the *opposite* direction. In other words, we can update the value of our parameters using $p := p - \nabla f(p)$, meaning that we subtract from the parameter values their contribution to the overall error in the predictions.
 
-But, as we will discuss further in @sec-gradientdescent-learningrate, there is such a thing as "too much learning". For this reason, we will usually not move the entire way, and introduce a term to regulate how much of the way we actually want to descend the gradient. Our actual scheme to update the parameters is
+But, as we will discuss further in @sec-gradientdescent-learningrate, there is such a thing as "too much learning". For this reason, we will usually not move the entire way, and introduce a term to regulate how much of the way we actually want to descend the gradient. Our actual scheme to update the parameters is\index{Regularization}
 
 $$
 p := p - \eta\times \nabla f(p) \,.
 $$ {#eq-gradientdescent-loop}
 
-This formula can be *iterated*: with each successive iteration, it will get us closer to the optimal value of $p$, which is to say the combination of $m$ and $b$ that minimizes the loss.
+This formula can be *iterated*: with each successive iteration, it will get us closer to the optimal value of $p$, which is to say the combination of $m$ and $b$ that minimizes the loss.\index{Iteration}
 
 ### A note on the learning rate {#sec-gradientdescent-learningrate}
 
@@ -160,7 +160,7 @@ The error we can make on the first iteration will depend on the value of our ini
 
 In order to protect against this, in reality, we update the gradient only a little, where the value of "a little" is determined by an hyper-parameter called the *learning rate*, which we noted $\eta$. This value will be very small (much less than one). Picking the correct learning rate is not simply a way to ensure that we get correct results (though that is always a nice bonus), but can be a way to ensure that we get results *at all*. The representation of numbers in a computer's memory is tricky, and it is possible to create an overflow: a number so large it does not fit within 64 (or 32, or 16, or however many we are using) bits of memory.
 
-The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.
+The conservative solution of using the smallest possible learning rate is not really effective, either. If we almost do not update our parameters at every epoch, then we will take almost forever to converge on the correct parameters. Figuring out the learning rate is an example of hyper-parameter tuning, which we will get back to later in this book.\index{Learning rate}
 
 ```{julia}
 #| label: Linear model and gradient calculation
@@ -180,9 +180,9 @@ We will not get back to the problem exposed in @fig-gradient-data, and use gradi
 
 ### The things we won't do
 
-At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score. But this is not really required here; we know that our model will give results that make sense in the units of species and interactions (after dealing with the natural log, of course). In addition, as we will see in @sec-leakage, applying a transformation to the data too soon can be a dangerous thing. We will have to live with raw features for a few more chapters.
+At this point, we could decide that it is a good idea to transform our predictor and our response, for example using the z-score\index{Data preparation}. But this is not really required here; we know that our model will give results that make sense in the units of species and interactions (after dealing with the natural log, of course). In addition, as we will see in @sec-leakage, applying a transformation to the data too soon can be a dangerous thing. We will have to live with raw features for a few more chapters.
 
-In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these data points. We will get back to this practice (cross-validation) in a lot more details in @sec-crossvalidation, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.
+In order to get a sense of the performance of our model, we will remove some of the data, meaning that the model will not learn on these data points. We will get back to this practice (cross-validation) in a lot more details in @sec-crossvalidation, but for now it is enough to say that we hide 20% of the dataset, and we will use them to evaluate how good the model is as it trains. The point of this chapter is not to think too deeply about cross-validation, but simply to develop intuitions about the way a machine learns.\index{Cross-validation!holdout}
 
 ### Starting the learning process
 
@@ -235,7 +235,7 @@ for i in 1:epochs
 end
 ```
 
-One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning *too much* from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In @tbl-gradient-attempt-one, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.
+One usual approach is to decide on a number of iterations (we need to start somewhere), and to check how rapidly the model seems to settle on a series of parameters. But more than this, we also need to ensure that our model is not learning *too much* from the data. This would result in over-fitting, in which the models gets better on the data we used to train it, and worse on the data we kept hidden from the training! In @tbl-gradient-attempt-one, we present the RMSE loss for the training and testing datasets, as well as the current estimates of the values of the parameters of the linear model.\index{Over-fitting}
 
 ```{julia}
 #| label: tbl-gradient-attempt-one
@@ -253,11 +253,11 @@ rename!(df, :b1 => "β₁")
 pretty_table(df, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```
 
-In order to protect against over-fitting, it is common to add a check to the training loop, to say that after a minimum number of iterations has been done, we stop the training when the loss on the testing data starts increasing. In order to protect against very long training steps, it is also common to set a tolerance (absolute or relative) under which we decide that improvements to the loss are not meaningful, and which serves as a stopping criterion for the training.
+In order to protect against over-fitting, it is common to add a check to the training loop, to say that after a minimum number of iterations has been done, we stop the training when the loss on the testing data starts increasing. In order to protect against very long training steps, it is also common to set a tolerance (absolute or relative) under which we decide that improvements to the loss are not meaningful, and which serves as a stopping criterion for the training.\index{Tolerance}
 
 ### Detecting over-fitting {#sec-gradientdescent-overfitting}
 
-As we mentioned in the previous section, one risk with training that runs for too long is to start seeing over-fitting. The usual diagnosis for over-fitting is an increase in the testing loss, which is to say, in the loss measured on the data that were not used for training. In @fig-gradient-loss-comparison, we can see that the RMSE loss decreases at the same rate on both datasets, which indicates that the model is learning from the data, but not to a point where its ability to generalize suffers.
+As we mentioned in the previous section, one risk with training that runs for too long is to start seeing over-fitting. The usual diagnosis for over-fitting is an increase in the testing loss, which is to say, in the loss measured on the data that were not used for training. In @fig-gradient-loss-comparison, we can see that the RMSE loss decreases at the same rate on both datasets, which indicates that the model is learning from the data, but not to a point where its ability to generalize suffers.\index{Loss functions!Root mean squared error}
 
 ::: column-margin
 Underfitting is also a possible scenario, where the model is *not* learning from the data, and can be detected by seeing the loss measures remain high or even increase.
@@ -368,7 +368,7 @@ We will have a far more nuanced discussion of "what is this model good for?" in 
 
 One delicate issue that we have avoided in this chapter is the absolute value of the parameters. In other words, we didn't really care about how large the model parameters would be, only the quality of the fit. This is (generally) safe to do in a model with a single parameter. But what if we had many different terms? What if, for example, we had a linear model of the form $\hat y \approx \beta_0 + \beta_1 x + \beta_2 x^2$? What if our model was of the form $\hat y \approx \beta_0 + \beta_1 x + \dots + \beta_n x^n$? What if $n$ started to get very large compared to the number of data points?
 
-In this situation, we would very likely see overfitting, wherein the model would use the polynomial terms we provided to capture more and more noise in the data. This would be a dangerous situation, as the model will lose its ability to work on unknown data!
+In this situation, we would very likely see overfitting, wherein the model would use the polynomial terms we provided to capture more and more noise in the data. This would be a dangerous situation, as the model will lose its ability to work on unknown data!\index{Regularization}
 
 To prevent this situation, we may need to use regularization. Thanfkully, regularization is a relatively simple process. In @eq-gradientdescent-gradientexplicit, the function $f(p)$ we used to measure the gradient was the loss function directly. In regularization, we use a slight variation on this, where
 

@@ -17,6 +17,13 @@ format:
       fig-cap-location: margin
       tbl-cap-location: top
       flw-cap-location: bottom
+      include-in-header:
+        text: |
+          \usepackage{imakeidx}
+          \makeindex[intoc=true, columns=3]
+      include-after-body:
+        text: |
+          \printindex
       geometry:
         - landscape
         - left=1in

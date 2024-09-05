@@ -305,8 +305,6 @@ Pi = LinRange(0.01, 0.99, 20)
 Pm = [deepcopy(model) for _ in axes(Pi, 1)]
 for (i, P) in enumerate(Pi)
     Pm[i].classifier.prior = P
-    @info mcc.(crossvalidate(Pm[i], folds; threshold=true)[1]) |> mean
-    @info Pm[i].classifier.prior
 end
 ```
 
@@ -319,8 +317,8 @@ illustration of result
 ```{julia}
 #| echo: false
 #| label: fig-tuning-prior
-#| fig-cap: Tuning of the NBC prior probability (see @eq-nbc-onevar) that a location is favorable to the presence of the species. As in @fig-tuning-threshold, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset, showing that the optimal prior for this model is informed by the relative proportion of presences in the training data.
-#| fig-scap: The 
+#| fig-cap: Tuning of the NBC prior probability (see @eq-nbc-onevar) that a location is favorable to the presence of the species. As in @fig-tuning-threshold, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset, showing that the optimal prior for this model is informed by the relative proportion of presences in the training data (this is the value of the prior we used by default in this entire chapter).
+#| fig-scap: Tuning of the NBC prior
 P0 = LinRange(0.0, 1.0, 80)
 Mm = zeros(length(P0))
 Ms = zeros(length(P0))
