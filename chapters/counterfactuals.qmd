@@ -31,7 +31,7 @@ Counterfactuals [@wachter2017] are defined as small perturbations on an actual i
 ```{julia}
 #| echo: false
 #| output: false
-i = rand(findall(p -> model.τ - 0.32 <= p <= model.τ - 0.30, predict(model; threshold=false)))
+i = rand(findall(p -> model.τ - 0.35 <= p <= model.τ - 0.25, predict(model; threshold=false)))
 cnd = X[:,i]
 pscore = predict(model, cnd; threshold=false)
 ```
@@ -188,8 +188,10 @@ lr = 1.0
 yhat = model.τ + 0.015
 xc = counterfactual(model, cnd, yhat, lr; threshold=false)
 pc = predict(model, xc; threshold=false)
+
 LR = [lr]
 PC = [pc]
+
 for i in 1:350
     if lr <= 1500
         lr *= 1.02
@@ -220,7 +222,7 @@ This approach is illustrated in @fig-counterfactuals-optimize. Note that there i
 ```{julia}
 #| echo: false
 #| output: false
-proposals = [counterfactual(model, cnd, model.τ + 0.015, 500.0; threshold=false) for _ in 1:50]
+proposals = [counterfactual(model, cnd, model.τ + 0.015, 500.0; threshold=false) for _ in 1:250]
 ```
 
 ```{julia}

@@ -83,3 +83,5 @@ function ci(C::Vector{ConfusionMatrix}, f)
 end
 
 ci(C::Vector{ConfusionMatrix}) = ci(C, mcc)
+
+crossentropyloss(y, p) = mean(.-(y .* log.(p) .+ (1.0 .- y) .* log.( 1.0 .- p)))

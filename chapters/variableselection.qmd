@@ -410,7 +410,6 @@ pretty_table(
 )
 ```
 
-
 ### Variable importance
 
 Before moving on, it is worth taking a moment to think about what we have done so far. We have optimized two components of our model: the transformation of the raw data before they are fed to the classifier (we use a PCA for this step), and then (or simultaneously) the list of variables which we put into the model. In @sec-classification, we had assumed that temperature and precipitation were important variables based on decades of ecological folklore (or, as we say, "expert knowledge"). But what about the list of variables currently retained in this model? Althought it may be tempting to come up with *ad hoc* explanations for why they matter, we can rather ask the question of "how much do these variables actually matter?".
@@ -440,12 +439,14 @@ for (i,v) in enumerate(model.v)
     Vm[i] = mean(R)
 end
 
+model.v = model.v[sortperm(Vm; rev=true)]
+train!(model; threshold=false)
+
 f = Figure(; size=(6, 3).*(600/6))
-ax = Axis(f[1,1], xticks = (1:length(Vm), ["BIO$(v)" for v in model.v][sortperm(Vm; rev=true)]))
+ax = Axis(f[1,1], xticks = (1:length(model.v), ["BIO$(v)" for v in model.v]), xticklabelrotation=45.0)
 
 stem!(ax, Vm[sortperm(Vm; rev=true)] ./ sum(Vm), strokecolor=bkcol.generic, color=:white, strokewidth=1, trunkcolor=:transparent, stemcolor=bkcol.nodata, markersize=18)
 
-#ylims!(ax, 0., 1.)
 xlims!(ax, 0, length(model.v)+1)
 hideydecorations!(ax)
 hidexdecorations!(ax, grid=true, ticks=false, label=false, ticklabels=false)
@@ -498,7 +499,7 @@ These results are presented in @fig-predictors-rangediff.
 final_range = vpr .> 0.5
 old_range = opr .> 0.5
 
-f = Figure(; size=(7, 6).*(600/6))
+f = Figure(; size=(6, 4).*(600/6))
 
 gl = f[1, 1] = GridLayout()
 
@@ -611,6 +612,5 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 #| output: false
 #| echo: false
 modelpath = joinpath(_models_path, "sdm-variables.json")
-model.v = model.v[sortperm(Vm, rev=true)]
 writesdm(modelpath, model)
 ```

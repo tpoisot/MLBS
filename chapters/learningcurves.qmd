@@ -48,29 +48,7 @@ An alternative to ROC is the PR (for precision-recall) curve, in which the posit
 
 The idea behind the TPTS curve is to instead evaluate the sensitivity of the model as a function of the prevalence that would have been observed *during training* using a specific threshold. At higher thresholds, all instances are predicted positive, but the TPTS curve quantifies how reliably high the specificity can be while keeping the threshold as low as possible. As for the ROC curve, a good model will get a high specificity even at a low threshold.
 
-### A note on cross-entropy loss
-
-In @sec-gradientdescent, we used loss functions to measure the progress of our learning algorithm. Unsurprisingly, loss functions exist for classification tasks too. One of the most common is the cross-entropy (or log-loss), which is defined as
-
-$$
-−\left[y \times \text{log}\ p+(1−y)\times \text{log}\ (1−p)\right] \,,
-$$
-
-where $y$ is the actual class, and $p$ is the probability associated to the positive class. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. Which is to say that log-loss measures how much information about $y$ is conveyed by $p$. In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of the advancement of the learning process.
-
-## How to optimize the threshold?
-
-In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased (towards false positives). We then increase the threshold, and start again.
-
-As we have discussed in @sec-learningcurves-threshold, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
-
-Some authors have used the MCC as a measure of optimality [@zhou2013], as it is maximized *only* when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, @chicco2023 recommend that MCC should be used to pick the optimal threshold *regardless of the question*, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at *everything*, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss [@Jurman2012].
-
-For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.
-
-## Application: improved Corsican nuthatch model
-
-In this section, we will finish the training of the model for the distribution of *Sitta whiteheadi*, by picking optimal hyper-parameters, and finally reporting its performance on the testing dataset. At the end of this chapter, we will therefore have established a trained model, that we will use in @sec-explanations to see how each prediction emerges.
+## A note on cross-entropy loss
 
 ```{julia}
 #| echo: false
@@ -87,50 +65,63 @@ modelpath = joinpath(_models_path, "sdm-variables.json")
 model = loadsdm(modelpath; threshold=false)
 ```
 
-### Revisiting assumptions on cross-validation
+In @sec-gradientdescent, we used loss functions to measure the progress of our learning algorithm. Unsurprisingly, loss functions exist for classification tasks too. One of the most common is the cross-entropy (or log-loss), which is defined at the scale of each prediction as
+
+$$
+L_i = −\left[y_i \times \text{log}\ p_i+(1−y_i)\times \text{log}\ (1−p_i)\right] \,,
+$$ {#eq-tuning-crossentropyloss-single}
+
+where $y_i$ is the actual class, and $p_i$ is the probability associated to the positive class for an input $x_i$. The loss of a model is simply the average of the contributions of individual points. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. All of this is to say say that the cross-entropy loss measures how much information about $y$ is conveyed by $p$.\index{Loss functions!Cross-entropy}
+
+In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of the advancement of the learning process.
 
 ```{julia}
 #| echo: false
 #| output: false
-_repls = 90
-_prop = LinRange(0.05, 0.95, 25)
-valm = zeros(length(_prop), _repls)
-trnm = zeros(length(_prop), _repls)
+_repls = 100
+_prop = LinRange(0.025, 0.975, 25)
+vall = zeros(length(_prop), _repls)
+trnl = zeros(length(_prop), _repls)
 
 for (i,p) in enumerate(_prop)
     for j in Base.oneto(_repls)
-        _folds = [holdout(y, X; proportion=p)]
-        Cs = crossvalidate(model, _folds; threshold=false)
-        valm[i,j] = mean(mcc.(Cs[1]))
-        trnm[i,j] = mean(mcc.(Cs[2]))
+        vl, tr = holdout(y, X; proportion=p)
+        train!(model; threshold=false, training=tr)
+        P = predict(model; threshold=false)
+        vall[i,j] = crossentropyloss(y[vl], P[vl])
+        trnl[i,j] = crossentropyloss(y[tr], P[tr])
     end
 end
 ```
 
-Most things related to cross-validation *are* hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to poor outcomes. In @fig-tuning-holdout, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation [see @sec-crossvalidation-holdout] can change our ability to produce a good model. Specifically, we compare the MCC estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.\index{Over-fitting}\index{Cross-validation!Holdout}
+As a gentle introduction to what's next in this chapter, we can start using the loss to optimize the training process. Most things related to cross-validation *are* hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to adverse outcomes. In @fig-tuning-holdout, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation [see @sec-crossvalidation-holdout] can change our ability to produce a good model.
+
+Specifically, we compare the cross-entropy loss estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.\index{Over-fitting}\index{Cross-validation!Holdout}
 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-holdout
 #| fig-scap: Learning curve for the proportion of data used in cross-validation.
-#| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 50 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
-fig = Figure(; size=(7, 5).*(600/6))
-ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="MCC")
+#| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 100 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
+fig = Figure(; size=(6, 3).*(600/6))
+ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="Cross-entropy loss")
 
-μ = vec(mean(valm; dims=2))
-σ = vec(std(valm, dims=2))
+μ = vec(mean(vall; dims=2))
+σ = vec(std(vall, dims=2))
 c = 1.96 .* σ ./ sqrt(_repls)
-band!(ax1, _prop, μ-c, μ+c, color = (bkcol.cv.validation, 0.4))
-scatterlines!(ax1, _prop, μ, color = bkcol.cv.validation, markersize=4, linewidth=1)
+band!(ax1, _prop, μ-c, μ+c, color = (bkcol.cv.validation, 0.4), label="Validation")
+scatterlines!(ax1, _prop, μ, color = bkcol.cv.validation, markersize=4, linewidth=1, label="Validation")
 
-μ = vec(mean(trnm; dims=2))
-σ = vec(std(trnm, dims=2))
+μ = vec(mean(trnl; dims=2))
+σ = vec(std(trnl, dims=2))
 c = 1.96 .* σ ./ sqrt(_repls)
-band!(ax1, _prop, μ-c, μ+c, color = (bkcol.cv.training, 0.4))
-scatterlines!(ax1, _prop, μ, color = bkcol.cv.training, markersize=4, linewidth=1)
+band!(ax1, _prop, μ-c, μ+c, color = (bkcol.cv.training, 0.4), label="Training")
+scatterlines!(ax1, _prop, μ, color = bkcol.cv.training, markersize=4, linewidth=1, label="Training")
+
+axislegend(ax1, merge = true, unique = true)
 
 xlims!(ax1, (0., 1.))
-ylims!(ax1, (0.6, 0.95))
+ylims!(ax1, (0., 0.5))
 current_figure()
 ```
 
@@ -141,6 +132,20 @@ Remember from @sec-crossvalidation-kfolds that with k-fold, $k$ is an hyper-para
 Performing this type of analysis is crucial, as it will help us figure out the correct conditions under which a model can be trained. In this case, if we decided to use holdout cross-validation (which we do not, we will keep using *k*-folds!) it appears that the model performance can be reliably be estimated even with low holdout proportions. The usual cutoff of 30% of data used for training using holdout would give reliable estimates of model performance.
 
 This simple example served as an illustration of what a learning curve looks like. In the rest of this chapter, we will focus on tuning an hyper-parameter from the model itself (the probability threshold for attribution of the positive class), and see how we can re-construct a general approach from thinking about the components of the confusion table.
+
+## How to optimize the threshold?
+
+In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased (towards false positives). We then increase the threshold, and start again.
+
+As we have discussed in @sec-learningcurves-threshold, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
+
+Some authors have used the MCC as a measure of optimality [@zhou2013], as it is maximized *only* when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, @chicco2023 recommend that MCC should be used to pick the optimal threshold *regardless of the question*, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at *everything*, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss [@Jurman2012].
+
+For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.
+
+## Application: improved Corsican nuthatch model
+
+In this section, we will finish the training of the model for the distribution of *Sitta whiteheadi*, by picking optimal hyper-parameters, and finally reporting its performance on the testing dataset. At the end of this chapter, we will therefore have established a trained model, that we will use in @sec-explanations to see how each prediction emerges.
 
 ### Making the NBC explicitly probabilistic {#sec-learningcurves-probabilistic}
 
@@ -182,8 +187,8 @@ In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1
 #| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
 fig = Figure(; size=(7, 5).*(600/6))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
-series!(ax, T, mcc.(CT), solid_color=bkcol.cv.training)
-lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=bkcol.cv.validation, linewidth=2, linestyle=:dash)
+series!(ax, T, mcc.(CT), solid_color=(bkcol.cv.training, 0.8), linestyle=:dash)
+lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=bkcol.cv.validation, linewidth=3)
 scatter!(ax, model.τ, maximum(vec(mean(mcc.(CT); dims=1))), strokecolor=bkcol.cv.validation, color=:white, strokewidth=2, markersize=20)
 xlims!(ax, (0., 1.))
 ylims!(ax, (0., 1.))
@@ -300,6 +305,8 @@ In a sense, the ROC and PR curves are another projection of the results from @fi
 ### Optimizing the prior
 
 ```{julia}
+#| echo: false
+#| output: false
 P0 = model.classifier.prior
 Pi = LinRange(0.01, 0.99, 20)
 Pm = [deepcopy(model) for _ in axes(Pi, 1)]
@@ -335,7 +342,7 @@ for (i, Pi) in enumerate(P0)
     Ms[i] = std(M)
 end
 
-f = Figure(; size=(6, 6).*(600/6))
+f = Figure(; size=(6, 3).*(600/6))
 ax = Axis(f[1,1], xlabel="Prior", ylabel="MCC", aspect=1)
 band!(ax, P0, Mm .- Ms, Mm .+ Ms, color=bkcol.nodata)
 lines!(ax, P0, Mm, color=bkcol.generic)

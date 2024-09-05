@@ -14,6 +14,8 @@ include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "minisdm/pipelines.jl"))
 ```
 
+The bias-variance trade off - equation for decomposition
+
 ## Non-parametric bootstrap
 
 ## Bagging and the out-of-bag error

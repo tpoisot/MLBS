@@ -33,7 +33,7 @@ presencelayer = SpeciesDistributionToolkit.mask(temperature, presences, Bool)
 heatmap(presencelayer)
 
 background = pseudoabsencemask(DistanceToEvent, presencelayer)
-buffer = pseudoabsencemask(WithinRadius, presencelayer; distance=2.5)
+buffer = pseudoabsencemask(WithinRadius, presencelayer; distance=2.0)
 bgmask = SpeciesDistributionToolkit.mask(buffer, background)
 
 heatmap(bgmask)
@@ -47,7 +47,7 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = backgroundpoints((x -> x^0.7).(bgmask), round(Int, 0.75sum(presencelayer)); replace=false)
+bgpoints = backgroundpoints((x -> x^0.9).(bgmask), round(Int, 1.45sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
 replace!(presencelayer, false => nothing)
 
