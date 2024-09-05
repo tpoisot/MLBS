@@ -180,13 +180,17 @@ heatmap(V[varord[1]], colormap=bkcol.div, colorrange=(-0.5,0.5))
 ```
 
 ```{julia}
+#| echo: false
+#| label: fig-explanations-mosaic
+#| fig-scap: Mosaic of the most important variable for each pixel
+#| fig-cap: TODO
 mostimp = mosaic(x -> argmax(abs.(x)), V)
 
-nvars = 6
+nvars = 3
 cmap = [bkcol.cat[1:nvars]..., bkcol.nodata]
 clab = push!("BIO" .* string.(model.v[varord][1:nvars]), "other")
 
-f = Figure()
+f = Figure(; size=(7, 5).*(600/6))
 ax = Axis(f[1,1], aspect=DataAspect())
 
 mvar = similar(mostimp)
@@ -196,9 +200,12 @@ for i in 1:nvars
 end
 
 heatmap!(ax, mvar, colormap=cmap)
+hidespines!(ax)
+hidexdecorations!(ax)
+hideydecorations!(ax)
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in cmap]
-Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10))
+Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10), nbanks=2)
 
 current_figure()
 ```

@@ -23207,12 +23207,26 @@
         ]
     ],
     "variables": [
+        8,
+        4,
+        19,
+        16,
+        3,
+        6,
+        5,
         1,
-        12
+        10,
+        11,
+        9,
+        13,
+        17,
+        7,
+        15,
+        14
     ],
     "classifier": "NBC",
     "threshold": 0.5,
-    "transformer": "RawData",
+    "transformer": "MultivariateTransform{PCA}",
     "labels": [
         true,
         false,
