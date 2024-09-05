@@ -2,4 +2,102 @@
 engine: julia
 ---
 
-# Bagging and ensembles {#sec-bagging}
+# Bagging, ensembles, and uncertainty {#sec-bagging}
+
+In @sec-tuning, we have established a good (as evaluated on the testing data) model for the distribution of *Sitta whiteheadi*. In this chapter, before jumping into the explainability of predictions [@sec-explanations], we will introduce a technique called bootstrap aggregating (or bagging, for short), discuss the notion of ensemble models, and see how we can use these approaches to talk about model uncertainty.
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+```
+
+## Non-parametric bootstrap
+
+## Bagging and the out-of-bag error
+
+### Bagging as a training strategy
+
+### The out-of-bag error
+
+### Bagging is a form of cross-validation
+
+## Homogeneous ensembles and when to use them
+
+### Performance and inter-model agreement
+
+In order for the bagging procedure to make sense, the component of the homogeneous ensemble should have two properties. First, each model trained on a subset of the data must be *skilled*, which is to say that if cross-validated on its own, it should have a good performance. Second, the models should (ideally) *disagree* in their predictions. The last part is important: bagging is useful when there are different ways (different biases) for a model to make accurate predictions. If all the models agree, then there is less interest in building an ensemble (aside from showing the uncertainty, as we will illustrate below).
+
+### Performance evaluation
+
+### Aggregation of the ensemble outputs
+
+## Application: uncertainty of the Corsican nuthatch model
+
+```{julia}
+#| echo: false
+#| output: false
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+    global folds = file["folds"]
+    global bags = file["bags"]
+end;
+
+
+# Load the model
+modelpath = joinpath(_models_path, "sdm-threshold.json")
+model = loadsdm(modelpath)
+
+ensemble = Bagging(model, bags)
+train!(ensemble)
+```
+
+```{julia}
+#| echo: false
+#| output: false
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+X0 = predict(ensemble.model, bio; threshold=false)
+μ = predict(ensemble, bio; threshold=false, consensus=mean)
+σ = predict(ensemble, bio; threshold=false, consensus=std)
+IQR = predict(ensemble, bio; threshold=false, consensus=iqr)
+```
+
+```{julia}
+#| echo: false
+#| output: false
+Z = (X0 - μ)/σ
+```
+
+```{julia}
+#| echo: false
+#| output: false
+heatmap(IQR)
+```
+
+tpr ppv
+
+```{julia}
+f = Figure()
+ax1 = Axis(f[1,1]; aspect=1)
+ax2 = Axis(f[1,2]; aspect=1)
+
+C = ConfusionMatrix(ensemble.model)
+OOB = outofbag(ensemble)
+E = ConfusionMatrix(ensemble)
+
+scatter!(ax1, fpr.(E), tpr.(E), color=:red, marker=:cross)
+scatter!(ax1, (fpr(C), tpr(C)), color=:black)
+scatter!(ax1, (fpr(OOB), tpr(OOB)), color=:blue)
+
+scatter!(ax2, tpr.(E), ppv.(E), color=:red, marker=:cross)
+scatter!(ax2, (tpr(C), ppv(C)), color=:black)
+scatter!(ax2, (tpr(OOB), ppv(OOB)), color=:orange)
+
+current_figure()
+```
+
+## Conclusion

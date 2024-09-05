@@ -10,10 +10,9 @@ As we mentioned in the introduction, a core idea of data science is that things 
 #| label: activate-environment
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
 include(joinpath(_code_path, "colorcube.jl"))
-include(joinpath(_code_path, "landsat.jl"))
 include(joinpath(_code_path, "daviesbouldin.jl"))
 include(joinpath(_code_path, "palettes.jl"))
 ```
@@ -42,11 +41,15 @@ Throughout this chapter, we will work on a single image -- we may initially balk
 #| label: load-data-cubes
 #| echo: false
 #| output: false
-_data_path = joinpath(dirname(Base.active_project()), "data", "kmeans", "cooked")
-R, G, B, N, S1, S2 = readlandsat(_data_path)
+R = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B4.tif"), SimpleSDMResponse)
+G = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B3.tif"), SimpleSDMResponse)
+B = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B2.tif"), SimpleSDMResponse)
+NIR = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B5.tif"), SimpleSDMResponse)
+SWIR1 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B6.tif"), SimpleSDMResponse)
+SWIR2 = SpeciesDistributionToolkit._read_geotiff(joinpath(_data_path, "earthengine", "LandSat.SR_B7.tif"), SimpleSDMResponse)
 ```
 
-In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 9 scene [@vermote2016], for which we have access to 9 different bands.
+In fact, we are going to use an image with many dimensions: the data in this chapter are coming from a Landsat 8 scene [@vermote2016], for which we have access to many different bands.
 
 | Band | Measure | Notes |
 |------------------|-----------------------|-------------------------------|
@@ -60,50 +63,56 @@ In fact, we are going to use an image with many dimensions: the data in this cha
 | 9 | Cirrus band | Can pick up high and thin clouds |
 | 10, 11 | Thermal infrared |  |
 
-: Overview of the bands in a Landsat 9 scene. The data from this chapter were downloaded from [LandsatLook].
-
-  [LandsatLook]: https://landsatlook.usgs.gov
+: Overview of the bands in a Landsat 8 scene. The data from this chapter were downloaded using the Google Earth Engine API, and are a composite of cloud-free and shadow-free pixels between the months of April and October of 2017. Note that we are spanning a wide range of seasonal conditions!
 
 By using the data present in the channels, we can reconstruct an approximation of what the landscape looked like (by using the red, green, and blue channels).
 
 Or can we?
 
-If we were to invent a time machine, and go stand directly under Landsat 9 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a *lot* of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 30x30 meters pixel. But just like we can get more information that Landsat 9, so too can Landsat 9 out-sense us when it comes to getting information, because it is not limited to the visible light spectrum. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape.
+If we were to invent a time machine, and go stand directly under Landsat 8 at the exact center of this scene, and look around, what would we see? We would see colors, and they would admit a representation as a three-dimensional vector of red, green, and blue. But we would see so much more than that! And even if we were to stand within a pixel, we would see a *lot* of colors. And texture. And depth. We would see something entirely different from this map; and we would be able to draw a lot more inferences about our surroundings than what is possible by knowing the average color of a 25x25 meters pixel. But just like we can get more information that Landsat 8, so too can Landsat 8 out-sense us when it comes to getting information. In the same way that we can extract a natural color composite out of the different channels, we can extract a fake color one to highlight differences in the landscape.
 
 ```{julia}
 #| label: fig-kmeans-composites
 #| echo: false
-#| fig-cap: The Landsat 9 data are combined into the "Natural Color" image, in which the red, green, and blue bands are mapped to their respective channels (left). The other composites is a 6-5-4 image meant to show differences between urban areas, vegetations, and crops. Note that the true-color composite is slightly distored compared to the colors of the landscape we expect; this is because natural colors are difficult to reproduce accurately.
-rgb_cube = colorcube(R, G, B; natural=true)
-veg_cube = colorcube(S1, N, R)
+#| fig-cap: The Landsat 8 data are combined into the "Natural Color" image, in which the red, green, and blue bands are mapped to their respective channels (left). The other composites are different composites (SWIR1, NIR, red; NIR, red, green; SWIR2, SWIR1, red), highlighting how choices of data representation are likely to affect what areas of the landscape will pop up. Note that the true-color composite is slightly distored compared to the colors of the landscape we expect; this is because natural colors are difficult to reproduce accurately.
+rgb_cube = colorcube(R, G, B)
+veg_cube = colorcube(SWIR1, NIR, R)
+fci_cube = colorcube(NIR, R, G)
+urb_cube = colorcube(SWIR2, SWIR1, R)
 
-fig = Figure(resolution=(500, 480))
+fig = Figure(; size=(7, 6).*(600/6))
 
 ax_rgb = Makie.Axis(fig[1,1], aspect=DataAspect())
 ax_veg = Makie.Axis(fig[2,1], aspect=DataAspect())
+ax_fci = Makie.Axis(fig[1,2], aspect=DataAspect())
+ax_urb = Makie.Axis(fig[2,2], aspect=DataAspect())
 
 image!(ax_rgb, Images.load(Makie.assetpath(rgb_cube)))
 image!(ax_veg, Images.load(Makie.assetpath(veg_cube)))
+image!(ax_fci, Images.load(Makie.assetpath(fci_cube)))
+image!(ax_urb, Images.load(Makie.assetpath(urb_cube)))
 
 hidedecorations!(ax_rgb)
 hidedecorations!(ax_veg)
+hidedecorations!(ax_fci)
+hidedecorations!(ax_urb)
 
 current_figure()
 ```
 
-In @fig-kmeans-composites, we compare the natural color reconstruction (top) to a false color composite. All of the panels in @fig-kmeans-composites represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: *what we measure defines what we can see*. In order to tell something ecologically meaningful about this place, we need to look at it in the "right" way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale [@gonzalez2023], there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily right for all problems.
+In @fig-kmeans-composites, we compare the natural color reconstruction (top) to a false color composite. All of the panels in @fig-kmeans-composites represent the same physical place at the same moment in time; but through them, we are looking at this place with very different purposes. This is not an idle observation, but a core notion in data science: *what we measure defines what we can see*. In order to tell something ecologically meaningful about this place, we need to look at it in the "right" way. Of course, although remote sensing offers a promising way to collect data for biodiversity monitoring at scale [@gonzalez2023], there is no guarantee that it will be the right approach for all problems. More (fancier) data is not necessarily awlays adequate, and just because an equipment is very expensive does not mean it will provide the information we *need*.
 
 ::: column-margin
-We will revisit the issue of variable selection and feature engineering in @sec-variable-selection.
+We will revisit the issue of variable selection and feature engineering in @sec-predictors.
 :::
 
-So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the *right* data. In fact, they may not hold information that is relevant to our question *at all*; or worse, they can hold more noise than signal. The area we will work on in this chapter is a very small crop of a Landsat 9 scene, taken on path 14 and row 28, early in late June 2023. It shows the western tip of the island of Montréal, as well as Lake Saint-Louis to the south (not actually a lake), Lake Deux-Montages to the north (not actually a lake either), and a small part of Oka national park. This is an interesting area because it has a high variety of environments: large bodies of water, forested areas (bright green in the composite), densely urbanized places (bright purple and white in the composite), less densely urbanized (green-brown), and cropland to the western tip of the island.
+So far, we have looked at this area by combining the raw data. Depending on the question we have in mind, they may not be the *right* data. In fact, they may not hold information that is relevant to our question *at all*; or worse, they can hold more noise than signal. The area we will work on in this chapter is a very small crop of a Landsat 8 scene, showing a median of the images with no cloud, for the year 2017, at a 25m resolution, for the southernmost part of Corsica. This is an interesting area because it has a high variety of environments: large bodies of water, forested areas, urban areas, and at least one airport.
 
-But can we classify these different environments starting in an ecologically relevant way? Based on our knowledge of plants, we can start thinking about this question in a different way. Specifically, "can we guess that a pixel contains plants?", and "can we guess at how much water there is in a pixel?". Thankfully, ecologists, whose hobbies include (i) guesswork and (ii) plants, have ways to answer these questions rather accurately.
+But can we classify these different environments starting in an ecologically relevant way? Based on our knowledge of plants, we can start thinking about the question of splitting the landscape into classes in a different way. Specifically, "can we guess that a pixel contains plants?", and "can we guess at how much water there is in a pixel?". During the summer of 2017, a large forest fire took place, about 10 km north of Bonifacio; this is a strong incentive to also ask the question, "can we figure out which area burned?". Thankfully, ecologists, whose hobbies include (i) guesswork and (ii) plants, have ways to answer these questions rather accurately.
 
-One way to do this is to calculate the normalized difference vegetation index, or NDVI [@kennedy2020]. NDVI is derived from the band data (NIR - Red), and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. Because plants are immediately tied to water, we can also consider the NDWI (water; Green - NIR) and NDMI (moisture; NIR - SWIR1) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), and whether this pixel is a water body (NDWI). Other commonly used indices based on Landsat 9 data include the NBR (Normalized Burned Ratio), for which high values are suggestive of a history of intense fire [@roy2006 have challenged the idea that this measure is relevant immediately post-fire], and the NDBI (Normalized Difference Built-up Index) for urban areas.
+One way to do this is to calculate the normalized difference vegetation index, or NDVI [@kennedy2020]. NDVI is derived from the band data (NIR and Red), and there is an adequate heuristic using it to make a difference between vegetation, barren soil, and water. NDVI is a normalized difference index, which is a function of the form $f(x,y) = (x-y)/(x+y)$. Because plants are immediately tied to water, we can also consider the NDWI (water; Green and NIR), NDMI (moisture; NIR and SWIR1), and the NBR (normalized burn ratio; NIR and SWIR2) dimensions: taken together, these information will represent every pixel in a three-dimensional space, telling us whether there are plants (NDVI), whether they are stressed (NDMI), whether this pixel is a water body (NDWI), and whether this pixel is recovering following a fire (NBR). @roy2006 have challenged the idea that the NBR is relevant immediately post-fire, but negative NBR values can suggest re-growth after a fire.
 
-Normalized differences indices are really fascinating measures to apply when you have two different quantities $u$ and $w$. The formula for the normalized difference index is
+Normalized differences indices\index{Normalized difference} are really fascinating measures to apply when you have two different quantities $u$ and $w$. The formula for the normalized difference index is
 
 $$\frac{u-w}{u+w}$$
 
@@ -113,36 +122,42 @@ or in other words, is the difference between these two quantities *relatively* l
 #| label: get-ndvi-et-al
 #| echo: false
 #| output: false
-ndvi = @. (N - R) / (N + R)
-ndwi = @. (G - N) / (G + N)
-ndmi = @. (N - S1) / (N + S1)
+NVI(x, y) = (x - y) / (x + y)
 
-X = zeros(Float32, (3, prod(size(ndvi))...))
-X[1,:] .= vec(ndvi)
-X[2,:] .= vec(ndwi)
-X[3,:] .= vec(ndmi)
+NDVI = NVI(NIR, R)
+NDWI = NVI(G, NIR)
+NDMI = NVI(NIR, SWIR1)
+NBR = NVI(NIR, SWIR2)
+
+X = zeros(Float32, (4, prod(size(NDVI))...))
+X[1,:] .= values(NDVI)
+X[2,:] .= values(NDWI)
+X[3,:] .= values(NDMI)
+X[4,:] .= values(NBR)
 ```
 
-We can look at the relationship between the NDVI and NDMI data [@fig-kmeans-hexbin]. For example, NDMI values around -0.1 are [low-canopy cover with low water stress]; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time [@zheng2021]. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds [@mcfeeters2013].
+We can look at the pairwise relationships between these derived measures [@fig-kmeans-hexbin]. For example, NDMI values around -0.1 are [low-canopy cover with low water stress]; NDVI values from 0.2 to 0.5 are good candidates for moderately dense crops. Notice that there is a strong (linear) relationship between NDVI and NDMI. Indeed, none of these indices are really independent; this implies that they are likely to be more informative taken together than when looking at them one at a time [@zheng2021]. Indeed, urban area tend to have high values of the NDWI, which makes the specific task of looking for swimming pools (for mosquito control) more challenging than it sounds [@mcfeeters2013].
 
   [low-canopy cover with low water stress]: https://eos.com/make-an-analysis/ndmi/
 
 ```{julia}
 #| label: fig-kmeans-hexbin
 #| echo: false
-#| fig-cap: The pixels acquired from Landsat 9 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
-fig = Figure(resolution=(500,300))
-ax = Makie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-hexbin!(ax, vec(ndvi), vec(ndmi), colormap=cgrad(incandescent), bins=20)
+#| fig-cap: The pixels acquired from Landsat 8 exist in a space with many different dimensions (one for each band). Because we are interested in a landscape classification based on water and vegetation data, we use the NDVI, NDMI, NBR, and NDWI combinations of bands. These are *derived* data, and represent the creation of new features from the raw data. Darker colors indicate more pixels in this bin.
+fig = Figure(; size=(6, 6).*(600/6))
+ax = Makie.Axis(fig[1,1]; xlabel="NBR", ylabel="NDWI", aspect=DataAspect())
+hexbin!(ax, NBR, NDWI, colormap=cgrad(bkcol.seq), bins=50)
 tightlimits!(ax)
+vlines!(ax, [0.0]; color=:black, linewidth=0.5)
+hlines!(ax, [0.0]; color=:black, linewidth=0.5)
 current_figure()
 ```
 
-By picking these four transformed values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm sees, through the lens of what we know is important about the system. With these data in hands, we can start building a classification algorithm.
+By picking these four transformed values, instead of simply looking at the clustering of all the bands in the raw data, we are starting to refine what the algorithm sees, through the lens of what we know (or guess!) to be important about the system. With these data in hand, we can start building a classification algorithm.
 
-## The theory behind *k*-means clustering
+## The theory behind *k*-means clustering {#sec-kmeans-theory}
 
-In order to understand the theory underlying *k*-means, we will work backwards from its output. As a method for clustering, *k*-means will return a vector of *class memberships*, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that *k*-means is a transformation, taking as its input a vector with three dimensions (NDVI, NDMI, NDWI), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. Pixels only belongs to one class. These are the input and output of our blackbox, and now we can start figuring out its internals.
+In order to understand the theory underlying *k*-means, we will work backwards from its output. As a method for clustering, *k*-means will return a vector of *class memberships*, which is to say, a list that maps each observation (pixel, in our case) to a class (tentatively, a cohesive landscape unit). What this means is that *k*-means is a transformation, taking as its input a vector with (in our case) four dimensions (NDVI, NDMI, NDWI, NBR), and returning a scalar (an integer, even!), giving the class to which this pixel belongs. Pixels only belongs to one class. These are the input and output of our blackbox, and now we can start figuring out its internals.
 
 ```{dot}
 //| fig-width: 100%
@@ -178,17 +193,17 @@ digraph G {
 ### Inputs and parameters
 
 ::: column-margin
-Throughout this book, we will use $\mathbf{X}$ to note the matrix of features, and $\mathbf{y}$ to note the vector of labels. Instances are columns of the features matrix, noted $\mathbf{x}_i$.
+Throughout this book, we will use $\mathbf{X}$ to note the matrix of features, and $\mathbf{y}$ to note the vector of labels. Instances are columns of the matrix of features, and noted $\mathbf{x}_i$. When we need to represent a vector $\mathbf{v}$ as a row vector, it will be noted $\mathbf{v}^\top$.
 :::
 
 In *k*-means, a set of observations $\mathbf{x}_i$ are assigned to a set of classes $\mathbf{C}$, also called the clusters. All $\mathbf{x}_i$ are vectors with the same dimension (we will call it $f$, for *features*), and we can think of our observations as a matrix of features $\mathbf{X}$ of size $(f, n)$, with $f$ features and $n$ observations (the columns of this matrix).
 
-The number of classes of $\mathbf{C}$ is $|\mathbf{C}| = k$, and $k$ is an hyper-parameter of the model, as it needs to fixed before we start running the algorithm. Each class is defined by its centroid, a vector $\mathbf{c}$ with $f$ dimensions (*i.e.* the centroid corresponds to a potential "idealized" observation of this class in the space of the features), which *k*-means progressively refines.
+The number of classes of $\mathbf{C}$ is $|\mathbf{C}| = k$, and $k$ is an hyper-parameter\index{Hyper-parameters} of the model, as it needs to fixed before we start running the algorithm. Each class is defined by its centroid, a vector $\mathbf{c}$ with $f$ dimensions (*i.e.* the centroid corresponds to a potential "idealized" observation of this class in the space of the features), which *k*-means progressively refines.
 
 ### Assigning instances to classes
 
 ::: column-margin
-Of course, the correct distance measure to use depends on what is appropriate for the data!
+The correct distance measure to use depends on what is appropriate for the data! See for example @dove2023 for time-series, or @legendre2014 for community composition data.
 :::
 
 Instances are assigned to the class for which the distance between themselves and the centroid of this class is lower than the distance between themselves and the centroid of any other class. To phrase it differently, the class membership of an instance $\mathbf{x}_i$ is given by
@@ -197,11 +212,11 @@ $$
 \text{argmin}_j \left\|\mathbf{x}_i-\mathbf{c}_j\right\|_2 \,,
 $$ {#eq-clustering-onepoint}
 
-which is the value of $j$ that minimizes the $L^2$ norm ($\|\cdot\|_2$, the Euclidean distance) between the instance and the centroid; $\text{argmin}_j$ is the function returning the value of $j$ that minimizes its argument. For example, $\text{argmin}(0.2,0.8,0.0)$ is $3$, as the third argument is the smallest. There exists an $\text{argmax}$ function, which works in the same way.
+which is the value of $j$ that minimizes the $L^2$ norm ($\|\cdot\|_2$, the Euclidean distance\index{Distances!Euclidean}) between the instance and the centroid; $\text{argmin}_j$ is the function returning the value of $j$ that minimizes its argument. For example, $\text{argmin}(0.2,0.8,0.0)$ is $3$, as the third argument is the smallest. There exists an $\text{argmax}$ function, which works in the same way.
 
 ### Optimizing the centroids
 
-Of course, what we really care about is the assignment of *all* instances to the classes. For this reason, the configuration (the disposition of the centroids) that solves our specific problem is the one that leads to the lowest possible variance within the clusters. As it turns out, it is not that difficult to go from @eq-clustering-onepoint to a solution for the entire problem: we simply have to sum over all points!
+Of course, what we really care about is the assignment of *all* instances to the classes. For this reason, the configuration (the disposition of the centroids) that solves our specific problem is the one that leads to the lowest possible variance\index{Variance} within the clusters. As it turns out, it is not that difficult to go from @eq-clustering-onepoint to a solution for the entire problem: we simply have to sum over all points!
 
 This leads to a measure of the variance, which we want to minimize, expressed as
 
@@ -225,13 +240,13 @@ where $|\cdot|$ is the cardinality of (number of instances in) $\mathbf{C}_j$, a
 Repeating a step multiple times in a row is called an iterative process, and we will see a *lot* of them. @sec-gradientdescent relies almost entirely on iteration, in fact.
 :::
 
-Once we have applied @eq-clustering-centroid-update to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.
+Once we have applied @eq-clustering-centroid-update to all classes, there is a good chance that we have moved the centroids in a way that moved them away from some of the points, and closer to others: the membership of the instances has likely changed. Therefore, we need to re-start the process again, in an iterative way.\index{Iteration}
 
 But until when?
 
-Finding the optimal solution for a set of points is an NP-hard problem [@aloise2009], which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is *global* and not *local*.
+Finding the optimal solution\index{Optimality} for a set of points is an NP-hard problem [@aloise2009], which means that we will need to rely on a little bit of luck, or a whole lot of time. The simplest way to deal with iterative processes is to let them run for a long time, as after a little while they should converge onto an optimum (here, a set of centroids for which the variance is as good as it gets), and hope that this optimum is *global* and not *local*.
 
-A global optimum is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is *greedy*, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum.
+A global optimum\index{Optimality!global} is easy to define: it is the state of the solution that gives the best possible result. For this specific problem, a global optimum means that there are no other combinations of centroids that give a lower variance. A local optimum is a little bit more subtle: it means that we have found a combination of centroids that we cannot improve without first making the variance worse. Because the algorithm as we have introduced it in the previous sections is *greedy*, in that it makes the moves that give the best short-term improvement, it will not provide a solution that temporarily makes the variance higher, and therefore is susceptible to being trapped in a local optimum\index{Optimality!local}.
 
 In order to get the best possible solution, it is therefore common to run *k*-means multiple times for a given $k$, and to pick the positions of the centroids that give the best overall fit.
 
@@ -256,7 +271,7 @@ These two information are combined in a matrix $\mathbf{R}$, wherein $\mathbf{R}
 Note that this approach protects us against the each-point-in-its-cluster situation: in this scenario, the distance between clusters would decrease really rapidly, meaning that the values in $\mathbf{R}$ would *increase*; the Davies-Bouldin measure indicates a better clustering when the values are *lower*.
 
 ::: column-margin
-In fact, there is very little enumeration of techniques in this book. The important point is to understand how all of the pieces fit together, not to make a census of all possible pieces.
+There is very little enumeration of techniques in this book. The important point is to understand how all of the pieces fit together, not to make a census of all possible pieces.
 :::
 
 There are alternatives to this method, including silhouettes [@rousseeuw1987] and the technique of @dunn1974. The question of optimizing the number of clusters goes back several decades [@thorndike1953], and it still actively studied. What matter is less to give a comprehensive overview of all the measures: the message here is to pick one that works (and can be justified) for your specific problem!
@@ -270,37 +285,32 @@ There are alternatives to this method, including silhouettes [@rousseeuw1987] an
 #| echo: false
 #| output: false
 using Clustering
-clusters = kmeans(X, 3)
+begin
+    clusters = kmeans(X, 3)
+end
+C = permutedims(reshape(assignments(clusters), size(NDVI)))
 ```
 
-Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using $k = 3$, we get the results presented in @fig-kmeans-initial-landscape.
-
-```{julia}
-#| label: permute-cluster-dimensions
-#| echo: false
-#| output: false
-C = permutedims(reshape(assignments(clusters), size(ndvi)))
-```
+Before we do anything else, we need to run our algorithm with a random pick of hyper-parameters, in order to get a sense of how hard the task ahead is. In this case, using $k = 3$, we get the results presented in @fig-kmeans-initial-landscape. Why $k=3$? Why not! The point of *k*-means is to provide a division of data in a small (manageable) number of classes, and the folklore around this method suggests that two is too few, and four is initially too much. Therefore, $k=3$. We can tweak it later, and indeed we will, but what matters immediately is to generate a result to kickstart our learning process.
 
 ```{julia}
 #| label: fig-kmeans-initial-landscape
 #| echo: false
 #| fig-cap: After iterating the k-means algorithm, we obtain a classification for every pixel in the landscape. This classification is based on the values of NDVI, NDMI, and NDWI indices, and therefore groups pixels based on specific assumptions about vegetation and stress. This clustering was produced using $k=3$, i.e. we want to see what the landscape would look like when divided into three categories.
-
-fig = Figure(; resolution=(500, 240))
+fig = Figure(; size=(7, 6).*(600/6))
 ax = CairoMakie.Axis(fig[1,1]; aspect=DataAspect())
-heatmap!(ax, C; colormap=light[2:4])
+heatmap!(ax, C; colormap=bkcol.cat)
 hidedecorations!(ax)
 current_figure()
 ```
 
 ::: column-margin
-In fact, take some time to think about how you would use $k$-means to come up with a way to remove pixels with only water from this image!
+Take some time to think about how you would use $k$-means to come up with a way to remove pixels with only water from this image! We will actually perform this step in the next section.
 :::
 
 It is always a good idea to look at the first results and state the obvious. Here, for example, we can say that water is easy to identify. In fact, removing open water pixels from images is an interesting image analysis challenge [@mondejar2019], and because we used an index that specifically identifies water bodies (NDWI), it is not surprising that there is an entire cluster that seems to be associated with water. But if we take a better look, it appears that there groups of pixels that represent dense urban areas that are classified with the water pixels. When looking at the landscape in a space with three dimensions, it looks like separating densely built-up environment and water is difficult.
 
-This might seem like an idle observation, but this is not the case! It means that when working on vegetation-related questions, we will likely need at least one cluster for water, and one cluster for built-up areas. This is helpful information, because we can already think about how many classes of vegetation we are willing to accept, and add (at least) two clusters to capture other types of cover.
+This might seem like an idle observation, but this is not the case! It means that when working on vegetation-related questions, we will likely need at least one cluster for water, and one cluster for built-up areas. This is helpful information, because we can already think about how many classes of vegetation we are willing to accept, and add (at least) two clusters to capture other types of cover. Looking at the initial division in classes, it seems that having only two clusters for the variety of non-water pixels is not really sufficient, and so we start searching for an optimal division of the landscape.
 
 ### Optimal number of pixels
 
@@ -309,6 +319,28 @@ We will revisit the issue of tuning the hyper-parameters in more depth in @sec-t
 :::
 
 In order to produce @fig-kmeans-initial-landscape, we had to guess at a number of classes we wanted to split the landscape into. This introduces two important steps in coming up with a model: starting with initial parameters in order to iterate rapidly, and then refining these parameters to deliver a model that is fit for purpose. Our discussion in @sec-kmeans-initial, where we concluded that we needed to keep (maybe) two classes for water and built-up is not really satisfying, as we do not yet have a benchmark to evaluate the correct value of $k$; we know that it is more than 3, but how much more?
+
+We will now change the values of $k$ and use the @davies1979 measure introduced in @sec-clustering-optimality to identify the optimal value of $k$. The results are presented in @fig-kmeans-tuning. Note that we only explore $k \in [3, 10]$. More than 10 categories is probably not very actionable\index{Actionable models}, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.
+
+Note that we will play a little trick on our data here. We know from @fig-kmeans-initial-landscape that with $k=3$, we can do a good job at removing water pixels, which seem to cover about a third of the image. If we are interested in land-based questions, this is quite a lot of information we do not really care about. In order to make the clustering more relevant to our interests, we will therefore extract the pixels that are *not* classified as water before doing the clustering. This *will* miss a few relevant pixels, but for now we can consider this an acceptable trade-off in order to have a better classification of land pixels.
+
+```{julia}
+#| label: mask-water
+#| echo: false
+#| output: false
+msk = convert(Bool, similar(NDVI))
+msk.grid[findall(isequal(C[1]), permutedims(C))] .= true # We know the first pixel in C is water
+replace!(msk, true => nothing)
+replace!(msk, false => true)
+
+X = zeros(Float32, (4, length(msk)))
+X[1,:] .= values(SpeciesDistributionToolkit.mask(msk, NDVI))
+X[2,:] .= values(SpeciesDistributionToolkit.mask(msk, NDWI))
+X[3,:] .= values(SpeciesDistributionToolkit.mask(msk, NDMI))
+X[4,:] .= values(SpeciesDistributionToolkit.mask(msk, NBR))
+```
+
+What would make such a classification better? Recall from the @sec-kmeans-theory that the assignment of instances to classes is done based on the distance to the centroid, which it itself the average of the features of the members of each class. By removing the pixels that are not relevant to our question (such as using water pixels to classify the image using data relevant to vegetation), we are taking steps to ensure that the space in which the centroids can exist is more rigorously defined for the question we are interested in.\index{Data preparation}
 
 ```{julia}
 #| label: run-davies-bouldin
@@ -322,7 +354,7 @@ vcosts = copy(score)
 begin
     Threads.@threads for j in axes(k_trial, 1)
         k = k_trial[j]
-        sc = zeros(Float64, 5)
+        sc = zeros(Float64, 12)
         cs = copy(sc)
         for rep in axes(sc, 1)
             cl = kmeans(X, k)
@@ -337,24 +369,21 @@ begin
 end
 ```
 
-We will now change the values of $k$ and use the @davies1979 measure introduced in @sec-clustering-optimality to identify the optimal value of $k$. The results are presented in @fig-kmeans-tuning. Note that we only explore $k \in [3, 10]$. More than 8 categories is probably not very actionable, and therefore we can make the decision to only look at this range of parameters. Sometimes (always!) the best solution is the one that gets your job done.
-
 ```{julia}
 #| label: fig-kmeans-tuning
 #| echo: false
-#| width: 100%
-#| fig-cap: Results of running the *k*-means algorithm ten times for each number of clusters between 3 and 8. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
-f = Figure(; resolution=(500,500))
+#| fig-cap: Results of running the *k*-means algorithm ten times for each number of clusters between 3 and 10. The average Davies-Bouldin and cost are reported, as well as the standard deviation. As expected, the total cost decreases with more clusters, but this is not necessarily the sign of a better clustering.
+f = Figure(; size=(7, 6).*(600/6))
 
 gl = f[1,1] = GridLayout()
 
-ax1 = CairoMakie.Axis(gl[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index", xticks=3:8)
+ax1 = CairoMakie.Axis(gl[1,1]; xlabel="Number of clusters", ylabel="Davies-Bouldin index", xticks=3:maximum(k_trial))
 scatterlines!(ax1, k_trial, score, color=:black)
-errorbars!(ax1, k_trial, score, .5vscore, .5vscore, whiskerwidth = 10)
+errorbars!(ax1, k_trial, score, .5vscore, .5vscore, whiskerwidth = 10, color=:black)
 
-ax2 = CairoMakie.Axis(gl[2,1]; xlabel="Number of clusters", ylabel="Total cost", xticks=3:8)
+ax2 = CairoMakie.Axis(gl[2,1]; xlabel="Number of clusters", ylabel="Total cost", xticks=3:maximum(k_trial))
 scatterlines!(ax2, k_trial, costs, color=:black)
-errorbars!(ax2, k_trial, costs, .5vcosts, .5vcosts, whiskerwidth = 10)
+errorbars!(ax2, k_trial, costs, .5vcosts, .5vcosts, whiskerwidth = 10, color=:black)
 
 hidexdecorations!(ax1, grid=false)
 
@@ -363,25 +392,35 @@ rowgap!(gl, 0.0)
 current_figure()
 ```
 
-There are two interesting things in @fig-kmeans-tuning. First, note that for $k=\{3,4\}$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! This is a good sign, and, anecdotally, something that might suggest a really informative separation of the points. Second, $k = 3$ has by far the lowest Davies-Bouldin index of all values we tried, and is therefore strongly suggestive of an optimal hyper-parameter. But in @fig-kmeans-initial-landscape, we already established that one of these clusters was capturing *both* water and built-up environments, so although it may look better from a quantitative point of view, it is not an ideal solution *for the specific problem we have*.
+::: column-margin
+Note that using $k=3$ on the non-water pixels is *different* from using $k=4$ on all pixels! This is an important distinction, as it accentuates the importance of data selection and preparation on the process of picking good hyper-parameters.
+:::
 
-In this specific case, it makers very little sense *not* to use $k = 4$ or $k = 5$. They have about the same performance, but this gives us potentially more classes that are neither water nor built-up. This image is one of many cases where it is acceptable to sacrifice a little bit of optimality in order to present more actionable information. Based on the results in this section, we will pick the largest possible $k$ that does not lead to a drop in performance, which in our case is $k=5$.
+There are two interesting things in @fig-kmeans-tuning. First, note that for $k=\{3,4,5\}$, there is almost no dispersal: all of the assignments have the exact same score, which is unlikely to happen except if the assignments are the same every time! This is a good sign, and, anecdotally, something that might suggest a really information separation of the points. Second, $k = 3$ has by far the lowest Davies-Bouldin index of all values we tried, and is therefore strongly suggestive of an optimal hyper-parameter. Because we used the information in @fig-kmeans-initial-landscape to remove the water pixels, we can then probably move forward with this value.
+
+```{julia}
+#| label: re-cluster
+#| echo: false
+#| output: false
+k = 4
+clusters = kmeans(X, k)
+C = zeros(size(NDVI))
+C[findall(!isnothing, msk.grid)] .= clusters.assignments
+C[findall(iszero, C)] .= NaN
+```
 
 ### Clustering with optimal number of classes
 
-The clustering of pixels using $k = 5$ is presented in @fig-kmeans-optimal-landscape. Unsurprisingly, *k*-means separated the open water pixels, the dense urban areas, as well as the more forested/green areas. Now is a good idea to start thinking about what is representative of these clusters: one is associated with very high NDWI value (these are the water pixels), and two classes have both high NDVI and high NDMI (suggesting different categories of vegetation).
+The clustering of pixels using $k = 3$ is presented in @fig-kmeans-optimal-landscape. Unsurprisingly, *k*-means separated the open water pixels, the dense urban areas, as well as the more forested/green areas. Now is a good idea to start thinking about what is representative of these clusters: one is associated with very high NDWI value (these are the water pixels), and two classes have both high NDVI and high NDMI (suggesting different categories of vegetation).
 
 ```{julia}
 #| label: fig-kmeans-optimal-landscape
 #| echo: false
 #| fig-cap: Results of the landscape clustering with k=5 clusters. This number of clusters gives us a good separation between different groups of pixels, and seems to capture features of the landscape as revealed with the false-color composites.
-k = 5
-clusters = kmeans(X, k)
-C = reshape(assignments(clusters), size(ndvi))
 
-fig = Figure(resolution=(500, 240))
+fig = Figure(; size=(7, 6).*(600/6))
 ax_clust = CairoMakie.Axis(fig[1,1], aspect=DataAspect())
-heatmap!(ax_clust, permutedims(C); colormap=light[2:(k+1)])
+heatmap!(ax_clust, permutedims(C); colormap=bkcol.cat)
 hidedecorations!(ax_clust)
 current_figure()
 ```
@@ -403,10 +442,11 @@ for cluster in axes(ctr, 2)
     push!(df,
         (
             Cluster=cluster,
-            Cover=round(Int, count(clusters.assignments .== cluster)/prod(size(ndvi))*100),
+            Cover=round(Int, count(clusters.assignments .== cluster)/prod(size(NDVI))*100),
             NDVI=round(ctr[1,cluster]; digits=3),
             NDWI=round(ctr[2,cluster]; digits=3),
             NDMI=round(ctr[3,cluster]; digits=3),
+            NBR=round(ctr[4,cluster]; digits=3),
         )
     )
 end
@@ -414,14 +454,14 @@ sort!(df, :NDVI)
 pretty_table(df, backend = Val(:markdown), formatters = ft_nomissing, show_subheader = false, show_header = true)
 ```
 
+The area of the space of parameters covered by each cluster in represented in @fig-kmeans-clustering, and this result is actually not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.
+
 ::: column-margin
-In fact, this behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes], and [David Lawrence Miller's Beyoncé palettes]. Let it never again be said that ecologists should not be trusted with machine learning methods.
+This behavior makes *k*-means excellent at creating color palettes from images! Cases in point, [Karthik Ram's Wes Anderson palettes], and [David Lawrence Miller's Beyoncé palettes]. Let it never again be said that ecologists should not be trusted with machine learning techniques.
 :::
 
   [Karthik Ram's Wes Anderson palettes]: https://github.com/karthik/wesanderson
   [David Lawrence Miller's Beyoncé palettes]: https://github.com/dill/beyonce
-
-The area of the space of parameters covered by each cluster in represented in @fig-kmeans-clustering, and this result is actually not surprising, if we spend some time thinking about how *k*-means work. Because our criteria to assign a point to a cluster is based on the being closest to its centroid than to any other centroid, we are essentially creating Voronoi cells, with linear boundaries between them.
 
 By opposition to a model based on, for example, mixtures of Gaussians, the assignment of a point to a cluster in *k*-means is independent of the current composition of the cluster (modulo the fact that the current composition of the cluster is used to update the centroids). In fact, this makes *k*-means closer to (or at least most efficient as) a method for quantization [@gray1984].
 
@@ -429,13 +469,27 @@ By opposition to a model based on, for example, mixtures of Gaussians, the assig
 #| label: fig-kmeans-clustering
 #| echo: false
 #| fig-cap: Visualisation of the clustering output as a function of the NDVI and NDMI values. Note that the limits between the clusters are lines (planes), and that each cluster covers about the same volume in the space of parameters.
-fig = Figure(resolution=(500,300))
+fig = Figure(; size=(7, 6).*(600/6))
 ax = CairoMakie.Axis(fig[1,1]; xlabel="Vegetation", ylabel="Moisture")
-scatter!(ax, vec(ndvi), vec(ndmi), color=clusters.assignments, colormap=light[2:(k+1)])
+scatter!(ax, values(SpeciesDistributionToolkit.mask(msk, NDVI)), values(SpeciesDistributionToolkit.mask(msk, NDMI)), color=clusters.assignments, colormap=bkcol.cat, markersize=2)
 tightlimits!(ax)
 current_figure()
 ```
 
+## Is *k*-means a model?
+
+Yes.
+
+Well, it depends.
+
+Deciding what we mean by "a model" is actually an interesting question to ponder. When we apply *k*-means to the data, it brings us additional information, specifically the class to which we can assign the different pixels. This is creating novel information from the data, and this should be sufficient to accept that *k*-means is a model.
+
+But maybe we espouse a more ambitious definition of a model, and we are specifically looking for a model that can makes prediction on data that we had not previously used. In that case, *k*-means still qualifies. Imagine, for a moment, a new pixel. This is a little unrealistic as, unless some unforeseen geological events took place, all of the pixels we could describe today for this dataset already existed in 2017. But imagine we changed the bounding box of the scene: we now have spectral data for a few thousand pixels we had not previously observed.
+
+We do not need to run *k*-means again to classify these pixels. Because *k*-means is trained when we have established the number and position of the centroids, we can now simply figure out which cluster the new point belongs to, which is done using @eq-clustering-onepoint.
+
+Both "what is a model" and "what is a new datapoint" are important questions to think about, and there are often edge cases to the answers we can bring. They will come back often in this book, notably in @sec-crossvalidation. It is always a good idea, at the end of a chapter, to stop and think for a moment about what our model *really* is. What problems can it can solve? What would it would mean to use this model on new data? In doing so, you will naturally start thinking about the place of each model in the broader problem of "how do I make my data make sense?".
+
 ## Conclusion
 
-In this chapter, we have used the *k*-means algorithm to create groups in a large dataset that had no labels, *i.e.* the points were not assigned to a class. By picking the features we wanted to cluster the point, we were able to highlight specific aspects of the landscape. In @sec-gradientdescent, we will start adding labels to our data, and shift our attention from classification to regression problems.
+In this chapter, we have used the *k*-means algorithm to create groups in a large dataset that had no labels, *i.e.* the points were not initially assigned to a class. By picking the features we wanted to cluster the different points, we were able to highlight specific aspects of the landscape. In @sec-gradientdescent, we will start adding labels to our data, and shift our attention from classification to regression problems.

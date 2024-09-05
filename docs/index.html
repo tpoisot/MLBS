@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.47">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Timothée Poisot">
-<meta name="dcterms.date" content="2024-08-07">
+<meta name="dcterms.date" content="2024-09-04">
 
 <title>Machine Learning for Biodiversity Scientists</title>
 <style>
@@ -91,7 +91,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar docked">
+<body class="nav-sidebar docked slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -164,19 +164,37 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Variable preparation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing features</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hyper-parameters tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/bagging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bagging, ensembles, and uncertainty</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./chapters/explanations.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/counterfactuals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Generating counterfactuals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./chapters/squint.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The machine learning squint</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -212,7 +230,7 @@ div.csl-indent {
 <div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -241,7 +259,7 @@ div.csl-indent {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 7, 2024</p>
+      <p class="date">September 4, 2024</p>
     </div>
   </div>
   
@@ -253,13 +271,17 @@ div.csl-indent {
 </header>
 
 
-<section id="preface" class="level1 unnumbered">
+<section id="preface" class="level1 unnumbered page-columns page-full">
 <h1 class="unnumbered">Preface</h1>
-<p>Data science is now an established methodology to study biodiversity, and this is a problem.</p>
-<p>This may be an opportunity when it comes to advancing our knowledge of biodiversity, and in particular when it comes to translating this knowledge into action <span class="citation" data-cites="tuia2022">(<a href="#ref-tuia2022" role="doc-biblioref">Tuia <em>et al.</em> 2022</a>)</span>; but make no mistake, this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field. And as luck would have it, there are easier fields to master than data science. The point of this book, therefore, is to provide an introduction to fundamental concepts in data science, from the perspective of a biodiversity scientist, by using examples corresponding to real-world use-cases of these techniques.</p>
-<p>But what do we mean by <em>data science</em>? Most science, after all, relies on data in some capacity. What falls under the umbrella of data science is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered beyond recognition. This entire process is driven by (or subject to, even) domain knowledge. There is no such thing as data science, at least not in a vacuum: there is data science as a methodology applied to a specific domain.</p>
-<p>Before we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret: data <em>science</em> is a little bit of a misnomer.</p>
-<p>To understand why, it helps to think of science (the application of the scientific method, that is) as cooking. There are general techniques one must master, and specific steps and cultural specifics, and there is a final product. When writing this preface, I turned to my shelf of cookbooks, and picked my two favorites: Robuchon’s <em>The Complete Robuchon</em> (a no-nonsense list of hundreds of recipes with no place for improvisation), and Bianco’s <em>Pizza, Pasta, and Other Food I Like</em> (a short volume with very few pizza and pasta, and wonderful discussions about the importance of humility, creativity, and generosity). Data science, if it were cooking, would feel a lot like the second. Deviation from the rules (they are mostly recommendations, in fact) is often justifiable if you feel like it. But this improvisation requires good skills, a clear mental map of the problem, and a library of patterns that you can draw from.</p>
+<p>Machine learning is now an established methodology to study biodiversity, and this is a problem.</p>
+<p>This may be an opportunity when it comes to advancing our knowledge of biodiversity, and in particular when it comes to translating this knowledge into action <span class="citation" data-cites="tuia2022">(<a href="#ref-tuia2022" role="doc-biblioref">Tuia <em>et al.</em> 2022</a>)</span>; but make no mistake, this is a problem for us, biodiversity scientists, as we suddenly need to develop competences in an entirely new field in order to remain professionally relevant <span class="citation" data-cites="ellwood2019">(<a href="#ref-ellwood2019" role="doc-biblioref">Ellwood <em>et al.</em> 2019</a>)</span>. And as luck would have it, there are easier fields to master than machine learning. The point of this book, therefore, is to provide an introduction to fundamental concepts in data science, from the perspective of a biodiversity scientist, by using examples corresponding to real-world use-cases of these techniques.</p>
+<p>But what do we mean by <em>machine learning</em> and <em>data science</em>? Most science, after all, relies on data in some capacity. What falls under the umbrella of <em>data science</em> is, in short, embracing in equal measure quantitative skills (mathematics, machine learning, statistics), programming, and domain expertise, in order to solve well-defined problems. <em>Machine learning</em> is a series of techniques (or, more precisely, a high-level approach to these techniques) through which we conduct our data science activities. A core tenet of data science is that, when using it, we seek to “deliver actionable insights”, which is MBA-speak for “figuring out what to do next”. One of the ways in which this occurs is by letting the data speak, after they have been, of course, properly cleaned and transformed and engineered. This entire process is driven by (or, even, subject to) domain knowledge. There is no such thing as data science, at least not in a vacuum: there is data science as a methodology applied to a specific domain.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Think of data science as being its own epistemology <span class="citation" data-cites="desai2022">(<a href="#ref-desai2022" role="doc-biblioref">Desai <em>et al.</em> 2022</a>)</span>, and machine learning as one methodology we can apply to work within this context.</p>
+</div></div><p>Before we embark into a journey of discovery on the applications of data science to biodiversity, allow me to let you in on a little secret: data <em>science</em> is a little bit of a misnomer. In order to understand why, I need (or at least, I really want) to talk about cooking.</p>
+<p>To become a good cook, there are general techniques one <em>must</em> master, which we apply to specific steps in recipes; these recipes draw from a common cultural or local repertoire and cultural specifics (but the evolution of recipes is remarkably convergent – most cuisines have a <em>mirepoix</em>, bread, and beer). Finally, there is the product, <em>i.e.</em> the unique dish that you have cooked. And so it is for data science too: we can abstract a series of processes and guidelines, think about their application within the context of our specific field, study system, or line and research, and all of this will shape the final data product we can serve.</p>
+<p>When writing this preface, I turned to my shelf of cookbooks, and picked my two favorites: Robuchon’s <em>The Complete Robuchon</em> (a no-nonsense list of hundreds of recipes with no place for improvisation), and Bianco’s <em>Pizza, Pasta, and Other Food I Like</em> (a short volume with very few pizza and pasta, and wonderful discussions about the importance of humility, creativity, and generosity). Data science, if it were cooking, would feel a lot like the second. Deviation from the rules is often justifiable if you feel like it. But this improvisation requires good skills, a clear mental map of the problem, a defined vision of what these deviations will let you achieve, and a library of patterns that you can draw from.</p>
 <p>This book will not get you here. But it will speed up the process, by framing the practice of data science as a natural way to conduct research on biodiversity.</p>
 
 
@@ -270,6 +292,12 @@ div.csl-indent {
 <section id="bibliography" class="level1 unnumbered">
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-desai2022" class="csl-entry" role="listitem">
+Desai, J., Watson, D., Wang, V., Taddeo, M. &amp; Floridi, L. (2022). <a href="https://doi.org/10.1007/s11229-022-03933-2">The epistemological foundations of data science: a critical review</a>. <em>Synthese</em>, 200.
+</div>
+<div id="ref-ellwood2019" class="csl-entry" role="listitem">
+Ellwood, E.R., Sessa, J.A., Abraham, J.K., Budden, A.E., Douglas, N., Guralnick, R., <em>et al.</em> (2019). <a href="https://doi.org/10.1093/biosci/biz147">Biodiversity Science and the Twenty-First Century Workforce</a>. <em>BioScience</em>, 70, 119–121.
+</div>
 <div id="ref-tuia2022" class="csl-entry" role="listitem">
 Tuia, D., Kellenberger, B., Beery, S., Costelloe, B.R., Zuffi, S., Risse, B., <em>et al.</em> (2022). <a href="https://doi.org/10.1038/s41467-022-27980-y">Perspectives in machine learning for wildlife conservation</a>. <em>Nature Communications</em>, 13, 792.
 </div>

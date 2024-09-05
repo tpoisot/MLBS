@@ -2,26 +2,18 @@
 engine: julia
 ---
 
-# Hyper-parameters tuning {#sec-tuning}
+# Tuning hyper-parameters {#sec-tuning}
 
-In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of hyper-parameters of the model we developed in ­@sec-classification and @sec-predictors.
+In @sec-gradientdescent, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where *hyper*-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is *controlling* the learning process, but is not itself modified through learning [@yang2020]. Hyper-parameters usually need to be determined *before* the training starts [@claesen2015], but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of an hyper-parameter of the model we developed in ­@sec-classification and @sec-predictors (the threshold at which we consider that a probability is high enough to be considered a positive prediction).
 
-We will illustrate this using an approach called moving-threshold classification, and additionally explore how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then *explain* in @sec-explanations.
+We will illustrate this using an approach called moving-threshold classification, and additionally discuss how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling [@huntington1998], successive halvings [@jamieson2016], orthogonal sampling [@mckay1979], and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the "right" balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then *explain* in @sec-explanations.
 
 ```{julia}
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusion.jl"))
-include(joinpath(_code_path, "mocks.jl"))
-include(joinpath(_code_path, "bioclim.jl"))
-include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "vif.jl"))
-include(joinpath(_code_path, "splitters.jl"))
-include(joinpath(_code_path, "palettes.jl"))
-include(joinpath(_code_path, "crossvalidate.jl"))
-include(joinpath(_code_path, "variableselection.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
 ```
 
 ## Classification based on probabilities {#sec-learningcurves-threshold}
@@ -29,7 +21,7 @@ include(joinpath(_code_path, "variableselection.jl"))
 When first introducing classification in @sec-classification and @sec-predictors, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either "present" or "absent"). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.
 
 ::: column-margin
-Note that the quantitative value returned by the classifier does not *need* to be a probability; it simply needs to be on an interval or ratio scale.
+Note that the quantitative value returned by the classifier does not *need* to be a probability; it simply needs to be on an interval (or ratio) scale.
 :::
 
 The idea behind the use of thresholds is simple: if the classifier output $\hat y$ is larger than (or equal to) the threshold value $\tau$, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value $\hat y$ returned by the classifier be a probability. We can simply decide to pick $\tau$ somewhere in the support of the distribution of $\hat y$.
@@ -50,6 +42,12 @@ One very common issue with ROC curves, is that they are overly optimistic about 
 
 An alternative to ROC is the PR (for precision-recall) curve, in which the positive predictive value is plotted against the true-positive rate; in other words, the PR curve (and therefore the PR-AUC) quantify whether a classifier makes reliable positive predictions, both in terms of these predictions being associated to actual positive outcomes (true-positive rate) and not associated to actual negative outcomes (positive predictive value). Because the PR curve uses the positive predictive values, it captures information that is similar to the ROC curve, but is in general more informative [@Saito2015].
 
+### The TPTS curve
+
+@Becker2022 developed a variant of the ROC curve meant to be used when the validation data are *only* composed of the predictive class; there are a number of situations when this is a reasonable assumption. In the original article, the testing data were reported positive detection of beta-coronaviruses in bat species, which can be seen as a positive-only event since negative tests are unlikely to be reported [the "file-drawer effect"; @pautasso2010]. In this context, evaluating the model by accounting for negative testing data introduces biases, as we do not have access to novel negative instances.
+
+The idea behind the TPTS curve is to instead evaluate the sensitivity of the model as a function of the prevalence that would have been observed *during training* using a specific threshold. At higher thresholds, all instances are predicted positive, but the TPTS curve quantifies how reliably high the specificity can be while keeping the threshold as low as possible. As for the ROC curve, a good model will get a high specificity even at a low threshold.
+
 ### A note on cross-entropy loss
 
 In @sec-gradientdescent, we used loss functions to measure the progress of our learning algorithm. Unsurprisingly, loss functions exist for classification tasks too. One of the most common is the cross-entropy (or log-loss), which is defined as
@@ -58,11 +56,11 @@ $$
 −\left[y \times \text{log}\ p+(1−y)\times \text{log}\ (1−p)\right] \,,
 $$
 
-where $y$ is the actual class, and $p$ is the probability associated to the positive class. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. Which is to say that log-loss measures how much information about $y$ is conveyed by $p$. In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of learning.
+where $y$ is the actual class, and $p$ is the probability associated to the positive class. Note that the log-loss is very similar to Shannon's measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of $y$ and $p$. Which is to say that log-loss measures how much information about $y$ is conveyed by $p$. In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of the advancement of the learning process.
 
 ## How to optimize the threshold?
 
-In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased. We then increase the threshold, and start again.
+In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example $[0.2, 0.8, 0.1, 0.5, 1.0]$. We then compare all of these values to an initial threshold, for example $\tau = 0.05$, giving us a vector of Boolean values, in this case $[+, +, +, +, +]$. We can then compare this classified output to a series of validation labels, *e.g.* $[-, +, -, -, +]$, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased (towards false positives). We then increase the threshold, and start again.
 
 As we have discussed in @sec-learningcurves-threshold, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be [@Perkins2006; @Unal2017]. The usual recommendation is to use the True Skill Statistic, also known as Youden's $J$ [@youden1950]. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier [@perkins2005]. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions [@poisot2023a].
 
@@ -73,6 +71,76 @@ For once, and after over 15 years of methodological discussion, it appears that 
 ## Application: improved Corsican nuthatch model
 
 In this section, we will finish the training of the model for the distribution of *Sitta whiteheadi*, by picking optimal hyper-parameters, and finally reporting its performance on the testing dataset. At the end of this chapter, we will therefore have established a trained model, that we will use in @sec-explanations to see how each prediction emerges.
+
+```{julia}
+#| echo: false
+#| output: false
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+    global folds = file["folds"]
+    global coordinates = file["coordinates"]
+end;
+
+# Load the model
+modelpath = joinpath(_models_path, "sdm-variables.json")
+model = loadsdm(modelpath; threshold=false)
+```
+
+### Revisiting assumptions on cross-validation
+
+```{julia}
+#| echo: false
+#| output: false
+_repls = 90
+_prop = LinRange(0.05, 0.95, 25)
+valm = zeros(length(_prop), _repls)
+trnm = zeros(length(_prop), _repls)
+
+for (i,p) in enumerate(_prop)
+    for j in Base.oneto(_repls)
+        _folds = [holdout(y, X; proportion=p)]
+        Cs = crossvalidate(model, _folds; threshold=false)
+        valm[i,j] = mean(mcc.(Cs[1]))
+        trnm[i,j] = mean(mcc.(Cs[2]))
+    end
+end
+```
+
+Most things related to cross-validation *are* hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to poor outcomes. In @fig-tuning-holdout, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation [see @sec-crossvalidation-holdout] can change our ability to produce a good model. Specifically, we compare the MCC estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.\index{Over-fitting}\index{Cross-validation!Holdout}
+
+```{julia}
+#| echo: false
+#| label: fig-tuning-holdout
+#| fig-scap: Learning curve for the proportion of data used in cross-validation.
+#| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 50 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
+fig = Figure(; size=(7, 5).*(600/6))
+ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="MCC")
+
+μ = vec(mean(valm; dims=2))
+σ = vec(std(valm, dims=2))
+c = 1.96 .* σ ./ sqrt(_repls)
+band!(ax1, _prop, μ-c, μ+c, color = (bkcol.cv.validation, 0.4))
+scatterlines!(ax1, _prop, μ, color = bkcol.cv.validation, markersize=4, linewidth=1)
+
+μ = vec(mean(trnm; dims=2))
+σ = vec(std(trnm, dims=2))
+c = 1.96 .* σ ./ sqrt(_repls)
+band!(ax1, _prop, μ-c, μ+c, color = (bkcol.cv.training, 0.4))
+scatterlines!(ax1, _prop, μ, color = bkcol.cv.training, markersize=4, linewidth=1)
+
+xlims!(ax1, (0., 1.))
+ylims!(ax1, (0.6, 0.95))
+current_figure()
+```
+
+::: column-margin
+Remember from @sec-crossvalidation-kfolds that with k-fold, $k$ is an hyper-parameter; it can be tuned in the exact same way! The value of $k$ used in these chapters has been picked because it gives adequate performance.
+:::
+
+Performing this type of analysis is crucial, as it will help us figure out the correct conditions under which a model can be trained. In this case, if we decided to use holdout cross-validation (which we do not, we will keep using *k*-folds!) it appears that the model performance can be reliably be estimated even with low holdout proportions. The usual cutoff of 30% of data used for training using holdout would give reliable estimates of model performance.
+
+This simple example served as an illustration of what a learning curve looks like. In the rest of this chapter, we will focus on tuning an hyper-parameter from the model itself (the probability threshold for attribution of the positive class), and see how we can re-construct a general approach from thinking about the components of the confusion table.
 
 ### Making the NBC explicitly probabilistic {#sec-learningcurves-probabilistic}
 
@@ -101,36 +169,22 @@ Note that we can see that using the approximate version we used so far (the pred
 ```{julia}
 #| echo: false
 #| output: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-1.jld")
-ptm = JLD.load(modelpath)
-y = ptm["labels"]
-X = ptm["features"][:,ptm["variables"]]
-folds = ptm["folds"]
-v = ptm["variables"]
-tf = ptm["transformation"]
-untuned = naivebayes(y, X; transformation=tf)
+T = LinRange(0.0, 1.0, 120)
+CT = threshold!(model, folds; endpoints=T)
 ```
 
-```{julia}
-#| echo: false
-#| output: false
-T = LinRange(0.0, 1.0, 250)
-CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf)) for τ in T]...)
-τ = T[last(findmax(vec(mean(mcc.(CT); dims=1))))]
-```
-
-In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
+In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(model.τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-threshold
+#| fig-scap: Learning curve for the threshold of the NBC model.
 #| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
-fig = Figure(; resolution=(700, 300))
+fig = Figure(; size=(7, 5).*(600/6))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
-series!(ax, T, mcc.(CT), solid_color=light[1])
-lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=light[2], linewidth=2, linestyle=:dash)
-scatter!(ax, τ, maximum(vec(mean(mcc.(CT); dims=1))), color=light[2], markersize=20)
+series!(ax, T, mcc.(CT), solid_color=bkcol.cv.training)
+lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=bkcol.cv.validation, linewidth=2, linestyle=:dash)
+scatter!(ax, model.τ, maximum(vec(mean(mcc.(CT); dims=1))), strokecolor=bkcol.cv.validation, color=:white, strokewidth=2, markersize=20)
 xlims!(ax, (0., 1.))
 ylims!(ax, (0., 1.))
 current_figure()
@@ -141,31 +195,62 @@ To do so, we can look at the distribution of probabilities returned by the NBC, 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-probabilities
+#| fig-scap: Probabilities assigned to each pixel and position of the threshold.
 #| fig-cap: Probabilities assigned to each pixel (bottom), color-coded by their value in the validation set (top scatterplots). The NBC is making a lot of recommendations very close to 0 or very close to 1, and for this reason, positioning the threshold anywhere in the middle of the range would give almost similar results in terms of the MCC.
-P = vec(mapslices(untuned, X; dims=2))
-f = Figure(; resolution=(700, 300))
+P = predict(model; threshold=false)
+f = Figure(; size=(7, 5).*(600/6))
 
 ax = Axis(f[2,1]; xlabel="Probability of presence")
 xlims!(ax, (0, 1))
 ylims!(ax, low=0.0)
-hist!(ax, P, color=:lightgrey)
+hist!(ax, P, strokecolor=bkcol.generic, strokewidth=1, color=:white, bins=50)
 
 rg = Axis(f[1,1])
+
+poly!(rg, Point2f[(0, -0.05), (model.τ, -0.05), (model.τ, 0.6), (0, 0.6)], color=bkcol.sdm.absentbg)
+poly!(rg, Point2f[(model.τ, -0.05), (1, -0.05), (1, 0.6), (model.τ, 0.6)], color=bkcol.sdm.presentbg)
+
 xlims!(rg, (0, 1))
+ylims!(rg, (-0.05, 0.6))
 
 Ys = rand(length(y)).*0.2
 Ys[findall(y)] .+= 0.35
 
-cl = [vibrant[1:2][i+1] for i in y]
+cl = [i ? bkcol.sdm.present : bkcol.sdm.absent for i in y]
 
 scatter!(rg, P, Ys, color=cl)
 
-vlines!(ax, [τ], color=:black, linestyle=:dash)
-vlines!(rg, [τ], color=:black, linestyle=:dash)
+vlines!(ax, [model.τ], color=:black, linestyle=:dash)
+vlines!(rg, [model.τ], color=:black, linestyle=:dash)
 
 hideydecorations!(ax)
 hidedecorations!(rg)
-hidespines!(rg)
+
+current_figure()
+```
+
+Looking at @fig-tuning-probabilities, it appears that changing the threshold is changing the proportion of false positives and negatives; it is worth investigating exactly how this happens. We can explore this behavior in @fig-tuning-ppvnpv. The points where the PPV and NPC curves meet is a good first approximation of the threshold (the MCC is not picking this exact point, but this is an approximation nonetheless).
+
+```{julia}
+#| echo: false
+#| label: fig-tuning-ppvnpv
+#| fig-scap: Changes in PPV and NPV with increasing threshold values.
+#| fig-cap: Learning curve for the threshold of the NBC model, showing the PPV (solid line) and the NPV (dashed line). This figure shows how increasing the threshold leads to a better positive predictive value (we are more confident in the predicti class) at the cost of a loss in the negative predictive value (the pixels classified as negative are not meaningful). Essentially, moving the threshold (and indeed, tuning any other hyper-parameter) is a way to find a position in this space where the balance between errors maximizes the skill of our classifier.
+fig = Figure(; size=(7, 3.5).*(600/6))
+
+ax1 = Axis(fig[1,1]; xlabel="Threshold", ylabel="Positive Predictive value", aspect=1)
+ax2 = Axis(fig[1,2]; xlabel="Threshold", ylabel="Negative Predictive value", aspect=1)
+
+errorbars!(ax1, T, vec(mean(ppv.(CT); dims=1)), vec(std(ppv.(CT); dims=1)), color=bkcol.nodata)
+lines!(ax1, T, vec(mean(ppv.(CT); dims=1)), color=bkcol.generic, linewidth=2, linestyle=:solid)
+
+errorbars!(ax2, T, vec(mean(npv.(CT); dims=1)), vec(std(npv.(CT); dims=1)), color=bkcol.nodata)
+lines!(ax2, T, vec(mean(npv.(CT); dims=1)), color=bkcol.generic, linewidth=2, linestyle=:solid)
+
+for ax in [ax1, ax2]
+    xlims!(ax, (0., 1.))
+    ylims!(ax, (0., 1.))
+end
 
 current_figure()
 ```
@@ -177,27 +262,28 @@ After picking a threshold and seeing how it relates to the distribution of proba
 ```{julia}
 #| echo: false
 #| label: fig-tuning-roc-pr
+#| fig-scap: ROC and PR curve for the trained classifier.
 #| fig-cap: ROC and PR curve for each fold, calculated on the validation datasets. The area highlighted in green corresponds to perfect classifiers, and the dashed line is the no-skill classifier. The solid arrow shows direction alongside which model performance increases in both cases.
-f = Figure()
+f = Figure(; size=(7, 3.5).*(600/6))
 
 roc = Axis(f[1,1], xlabel="False Positive Rate", ylabel="True Positive Rate", aspect=1)
 pr = Axis(f[1,2], xlabel="True Positive Rate", ylabel="Positive Pred. Value", aspect=1)
 
-scatter!(roc, [0.0], [1.0], color=light[8], alpha=0.2, markersize=300)
-scatter!(pr, [1.0], [1.0], color=light[8], alpha=0.2, markersize=300)
+scatter!(roc, [0.0], [1.0], color=bkcol.sdm.nochange, alpha=0.6, markersize=300)
+scatter!(pr, [1.0], [1.0], color=bkcol.sdm.nochange, alpha=0.6, markersize=300)
 
-arrows!(roc, [0.5], [0.5], [-0.2], [0.2], color=light[8], linewidth=4)
-arrows!(roc, [0.5], [0.5], [0.2], [-0.2], color=light[3], linewidth=2, linestyle=:dash)
+arrows!(roc, [0.5], [0.5], [-0.2], [0.2], color=bkcol.sdm.gain, linewidth=4)
+arrows!(roc, [0.5], [0.5], [0.2], [-0.2], color=bkcol.sdm.loss, linewidth=2, linestyle=:dash)
 
 lines!(roc, [0.0, 1.0], [0.0, 1.0], color=:black, linestyle=:dash)
 lines!(pr, [0.0, 1.0], [0.5, 0.5], color=:black, linestyle=:dash)
 
-arrows!(pr, [0.5], [0.5], [0.2], [0.2], color=light[8], linewidth=4)
-arrows!(pr, [0.5], [0.5], [-0.2], [-0.2], color=light[3], linewidth=2, linestyle=:dash)
+arrows!(pr, [0.5], [0.5], [0.2], [0.2], color=bkcol.sdm.gain, linewidth=4)
+arrows!(pr, [0.5], [0.5], [-0.2], [-0.2], color=bkcol.sdm.loss, linewidth=2, linestyle=:dash)
 
 for i in axes(CT, 1)
-    lines!(roc, fpr.(CT[i,:]), tpr.(CT[i,:]), color=vibrant[1])
-    lines!(pr, tpr.(CT[i,:]), ppv.(CT[i,:]), color=vibrant[1])
+    lines!(roc, fpr.(CT[i,:]), tpr.(CT[i,:]), color=(bkcol.generic, 0.6))
+    lines!(pr, tpr.(CT[i,:]), ppv.(CT[i,:]), color=(bkcol.generic, 0.6))
 end
 
 for ax in [pr, roc]
@@ -209,75 +295,89 @@ end
 current_figure()
 ```
 
-### Fine-tuning the NBC prior
+In a sense, the ROC and PR curves are another projection of the results from @fig-tuning-ppvnpv: a good classifier makes credible recommendations for its positive class, while maintaining credible recommendations for the negative class. Looking at several ways to express the performance of the classifier is a good idea, as a good understanding of how reliable our predicitions are depends on our ability to appraise these different sources of error.
 
-In the previous section, we have assumed that the prior on occurrences $P(+)$ was one half, which is a decision we can revisit. But changing this value would probably require that we also change the threshold, and for this reason we need to optimize both hyperparameters at the same time. We present the results of a simple grid search in @fig-tuning-both.
+### Optimizing the prior
 
-Based on these results, it appears that changing the value of the prior has very little impact on the best MCC we can achieve: the threshold is simply adjusted to reflect the fact that we assume occurrences to be increasingly likely. In this example, there is very little incentive for us to change the value of the prior, as it would have a very small effect on the overall performance of the model. For this reason, we will keep the previous model ($P(+) = 0.5$ and $\tau \approx `{julia} round(τ; digits=2)`$) as the best one.
+```{julia}
+P0 = model.classifier.prior
+Pi = LinRange(0.01, 0.99, 20)
+Pm = [deepcopy(model) for _ in axes(Pi, 1)]
+for (i, P) in enumerate(Pi)
+    Pm[i].classifier.prior = P
+end
+```
 
-::: column-margin
-A grid search in an exhaustive sweep of all possible combinations of parameter values. In order to make the process more efficient, refined approaches like successive halvings [@jamieson2016] can be used.
-:::
+update on NBC prior
 
-Just because we decided to use a learning curve does not mean we *have* to change the hyper-parameters. Sometimes, this approach reveals that the value of an hyper-parameter is not really important to model performance, and we need to make a decision on what to do next. Here, although there are marginal changes in the value of the MCC, they do not feel significant enough to change the value of the prior.
+how to update? also threshold
+
+illustration of result
 
 ```{julia}
 #| echo: false
-#| label: fig-tuning-both
-#| fig-cap: learning curve for the threshold and prior
-fig = Figure(; resolution=(600, 400))
-ax = Axis(fig[1,1]; xlabel="P(+)", ylabel="MCC")
-
-T = LinRange(0.0, 1.0, 25)
-Pr = LinRange(0.2, 0.8, 25)
-Threads.@threads for pr in Pr
-    CT = hcat([first(crossvalidate(naivebayes, y, X, folds, τ; transformation=tf, presence=pr)) for τ in T]...)
-    mccs = vec(mean(mcc.(CT); dims=1))
-    bm, bi = findmax(mccs)
-    scatter!(ax, pr, bm, color=T[bi], colorrange=(0., 1.), colormap=cgrad(iridescent), strokecolor=:black, strokewidth=1)
+#| label: fig-tuning-prior
+#| fig-cap: Tuning of the NBC prior probability (see @eq-nbc-onevar) that a location is favorable to the presence of the species. As in @fig-tuning-threshold, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset, showing that the optimal prior for this model is informed by the relative proportion of presences in the training data (this is the value of the prior we used by default in this entire chapter).
+#| fig-scap: Tuning of the NBC prior
+P0 = LinRange(0.0, 1.0, 80)
+Mm = zeros(length(P0))
+Ms = zeros(length(P0))
+for (i, Pi) in enumerate(P0)
+    M = zeros(length(folds))
+    for (j, fold) in enumerate(folds)
+        tv, tt = fold
+        mi = deepcopy(model)
+        train!(mi; training=tt)
+        mi.classifier.prior = Pi
+        M[j] = mcc(ConfusionMatrix(predict(mi, mi.X[:,tv]), mi.y[tv]))
+    end
+    Mm[i] = mean(M)
+    Ms[i] = std(M)
 end
 
-Colorbar(fig[1,2], colorrange=(0, 1), colormap=cgrad(iridescent), label="Optimal threshold")
-
-xlims!(ax, (0., 1.))
-ylims!(ax, (0.87, 0.89))
-
+f = Figure(; size=(6, 6).*(600/6))
+ax = Axis(f[1,1], xlabel="Prior", ylabel="MCC", aspect=1)
+band!(ax, P0, Mm .- Ms, Mm .+ Ms, color=bkcol.nodata)
+lines!(ax, P0, Mm, color=bkcol.generic)
+bst = findmax(Mm)
+scatter!(ax, P0[last(bst)], bst[1], strokewidth=1, color=:white, strokecolor=bkcol.generic, markersize=18)
+vlines!(ax, [mean(model.y)], color=bkcol.generic, linestyle=:dash)
+xlims!(ax, 0, 1)
+ylims!(ax, 0, 1)
 current_figure()
 ```
 
-```{julia}
-#| echo: false
-#| output: false
-model = naivebayes(y, X; transformation=tf)
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in v]
-
-pr = convert(Float64, similar(first(bio)))
-bs = convert(Float64, similar(first(bio)))
-en = convert(Float64, similar(first(bio)))
-
-submodels = [naivebayes(y, X[b,:]; transformation=tf) for b in bootstrap(y, X; n=500)]
-
-Threads.@threads for k in keys(pr)
-    x = [bio[i][k] for i in axes(v, 1)]
-    pr[k] = model(x)
-    en[k] = entropy(pr[k])
-    bs[k] = iqr([m(x) for m in submodels])
-end
-```
+discuss imbalance again
 
 ### Testing and visualizing the final model
 
 As we are now considering that our model is adequately trained, we can apply it to the testing data we had set aside early in @sec-classification. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important.
+
+```{julia}
+#| echo: false
+#| output: false
+_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+
+origmodel = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+train!(origmodel; threshold=false)
+
+old_range = convert(Bool, predict(origmodel, bio; threshold=true))
+final_range = convert(Bool, predict(model, bio; threshold=true))
+final_proba = predict(model, bio; threshold=false)
+```
 
 We are *not* applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of "we pick the best model as the one with the highest validation MCC", and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of $p$-hacking, as the question of "what to do in case a model with lower validation MCC had a better performance on the testing data?" would arise, and we do not want to start questioning our central decision this late in the process.
 
 ```{julia}
 #| echo: false
 #| output: false
-ytest, Xtest = JLD.load(joinpath(_ptm_path, "sdm-step-0.jld"))["testing"]
-preds = vec(mapslices(model, Xtest[:,v], dims=2))
-C = ConfusionMatrix(preds, ytest, τ)
+JLD2.jldopen(joinpath(_models_path, "sdm-testing-data.jld2"), "r") do file
+    global Xt = file["X"]
+    global yt = file["y"]
+end;
+preds = predict(model, Xt)
+C = ConfusionMatrix(preds, yt)
 ```
 
 We can start by taking a look at the confusion matrix on the testing data:
@@ -291,40 +391,109 @@ $$
 
 This is very promising! There are far more predictions on the diagonal (`{julia} C.tp + C.tn`) than outside of it (`{julia} C.fp + C.fn`), which suggests an accurate classifier. The MCC of this model is `{julia} round(mcc(C); digits=3)`, its true-skill statistic is `{julia} round(trueskill(C); digits=3)`, and its positive and negative predictive values are respectively `{julia} round(ppv(C); digits=3)` and `{julia} round(npv(C); digits=3)`. In other words: this model is *extremely* good. The values of PPV and NPV in particular are important to report: they tell us that when the model predicts a positive or negative outcome, it is expected to be correct more than 9 out of 10 times.
 
-The final predictions are shown in @fig-tuning-map. Although the range map is very similar to the one we produced by the end of @sec-predictors, the small addition of an optimized threshold leads to a model that is overall a little more accurate. Note that the uncertainty has a much nicer spatial structure when compared to our initial attempt (in @fig-classification-range): there are combinations of environmental variables that make prediction more difficult, but they tend to be very spatially clustered.
+The final predictions are shown in @fig-tuning-map. Although the range map is very similar to the one we produced by the end of @sec-predictors, the small addition of an optimized threshold leads to a model that is overall a little more accurate. In @sec-bagging, we will focus on the uncertainty associated to this prediction.
 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-map
-#| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability. Darker pixels in the uncertainty map indicate a higher variance between bootstrap runs.
-f = Figure()
-ax = Axis(f[1,1], aspect=DataAspect())
-heatmap!(ax, pr .>= τ, colormap=vibrant[1:2])
-ax2 = Axis(f[1,2], aspect=DataAspect())
-heatmap!(ax2, bs, colormap=cgrad(iridescent))
-for a in [ax, ax2]
-    hidedecorations!(a)
-    hidespines!(a)
+#| fig-scap: Update range map for *Sitta whiteheadi* after thresholding.
+#| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
+f = Figure(; size=(7, 6).*(600/6))
+
+gl = f[1, 1] = GridLayout()
+
+ax0 = Axis(
+    gl[1, 1];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "Prediction difference",
+)
+ax1 = Axis(
+    gl[1, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True positives",
+)
+ax2 = Axis(
+    gl[1, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False positives",
+)
+ax4 = Axis(
+    gl[2, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False negatives",
+)
+ax5 = Axis(
+    gl[2, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True negatives",
+)
+
+rm_pal = cgrad([bkcol.sdm.loss, bkcol.sdm.nochange, bkcol.sdm.gain], 3, categorical=true)
+heatmap!(ax0, final_range, colormap=[bkcol.nodata, bkcol.nodata], alpha=0.7)
+heatmap!(ax0, rangediff(final_range, old_range); colormap = rm_pal)
+
+
+cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
+clab = ["Loss", "No change", "Gain"]
+Legend(gl[2,1], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
+
+prd = predict(model; threshold = true)
+grd = y
+
+TP = findall(prd .& grd)
+TN = findall((.!prd) .& (.!grd))
+FP = findall(prd .& (.!grd))
+FN = findall((.!prd) .& grd)
+
+heatmap!(ax1, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 3, color = bkcol.sdm.present)
+
+heatmap!(ax2, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 5, color = bkcol.sdm.absent, marker = :cross)
+
+heatmap!(ax4, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(
+    ax4,
+    coordinates[FN, 2],
+    coordinates[FN, 1];
+    markersize = 5,
+    color = bkcol.sdm.present,
+    marker = :cross,
+)
+
+heatmap!(ax5, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = bkcol.sdm.absent)
+
+for ax in [ax0, ax1, ax2, ax4, ax5]
+    ax.xticklabelpad = 0
+    ax.yticklabelpad = 0
+    hidedecorations!(ax)
+    hidespines!(ax)
 end
+
+colgap!(gl, 0)
+rowgap!(gl, 10)
+
 current_figure()
 ```
 
 ## Conclusion
 
-In this chapter, we have refined a model by adopting a principled approach to establishing hyper-parameters. This resulted in a final trained model, which we applied to produce the final prediction of the distribution of *Sitta whiteheadi*. In @sec-explanations, we will start asking "why"? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions.
+In this chapter, we have refined a model by adopting a principled approach to establishing hyper-parameters. This resulted in a final trained model, which we applied to produce the final prediction of the distribution of *Sitta whiteheadi*. In @sec-explanations, we will start asking "why"? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions. But before we do this, we will spend time in @sec-bagging to discuss the uncertainty that is part of this model, and how it can be communicated.
 
 ```{julia}
 #| output: false
 #| echo: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-2.jld")
-JLD.save(
-    modelpath,
-    "labels", y,
-    "features", X,
-    "folds", folds,
-    "variables", v,
-    "transformation", Whitening,
-    "threshold", τ
-)
+modelpath = joinpath(_models_path, "sdm-threshold.json")
+writesdm(modelpath, model)
 ```

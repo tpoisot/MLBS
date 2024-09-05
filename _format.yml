@@ -9,23 +9,38 @@ format:
     toc-expand: false
   pdf:
       documentclass: scrbook
+      dpi: 600
+      classoption:
+        - fontsize=10.5pt
       papersize: letter
-      fig-cap-location: bottom
+      linestretch: 1.1
+      fig-cap-location: margin
       tbl-cap-location: top
+      flw-cap-location: bottom
+      include-in-header:
+        text: |
+          \usepackage{imakeidx}
+          \makeindex[intoc=true, columns=3]
+      include-after-body:
+        text: |
+          \printindex
       geometry:
-        - left=0.7in
-        - textwidth=5.2in
-        - marginparsep=0.2in
-        - marginparwidth=1.7in
+        - landscape
+        - left=1in
+        - textwidth=7in
+        - textheight=6in
+        - marginparsep=0.3in
+        - marginparwidth=2.2in
       linkcolor: SteelBlue4
       colorlinks: true
-      fig-pos: 'pbt'
-      tbl-pos: 'bt'
+      fig-pos: 'p'
+      tbl-pos: 'pbt'
       toc: true
-      toc-depth: 3
+      lof: true
+      toc-depth: 2
       number-sections: true
       number-depth: 3
-      mainfont: TeX Gyre Termes
-      mathfont: TeX Gyre Termes
+      mainfont: TeX Gyre Pagella
+      mathfont: TeX Gyre Pagella Math
       sansfont: TeX Gyre Heros
       monofont: TeX Gyre Cursor

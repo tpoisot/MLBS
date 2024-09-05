@@ -2,7 +2,7 @@
 engine: julia
 ---
 
-# Variable preparation {#sec-predictors}
+# Preparing features {#sec-predictors}
 
 In @sec-classification, we introduced a simple classifier trained on a dataset of presence and pseudo-absences of a species (*Sitta whiteheadi*), which we predicted using the mean annual temperature as well as the annual total precipitation. This choice of variables was motivated by our knowledge of the fact that most species tend to have some temperature and precipitation they are best suited to. But we can approach the exercise of selecting predictive variables in a far more formal way, and this will form the core of this chapter. Specifically, we will examine two related techniques: variable selection, and feature engineering.
 
@@ -13,16 +13,10 @@ There are two reasons to think about variable selection and feature engineering 
 ```{julia}
 #| echo: false
 #| output: false
-_code_path = joinpath(dirname(Base.active_project()), "lib")
+_code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "confusion.jl"))
-include(joinpath(_code_path, "mocks.jl"))
-include(joinpath(_code_path, "nbc.jl"))
-include(joinpath(_code_path, "vif.jl"))
-include(joinpath(_code_path, "splitters.jl"))
-include(joinpath(_code_path, "palettes.jl"))
-include(joinpath(_code_path, "crossvalidate.jl"))
-include(joinpath(_code_path, "variableselection.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+include(joinpath(_code_path, "minisdm/varimp.jl"))
 ```
 
 The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction [@booth2022]; this is particularly true when working from the WorldClim version [@fick2017], and not as problematic when using other data products like CHELSA [@karger2017].
@@ -63,6 +57,22 @@ pretty_table(
 
 In this chapter, we will try to improve the model introduced in @sec-classification, by evaluating different methods to prepare our predictor variables.
 
+emphasize that the model is two functions, a transformer and the classifier
+
+yes even when not trasnforming, this is $f(x) = x$ which is a function
+
+## A digression: what is a variable?
+
+measurement with unit
+
+compare with clustering chapter
+
+derived variables v. transformations
+
+exploratory data analysis
+
+feature engineering
+
 ## What is data leakage? {#sec-leakage}
 
 Data leakage is a concept that is, if you can believe it, grosser than it sounds.
@@ -89,7 +99,9 @@ A counter-example where performing the transformation *before* the analysis is w
 
 Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
 
-If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation. This way to introduce data leakage is extremely common in the species distribution literature [see *e.g.* @demarco2018].
+If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation.
+
+**ARGUMENT** do at the global scale – but then question: is the structure of data outside of the study area relevant? This way to introduce data leakage is extremely common in the species distribution literature [see e.g. @demarco2018]. suggest reasons for/against
 
 ![Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.]
 
@@ -97,7 +109,7 @@ If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X
 
 The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$. This is illustrated in @fig-predictors-leakage.
 
-#### How to work in practice?
+### How to work in practice?
 
 Although avoiding data leakage is a tricky problem, there is a very specific mindset we can adopt that goes a long way towards not introducing it in our analyses, and it is as follows: *every data transformation step is a modeling step that is part of the learning process*. We do not, for example, apply a PCA and train the model on the projected variables -- we feed raw data into a model, the first step of which is to perform this PCA for us.
 
@@ -143,7 +155,9 @@ Keep in mind that we do not know the number of variables we should use; therefor
 
 ### Removal of colinear variables
 
-Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there
+Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there **THIS PARAGRAPH IS NOT FINISHED**
+
+## Univariate transformations
 
 ## Multivariate transformations
 
@@ -153,27 +167,34 @@ Principal Component Analysis (PCA) is one of the most widely used multi-variate 
 
 ### Whitening transforms
 
-Another class of potentially very useful data transformations is whitening transforms, which belongs to the larger category of decorrelation methods. These methods do not perform any dimensionality reduction, but instead remove the covariance in the datasets. Whitening has proven to be particularly effective at improving the predictive ability of models applied to data with strong covariance structure [@koivunen1999]. In essence, given a matrix of features $\mathbf{x}$, with averages $\mathbf{\mu}$ and covariance $\mathbf{C}$, a whitening transform $\mathbf{W}$ is the *one of the matrices* that satisfies $\mathbf{W}^\top\mathbf{C}\mathbf{W} = \mathbf{I}$. In other words, the whitening transform results in a new set of features with unit variance and no covariance: the dimensionality of the problem remains the same but the new random variables are independent. Given any dataset with covariance matrix $\mathbf{C}$, if any $\mathbf{W}$ is a whitening transform, then so to are any matrices $\mathbf{W}\mathbf{R}$ where $\mathbf{R}$ performs a rotation with $\mathbf{R}^\top\mathbf{R} = \mathbf{I}$. The optimal whitening transform can be derived through a variety of ways [see *e.g.* @kessy2018]. The whitening transform is applied to the input vector using $\mathbf{W}^\top (\mathbf{x}-\mathbf{\mu})$: this results in new random variables that have a mean of 0, and unit variance. The new input vector after the transformation is therefore an instance of "white noise" [@vasseur2004].
+Another class of potentially very useful data transformations is whitening transforms, which belongs to the larger category of decorrelation methods. These methods do not perform any dimensionality reduction, but instead remove the covariance in the datasets. Whitening has proven to be particularly effective at improving the predictive ability of models applied to data with strong covariance structure [@koivunen1999]. In essence, given a matrix of features $\mathbf{x}$, with averages $\mathbf{\mu}$ and covariance $\mathbf{C}$, a whitening transform $\mathbf{W}$ is *one of the matrices* that satisfies $\mathbf{W}^\top\mathbf{C}\mathbf{W} = \mathbf{I}$.
+
+In other words, the whitening transform results in a new set of features with unit variance and no covariance: the dimensionality of the problem remains the same but the new random variables are independent. Given any dataset with covariance matrix $\mathbf{C}$, if any $\mathbf{W}$ is a whitening transform, then so to are any matrices $\mathbf{W}\mathbf{R}$ where $\mathbf{R}$ performs a rotation with $\mathbf{R}^\top\mathbf{R} = \mathbf{I}$. The optimal whitening transform can be derived through a variety of ways [see *e.g.* @kessy2018]. The whitening transform is applied to the input vector using $\mathbf{W}^\top (\mathbf{x}-\mathbf{\mu})$: this results in new random variables that have a mean of 0, and unit variance. The new input vector after the transformation is therefore an instance of "white noise" [@vasseur2004].
+
+When performing Whitening transformation, the first variable in the new space will usually have pretty high correlation to the first raw variable. But because the purpose of Whitening is to remove the covariance (and ensure unit variance), this gets less and less true as we increase the rank of the variables. By the time the last selected variable is reached, we should expect it to be almost purely noise.
 
 ## Application: optimal variables for Corsican nuthatch
 
 ```{julia}
 #| echo: false
 #| output: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-0.jld")
-ptm = JLD.load(modelpath)
-trainlabels, trainfeatures = ptm["training"]
-v0 = ptm["variables"]
-m0 = naivebayes(trainlabels, trainfeatures[:,v0])
+JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
+    global X = file["X"]
+    global y = file["y"]
+    global folds = file["folds"]
+    global coordinates = file["coordinates"]
+end;
+# Load the model
+modelpath = joinpath(_models_path, "sdm-baseline.json")
+model = loadsdm(modelpath; threshold=false)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-folds = kfold(trainlabels, trainfeatures; k=15, permute=true)
-C0v, C0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,v0], folds)
-CXv, CXt = crossvalidate(naivebayes, trainlabels, trainfeatures, folds)
+C0v, C0t = crossvalidate(model, folds; threshold=false)
+reset!(model)
+CXv, CXt = crossvalidate(model, folds; threshold=false)
 ```
 
 Before we start, we can re-establish the baseline performance of the model from @sec-classification. In this (and the next) chapters, we will perform k-folds cross-validation (see @sec-crossvalidation-kfolds for a refresher), using $k=15$. This strategy gives an average MCC of `{julia} round(mean(mcc.(C0v)); digits=3)`, which represents our "target": any model with a higher MCC will be "better" according to our criteria.
@@ -199,40 +220,51 @@ We will perform four different versions of stepwise variable selection. Forward,
 ```{julia}
 #| echo: false
 #| output: false
-b0 = backwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
-Cb0v, Cb0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,b0], folds)
-f0 = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc)
-Cf0v, Cf0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,f0], folds)
-c0 = constrainedselection(naivebayes, trainlabels, trainfeatures, folds, [1,12], mcc)
-Cc0v, Cc0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,c0], folds)
-i0 = stepwisevif(trainfeatures, 10.0)
-Ci0v, Ci0t = crossvalidate(naivebayes, trainlabels, trainfeatures[:,i0], folds)
+reset!(model)
+b0 = predictors(backwardselection!(model, folds; threshold=false))
+Cb0v, Cb0t = crossvalidate(model, folds; threshold=false)
+
+reset!(model)
+f0 = predictors(forwardselection!(model, folds; threshold=false))
+Cf0v, Cf0t = crossvalidate(model, folds; threshold=false)
+
+reset!(model)
+c0 = predictors(constrainedselection!(model, folds, [1,12]; threshold=false))
+Cc0v, Cc0t = crossvalidate(model, folds; threshold=false)
+
+reset!(model)
+i0 = predictors(stepwisevif!(model, 50.0; threshold=false))
+Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 ```
 
 ```{julia}
 #| echo: false
-msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
-hed = "| Model | Variables |"
-sep = "|------|------|"
-for (k,v) in msrs
-    hed *= " $(k) |"
-    sep *= "------|"
-end
-tbl = [hed, sep]
-for (m, p) in ["@sec-classification baseline" => ([1,12], C0v), "All var." => (1:19, CXv), "Fwd." => (f0, Cf0v), "Fwd. (constr.)" => (c0, Cc0v), "Backw." => (b0, Cb0v), "VIF" => (i0, Ci0v)]
-    v, c = p
-    row = "| $(m) | $(length(v)) |"
-    for (pm, pf) in msrs
-        row *= " $(round(mean(pf.(c)); digits=3)) |"
-    end
-    push!(tbl, row)
-end
+#| output: asis
+#| label: tbl-predictors-selection
+#| tbl-cap: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC averaged over the validation datasets. The highest MCC value, corresponding to the best model, is in bold.
+tbl = []
+push!(tbl, ["@sec-classification baseline", "1,12", mean(mcc.(C0v))])
+push!(tbl, ["All variables", " ", mean(mcc.(CXv))])
+push!(tbl, ["Fwd. sel.", join(f0, ","), mean(mcc.(Cf0v))])
+push!(tbl, ["Constr. sel.", join(c0, ","), mean(mcc.(Cc0v))])
+push!(tbl, ["Backw. sel.", join(b0, ","), mean(mcc.(Cb0v))])
+push!(tbl, ["Var. infl. fac.", join(i0, ","), mean(mcc.(Ci0v))])
 
-push!(tbl, "\n: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC, NPV, PPV, accuracy, and True-Skill Statistic (TSS). {#tbl-predictors-selection}")
-try
-    display("text/markdown", join(tbl, "\n"))
-catch e
-end
+D = permutedims(hcat(tbl...))
+
+hl_maxval = MarkdownHighlighter(
+           (data, i, j) -> (j == 3) && (D[i,3] == maximum(Float64.(D[:,3]))),
+           MarkdownDecoration(bold = true)
+       );
+
+pretty_table(
+    D;
+    backend = Val(:markdown),
+    header = ["Model", "Variables", "MCC"],
+    alignment = [:l, :l, :l],
+    formatters = ft_printf("%5.4f", 3),
+    highlighters = hl_maxval
+)
 ```
 
 The best model is given by forward selection, although backwards selection also gives a very close performance. At this point, we may decide to keep these two strategies, and evaluate the effect of different transformations of the data.
@@ -243,92 +275,331 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 
 ```{julia}
 #| echo: false
-sel = ["Fwd." => forwardselection, "Backw." => backwardselection]
-trf = ["PCA" => PCA, "Whitening" => Whitening, "Raw data" => nothing]
-msrs = ["MCC" => mcc, "NPV" => npv, "PPV" => ppv, "Acc." => accuracy, "TSS" => trueskill]
+#| output: asis
+#| label: tbl-predictors-transformation
+#| tbl-cap: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictors-selection, and as we use the same folds for validation, can be directly compared.
+tbl = []
 
-hed = "| Selection | Transformation | Variables |"
-sep = "|------|------|----|"
-for (k,v) in msrs
-    hed *= " $(k) |"
-    sep *= "------|"
-end
-tbl = [hed, sep]
+current_best_mcc = -Inf
+current_best_model = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
 
-for (sk, sf) in sel
-    for (tk, tf) in trf
-        vs = sf(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation=tf)
-        Csv, Cst = crossvalidate(naivebayes, trainlabels, trainfeatures[:,vs], folds; transformation=tf)
-        row = "| $(sk) | $(tk) | $(length(vs)) |"
-        for (m, p) in msrs
-            v = round(mean(p.(Csv)); digits=3)
-            row *= " $(v) |"
-        end
-        push!(tbl, row)
-    end
+# Baseline
+mod = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+train!(mod; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["@sec-classification baseline", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
 end
 
-push!(tbl, "\n: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictors-selection, and as we use the same folds for validation, can be directly compared. {#tbl-predictors-transformation}")
-try
-    display("text/markdown", join(tbl, "\n"))
-catch e
+# Baseline + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
+train!(mod; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
 end
 
+# Forward
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["Fwd. sel.", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# Forward + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# Backward
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+backwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["Backw. sel.", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# Backward + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+backwardselection!(mod, folds; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# Constrained
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+constrainedselection!(mod, folds, [1, 12]; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["Constr. sel.", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# Constrained + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+constrainedselection!(mod, folds, [1, 12]; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# VIF
+mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+stepwisevif!(mod, 50.0; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["VIF", "", length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+# VIF + PCA
+mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+stepwisevif!(mod, 50.0; threshold=false)
+vs = predictors(mod)
+Csv, Cst = crossvalidate(mod, folds; threshold=false)
+push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+if mean(mcc.(Csv)) > current_best_mcc
+    current_best_mcc = mean(mcc.(Csv))
+    current_best_model = deepcopy(mod)
+end
+
+D = permutedims(hcat(tbl...))
+
+hl_maxval = MarkdownHighlighter(
+           (data, i, j) -> (j == 6) && (D[i,6] == maximum(Float64.(D[:,6]))),
+           MarkdownDecoration(bold = true)
+       );
+
+pretty_table(
+    D;
+    backend = Val(:markdown),
+    header = ["Variable selection", "Transformation", "Nb. variables", "Latent var.", "Var. expl.", "MCC (val.)", "MCC (train)"],
+    alignment = [:l, :l, :l, :l, :l, :l, :l],
+    formatters = (ft_printf("%5.3f", [6,7]), ft_printf("%4.2f", [5])),
+    highlighters = hl_maxval
+)
 ```
 
-### Model selection
 
-In @tbl-predictors-selection and @tbl-predictions-transformation, we have evaluated a series of several modeling strategies, defined by a variable selection and transformation technique. Using the MCC as our reference for what constitutes the best model, we can now apply the model to the relevant set of predictors, in order to see how these refinements result in a new predicted range for the species.
+### Variable importance
 
-These results are presented in @fig-predictors-rangediff.
+Before moving on, it is worth taking a moment to think about what we have done so far. We have optimized two components of our model: the transformation of the raw data before they are fed to the classifier (we use a PCA for this step), and then (or simultaneously) the list of variables which we put into the model. In @sec-classification, we had assumed that temperature and precipitation were important variables based on decades of ecological folklore (or, as we say, "expert knowledge"). But what about the list of variables currently retained in this model? Althought it may be tempting to come up with *ad hoc* explanations for why they matter, we can rather ask the question of "how much do these variables actually matter?".
+
+some specific methods for classifiers e.g. tree or boosting or BART
+
+TODO refs
+
+cannot retrain the model (ideally)
+
+The process we will adopt is simple: we train a model on a training set $\mathbf{X}_t$, and measure its performance on a validation set $\mathbf{X}_v$. The performance of the model on the validation we note $p_v$. Because we want to avoid re-training our model (because we may not have access to the training data, in practice), the only thing we can act on is the validation set. The process we will use is to identify a feature $j$, and then across the entire validation set, shuffle its $j$-th column. At this point, we can re-apply our model to this shuffled validation set (let's note it $\mathbf{X}^{(j)}_v$), and measure the performance of the model on this perturbed dataset as $p_v^{(j)}$. The impact of shuffling the variable $j$ is given as $m_j = \|p_v - p_v^{(j)}\|$.
+
+We can repeat this process a number of times (because we are relying on a shuffle, so it is better to perform this process many times over), and report the importance of variable $j$ as $\bar{m _j}$. This importance is expressed on the scale of the measure of performance we use. When it is large, it means that shuffling the variable $j$ has a very large impact on the performance of the model: it is important to know the correct value of this feature to make the "right" prediction. Because the absolute score $\bar{m_j}$ is not very informative, we can instead report a *relative* importance of a variable, which is simply $\bar{m_j}/\sum_{i \in \text{var.}}{\bar m_i}$. These will sum to one, and can interpreted as the proportional importance of the selected variables.
+
+But what does the process of shuffling simulate? Low quality data, sampling, wrong information, loss of information etc
+
+```{julia}
+#| label: fig-predictors-varimp
+#| echo: false
+#| fig-scap: Importance of variables selected as part of the best model
+#| fig-cap: Relative importance of the variables selected as part of the best model. The importance of the variables has been measured by comparing their performance on validation sets before and after shuffling the column of the feature matrix corresponding to the variable to test.
+model = deepcopy(current_best_model)
+
+Vm = zeros(Float64, length(model.v))
+for (i,v) in enumerate(model.v)
+    R = variableimportance(model, folds, v; threshold=false, reps=50)
+    Vm[i] = mean(R)
+end
+
+f = Figure(; size=(6, 3).*(600/6))
+ax = Axis(f[1,1], xticks = (1:length(Vm), ["BIO$(v)" for v in model.v][sortperm(Vm; rev=true)]))
+
+stem!(ax, Vm[sortperm(Vm; rev=true)] ./ sum(Vm), strokecolor=bkcol.generic, color=:white, strokewidth=1, trunkcolor=:transparent, stemcolor=bkcol.nodata, markersize=18)
+
+#ylims!(ax, 0., 1.)
+xlims!(ax, 0, length(model.v)+1)
+hideydecorations!(ax)
+hidexdecorations!(ax, grid=true, ticks=false, label=false, ticklabels=false)
+hidespines!(ax, :l, :r, :t)
+current_figure()
+```
+
+### Model selection and output
+
+In @tbl-predictors-selection and @tbl-predictors-transformation, we have evaluated a series of several modeling strategies, defined by a variable selection and transformation technique. Using the MCC as our reference for what constitutes the best model, we can now apply the model to the relevant set of predictors, in order to see how these refinements result in a new predicted range for the species.
 
 ```{julia}
 #| output: false
 #| echo: false
-origmodel = naivebayes(trainlabels, trainfeatures[:,[1,12]])
-intermodel = naivebayes(trainlabels, trainfeatures[:,f0])
-vf = forwardselection(naivebayes, trainlabels, trainfeatures, folds, mcc; transformation=Whitening)
-finalmodel = naivebayes(trainlabels, trainfeatures[:,vf]; transformation=Whitening)
+origmodel = SDM(RawData(), NBC(), 0.5, model.X, model.y, [1,12])
+train!(origmodel; threshold=false)
+
 _layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
-opr = convert(Float64, similar(first(bio)))
-ipr = convert(Float64, similar(first(bio)))
-vpr = convert(Float64, similar(first(bio)))
-Threads.@threads for k in keys(opr)
-    ox = [bio[i][k] for i in [1,12]]
-    ix = [bio[i][k] for i in f0]
-    fx = [bio[i][k] for i in vf]
-    opr[k] = origmodel(ox)
-    ipr[k] = intermodel(ix)
-    vpr[k] = finalmodel(fx)
-end
+opr = predict(origmodel, bio)
+vpr = predict(model, bio)
 ```
+
+show the difference of two predictors v. two PCs
+
+```{julia}
+#| echo: false
+#| label: fig-predictors-projection
+#| fig-scap: TODO
+#| fig-cap: orig var vs. their transformation
+f = Figure(; size=(6, 3).*(600/6))
+cpal = [bkcol.sdm.absent, bkcol.sdm.present]
+ax1 = Axis(f[1,1], xlabel="BIO$(model.v[1])", ylabel="BIO$(model.v[2])")
+scatter!(ax1, model.X[model.v[1],:], model.X[model.v[2],:], color=model.y, colormap=cpal)
+PC = predict(model.transformer, model.X[model.v, :])
+ax2 = Axis(f[1,2], xlabel="Princ. comp. 1", ylabel="Princ. comp. 2")
+scatter!(ax2, PC[1,:], PC[2,:], color=model.y, colormap=cpal)
+hidedecorations!(ax1, label=false)
+hidedecorations!(ax2, label=false)
+current_figure()
+```
+
+These results are presented in @fig-predictors-rangediff.
 
 ```{julia}
 #| label: fig-predictors-rangediff
 #| echo: false
+#| fig-scap: Updated range map for *Sitta whiteheadi* after variable selection.
 #| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
 final_range = vpr .> 0.5
-inter_range = ipr .> 0.5
 old_range = opr .> 0.5
-rangediff(new, old) = mask(new .| old, new .- old)
-fig = Figure(; resolution=(500,600))
-ax1 = Axis(fig[1,1]; aspect=DataAspect(), title="Initial")
-ax2 = Axis(fig[1,2]; aspect=DataAspect(), title="Final")
-ax3 = Axis(fig[2,1]; aspect=DataAspect(), title="Difference")
-heatmap!(ax1, old_range, colormap=vibrant[1:2])
-heatmap!(ax2, final_range, colormap=vibrant[1:2])
-heatmap!(ax3, final_range, colormap=[vibrant[1], vibrant[1]], alpha=0.7)
-rm_pal = cgrad(sunset, 3, categorical=true)
-heatmap!(ax3, rangediff(final_range, old_range); colormap = rm_pal)
+
+f = Figure(; size=(7, 6).*(600/6))
+
+gl = f[1, 1] = GridLayout()
+
+ax0 = Axis(
+    gl[1, 1];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "Prediction difference",
+)
+ax1 = Axis(
+    gl[1, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True positives",
+)
+ax2 = Axis(
+    gl[1, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False positives",
+)
+ax4 = Axis(
+    gl[2, 2];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "False negatives",
+)
+ax5 = Axis(
+    gl[2, 3];
+    xlabel = "Longitude",
+    ylabel = "Latitude",
+    aspect = DataAspect(),
+    title = "True negatives",
+)
+
+rm_pal = cgrad([bkcol.sdm.loss, bkcol.sdm.nochange, bkcol.sdm.gain], 3, categorical=true)
+heatmap!(ax0, final_range, colormap=[bkcol.nodata, bkcol.nodata], alpha=0.7)
+heatmap!(ax0, rangediff(final_range, old_range); colormap = rm_pal)
 
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
 clab = ["Loss", "No change", "Gain"]
-Legend(fig[2,2], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
+Legend(gl[2,1], cleg, clab; tellheight=false, tellwidth=false, halign=:center, valign=:center, margin=(5, 5, 5, 5), nbanks=1, framevisible=false)
+
+prd = predict(model; threshold = true)
+grd = y
+
+TP = findall(prd .& grd)
+TN = findall((.!prd) .& (.!grd))
+FP = findall(prd .& (.!grd))
+FN = findall((.!prd) .& grd)
+
+heatmap!(ax1, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 3, color = bkcol.sdm.present)
+
+heatmap!(ax2, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 5, color = bkcol.sdm.absent, marker = :cross)
+
+heatmap!(ax4, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(
+    ax4,
+    coordinates[FN, 2],
+    coordinates[FN, 1];
+    markersize = 5,
+    color = bkcol.sdm.present,
+    marker = :cross,
+)
+
+heatmap!(ax5, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
+scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = bkcol.sdm.absent)
+
+for ax in [ax0, ax1, ax2, ax4, ax5]
+    ax.xticklabelpad = 0
+    ax.yticklabelpad = 0
+    hidedecorations!(ax)
+    hidespines!(ax)
+end
+
+colgap!(gl, 0)
+rowgap!(gl, 10)
 
 current_figure()
 ```
+
+## The Rashomon effect
+
+The Rashomon effect is defined as the fact that, given a single problem, we can find many models that will achieve, on average, the same performance (or the same loss). In other words, the same event (the prediction we want to make) can often admit several seemingly reasonable yet incompatible interpretations (just like in the movie usually invoked as an example of the Rashomon effect: *Hoodwinked!*). So far, we have assumed that we were able to pick the *best* model, but the *best* is often a relatively minor improvement over the second-best model.\index{Rashomon effect}\index{Interpretability}
+
+::: column-margin
+We will talk about the Rashomon effect again in @sec-tuning, in @sec-bagging, and further in @sec-counterfactuals.
+:::
+
+This chapter is a good illustration of the Rashomon effect. Most models in @tbl-predictors-transformation have a very similar performance on the same problem. We know this because we evaluated the performance of these models on the *exact* same folds, training, and validation points. By picking the best model, we had to discard a large number of models that were, all things considered, similarly good.
+
+This is not really a problem if all we care about is "making a good prediction". Even then, a similar loss or MCC score can be achieved through different predictions once mapped out. But where the Rashomon effect is particularly problematic is when we start attempting to provide *explanations* for the predictions. All the best models (under different variable selection and data transformation schemes) had selected different features. What this means is that, if we attempt to explain a specific prediction with regards to, for example, annual precipitation, this task is only meaningful in a model that uses annual precipitation as a feature.
+
+The Rashomon effect manifests at all scales of the machine learning process, and we will see instances of it again in the following chapters.
 
 ## Conclusion
 
@@ -339,14 +610,7 @@ In @sec-tuning, we will finish to refine this model, by considering that the NBC
 ```{julia}
 #| output: false
 #| echo: false
-_ptm_path = joinpath(dirname(Base.active_project()), "checkpoints")
-modelpath = joinpath(_ptm_path, "sdm-step-1.jld")
-JLD.save(
-    modelpath,
-    "labels", trainlabels,
-    "features", trainfeatures,
-    "folds", folds,
-    "variables", vf,
-    "transformation", Whitening
-)
+modelpath = joinpath(_models_path, "sdm-variables.json")
+model.v = model.v[sortperm(Vm, rev=true)]
+writesdm(modelpath, model)
 ```

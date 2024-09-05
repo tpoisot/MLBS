@@ -4,21 +4,27 @@ engine: julia
 
 # Introduction
 
-This book started as a collection of notes from several classes I gave in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. In teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing a stepping stone to proficiency. There are excellent manuals covering the mathematics of data science and machine learning; there are many good papers giving overviews of some applications of data science to biological problems; and there are, of course, thousands of tutorials about how to write code (some of them are good!).
+This book started as a collection of notes from several classes I taught in the Department of Biological Sciences at the Université de Montréal, as well as a few workshops I ran for the Québec Centre for Biodiversity Sciences. When teaching data synthesis, data science, and machine learning to biology students, I realized that the field was missing resources that could serve as stepping stones to proficiency.
 
-But one thing that students commonly called for was an attempt to tie concepts together, and to explain when and how human decisions were required in ML approaches [@sulmont2019]. This is this attempt.
+There are excellent manuals covering the mathematics of data science and machine learning (I will list a few later on). These are important to read, because the field of machine learning is an offshoot of mathematics and computer science, and it is important to become familiar with the core concepts. A little bit of calculus and a whole lot of linear algebra should be more of the same for many ecologists. But these resources are usually less useful as practical guides to the field.
+
+There are many good papers giving overviews of some applications of data science to biological problems (a lot of them are cited in this book). These are important to read, because any attempt to adopt a new methodology (new to us, not new to the field, or new in absolute terms!) must proceed alongside some familiarity of how it has been used by our colleagues. But these articles, although good at showing how these tools are actually used, usually make it difficult to establish more general recommendations.
+
+There are, finally, thousands of tutorials about how to write code to perform any machine learning algorithm you can think of. Some of them are even good. But these tutorials usually suffer (in our case) from being disconnected from the field of biodiversity science, and of course are limited by the language they use, the version of the packages they ran with, and again do not allow for much generalization.
+
+When navigating these resources, one thing that students commonly called for was an attempt to tie concepts together, and to explain when and how human decisions were required in ML approaches [@sulmont2019]. This is particularly true of students with strong domain knowledge that want to understand how machine learning fits with their ability to do research.
+
+This is book is this attempt.
 
 There are, broadly speaking, two situations in which reading this book is useful. The first is when you are done reading some general books about machine learning, and want to see how it can be applied to problems that are more specific to biodiversity research; the second is when you have a working understanding of biodiversity research, and want a stepping stone into the machine learning literature. Note that there is no scenario where you *stop* after reading this book -- this is by design. The purpose of this book is to give a practical overview of "how data science for biodiversity happens", and this needs to be done in parallel to even more fundamental readings.
 
-::: content-margin
+::: column-margin
 These are examples of books I like. I found them comprehensive and engaging. They may not work for you.
 :::
 
-A wonderful introduction to the mathematics behind machine learning can be found in @deisenroth2020, which provides stunning visualization of mathematical concepts. @yau2015 is a particularly useful book about the ways to visualize data in a meaningful way. [@watt2020] **TK**
+A wonderful introduction to the mathematics behind machine learning can be found in @deisenroth2020, which provides stunning visualization of mathematical concepts. @yau2015 is a particularly useful book about the ways to visualize data in a meaningful way. @watt2020 is a solid introduction to the underlying theory of applied machine learning. For ecologists, @dietze2017 is a comprehensive, and still highly readable, treaty on the problems associated to forecasting. The best way to decide on which book to read is often to look at the books that your colleagues have also read; being able to work through material collectively is useful, and knowing that you can practice the craft of data science within a community will make your learning more effective.
 
-When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible quantity of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.
-
-note on the meaning of colors
+When reading this book, I encourage you to read the chapters in order. They have been designed to be read in order, because each chapter introduces the least possible amount of new concepts, but often requires to build on the previous chapters. This is particularly true of the second half of this book.
 
 ## Core concepts in data science
 
@@ -71,7 +77,6 @@ digraph G {
 }
 ```
 
-
 ### EDA
 
 ### Clustering and regression
@@ -90,11 +95,9 @@ In @sec-gradientdescent, we revisit well-trodden statistical ground, by fitting 
 
 In @sec-crossvalidation, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of "what kind of decision-making can we justify with a model".
 
-In @sec-leakage, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.
-
 In @sec-classification, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.
 
-In @sec-variable-selection, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. We further improve our distribution model.
+In @sec-predictors, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. In @sec-leakage, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.
 
 In @sec-tuning, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.
 
@@ -102,9 +105,60 @@ In @sec-explanations, we will shift our attention from prediction to understandi
 
 In @sec-bagging, ...
 
+## A note on colors {#sec-introduction-colors}
+
+```{julia}
+#| echo: false
+#| output: false
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+```
+
+| Type             | Meaning    |  Color  |
+|------------------|------------|:-------:|
+| All              | generic    | ![][1]  |
+|                  | no data    | ![][2]  |
+| Cross-validation | training   | ![][3]  |
+|                  | validation | ![][4]  |
+|                  | testing    | ![][5]  |
+| Species range    | presence   | ![][6]  |
+|                  | absence    | ![][7]  |
+| Range change     | loss       | ![][8]  |
+|                  | no change  | ![][9]  |
+|                  | gain       | ![][10] |
+
+  [1]: resources/colordots/bkcol.generic.png {width="7%"}
+  [2]: resources/colordots/bkcol.nodata.png {width="7%"}
+  [3]: resources/colordots/bkcol.cv.training.png {width="7%"}
+  [4]: resources/colordots/bkcol.cv.validation.png {width="7%"}
+  [5]: resources/colordots/bkcol.cv.testing.png {width="7%"}
+  [6]: resources/colordots/bkcol.sdm.present.png {width="7%"}
+  [7]: resources/colordots/bkcol.sdm.absent.png {width="7%"}
+  [8]: resources/colordots/bkcol.sdm.loss.png {width="7%"}
+  [9]: resources/colordots/bkcol.sdm.nochange.png {width="7%"}
+  [10]: resources/colordots/bkcol.sdm.gain.png {width="7%"}
+
+In addition, there are three important color *palettes*. Information that is *sequential* is nature, which is to say it increases on a continuous scale without a logical midpoint, is rendered with these colors (from low to the left, to high values to the right):
+
+![][11]
+
+  [11]: resources/colordots/bkcol.seq.png {fig-align="center"}
+
+The diverging palette is used for values that have a clear midpoint (usually values centered on 0). The midpoint will always correspond to the central color, and this palette is symmetrical:
+
+![][12]
+
+  [12]: resources/colordots/bkcol.div.png {fig-align="center"}
+
+Finally, the categorical data are represented using the following palette:
+
+![][13]
+
+  [13]: resources/colordots/bkcol.cat.png {fig-align="center"}
+
 ## Some rules about this book
 
-When I started aggregating these notes, I decided on a series of four rules. No code, no simulated data, no long list of model, and above all, no `iris` dataset. In this section, I will go through *why* I decided to adopt these rules, and how it should change the way you interact with the book.
+When I started aggregating these notes, I decided on a series of four rules. No code, no simulated data, no long list of model, and above all, no *iris* dataset. In this section, I will go through *why* I decided to adopt these rules, and how it should change the way you interact with the book.
 
 ### No code
 
@@ -128,18 +182,18 @@ Reading a long enumeration of things is boring; unless it's sung by Yakko Warner
 
 In fact, 90% of this book uses only two models: linear regression, and the Naïve Bayes Classifier. Some other models are involved in a few chapters, but these two models are breathtakingly simple, work surprisingly well, run fast, and can be tweaked to allow us to build deep intuitions about how machines learn. They are perfect for the classroom, and give us the freedom to spent most of our time thinking about how we interact with models, and why, and how we make methodological decisions.
 
-### No `iris` dataset
+### No *iris* dataset
 
-From a teaching point of view, the `iris` dataset is like hearing Smash Mouth in a movie trailer, in that it tells you two things with absolute certainty. First, that you are indeed watching a movie trailer. Second, that you could be watching Shrek instead. There are datasets out there that are *infinitely more* exciting to use than `iris`.
+From a teaching point of view, the *iris* dataset is like hearing Smash Mouth in a movie trailer, in that it tells you two things with absolute certainty. First, that you are indeed watching a movie trailer. Second, that you could be watching Shrek instead. There are datasets out there that are *infinitely more* exciting to use than *iris*.
 
-But there is a far more important reason not to use `iris`: eugenics.
+But there is a far more important reason not to use *iris*: eugenics.
 
 Listen, we made it several hundred words in a text about quantitative techniques in life sciences without encountering a sad little man with racist ideas that academia decided to ignore because "he just contributed so much to the field, and these were different times, maybe we shouldn't be so quick to judge?". Ronald Aylmer Fisher, statistics' most racist nerd, was such a man; and there are, of course, those who want to consider the possibility that you can be outrageously racist as long as you are an outstanding scientist [@bodmer2021].
 
-The `iris` dataset was first published by @fisher1936 in the *Annals of Eugenics* (so, there's a bit of a red flag there already), and draws from several publications by Edgar Anderson, starting with @anderson1928; @unwin2021 have an interesting historiographic deep-dive into the correspondence between the two. Judging by the dates, you may think that Fisher was a product of his time. But this could not be further from the truth. Fisher was dissatisfied with his time, to the point where his contributions to statistics were done in service of his views, in order to provide the appearance of scientific rigor to his bigotry.
+The *iris* dataset was first published by @fisher1936 in the *Annals of Eugenics* (so, there's a bit of a red flag there already), and draws from several publications by Edgar Anderson, starting with @anderson1928; @unwin2021 have an interesting historiographic deep-dive into the correspondence between the two. Judging by the dates, you may think that Fisher was a product of his time. But this could not be further from the truth. Fisher was dissatisfied with his time, to the point where his contributions to statistics were done in service of his views, in order to provide the appearance of scientific rigor to his bigotry.
 
 Fisher advocated for forced sterilization for the "defectives" (which he estimated at, oh, roughly 10% of the population), argued that not all races had equal capacity for intellectual and emotional development, and held a host of related opinions. There is no amount of contribution to science that pardon these views. Coming up with the idea of the null hypothesis does not even out lending "scientific" credibility to ideas whose logical (and historical) conclusion is genocide. That Ronald Fisher is still described as a polymath and a genius is infuriating, and we should use every alternative to his work that we have.
 
 Thankfully, there are alternatives!
 
-The most broadly known alternative to the `iris` dataset is `penguins`, which was collected by ecologists [@gorman2014], and published as a standard dataset [@horst2020] so that we can train students without engaging with the "legacy" of eugenicists. The `penguins` dataset is also genuinely good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won't use `penguins` either. It's a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go `penguins`.
+The most broadly known alternative to the *iris* dataset is `penguins`, which was collected by ecologists [@gorman2014], and published as a standard dataset [@horst2020] so that we can train students without engaging with the "legacy" of eugenicists. The `penguins` dataset is also genuinely good! The classes are not so obviously separable, there are some missing data that reflect the reality of field work, and the data about sex and spatial location have been preserved, which increases the diversity of questions we can ask. We won't use `penguins` either. It's a fine dataset, but at this point there is little that we can write around it that would be new, or exciting. But if you want to apply some of the techniques in this book? Go `penguins`.
