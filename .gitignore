@@ -6,7 +6,7 @@ Manifest.toml
 data/**/raw/*
 /.luarc.json
 data/**/*.tiff
-!data/general/layers.tiff
+!data/occurrences/layers.tiff
 
 chapters/**_files/
 chapters/resources/

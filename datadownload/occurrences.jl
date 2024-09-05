@@ -13,8 +13,12 @@ heatmap(temperature, colormap=[:black, :black])
 # Data
 BIOX = convert.(Float32, [SimpleSDMPredictor(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
 
+for i in 1:11
+    BIOX[i] = 0.1f0 .* BIOX[i]
+end
+
 # Save the layers
-SpeciesDistributionToolkit._write_geotiff("data/general/layers.tiff", BIOX)
+SpeciesDistributionToolkit._write_geotiff("data/occurrences/layers.tiff", BIOX)
 
 sitta = taxon("Sitta whiteheadi"; strict = false)
 query = [
@@ -47,7 +51,7 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = backgroundpoints((x -> x^0.9).(bgmask), round(Int, 1.45sum(presencelayer)); replace=false)
+bgpoints = backgroundpoints((x -> x^0.7).(bgmask), round(Int, 1.35sum(presencelayer)); replace=false)
 replace!(bgpoints, false => nothing)
 replace!(presencelayer, false => nothing)
 
@@ -76,4 +80,62 @@ df = DataFrame(latitude=lat, longitude=lon, presence=pre)
 for (i, l) in enumerate(layers(dataprovider))
     df[!,l] = biox[i]
 end
-CSV.write("data/general/observations.csv", df)
+
+# Do the splits
+_code_path = joinpath(dirname(Base.active_project()), "code")
+include(joinpath(_code_path, "pkg.jl"))
+include(joinpath(_code_path, "minisdm/pipelines.jl"))
+
+occdata = df
+coordinates = select(occdata, [:presence, :longitude, :latitude])
+select!(occdata, Not(:latitude))
+select!(occdata, Not(:longitude))
+raw = copy(occdata)
+
+y = occdata.presence
+X = permutedims(Matrix(select(occdata, Not(:presence))))
+trn, tst = holdout(y, X)
+ty = y[tst]
+tX = X[:,tst]
+y = y[trn]
+X = X[:,trn]
+
+folds = kfold(y, X; k=20)
+bags = bootstrap(y, X; n=20)
+
+latlon=Matrix(coordinates[trn,[3,2]])
+
+# Save the data
+dpath = joinpath("data", "occurrences")
+if !ispath(dpath)
+    mkpath(dpath)
+end
+
+writedlm(joinpath(dpath, "training-features.csv"), X)
+writedlm(joinpath(dpath, "training-labels.csv"), y)
+writedlm(joinpath(dpath, "testing-features.csv"), tX)
+writedlm(joinpath(dpath, "testing-labels.csv"), ty)
+writedlm(joinpath(dpath, "coordinates.csv"), latlon)
+open(joinpath(dpath, "crossvalidation.json"), "w") do f
+    JSON.print(f, Dict([
+        :bags => bags,
+        :folds => folds
+    ]), 4)
+end
+
+ldesc = layerdescriptions(dataprovider)
+ldict = Dict()
+for (k, v) in ldesc
+    ldict[k] = Dict([:code => k])
+    lparts = split(v, "(", limit=2)
+    ldict[k][:description] = lparts[1]
+    if length(lparts) == 2
+        ldict[k][:information] = lparts[2][1:end-1]
+    else
+        ldict[k][:information] = ""
+    end
+end
+
+open(joinpath(dpath, "layers.json"), "w") do f
+    JSON.print(f, ldict, 4)
+end

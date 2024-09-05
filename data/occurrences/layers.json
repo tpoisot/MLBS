@@ -1,0 +1,97 @@
+{
+    "BIO8": {
+        "code": "BIO8",
+        "description": "Mean Temperature of Wettest Quarter",
+        "information": ""
+    },
+    "BIO14": {
+        "code": "BIO14",
+        "description": "Precipitation of Driest Month",
+        "information": ""
+    },
+    "BIO18": {
+        "code": "BIO18",
+        "description": "Precipitation of Warmest Quarter",
+        "information": ""
+    },
+    "BIO12": {
+        "code": "BIO12",
+        "description": "Annual Precipitation",
+        "information": ""
+    },
+    "BIO13": {
+        "code": "BIO13",
+        "description": "Precipitation of Wettest Month",
+        "information": ""
+    },
+    "BIO2": {
+        "code": "BIO2",
+        "description": "Mean Diurnal Range ",
+        "information": "Mean of monthly (max temp - min temp)"
+    },
+    "BIO11": {
+        "code": "BIO11",
+        "description": "Mean Temperature of Coldest Quarter",
+        "information": ""
+    },
+    "BIO6": {
+        "code": "BIO6",
+        "description": "Min Temperature of Coldest Month",
+        "information": ""
+    },
+    "BIO17": {
+        "code": "BIO17",
+        "description": "Precipitation of Driest Quarter",
+        "information": ""
+    },
+    "BIO5": {
+        "code": "BIO5",
+        "description": "Max Temperature of Warmest Month",
+        "information": ""
+    },
+    "BIO3": {
+        "code": "BIO3",
+        "description": "Isothermality ",
+        "information": "BIO2/BIO7) (×100"
+    },
+    "BIO19": {
+        "code": "BIO19",
+        "description": "Precipitation of Coldest Quarter",
+        "information": ""
+    },
+    "BIO16": {
+        "code": "BIO16",
+        "description": "Precipitation of Wettest Quarter",
+        "information": ""
+    },
+    "BIO10": {
+        "code": "BIO10",
+        "description": "Mean Temperature of Warmest Quarter",
+        "information": ""
+    },
+    "BIO4": {
+        "code": "BIO4",
+        "description": "Temperature Seasonality ",
+        "information": "standard deviation ×100"
+    },
+    "BIO7": {
+        "code": "BIO7",
+        "description": "Temperature Annual Range ",
+        "information": "BIO5-BIO6"
+    },
+    "BIO1": {
+        "code": "BIO1",
+        "description": "Annual Mean Temperature",
+        "information": ""
+    },
+    "BIO9": {
+        "code": "BIO9",
+        "description": "Mean Temperature of Driest Quarter",
+        "information": ""
+    },
+    "BIO15": {
+        "code": "BIO15",
+        "description": "Precipitation Seasonality ",
+        "information": "Coefficient of Variation"
+    }
+}

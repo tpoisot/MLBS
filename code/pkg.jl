@@ -6,6 +6,7 @@ ispath(_code_path) || mkpath(_code_path)
 ispath(_data_path) || mkpath(_data_path)
 ispath(_models_path) || mkpath(_models_path)
 
+using DelimitedFiles
 import JLD2
 import StatsAPI
 using CairoMakie

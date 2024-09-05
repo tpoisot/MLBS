@@ -20,17 +20,6 @@ Throughout these chapters, we will be working on a single problem, which is to p
 
 Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious about our data science practices when training a species distribution model is important: @cholletramampiandra2023 make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.\index{Over-fitting}
 
-```{julia}
-#| echo: false
-#| output: false
-_path = joinpath(_data_path, "general", "observations.csv")
-occdata = DataFrame(CSV.File(_path))
-coordinates = select(occdata, [:presence, :longitude, :latitude])
-select!(occdata, Not(:latitude))
-select!(occdata, Not(:longitude))
-raw = copy(occdata)
-```
-
 Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.
 
 We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants and animals [@clapham1935; @whittaker1962], to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start [@berteaux2014].\index{Feature selection}
@@ -44,23 +33,10 @@ To build a model with temperature and precipitation as inputs, we need to extrac
 ```{julia}
 #| echo: false
 #| output: false
-y = occdata.presence
-X = permutedims(Matrix(select(occdata, Not(:presence))))
-trn, tst = holdout(y, X)
-ty = y[tst]
-tX = X[:,tst]
-y = y[trn]
-X = X[:,trn]
-
-folds = kfold(y, X; k=15)
-bags = bootstrap(y, X; n=50)
-
-latlon=Matrix(coordinates[trn,[3,2]])
-
-testingpath = joinpath(_models_path, "sdm-testing-data.jld2")
-trainingpath = joinpath(_models_path, "sdm-training-data.jld2")
-JLD2.jldsave(testingpath; y=ty, X=tX)
-JLD2.jldsave(trainingpath; y=y, X=X, coordinates=latlon, folds=folds, bags=bags)
+_path = joinpath(_data_path, "occurrences")
+y = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "training-labels.csv"))))
+X = readdlm(joinpath(_path, "training-features.csv"))
+coordinates = readdlm(joinpath(_path, "coordinates.csv"))
 ```
 
 The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
@@ -84,26 +60,23 @@ In @fig-classification-separability, we can see the temperature (in degrees) for
 ```{julia}
 #| label: fig-classification-separability
 #| echo: false
-#| fig-cap: This figures show the separability of the presences (orange) and pseudo-absences (grey) on the temperature and precipitation dimensions.
-f = Figure(; size=(6, 6).*(600/6))
+#| fig-scap: Separability of presences and absences in the two-variables classifier.
+#| fig-cap: This figures show the separability of the presences and pseudo-absences on the temperature and precipitation dimensions.
+f = Figure(; size=(5, 5).*(600/6))
 
 gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
-density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1)
-density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1)
+density!(axtemp, X[1,findall(y)], color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1)
+density!(axtemp, X[1,findall(!, y)], color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1)
 
 axprec = Axis(gl[2,2])
-density!(axprec, filter(r -> r.presence, occdata).BIO12, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1, direction=:y)
-density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1, direction=:y)
+density!(axprec, X[12,findall(y)], color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1, direction=:y)
+density!(axprec, X[12,findall(!, y)], color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1, direction=:y)
 
 axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-xp = 0.1filter(r -> r.presence, occdata).BIO1
-xn = 0.1filter(r -> !r.presence, occdata).BIO1
-yp = filter(r -> r.presence, occdata).BIO12
-yn = filter(r -> !r.presence, occdata).BIO12
-scatter!(axboth, xn, yn, color=bkcol.sdm.absent, markersize=4, label="Pseudo-absence")
-scatter!(axboth, xp, yp, color=bkcol.sdm.present, markersize=4, label="Presence")
+scatter!(axboth, X[1,findall(!, y)], X[12,findall(!, y)], color=bkcol.sdm.absent, markersize=4, label="Pseudo-absence")
+scatter!(axboth, X[1,findall(y)], X[12,findall(y)], color=bkcol.sdm.present, markersize=4, label="Presence")
 
 axislegend(position = :lb)
 
@@ -382,8 +355,8 @@ pretty_table(
 #| echo: false
 #| output: false
 train!(model; threshold=false)
-air = LinRange(extrema(occdata.BIO1)..., 250)
-prc = LinRange(extrema(occdata.BIO12)..., 250)
+air = LinRange(extrema(X[1,:])..., 250)
+prc = LinRange(extrema(X[12,:])..., 250)
 SRF = zeros(Float64, (length(air), length(prc)))
 for i in axes(air, 1)
     for j in axes(prc, 1)
@@ -401,28 +374,22 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| label: fig-classification-decision
 #| echo: false
 #| fig-cap: Overview of the decision boundary between the positive (orange) and negative (grey) classes using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
-f = Figure(; size=(6, 6).*(600/6))
+f = Figure(; size=(5, 5).*(600/6))
 
 gl = f[1,1] = GridLayout()
 
 axtemp = Axis(gl[1,1])
-density!(axtemp, 0.1filter(r -> r.presence, occdata).BIO1, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1)
-density!(axtemp, 0.1filter(r -> !r.presence, occdata).BIO1, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1)
+density!(axtemp, X[1,findall(y)], color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1)
+density!(axtemp, X[1,findall(!, y)], color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1)
 
 axprec = Axis(gl[2,2])
-density!(axprec, filter(r -> r.presence, occdata).BIO12, color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1, direction=:y)
-density!(axprec, filter(r -> !r.presence, occdata).BIO12, color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1, direction=:y)
+density!(axprec, X[12,findall(y)], color=bkcol.sdm.presentbg, strokecolor=bkcol.sdm.present, strokewidth=1, direction=:y)
+density!(axprec, X[12,findall(!, y)], color=bkcol.sdm.absentbg, strokecolor=bkcol.sdm.absent, strokewidth=1, direction=:y)
 
-
-ax = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
-heatmap!(ax, 0.1air, prc, SRF, colormap=[bkcol.sdm.absent, bkcol.sdm.present], alpha=0.3)
-xp = 0.1filter(r -> r.presence, occdata).BIO1
-xn = 0.1filter(r -> !r.presence, occdata).BIO1
-yp = filter(r -> r.presence, occdata).BIO12
-yn = filter(r -> !r.presence, occdata).BIO12
-scatter!(ax, xp, yp, color=bkcol.sdm.present, markersize=4, label="Presence")
-scatter!(ax, xn, yn, color=bkcol.sdm.absent, markersize=4, label="Pseudo-absence")
-
+axboth = Axis(gl[2,1], xlabel="Mean air temperature (°C)", ylabel = "Annual precipitation (kg m⁻²)")
+heatmap!(axboth, air, prc, SRF, colormap=[bkcol.sdm.absent, bkcol.sdm.present], alpha=0.3)
+scatter!(axboth, X[1,findall(!, y)], X[12,findall(!, y)], color=bkcol.sdm.absent, markersize=4, label="Pseudo-absence")
+scatter!(axboth, X[1,findall(y)], X[12,findall(y)], color=bkcol.sdm.present, markersize=4, label="Presence")
 
 hidespines!(axtemp, :l, :r, :t)
 hidespines!(axprec, :b, :r, :t)
@@ -454,7 +421,7 @@ It is interesting to compare @fig-classification-decision with, for example, the
 ```{julia}
 #| echo: false
 #| output: false
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+_layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 pr = predict(model, bio; threshold=true)
 ```
@@ -464,8 +431,9 @@ We can now go through all of the pixels in the island of Corsica, and apply the 
 ```{julia}
 #| label: fig-classification-range
 #| echo: false
+#| fig-scap: TODO
 #| fig-cap: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*, but would definitely stand to be improved, possibly by accounting for more features.
-f = Figure(; size=(7, 6).*(600/6))
+f = Figure(; size=(6, 5).*(600/6))
 
 gl = f[1, 1] = GridLayout()
 
@@ -517,15 +485,14 @@ heatmap!(ax3, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 heatmap!(ax0, pr; colormap = [bkcol.nodata])
 scatter!(
     ax0,
-    coordinates.longitude[trn],
-    coordinates.latitude[trn];
-    color = coordinates.presence[trn],
+    rotl90(coordinates);
+    color = y,
     colormap = [bkcol.sdm.absent, bkcol.sdm.present],
     markersize = 2,
 )
 
 prd = predict(model, X; threshold = true)
-grd = coordinates.presence[trn]
+grd = y
 
 TP = findall(prd .& grd)
 TN = findall((.!prd) .& (.!grd))
@@ -533,23 +500,22 @@ FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
 
 heatmap!(ax1, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
-scatter!(ax1, latlon[TP, 2], latlon[TP, 1]; markersize = 2, color = bkcol.sdm.present)
+scatter!(ax1, rotl90(coordinates[TP,:]); markersize = 2, color = bkcol.sdm.present)
 
 heatmap!(ax2, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
-scatter!(ax2, latlon[FP, 2], latlon[FP, 1]; markersize = 3, color = bkcol.sdm.absent, marker = :cross)
+scatter!(ax2, rotl90(coordinates[FP,:]); markersize = 3, color = bkcol.sdm.absent, marker = :cross)
 
 heatmap!(ax4, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 scatter!(
     ax4,
-    latlon[FN, 2],
-    latlon[FN, 1];
+    rotl90(coordinates[FN,:]);
     markersize = 3,
     color = bkcol.sdm.present,
     marker = :cross,
 )
 
 heatmap!(ax5, pr; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
-scatter!(ax5, latlon[TN, 2], latlon[TN, 1]; markersize = 2, color = bkcol.sdm.absent)
+scatter!(ax5, rotl90(coordinates[TN,:]); markersize = 2, color = bkcol.sdm.absent)
 
 for ax in [ax0, ax1, ax2, ax3, ax4, ax5]
     ax.xticklabelpad = 0
