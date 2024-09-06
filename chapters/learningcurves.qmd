@@ -53,12 +53,11 @@ The idea behind the TPTS curve is to instead evaluate the sensitivity of the mod
 ```{julia}
 #| echo: false
 #| output: false
-JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
-    global X = file["X"]
-    global y = file["y"]
-    global folds = file["folds"]
-    global coordinates = file["coordinates"]
-end;
+_path = joinpath(_data_path, "occurrences")
+y = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "training-labels.csv"))))
+X = readdlm(joinpath(_path, "training-features.csv"))
+coordinates = readdlm(joinpath(_path, "coordinates.csv"))
+folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
 
 # Load the model
 modelpath = joinpath(_models_path, "sdm-variables.json")
@@ -103,7 +102,7 @@ Specifically, we compare the cross-entropy loss estimated from 100 replicated at
 #| label: fig-tuning-holdout
 #| fig-scap: Learning curve for the proportion of data used in cross-validation.
 #| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 100 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
-fig = Figure(; size=(6, 3).*(600/6))
+fig = Figure(; size=(5, 3).*(600/6))
 ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="Cross-entropy loss")
 
 μ = vec(mean(vall; dims=2))
@@ -185,7 +184,7 @@ In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1
 #| label: fig-tuning-threshold
 #| fig-scap: Learning curve for the threshold of the NBC model.
 #| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
-fig = Figure(; size=(7, 5).*(600/6))
+fig = Figure(; size=(6, 5).*(600/6))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
 series!(ax, T, mcc.(CT), solid_color=(bkcol.cv.training, 0.8), linestyle=:dash)
 lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=bkcol.cv.validation, linewidth=3)
@@ -363,7 +362,7 @@ As we are now considering that our model is adequately trained, we can apply it 
 ```{julia}
 #| echo: false
 #| output: false
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+_layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 
 origmodel = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
@@ -379,10 +378,8 @@ We are *not* applying the older versions of the model to the testing data, as we
 ```{julia}
 #| echo: false
 #| output: false
-JLD2.jldopen(joinpath(_models_path, "sdm-testing-data.jld2"), "r") do file
-    global Xt = file["X"]
-    global yt = file["y"]
-end;
+yt = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "testing-labels.csv"))))
+Xt = readdlm(joinpath(_path, "testing-features.csv"))
 preds = predict(model, Xt)
 C = ConfusionMatrix(preds, yt)
 ```
@@ -405,7 +402,7 @@ The final predictions are shown in @fig-tuning-map. Although the range map is ve
 #| label: fig-tuning-map
 #| fig-scap: Update range map for *Sitta whiteheadi* after thresholding.
 #| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
-f = Figure(; size=(7, 6).*(600/6))
+f = Figure(; size=(6, 5).*(600/6))
 
 gl = f[1, 1] = GridLayout()
 

@@ -34,12 +34,13 @@ transfo in model = we can still apply these techniques instead of asking "what d
 ## Application
 
 ```{julia}
-JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
-    global X = file["X"]
-    global y = file["y"]
-    global folds = file["folds"]
-    global coordinates = file["coordinates"]
-end;
+#| echo: false
+#| output: false
+_path = joinpath(_data_path, "occurrences")
+y = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "training-labels.csv"))))
+X = readdlm(joinpath(_path, "training-features.csv"))
+coordinates = readdlm(joinpath(_path, "coordinates.csv"))
+folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
 
 # Load the model
 modelpath = joinpath(_models_path, "sdm-threshold.json")
@@ -163,7 +164,7 @@ current_figure()
 ```
 
 ```{julia}
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+_layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 ```
 
@@ -188,7 +189,7 @@ heatmap(V[varord[1]], colormap=bkcol.div, colorrange=(-0.5,0.5))
 #| fig-cap: TODO
 mostimp = mosaic(x -> argmax(abs.(x)), V)
 
-nvars = 5
+nvars = 3
 cmap = [bkcol.cat[1:nvars]..., bkcol.nodata]
 clab = push!("BIO" .* string.(model.v[varord][1:nvars]), "other")
 

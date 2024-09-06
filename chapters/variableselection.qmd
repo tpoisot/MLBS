@@ -28,23 +28,13 @@ The definitions of the 19 BioClim variables are given in @tbl-predictors-bioclim
 #| output: asis
 #| label: tbl-predictors-bioclim
 #| tbl-cap: List of the 19 BioClim variables, including indications of their calculation. The model we used in @sec-classification used BIO1 and BIO12.
-provider = RasterData(CHELSA1, BioClim)
+content = Matrix{String}(undef, 19, 3)
+ldesc = JSON.parsefile("data/occurrences/layers.json")
 
-content = Matrix{String}(undef, length(layers(provider)), 3)
-
-for (i,l) in enumerate(layers(provider))
-    value = layerdescriptions(provider)[l]
-    vparts = split(value, "("; limit=2)
-    desc = ""
-    if length(vparts) == 2
-        desc = "("*vparts[2]
-        if ~contains(desc, "BIO")
-            desc = desc[2:end-1]
-        end
-    end
-    content[i,1] = "$i"
-    content[i,2] = vparts[1]
-    content[i,3] = desc
+for i in 1:length(ldesc)
+    content[i,1] = ldesc["BIO$(i)"]["code"]
+    content[i,2] = ldesc["BIO$(i)"]["description"]
+    content[i,3] = ldesc["BIO$(i)"]["information"]
 end
 
 pretty_table(
@@ -178,12 +168,12 @@ When performing Whitening transformation, the first variable in the new space wi
 ```{julia}
 #| echo: false
 #| output: false
-JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
-    global X = file["X"]
-    global y = file["y"]
-    global folds = file["folds"]
-    global coordinates = file["coordinates"]
-end;
+_path = joinpath(_data_path, "occurrences")
+y = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "training-labels.csv"))))
+X = readdlm(joinpath(_path, "training-features.csv"))
+coordinates = readdlm(joinpath(_path, "coordinates.csv"))
+folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
+
 # Load the model
 modelpath = joinpath(_models_path, "sdm-baseline.json")
 model = loadsdm(modelpath; threshold=false)
@@ -262,7 +252,7 @@ pretty_table(
     backend = Val(:markdown),
     header = ["Model", "Variables", "MCC"],
     alignment = [:l, :l, :l],
-    formatters = ft_printf("%5.4f", 3),
+    formatters = ft_printf("%4.3f", 3),
     highlighters = hl_maxval
 )
 ```
@@ -464,7 +454,7 @@ In @tbl-predictors-selection and @tbl-predictors-transformation, we have evaluat
 origmodel = SDM(RawData(), NBC(), 0.5, model.X, model.y, [1,12])
 train!(origmodel; threshold=false)
 
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
+_layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
 bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
 opr = predict(origmodel, bio)
 vpr = predict(model, bio)
