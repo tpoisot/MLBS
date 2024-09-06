@@ -227,20 +227,22 @@ proposals = [counterfactual(model, cnd, model.τ + 0.015, 500.0; threshold=false
 #| label: fig-counterfactuals-generation
 #| echo: false
 #| fig-scap: Generation of a sample of counterfactuals
-#| fig-cap: Generation of a number of counterfactual samples for an actual observation (black diamond), color-coded by whether or not the prediction for each counterfactual is positive or negative. The target $\hat y'$ is set to $\tau + 0.015$, which explains why the generated counterfactuals lie on the separation between the positive and the negative class.
+#| fig-cap: Generation of a number of counterfactual samples for an actual observation (black diamond), color-coded by whether or not the prediction for each counterfactual is positive or negative. The target $\hat y'$ is set to $\tau + 0.015$, which explains why the generated counterfactuals lie on the separation between the positive and the negative class. The proposals are scaled proportionally to the inverse of their loss (larger points have a lower loss).
 f = Figure(; size=(6, 6).*(600/6))
 ax = Axis(f[1,1])
+L = [loss(model, cnd, xp, model.τ + 0.015, 500.0; threshold=false) for xp in proposals]
 for i in eachindex(proposals)
     xc = proposals[i]
     ccol = predict(model, xc; threshold=true) ? bkcol.sdm.present : bkcol.sdm.absent
     bcol = predict(model, xc; threshold=true) ? bkcol.sdm.presentbg : bkcol.sdm.absentbg
-    scatter!(ax, [xc[model.v[1]]], [xc[model.v[2]]], strokecolor=ccol, strokewidth=2, color=bcol, markersize=12)
+    scatter!(ax, [xc[model.v[1]]], [xc[model.v[2]]], strokecolor=ccol, strokewidth=2, color=bcol, markersize=20 ./ L[i])
 end
 vlines!(ax, [cnd[model.v[1]]], color=bkcol.generic, linestyle=:dash)
 hlines!(ax, [cnd[model.v[2]]], color=bkcol.generic, linestyle=:dash)
 scatter!(ax, [cnd[model.v[1]]], [cnd[model.v[2]]], color=bkcol.generic, markersize=12)
-#xlims!(ax, extrema(model.X[1,:]))
-#ylims!(ax, extrema(model.X[12,:]))
+xlims!(ax, extrema(model.X[model.v[1],:]))
+ylims!(ax, extrema(model.X[model.v[2],:]))
+
 current_figure()
 ```
 
@@ -252,7 +254,7 @@ filter by conditions existing in the dataset
 #| output: asis
 #| tbl-cap: Values of the model variables for the ten counterfactuals with the lowest loss, sampled from the outputs in @fig-counterfactuals-generation that had sucessfully flipped their prediction. Note that the values given in this table are the *raw* values of the bioclimatic variables, and not expressed in particular units.
 filter!(p -> predict(model, p), proposals)
-L = [loss(model, cnd, xp, model.τ + 0.015, 250.0; threshold=false) for xp in proposals]
+L = [loss(model, cnd, xp, model.τ + 0.015, 500.0; threshold=false) for xp in proposals]
 M = [dmad(model, cnd, xp) for xp in proposals]
 ord = partialsortperm(L, 1:10)
 tbl = [100(proposals[o][model.v] .- cnd[model.v])./cnd[model.v] for o in ord] # Turn into a table
