@@ -1,5 +1,13 @@
 using EarthEngine
 
+# ENV["PYTHON"] = ""
+# import Pkg
+# Pkg.build("PyCall")
+# QUIT
+# using Conda
+# Conda.add("earthengine-api")
+# QUIT
+
 # This file cannot be run in non-interactive mode if you have not already
 # downloaded an authentication token
 Initialize()
@@ -52,9 +60,9 @@ masked = map(collection, maskL8sr)
 composite = median(masked)
 
 # define a region to view results
-#corsica = Point(9.141445, 41.455772)
+centerpoint = Point(9.141445, 41.455772)
 #corsica = Point(-73.870354, 45.485857)
-centerpoint = Point(-1.082540, 45.656133)
+#centerpoint = Point(-1.082540, 45.656133)
 region = bounds(buffer(centerpoint, 4e3))
 
 # Get a link to view results in false color composite

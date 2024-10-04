@@ -9,7 +9,7 @@ format:
     toc-expand: false
   pdf:
       documentclass: scrbook
-      dpi: 600
+      dpi: 800
       classoption:
         - fontsize=10.5pt
       papersize: letter
