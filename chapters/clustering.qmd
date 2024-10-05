@@ -329,11 +329,11 @@ Note that we will play a little trick on our data here. We know from @fig-kmeans
 #| echo: false
 #| output: false
 begin
-    clusters = kmeans(X, 5)
+    clusters = kmeans(X, 8)
 end
 Cm = permutedims(reshape(assignments(clusters), size(NDVI)))
 msk = convert(Bool, similar(NDVI))
-msk.grid[findall(isequal(C[1]), permutedims(C))] .= true # We know the first pixel in C is water
+msk.grid[findall(isequal(Cm[1]), permutedims(Cm))] .= true # We know the first pixel in C is water
 replace!(msk, true => nothing)
 replace!(msk, false => true)
 
@@ -415,7 +415,7 @@ C[findall(iszero, C)] .= NaN
 
 ### Clustering with optimal number of classes
 
-The clustering of pixels using $k = 3$ is presented in @fig-kmeans-optimal-landscape. Unsurprisingly, *k*-means separated the open water pixels, the burnt area, as well as the more forested/green areas. Now is a good idea to start thinking about what is representative of these clusters: one is associated with very high NDWI value (these are the water pixels), and two classes have both high NDVI and high NDMI (suggesting different categories of vegetation).
+The clustering of pixels using $k = 4$ is presented in @fig-kmeans-optimal-landscape. Unsurprisingly, *k*-means separated the burnt area, as well as the more forested/green areas. Now is a good idea to start thinking about what is representative of these clusters: one is associated with very high NDWI value (these are the water pixels), and two classes have both high NDVI and high NDMI (suggesting different categories of vegetation).
 
 ```{julia}
 #| label: fig-kmeans-optimal-landscape
