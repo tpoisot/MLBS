@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Tuning hyper-parameters – Machine Learning for Biodiversity Scientists</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-c5e942a007d896c09d288e0a021963dd.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-8c0a46209ffcf3a098f65e18256def9c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": true,
+  "collapse-after": 1,
+  "panel-placement": "start",
+  "type": "overlay",
+  "limit": 10,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/learningcurves.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
+</div>
+    </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/crossvalidation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Cross-validation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing features</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bagging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bagging, ensembles, and uncertainty</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/counterfactuals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Generating counterfactuals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/squint.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The machine learning squint</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
+   
+  <ul>
+  <li><a href="#sec-learningcurves-threshold" id="toc-sec-learningcurves-threshold" class="nav-link active" data-scroll-target="#sec-learningcurves-threshold"><span class="header-section-number">7.1</span> Classification based on probabilities</a>
+  <ul class="collapse">
+  <li><a href="#the-roc-curve" id="toc-the-roc-curve" class="nav-link" data-scroll-target="#the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</a></li>
+  <li><a href="#the-pr-curve" id="toc-the-pr-curve" class="nav-link" data-scroll-target="#the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</a></li>
+  <li><a href="#the-tpts-curve" id="toc-the-tpts-curve" class="nav-link" data-scroll-target="#the-tpts-curve"><span class="header-section-number">7.1.3</span> The TPTS curve</a></li>
+  </ul></li>
+  <li><a href="#a-note-on-cross-entropy-loss" id="toc-a-note-on-cross-entropy-loss" class="nav-link" data-scroll-target="#a-note-on-cross-entropy-loss"><span class="header-section-number">7.2</span> A note on cross-entropy loss</a></li>
+  <li><a href="#how-to-optimize-the-threshold" id="toc-how-to-optimize-the-threshold" class="nav-link" data-scroll-target="#how-to-optimize-the-threshold"><span class="header-section-number">7.3</span> How to optimize the threshold?</a></li>
+  <li><a href="#application-improved-corsican-nuthatch-model" id="toc-application-improved-corsican-nuthatch-model" class="nav-link" data-scroll-target="#application-improved-corsican-nuthatch-model"><span class="header-section-number">7.4</span> Application: improved Corsican nuthatch model</a>
+  <ul class="collapse">
+  <li><a href="#revisiting-assumptions-on-cross-validation" id="toc-revisiting-assumptions-on-cross-validation" class="nav-link" data-scroll-target="#revisiting-assumptions-on-cross-validation"><span class="header-section-number">7.4.1</span> Revisiting assumptions on cross-validation</a></li>
+  <li><a href="#sec-learningcurves-probabilistic" id="toc-sec-learningcurves-probabilistic" class="nav-link" data-scroll-target="#sec-learningcurves-probabilistic"><span class="header-section-number">7.4.2</span> Making the NBC explicitly probabilistic</a></li>
+  <li><a href="#how-good-is-the-model" id="toc-how-good-is-the-model" class="nav-link" data-scroll-target="#how-good-is-the-model"><span class="header-section-number">7.4.3</span> How good is the model?</a></li>
+  <li><a href="#optimizing-the-prior" id="toc-optimizing-the-prior" class="nav-link" data-scroll-target="#optimizing-the-prior"><span class="header-section-number">7.4.4</span> Optimizing the prior</a></li>
+  <li><a href="#testing-and-visualizing-the-final-model" id="toc-testing-and-visualizing-the-final-model" class="nav-link" data-scroll-target="#testing-and-visualizing-the-final-model"><span class="header-section-number">7.4.5</span> Testing and visualizing the final model</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7.5</span> Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/learningcurves.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-tuning" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, we represented the testing and training loss of a model as a function of the number of gradient descent steps we had made. This sort of representation is very useful to figure out how well our model is learning, and is called, appropriately enough, a learning curve. We further discussed that the learning rate (and possibly the regularization rate), and the number of epochs, where <em>hyper</em>-parameters of the model. An hyper-parameter is usually defined as a parameter of the model that is <em>controlling</em> the learning process, but is not itself modified through learning <span class="citation" data-cites="yang2020">(<a href="#ref-yang2020" role="doc-biblioref">Yang &amp; Shami 2020</a>)</span>. Hyper-parameters usually need to be determined <em>before</em> the training starts <span class="citation" data-cites="claesen2015">(<a href="#ref-claesen2015" role="doc-biblioref">Claesen &amp; De Moor 2015</a>)</span>, but there are various strategies to optimize them. In this chapter, we will produce learning curves to find the optimal values of an hyper-parameter of the model we developed in ­<a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter 6</span></a> (the threshold at which we consider that a probability is high enough to be considered a positive prediction).</p>
+<p>We will illustrate this using an approach called moving-threshold classification, and additionally discuss how we can conduct searches to tune several hyper-parameters at once. There are many techniques to sample multiple parameters at the same time, including Latin hypercube sampling <span class="citation" data-cites="huntington1998">(<a href="#ref-huntington1998" role="doc-biblioref">Huntington &amp; Lyrintzis 1998</a>)</span>, successive halvings <span class="citation" data-cites="jamieson2016">(<a href="#ref-jamieson2016" role="doc-biblioref">Jamieson &amp; Talwalkar 2016</a>)</span>, orthogonal sampling <span class="citation" data-cites="mckay1979">(<a href="#ref-mckay1979" role="doc-biblioref">McKay <em>et al.</em> 1979</a>)</span>, and grid searches. The common point to all of these approaches are that they generate a combination of hyper-parameters, which are used to train the model, and measures of performance are then used to pick the best possible combination of hyper-parameters. In the process of doing this, we will also revisit the question of why the MCC is a good measure of the classification performance, as well as examine tools to investigate the “right” balance between false/true positive rates. At the end of this chapter, we will have produced a very good model for the distribution of the Corsican nuthatch, which we will then <em>explain</em> in <a href="explanations.html" class="quarto-xref"><span>Chapter 9</span></a>.</p>
+<section id="sec-learningcurves-threshold" class="level2 page-columns page-full" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="sec-learningcurves-threshold"><span class="header-section-number">7.1</span> Classification based on probabilities</h2>
+<p>When first introducing classification in <a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a> and <a href="variableselection.html" class="quarto-xref"><span>Chapter 6</span></a>, we used a model that returned a deterministic answer, which is to say, the name of a class (in our case, this class was either “present” or “absent”). But a lot of classifiers return quantitative values, that correspond to (proxies for) the probability of the different classes. Nevertheless, because we are interested in solving a classification problem, we need to end up with a confusion table, and so we need to turn a number into a class. In the context of binary classification (we model a yes/no variable), this can be done using a threshold for the probability.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Note that the quantitative value returned by the classifier does not <em>need</em> to be a probability; it simply needs to be on an interval (or ratio) scale.</p>
+</div></div><p>The idea behind the use of thresholds is simple: if the classifier output <span class="math inline">\(\hat y\)</span> is larger than (or equal to) the threshold value <span class="math inline">\(\tau\)</span>, we consider that this prediction corresponds to the positive class (the event we want to detect, for example the presence of a species). In the other case, this prediction corresponds to the negative class. Note that we do not, strictly, speaking, require that the value <span class="math inline">\(\hat y\)</span> returned by the classifier be a probability. We can simply decide to pick <span class="math inline">\(\tau\)</span> somewhere in the support of the distribution of <span class="math inline">\(\hat y\)</span>.</p>
+<p>The threshold to decide on a positive event is an hyper-parameter of the model. In the NBC we built in <a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a>, our decision rule was that <span class="math inline">\(p(+) &gt; p(-)\)</span>, which when all is said and done (but we will convince ourselves of this in <a href="#sec-learningcurves-probabilistic" class="quarto-xref"><span>Section 7.4.2</span></a>), means that we used <span class="math inline">\(\tau = 0.5\)</span>. But there is no reason to assume that the threshold needs to be one half. Maybe the model is overly sensitive to negatives. Maybe there is a slight issue with our training data that bias the model predictions. And for this reason, we have to look for the optimal value of <span class="math inline">\(\tau\)</span>.</p>
+<p>There are two important values for the threshold, at which we know the behavior of our model. The first is <span class="math inline">\(\tau = \text{min}(\hat y)\)</span>, for which the model <em>always</em> returns a negative answer; the second is, unsurprisingly, <span class="math inline">\(\tau = \text{max}(\hat y)\)</span>, where the model <em>always</em> returns a positive answer. Thinking of this behavior in terms of the measures on the confusion matrix, as we have introduced them in <a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a>, the smallest possible threshold gives only negatives, and the largest possible one gives only positives: they respectively maximize the false negatives and false positives rates.</p>
+<section id="the-roc-curve" class="level3" data-number="7.1.1">
+<h3 data-number="7.1.1" class="anchored" data-anchor-id="the-roc-curve"><span class="header-section-number">7.1.1</span> The ROC curve</h3>
+<p>This is a behavior we can exploit, as increasing the threshold away from the minimum will lower the false negatives rate and increase the true positive rate, while decreasing the threshold away from the maximum will lower the false positives rate and increase the true negative rate. If we cross our fingers and knock on wood, there will be a point where the false events rates have decreased as much as possible, and the true events rates have increased as much as possible, and this corresponds to the optimal value of <span class="math inline">\(\tau\)</span> for our problem.</p>
+<p>We have just described the Receiver Operating Characteristic (ROC; <span class="citation" data-cites="fawcett2006">Fawcett (<a href="#ref-fawcett2006" role="doc-biblioref">2006</a>)</span>) curve! The ROC curve visualizes the false positive rate on the <span class="math inline">\(x\)</span> axis, and the true positive rate on the <span class="math inline">\(y\)</span> axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier <span class="citation" data-cites="hanley1982">(<a href="#ref-hanley1982" role="doc-biblioref">Hanley &amp; McNeil 1982</a>)</span>; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance.The ROC curve is a description of the model performance across all of the possible threshold values we investigated!</p>
+</section>
+<section id="the-pr-curve" class="level3" data-number="7.1.2">
+<h3 data-number="7.1.2" class="anchored" data-anchor-id="the-pr-curve"><span class="header-section-number">7.1.2</span> The PR curve</h3>
+<p>One very common issue with ROC curves, is that they are overly optimistic about the performance of the model, especially when the problem we work on suffers from class imbalance, which happens when observations of the positive class are much rarer than observations of the negative class. In ecology, this is a common feature of data on species interactions <span class="citation" data-cites="poisot2023">(<a href="#ref-poisot2023" role="doc-biblioref">Poisot <em>et al.</em> 2023</a>)</span>. In addition, although a good model will have a high ROC-AUC, a bad model can get a high ROC-AUC too <span class="citation" data-cites="Halligan2015">(<a href="#ref-Halligan2015" role="doc-biblioref">Halligan <em>et al.</em> 2015</a>)</span>; this means that ROC-AUC alone is not enough to select a model.</p>
+<p>An alternative to ROC is the PR (for precision-recall) curve, in which the positive predictive value is plotted against the true-positive rate; in other words, the PR curve (and therefore the PR-AUC) quantify whether a classifier makes reliable positive predictions, both in terms of these predictions being associated to actual positive outcomes (true-positive rate) and not associated to actual negative outcomes (positive predictive value). Because the PR curve uses the positive predictive values, it captures information that is similar to the ROC curve, but is in general more informative <span class="citation" data-cites="Saito2015">(<a href="#ref-Saito2015" role="doc-biblioref">Saito &amp; Rehmsmeier 2015</a>)</span>.</p>
+</section>
+<section id="the-tpts-curve" class="level3" data-number="7.1.3">
+<h3 data-number="7.1.3" class="anchored" data-anchor-id="the-tpts-curve"><span class="header-section-number">7.1.3</span> The TPTS curve</h3>
+<p><span class="citation" data-cites="Becker2022">Becker <em>et al.</em> (<a href="#ref-Becker2022" role="doc-biblioref">2022</a>)</span> developed a variant of the ROC curve meant to be used when the validation data are <em>only</em> composed of the predictive class; there are a number of situations when this is a reasonable assumption. In the original article, the testing data were reported positive detection of beta-coronaviruses in bat species, which can be seen as a positive-only event since negative tests are unlikely to be reported [the “file-drawer effect”; <span class="citation" data-cites="pautasso2010">Pautasso (<a href="#ref-pautasso2010" role="doc-biblioref">2010</a>)</span>]. In this context, evaluating the model by accounting for negative testing data introduces biases, as we do not have access to novel negative instances.</p>
+<p>The idea behind the TPTS curve is to instead evaluate the sensitivity of the model as a function of the prevalence that would have been observed <em>during training</em> using a specific threshold. At higher thresholds, all instances are predicted positive, but the TPTS curve quantifies how reliably high the specificity can be while keeping the threshold as low as possible. As for the ROC curve, a good model will get a high specificity even at a low threshold.</p>
+</section>
+</section>
+<section id="a-note-on-cross-entropy-loss" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="a-note-on-cross-entropy-loss"><span class="header-section-number">7.2</span> A note on cross-entropy loss</h2>
+<p>In <a href="gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, we used loss functions to measure the progress of our learning algorithm. Unsurprisingly, loss functions exist for classification tasks too. One of the most common is the cross-entropy (or log-loss), which is defined as</p>
+<p><span class="math display">\[
+−\left[y \times \text{log}\ p+(1−y)\times \text{log}\ (1−p)\right] \,,
+\]</span></p>
+<p>where <span class="math inline">\(y\)</span> is the actual class, and <span class="math inline">\(p\)</span> is the probability associated to the positive class. Note that the log-loss is very similar to Shannon’s measure of entropy, and in fact can be expressed based on the Kullback-Leibler divergence of the distributions of <span class="math inline">\(y\)</span> and <span class="math inline">\(p\)</span>. Which is to say that log-loss measures how much information about <span class="math inline">\(y\)</span> is conveyed by <span class="math inline">\(p\)</span>.</p>
+<p>In this chapter, we use measures like the MCC that describe the performance of a classifier when the predictions are done, but log-loss is useful when there are multiple epochs of training. Neural networks used for classification commonly use log-loss as a loss function; note that the gradient of the log-loss function is very easy to calculate, and that gives it its usefulness as a measure of the advancement of the learning process.</p>
+</section>
+<section id="how-to-optimize-the-threshold" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="how-to-optimize-the-threshold"><span class="header-section-number">7.3</span> How to optimize the threshold?</h2>
+<p>In order to understand the optimization of the threshold, we first need to understand how a model with thresholding works. When we run such a model on multiple input features, it will return a list of probabilities, for example <span class="math inline">\([0.2, 0.8, 0.1, 0.5, 1.0]\)</span>. We then compare all of these values to an initial threshold, for example <span class="math inline">\(\tau = 0.05\)</span>, giving us a vector of Boolean values, in this case <span class="math inline">\([+, +, +, +, +]\)</span>. We can then compare this classified output to a series of validation labels, <em>e.g.</em> <span class="math inline">\([-, +, -, -, +]\)</span>, and report the performance of our model. In this case, the very low thresholds means that we accept any probability as a positive case, and so our model is very strongly biased (towards false positives). We then increase the threshold, and start again.</p>
+<p>As we have discussed in <a href="#sec-learningcurves-threshold" class="quarto-xref"><span>Section 7.1</span></a>, moving the threshold is essentially a way to move in the space of true/false rates. As the measures of classification performance capture information that is relevant in this space, there should be a value of the threshold that maximizes one of these measures. Alas, no one agrees on which measure this should be <span class="citation" data-cites="Perkins2006 Unal2017">(<a href="#ref-Perkins2006" role="doc-biblioref">Perkins &amp; Schisterman 2006</a>; <a href="#ref-Unal2017" role="doc-biblioref">Unal 2017</a>)</span>. The usual recommendation is to use the True Skill Statistic, also known as Youden’s <span class="math inline">\(J\)</span> <span class="citation" data-cites="youden1950">(<a href="#ref-youden1950" role="doc-biblioref">Youden 1950</a>)</span>. The biomedical literature, which is quite naturally interested in getting the interpretation of tests right, has established that maximizing this value brings us very close to the optimal threshold for a binary classifier <span class="citation" data-cites="perkins2005">(<a href="#ref-perkins2005" role="doc-biblioref">Perkins &amp; Schisterman 2005</a>)</span>. In a simulation study, using the True Skill Statistic gave good predictive performance for models of species interactions <span class="citation" data-cites="poisot2023a">(<a href="#ref-poisot2023a" role="doc-biblioref">Poisot 2023</a>)</span>.</p>
+<p>Some authors have used the MCC as a measure of optimality <span class="citation" data-cites="zhou2013">(<a href="#ref-zhou2013" role="doc-biblioref">Zhou &amp; Jakobsson 2013</a>)</span>, as it is maximized <em>only</em> when a classifier gets a good score for the basic rates of the confusion matrix. Based on this information, <span class="citation" data-cites="chicco2023">Chicco &amp; Jurman (<a href="#ref-chicco2023" role="doc-biblioref">2023</a>)</span> recommend that MCC should be used to pick the optimal threshold <em>regardless of the question</em>, and I agree with their assessment. A high MCC is always associated to a high ROC-AUC, TSS, etc., but the opposite is not necessarily true. This is because the MCC can only reach high values when the model is good at <em>everything</em>, and therefore it is not possible to trick it. In fact, previous comparisons show that MCC even outperform measures of classification loss <span class="citation" data-cites="Jurman2012">(<a href="#ref-Jurman2012" role="doc-biblioref">Jurman <em>et al.</em> 2012</a>)</span>.</p>
+<p>For once, and after over 15 years of methodological discussion, it appears that we have a conclusive answer! In order to pick the optimal threshold, we find the value that maximizes the MCC. Note that in previous chapters, we already used the MCC as a our criteria for the best model, and now you know why.</p>
+</section>
+<section id="application-improved-corsican-nuthatch-model" class="level2 page-columns page-full" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="application-improved-corsican-nuthatch-model"><span class="header-section-number">7.4</span> Application: improved Corsican nuthatch model</h2>
+<p>In this section, we will finish the training of the model for the distribution of <em>Sitta whiteheadi</em>, by picking optimal hyper-parameters, and finally reporting its performance on the testing dataset. At the end of this chapter, we will therefore have established a trained model, that we will use in <a href="explanations.html" class="quarto-xref"><span>Chapter 9</span></a> to see how each prediction emerges.</p>
+<section id="revisiting-assumptions-on-cross-validation" class="level3 page-columns page-full" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="revisiting-assumptions-on-cross-validation"><span class="header-section-number">7.4.1</span> Revisiting assumptions on cross-validation</h3>
+<p>Most things related to cross-validation <em>are</em> hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to poor outcomes. In <a href="#fig-tuning-holdout" class="quarto-xref">Figure&nbsp;<span>7.1</span></a>, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation <a href="crossvalidation.html#sec-crossvalidation-holdout" class="quarto-xref">see&nbsp;<span>4.3.1</span></a> can change our ability to produce a good model. Specifically, we compare the MCC estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data <em>increases</em>, but the MCC on the validation data <em>decreases</em>. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.</p>
+<div id="cell-fig-tuning-holdout" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-holdout" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="Learning curve for the proportion of data used in cross-validation.">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-holdout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-holdout-output-1.png" data-fig-scap="Learning curve for the proportion of data used in cross-validation." width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-holdout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 50 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Remember from <a href="crossvalidation.html#sec-crossvalidation-kfolds" class="quarto-xref"><span>Section 4.3.4</span></a> that with k-fold, <span class="math inline">\(k\)</span> is an hyper-parameter; it can be tuned in the exact same way! The value of <span class="math inline">\(k\)</span> used in these chapters has been picked because it gives adequate performance.</p>
+</div></div><p>Performing this type of analysis is crucial, as it will help us figure out the correct conditions under which a model can be trained. In this case, if we decided to use holdout cross-validation (which we do not, we will keep using <em>k</em>-folds!) it appears that the model performance can be reliably be estimated even with low holdout proportions. The usual cutoff of 30% of data used for training using holdout would give reliable estimates of model performance.</p>
+<p>This simple example served as an illustration of what a learning curve looks like. In the rest of this chapter, we will focus on tuning an hyper-parameter from the model itself (the probability threshold for attribution of the positive class), and see how we can re-construct a general approach from thinking about the components of the confusion table.</p>
+</section>
+<section id="sec-learningcurves-probabilistic" class="level3 page-columns page-full" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="sec-learningcurves-probabilistic"><span class="header-section-number">7.4.2</span> Making the NBC explicitly probabilistic</h3>
+<p>In <a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a>, we have expressed the probability that the NBC recommends a positive outcome as</p>
+<p><span class="math display">\[
+    P(+|x) = \frac{P(+)}{P(x)}P(x|+)\,,
+\]</span></p>
+<p>and noted that because <span class="math inline">\(P(x)\)</span> is constant across all classes, we could simplify this model as <span class="math inline">\(P(+|x) \propto P(+)P(x|+)\)</span>. But because we know the only two possible classes are <span class="math inline">\(+\)</span> and <span class="math inline">\(-\)</span>, we can figure out the expression for <span class="math inline">\(P(x)\)</span>. Because we are dealing with probabilities, we know that <span class="math inline">\(P(+|x)+P(-|x) = 1\)</span>. We can therefore re-write this as</p>
+<p><span class="math display">\[
+\frac{P(+)}{P(x)}P(x|+)+\frac{P(-)}{P(x)}P(x|-) = 1\,
+\]</span></p>
+<p>which after some reorganization (and note that <span class="math inline">\(P(-) = 1-P(+)\)</span>), results in</p>
+<p><span class="math display">\[
+P(x) = P(+) P(x|+)+P(-) P(x|-) \,.
+\]</span></p>
+<p>This value <span class="math inline">\(P(x)\)</span> is the “evidence” in Bayesian parlance, and we can use this value explicitly to get the prediction for the probability associated to the class <span class="math inline">\(+\)</span> using the NBC.</p>
+<p>Note that we can see that using the approximate version we used so far (the prediction is positive if <span class="math inline">\(P(+) P(x|+) &gt; P(-) P(x|-)\)</span>) is equivalent to saying that the prediction is positive whenever <span class="math inline">\(P(+|x) &gt; \tau\)</span> with <span class="math inline">\(\tau = 0.5\)</span>. In the next sections, we will challenge the assumption that <span class="math inline">\(0.5\)</span> is the optimal value of <span class="math inline">\(\tau\)</span>.</p>
+<p>In <a href="#fig-tuning-threshold" class="quarto-xref">Figure&nbsp;<span>7.2</span></a>, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is <span class="math inline">\(\tau \approx 0\.479\)</span>. But more importantly, it seems that the “landscape” of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning <em>why</em> that is.</p>
+<div id="cell-fig-tuning-threshold" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-threshold" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="Learning curve for the threshold of the NBC model.">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-threshold-output-1.png" data-fig-scap="Learning curve for the threshold of the NBC model." width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-threshold-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>To do so, we can look at the distribution of probabilities returned by the NBC, which are presented in <a href="#fig-tuning-probabilities" class="quarto-xref">Figure&nbsp;<span>7.3</span></a>. It appears that the NBC is often confident in its recommendations, with a bimodal distribution of probabilities. For this reason, small changes in the position of the threshold would only affect a very small number of instances, and consequently only have a small effect on the MCC and other statistics. If the distribution of probabilities returned by the NBC had been different, the shape of the learning curve may have been a lot more skewed.</p>
+<div id="cell-fig-tuning-probabilities" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-probabilities" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="Probabilities assigned to each pixel and position of the threshold.">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-probabilities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-probabilities-output-1.png" data-fig-scap="Probabilities assigned to each pixel and position of the threshold." width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-probabilities-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: Probabilities assigned to each pixel (bottom), color-coded by their value in the validation set (top scatterplots). The NBC is making a lot of recommendations very close to 0 or very close to 1, and for this reason, positioning the threshold anywhere in the middle of the range would give almost similar results in terms of the MCC.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Looking at <a href="#fig-tuning-probabilities" class="quarto-xref">Figure&nbsp;<span>7.3</span></a>, it appears that changing the threshold is changing the proportion of false positives and negatives; it is worth investigating exactly how this happens. We can explore this behavior in <a href="#fig-tuning-ppvnpv" class="quarto-xref">Figure&nbsp;<span>7.4</span></a>. The points where the PPV and NPC curves meet is a good first approximation of the threshold (the MCC is not picking this exact point, but this is an approximation nonetheless).</p>
+<div id="cell-fig-tuning-ppvnpv" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-ppvnpv" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="Changes in PPV and NPV with increasing threshold values.">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-ppvnpv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-ppvnpv-output-1.png" data-fig-scap="Changes in PPV and NPV with increasing threshold values." width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-ppvnpv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.4: Learning curve for the threshold of the NBC model, showing the PPV (solid line) and the NPV (dashed line). This figure shows how increasing the threshold leads to a better positive predictive value (we are more confident in the predicti class) at the cost of a loss in the negative predictive value (the pixels classified as negative are not meaningful). Essentially, moving the threshold (and indeed, tuning any other hyper-parameter) is a way to find a position in this space where the balance between errors maximizes the skill of our classifier.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="how-good-is-the-model" class="level3 page-columns page-full" data-number="7.4.3">
+<h3 data-number="7.4.3" class="anchored" data-anchor-id="how-good-is-the-model"><span class="header-section-number">7.4.3</span> How good is the model?</h3>
+<p>After picking a threshold and seeing how it relates to the distribution of probabilities in the model output, we can have a look at the ROC and PR curves. They are presented in <a href="#fig-tuning-roc-pr" class="quarto-xref">Figure&nbsp;<span>7.5</span></a>. In both cases, we see that the model is behaving correctly (it is nearing the point in the graph corresponding to perfect classifications), and importantly, we can check that the variability between the different folds is low. The model also outperforms the no-skill classifier. Taken together, these results give us a strong confidence in the fact that our model with the threshold applied represents an improvement over the version without the threshold.</p>
+<div id="cell-fig-tuning-roc-pr" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-roc-pr" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="ROC and PR curve for the trained classifier.">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-roc-pr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-roc-pr-output-1.png" data-fig-scap="ROC and PR curve for the trained classifier." width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-roc-pr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.5: ROC and PR curve for each fold, calculated on the validation datasets. The area highlighted in green corresponds to perfect classifiers, and the dashed line is the no-skill classifier. The solid arrow shows direction alongside which model performance increases in both cases.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In a sense, the ROC and PR curves are another projection of the results from <a href="#fig-tuning-ppvnpv" class="quarto-xref">Figure&nbsp;<span>7.4</span></a>: a good classifier makes credible recommendations for its positive class, while maintaining credible recommendations for the negative class. Looking at several ways to express the performance of the classifier is a good idea, as a good understanding of how reliable our predicitions are depends on our ability to appraise these different sources of error.</p>
+</section>
+<section id="optimizing-the-prior" class="level3 page-columns page-full" data-number="7.4.4">
+<h3 data-number="7.4.4" class="anchored" data-anchor-id="optimizing-the-prior"><span class="header-section-number">7.4.4</span> Optimizing the prior</h3>
+<div id="20" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>P0 <span class="op">=</span> model.classifier.prior</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Pi <span class="op">=</span> <span class="fu">LinRange</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>, <span class="fl">20</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>Pm <span class="op">=</span> [<span class="fu">deepcopy</span>(model) for _ <span class="kw">in</span> <span class="fu">axes</span>(Pi, <span class="fl">1</span>)]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i, P) <span class="kw">in</span> <span class="fu">enumerate</span>(Pi)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    Pm[i].classifier.prior <span class="op">=</span> P</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>update on NBC prior</p>
+<p>how to update? also threshold</p>
+<p>illustration of result</p>
+<div id="cell-fig-tuning-prior" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-prior" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="Tuning of the NBC prior">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-prior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-prior-output-1.png" data-fig-scap="Tuning of the NBC prior" width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-prior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.6: Tuning of the NBC prior probability (see <a href="classification.html#eq-nbc-onevar" class="quarto-xref">Equation&nbsp;<span>5.4</span></a>) that a location is favorable to the presence of the species. As in <a href="#fig-tuning-threshold" class="quarto-xref">Figure&nbsp;<span>7.2</span></a>, the model was cross-validation on a number of priors increasing from 0 (presences will never be predicted) to 1 (presences will always be predicted). The vertical dashed line is the class balance in the dataset, showing that the optimal prior for this model is informed by the relative proportion of presences in the training data (this is the value of the prior we used by default in this entire chapter).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>discuss imbalance again</p>
+</section>
+<section id="testing-and-visualizing-the-final-model" class="level3 page-columns page-full" data-number="7.4.5">
+<h3 data-number="7.4.5" class="anchored" data-anchor-id="testing-and-visualizing-the-final-model"><span class="header-section-number">7.4.5</span> Testing and visualizing the final model</h3>
+<p>As we are now considering that our model is adequately trained, we can apply it to the testing data we had set aside early in <a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a>. Applying the trained model to this data provides a fair estimate of the expected model performance, and relaying this information to people who are going to use the model is important.</p>
+<p>We are <em>not</em> applying the older versions of the model to the testing data, as we had decided against this. We had established the rule of “we pick the best model as the one with the highest validation MCC”, and this is what we will stick to. To do otherwise would be the applied machine learning equivalent of <span class="math inline">\(p\)</span>-hacking, as the question of “what to do in case a model with lower validation MCC had a better performance on the testing data?” would arise, and we do not want to start questioning our central decision this late in the process.</p>
+<p>We can start by taking a look at the confusion matrix on the testing data:</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+142 &amp; 20 \\
+15 &amp; 195
+\end{pmatrix}
+\]</span></p>
+<p>This is very promising! There are far more predictions on the diagonal (337) than outside of it (35), which suggests an accurate classifier. The MCC of this model is 0.808, its true-skill statistic is 0.811, and its positive and negative predictive values are respectively 0.877 and 0.929. In other words: this model is <em>extremely</em> good. The values of PPV and NPV in particular are important to report: they tell us that when the model predicts a positive or negative outcome, it is expected to be correct more than 9 out of 10 times.</p>
+<p>The final predictions are shown in <a href="#fig-tuning-map" class="quarto-xref">Figure&nbsp;<span>7.7</span></a>. Although the range map is very similar to the one we produced by the end of <a href="variableselection.html" class="quarto-xref"><span>Chapter 6</span></a>, the small addition of an optimized threshold leads to a model that is overall a little more accurate. In <a href="bagging.html" class="quarto-xref"><span>Chapter 8</span></a>, we will focus on the uncertainty associated to this prediction.</p>
+<div id="cell-fig-tuning-map" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-tuning-map" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full" data-fig-scap="Update range map for *Sitta whiteheadi* after thresholding.">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-tuning-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="learningcurves_files/figure-html/fig-tuning-map-output-1.png" data-fig-scap="Update range map for *Sitta whiteheadi* after thresholding." width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-tuning-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.7: Predicted range of <em>Sitta whiteheadi</em> (left) and associated bootstrap uncertainty (right; see <a href="classification.html" class="quarto-xref"><span>Chapter 5</span></a>). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7.5</span> Conclusion</h2>
+<p>In this chapter, we have refined a model by adopting a principled approach to establishing hyper-parameters. This resulted in a final trained model, which we applied to produce the final prediction of the distribution of <em>Sitta whiteheadi</em>. In <a href="explanations.html" class="quarto-xref"><span>Chapter 9</span></a>, we will start asking “why”? Specifically, we will see a series of tools to evaluate why the model was making a specific prediction at a specific place, and look at the relationship between the importance of variables for model performance and for actual predictions. But before we do this, we will spend time in <a href="bagging.html" class="quarto-xref"><span>Chapter 8</span></a> to discuss the uncertainty that is part of this model, and how it can be communicated.</p>
+
+
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden">
+
+</div>
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Becker2022" class="csl-entry" role="listitem">
+Becker, D.J., Albery, G.F., Sjodin, A.R., Poisot, T., Bergner, L.M., Chen, B., <em>et al.</em> (2022). <a href="https://doi.org/10.1016/s2666-5247(21)00245-7">Optimising predictive models to prioritise viral discovery in zoonotic reservoirs</a>. <em>The Lancet Microbe</em>, 3, e625–e637.
+</div>
+<div id="ref-chicco2023" class="csl-entry" role="listitem">
+Chicco, D. &amp; Jurman, G. (2023). <a href="https://doi.org/10.1186/s13040-023-00322-4">The Matthews correlation coefficient&nbsp;(MCC) should replace the ROC&nbsp;AUC as the standard metric for assessing binary classification</a>. <em>BioData Mining</em>, 16.
+</div>
+<div id="ref-claesen2015" class="csl-entry" role="listitem">
+Claesen, M. &amp; De Moor, B. (2015). <a href="https://doi.org/10.48550/ARXIV.1502.02127">Hyperparameter search in machine learning</a>.
+</div>
+<div id="ref-fawcett2006" class="csl-entry" role="listitem">
+Fawcett, T. (2006). <a href="https://doi.org/10.1016/j.patrec.2005.10.010">An introduction to ROC analysis</a>. <em>Pattern Recognition Letters</em>, 27, 861–874.
+</div>
+<div id="ref-Halligan2015" class="csl-entry" role="listitem">
+Halligan, S., Altman, D.G. &amp; Mallett, S. (2015). <a href="https://doi.org/10.1007/s00330-014-3487-0">Disadvantages of using the area under the receiver operating characteristic curve to assess imaging tests: A discussion and proposal for an alternative approach</a>. <em>European Radiology</em>, 25, 932–939.
+</div>
+<div id="ref-hanley1982" class="csl-entry" role="listitem">
+Hanley, J.A. &amp; McNeil, B.J. (1982). <a href="https://doi.org/10.1148/radiology.143.1.7063747">The meaning and use of the area under a receiver operating characteristic (ROC) curve.</a> <em>Radiology</em>, 143, 29–36.
+</div>
+<div id="ref-huntington1998" class="csl-entry" role="listitem">
+Huntington, D.E. &amp; Lyrintzis, C.S. (1998). <a href="https://doi.org/10.1016/s0266-8920(97)00013-1">Improvements to and limitations of Latin hypercube sampling</a>. <em>Probabilistic Engineering Mechanics</em>, 13, 245–253.
+</div>
+<div id="ref-jamieson2016" class="csl-entry" role="listitem">
+Jamieson, K. &amp; Talwalkar, A. (2016). <a href="https://proceedings.mlr.press/v51/jamieson16.html">Non-stochastic best arm identification and hyperparameter optimization</a>. In: <em>Proceedings of the 19th international conference on artificial intelligence and statistics</em>, Proceedings of machine learning research (eds. Gretton, A. &amp; Robert, C.C.). PMLR, Cadiz, Spain, pp. 240–248.
+</div>
+<div id="ref-Jurman2012" class="csl-entry" role="listitem">
+Jurman, G., Riccadonna, S. &amp; Furlanello, C. (2012). <a href="https://doi.org/10.1371/journal.pone.0041882">A Comparison of MCC and CEN Error Measures in Multi-Class Prediction</a>. <em>PLoS ONE</em>, 7, e41882.
+</div>
+<div id="ref-mckay1979" class="csl-entry" role="listitem">
+McKay, M.D., Beckman, R.J. &amp; Conover, W.J. (1979). <a href="https://doi.org/10.2307/1268522">A comparison of three methods for selecting values of input variables in the analysis of output from a computer code</a>. <em>Technometrics</em>, 21, 239.
+</div>
+<div id="ref-pautasso2010" class="csl-entry" role="listitem">
+Pautasso, M. (2010). <a href="https://doi.org/10.1007/s11192-010-0233-5">Worsening file-drawer problem in the abstracts of natural, medical and social science databases</a>. <em>Scientometrics</em>, 85, 193–202.
+</div>
+<div id="ref-perkins2005" class="csl-entry" role="listitem">
+Perkins, N.J. &amp; Schisterman, E.F. (2005). <a href="https://doi.org/10.1002/bimj.200410133">The Youden Index and the Optimal Cut-Point Corrected for Measurement Error</a>. <em>Biometrical Journal</em>, 47, 428–441.
+</div>
+<div id="ref-Perkins2006" class="csl-entry" role="listitem">
+Perkins, N.J. &amp; Schisterman, E.F. (2006). <a href="https://doi.org/10.1093/aje/kwj063">The Inconsistency of <span>“</span>Optimal<span>”</span> Cutpoints Obtained using Two Criteria based on the Receiver Operating Characteristic Curve</a>. <em>American Journal of Epidemiology</em>, 163, 670–675.
+</div>
+<div id="ref-poisot2023a" class="csl-entry" role="listitem">
+Poisot, T. (2023). <a href="https://doi.org/10.1111/2041-210x.14071">Guidelines for the prediction of species interactions through binary classification</a>. <em>Methods in Ecology and Evolution</em>, 14, 1333–1345.
+</div>
+<div id="ref-poisot2023" class="csl-entry" role="listitem">
+Poisot, T., Ouellet, M.-A., Mollentze, N., Farrell, M.J., Becker, D.J., Brierley, L., <em>et al.</em> (2023). <a href="https://doi.org/10.1016/j.patter.2023.100738">Network embedding unveils the hidden interactions in the mammalian virome</a>. <em>Patterns</em>, 4, 100738.
+</div>
+<div id="ref-Saito2015" class="csl-entry" role="listitem">
+Saito, T. &amp; Rehmsmeier, M. (2015). <a href="https://doi.org/10.1371/journal.pone.0118432">The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets</a>. <em>PLOS ONE</em>, 10, e0118432.
+</div>
+<div id="ref-Unal2017" class="csl-entry" role="listitem">
+Unal, I. (2017). <a href="https://doi.org/10.1155/2017/3762651">Defining an Optimal Cut-Point Value in ROC Analysis: An Alternative Approach</a>. <em>Computational and Mathematical Methods in Medicine</em>, 2017, 1–14.
+</div>
+<div id="ref-yang2020" class="csl-entry" role="listitem">
+Yang, L. &amp; Shami, A. (2020). <a href="https://doi.org/10.1016/j.neucom.2020.07.061">On hyperparameter optimization of machine learning algorithms: Theory and practice</a>. <em>Neurocomputing</em>, 415, 295–316.
+</div>
+<div id="ref-youden1950" class="csl-entry" role="listitem">
+Youden, W.J. (1950). <a href="https://doi.org/10.1002/1097-0142(1950)3:1<32::aid-cncr2820030106>3.0.co;2-3">Index for rating diagnostic tests</a>. <em>Cancer</em>, 3, 32–35.
+</div>
+<div id="ref-zhou2013" class="csl-entry" role="listitem">
+Zhou, H. &amp; Jakobsson, E. (2013). <a href="https://doi.org/10.1371/journal.pone.0081100">Predicting Protein-Protein Interaction by the Mirrortree Method: Possibilities and Limitations</a>. <em>PLoS ONE</em>, 8, e81100.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0 International License</a></p>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/learningcurves.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

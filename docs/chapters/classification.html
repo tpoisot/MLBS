@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Supervised classification – Machine Learning for Biodiversity Scientists</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-c5e942a007d896c09d288e0a021963dd.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-8c0a46209ffcf3a098f65e18256def9c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": true,
+  "collapse-after": 1,
+  "panel-placement": "start",
+  "type": "overlay",
+  "limit": 10,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/classification.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Machine Learning for Biodiversity Scientists</a> 
+        <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/tpoisot/MLBS" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="../Machine-Learning-for-Biodiversity-Scientists.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+    <div id="quarto-search" class="quarto-navigation-tool px-1" title="Search"></div>
+</div>
+    </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/gradientdescent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Gradient descent</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/crossvalidation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Cross-validation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/classification.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/variableselection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Preparing features</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/bagging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bagging, ensembles, and uncertainty</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/explanations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/counterfactuals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Generating counterfactuals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/squint.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The machine learning squint</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendices/instructornotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Instructor notes</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="-1">
+    <h2 id="toc-title">Chapter overview</h2>
+   
+  <ul>
+  <li><a href="#the-problem-distribution-of-an-endemic-species" id="toc-the-problem-distribution-of-an-endemic-species" class="nav-link active" data-scroll-target="#the-problem-distribution-of-an-endemic-species"><span class="header-section-number">5.1</span> The problem: distribution of an endemic species</a></li>
+  <li><a href="#what-is-classification" id="toc-what-is-classification" class="nav-link" data-scroll-target="#what-is-classification"><span class="header-section-number">5.2</span> What is classification?</a>
+  <ul class="collapse">
+  <li><a href="#separability" id="toc-separability" class="nav-link" data-scroll-target="#separability"><span class="header-section-number">5.2.1</span> Separability</a></li>
+  <li><a href="#the-confusion-table" id="toc-the-confusion-table" class="nav-link" data-scroll-target="#the-confusion-table"><span class="header-section-number">5.2.2</span> The confusion table</a></li>
+  <li><a href="#sec-classification-null" id="toc-sec-classification-null" class="nav-link" data-scroll-target="#sec-classification-null"><span class="header-section-number">5.2.3</span> Null classifiers</a></li>
+  <li><a href="#sec-classification-accuracy" id="toc-sec-classification-accuracy" class="nav-link" data-scroll-target="#sec-classification-accuracy"><span class="header-section-number">5.2.4</span> A note on accuracy</a></li>
+  </ul></li>
+  <li><a href="#the-naive-bayes-classifier" id="toc-the-naive-bayes-classifier" class="nav-link" data-scroll-target="#the-naive-bayes-classifier"><span class="header-section-number">5.3</span> The Naive Bayes Classifier</a>
+  <ul class="collapse">
+  <li><a href="#how-the-nbc-works" id="toc-how-the-nbc-works" class="nav-link" data-scroll-target="#how-the-nbc-works"><span class="header-section-number">5.3.1</span> How the NBC works</a></li>
+  <li><a href="#how-the-nbc-learns" id="toc-how-the-nbc-learns" class="nav-link" data-scroll-target="#how-the-nbc-learns"><span class="header-section-number">5.3.2</span> How the NBC learns</a></li>
+  </ul></li>
+  <li><a href="#application-a-baseline-model-of-the-corsican-nuthatch" id="toc-application-a-baseline-model-of-the-corsican-nuthatch" class="nav-link" data-scroll-target="#application-a-baseline-model-of-the-corsican-nuthatch"><span class="header-section-number">5.4</span> Application: a baseline model of the Corsican nuthatch</a>
+  <ul class="collapse">
+  <li><a href="#training-and-validation-strategy" id="toc-training-and-validation-strategy" class="nav-link" data-scroll-target="#training-and-validation-strategy"><span class="header-section-number">5.4.1</span> Training and validation strategy</a></li>
+  <li><a href="#performance-evaluation-of-the-model" id="toc-performance-evaluation-of-the-model" class="nav-link" data-scroll-target="#performance-evaluation-of-the-model"><span class="header-section-number">5.4.2</span> Performance evaluation of the model</a></li>
+  <li><a href="#the-decision-boundary" id="toc-the-decision-boundary" class="nav-link" data-scroll-target="#the-decision-boundary"><span class="header-section-number">5.4.3</span> The decision boundary</a></li>
+  <li><a href="#visualizing-the-trained-model" id="toc-visualizing-the-trained-model" class="nav-link" data-scroll-target="#visualizing-the-trained-model"><span class="header-section-number">5.4.4</span> Visualizing the trained model</a></li>
+  <li><a href="#what-is-an-acceptable-model" id="toc-what-is-an-acceptable-model" class="nav-link" data-scroll-target="#what-is-an-acceptable-model"><span class="header-section-number">5.4.5</span> What is an acceptable model?</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5.5</span> Conclusion</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/classification.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-classification" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In the previous chapters, we have focused our efforts on regression models, which is to say models that predict a continuous response. In this chapter, we will introduce the notion of classification, which is the prediction of a discrete variable representing a category. There are a lot of topics we need to cover before we can confidently come up with a model for classification, and so this chapter is part of a series. We will first introduce the idea of classification; in <a href="variableselection.html" class="quarto-xref"><span>Chapter 6</span></a>, we will explore techniques to fine-tune the set of variables we use for prediction; in <a href="learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>, we will think about predictions of classes as probabilities, and generalize these ideas and think about learning curves; finally, in <a href="explanations.html" class="quarto-xref"><span>Chapter 9</span></a>, we will think about variables a lot more, and introduce elements of model interpretability.</p>
+<section id="the-problem-distribution-of-an-endemic-species" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="the-problem-distribution-of-an-endemic-species"><span class="header-section-number">5.1</span> The problem: distribution of an endemic species</h2>
+<p>Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, <em>Sitta whiteheadi</em>. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as “vulnerable to extinction” by the International Union for the Conservation of Nature. <span class="citation" data-cites="barbet-massin2011">Barbet-Massin &amp; Jiguet (<a href="#ref-barbet-massin2011" role="doc-biblioref">2011</a>)</span> nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.</p>
+<p>Species Distribution Modeling (SDM; <span class="citation" data-cites="elith2009">Elith &amp; Leathwick (<a href="#ref-elith2009" role="doc-biblioref">2009</a>)</span>), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as <span class="citation" data-cites="beery2021">Beery <em>et al.</em> (<a href="#ref-beery2021" role="doc-biblioref">2021</a>)</span> rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in <a href="crossvalidation.html#sec-crossvalidation-fitness" class="quarto-xref"><span>Section 4.4.3</span></a>), has been covered in the SDM literature <span class="citation" data-cites="guillera-arroita2015">(<a href="#ref-guillera-arroita2015" role="doc-biblioref">Guillera-Arroita <em>et al.</em> 2015</a>)</span>. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious our data science practices when fitting a species distribution model is important: <span class="citation" data-cites="cholletramampiandra2023">Chollet Ramampiandra <em>et al.</em> (<a href="#ref-cholletramampiandra2023" role="doc-biblioref">2023</a>)</span> make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.</p>
+<p>Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.</p>
+<p>We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants and animals <span class="citation" data-cites="clapham1935 whittaker1962">(<a href="#ref-clapham1935" role="doc-biblioref">Clapham <em>et al.</em> 1935</a>; <a href="#ref-whittaker1962" role="doc-biblioref">Whittaker 1962</a>)</span>, to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start <span class="citation" data-cites="berteaux2014">(<a href="#ref-berteaux2014" role="doc-biblioref">Berteaux 2014</a>)</span>.</p>
+<p>Consider our dataset for a minute. In order to predict the presence of a species, we need information about where the species has been observed; this we can get from the <a href="https://www.gbif.org/">Global Biodiversity Information Facility</a>. We need information about where the species has <em>not</em> been observed; this is usually not directly available, but there are ways to generate background points that are a good approximation of this <span class="citation" data-cites="hanberry2012 barbet-massin2012">(<a href="#ref-barbet-massin2012" role="doc-biblioref">Barbet-Massin <em>et al.</em> 2012</a>; <a href="#ref-hanberry2012" role="doc-biblioref">Hanberry <em>et al.</em> 2012</a>)</span>. All of these data points come in the form <span class="math inline">\((\text{lat.}, \text{lon.}, y)\)</span>, which give a position in space, as well as <span class="math inline">\(y = \{+,-\}\)</span> (the species is present or absent!) at this position.</p>
+<p>To build a model with temperature and precipitation as inputs, we need to extract the temperature and precipitation at all of these coordinates. We will use the CHELSA1 dataset <span class="citation" data-cites="karger2017">(<a href="#ref-karger2017" role="doc-biblioref">Karger <em>et al.</em> 2017</a>)</span>, at a resolution of 30 seconds of arc. WorldClim2 <span class="citation" data-cites="fick2017">(<a href="#ref-fick2017" role="doc-biblioref">Fick &amp; Hijmans 2017</a>)</span> also offers access to similar bioclimatic variables, but is known to have some artifacts that may bias the analysis.</p>
+<p>The predictive task we want to complete is to get a predicted presence or absence <span class="math inline">\(\hat y = \{+,-\}\)</span>, from a vector <span class="math inline">\(\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]\)</span>. This specific task is called classification, and we will now introduce some elements of theory.</p>
+</section>
+<section id="what-is-classification" class="level2 page-columns page-full" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="what-is-classification"><span class="header-section-number">5.2</span> What is classification?</h2>
+<p>Classification is the prediction of a qualitative response. In <a href="clustering.html" class="quarto-xref"><span>Chapter 2</span></a>, for example, we predicted the class of a pixel, which is a qualitative variable with levels <span class="math inline">\(\{1, 2, \dots, k\}\)</span>. This represented an instance of <em>unsupervised</em> learning, as we had no <em>a priori</em> notion of the correct class of the pixel. When building SDMs, by contrast, we often know where species are, and we can simulate “background points”, that represent assumptions about where the species are not. For this series of chapters, the background points have been generated by sampling preferentially the pixels that are farther away from known presences of the species.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>When working on <span class="math inline">\(\{+,-\}\)</span> outcomes, we are specifically performing <em>binary</em> classification. Classification can be applied to more than two levels.</p>
+</div></div><p>In short, our response variable has levels <span class="math inline">\(\{+, -\}\)</span>: the species is there, or it is not – we will challenge this assumption later in the series of chapters, but for now, this will do. The case where the species is present is called the <em>positive class</em>, and the case where it is absent is the <em>negative class</em>. We tend to have really strong assumptions about classification already. For example, monitoring techniques using environmental DNA <span class="citation" data-cites="perl2022">(<em>e.g.</em> <a href="#ref-perl2022" role="doc-biblioref">Perl <em>et al.</em> 2022</a>)</span> are a classification problem: the species can be present or not, <span class="math inline">\(y = \{+,-\}\)</span>, and the test can be positive of negative <span class="math inline">\(\hat y = \{+,-\}\)</span>. We would be happy in this situation whenever <span class="math inline">\(\hat y = y\)</span>, as it means that the test we use has diagnostic value. This is the essence of classification, and everything that follows is more precise ways to capture how close a test comes from this ideal scenario.</p>
+<section id="separability" class="level3 page-columns page-full" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="separability"><span class="header-section-number">5.2.1</span> Separability</h3>
+<p>A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in <a href="variableselection.html#sec-predictors-curse" class="quarto-xref"><span>Section 6.4.1</span></a>, simply adding more predictors is not the right thing to do.</p>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in <a href="variableselection.html" class="quarto-xref"><span>Chapter 6</span></a>), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 10°C, presences are far more likely. For a location with a temperature warmer than 15°C, absences become overwhelmingly more likely. The locations with a temperature between 10°C and 15°C can go either way.</p>
+<div id="cell-fig-classification-separability" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-classification-separability" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-separability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-separability-output-1.png" width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-separability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: This figures show the separability of the presences (orange) and pseudo-absences (grey) on the temperature and precipitation dimensions.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-confusion-table" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="the-confusion-table"><span class="header-section-number">5.2.2</span> The confusion table</h3>
+<p>Evaluating the performance of a classifier (a classifier is a model that performs classification) is usually done by looking at its confusion table, which is a contingency table of the form</p>
+<p><span id="eq-classification-confusion"><span class="math display">\[
+\begin{pmatrix}
+\text{TP} &amp; \text{FP}\\
+\text{FN} &amp; \text{TN}
+\end{pmatrix} \,.
+\tag{5.1}\]</span></span></p>
+<p>This can be stated as “counting the number of times each pair of (prediction, observation occurs)”, like so:</p>
+<p><span id="eq-classification-explain"><span class="math display">\[
+\begin{pmatrix}
+|\hat +, +| &amp; |\hat +, -|\\
+|\hat -, +| &amp; |\hat -, -|
+\end{pmatrix} \,.
+\tag{5.2}\]</span></span></p>
+<p>The four components of the confusion table are the true positives (TP; correct prediction of <span class="math inline">\(+\)</span>), the true negatives (TN; correct prediction of <span class="math inline">\(-\)</span>), the false positives (FP; incorrect prediction of <span class="math inline">\(+\)</span>), and the false negatives (FN; incorrect prediction of <span class="math inline">\(-\)</span>). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible (the proportion of predictions on the diagonal is called the accuracy, and we will spend <a href="#sec-classification-accuracy" class="quarto-xref"><span>Section 5.2.4</span></a> discussing why it is not such a great measure).</p>
+<p>As there are many different possible measures on this matrix, we will introduce them as we go. In this section, it it more important to understand how the matrix responds to two important features of the data and the model: balance and bias.</p>
+<p>Balance refers to the proportion of the positive class. Whenever this balance is not equal to 1/2 (there are as many positives as negative cases), we are performing <em>imbalanced</em> classification, which comes with additional challenges; few ecological problems are balanced.</p>
+</section>
+<section id="sec-classification-null" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="sec-classification-null"><span class="header-section-number">5.2.3</span> Null classifiers</h3>
+<p>A useful baseline to establish whether a model “works” is to measure whether the model performs better than at random. For classification problems, a good baseline is provided by “null” classifiers, in which the underlying structure of the data is known (and respects class balance), but the classifier itself makes guesses at random, for different definitions of random. Because these classifiers are very simple, they are not in fact models; we can directly write their confusion matrix, and apply different measures of model performance to it.</p>
+<section id="the-no-skill-classifier" class="level4" data-number="5.2.3.1">
+<h4 data-number="5.2.3.1" class="anchored" data-anchor-id="the-no-skill-classifier"><span class="header-section-number">5.2.3.1</span> The no-skill classifier</h4>
+<p>There is a specific hypothetical classifier, called the <em>no-skill classifier</em>, which guesses classes at random as a function of their proportion. It turns out to have an interesting confusion matrix! If we note <span class="math inline">\(b\)</span> the proportion of positive classes, the no-skill classifier will guess <span class="math inline">\(+\)</span> with probability <span class="math inline">\(b\)</span>, and <span class="math inline">\(-\)</span> with probability <span class="math inline">\(1-b\)</span>. Because these are also the proportion in the data, we can write the confusion matrix as</p>
+<p><span id="eq-classification-noskill"><span class="math display">\[
+\begin{pmatrix}
+b^2 &amp; b(1-b)\\
+(1-b)b &amp; (1-b)^2
+\end{pmatrix} \,.
+\tag{5.3}\]</span></span></p>
+<p>The proportion of elements that are on the diagonal of this matrix is <span class="math inline">\(b^2 + (1-b)^2\)</span>. When <span class="math inline">\(b\)</span> gets lower, this value actually increases: the more difficult a classification problem is, the more accurate random guesses <em>look like</em>. This has a simple explanation, which we expand <a href="#sec-classification-accuracy" class="quarto-xref"><span>Section 5.2.4</span></a> : when most of the cases are negative, if you predict a negative case often, you will by chance get a very high true negative score. For this reason, measures of model performance will combine the positions of the confusion table to avoid some of these artifacts.</p>
+<p>Bias refers to the fact that a model can recommend more (or fewer) positive or negative classes than it should. An extreme example is the <em>zero-rate classifier</em>, which will always guess the most common class, and which is commonly used as a baseline for imbalanced classification. A good classifier has high skill (which we can measure by whether it beats the no-skill classifier for our specific problem) and low bias. In this chapter, we will explore different measures on the confusion table the inform us about these aspects of model performance, using the Naive Bayes Classifier.</p>
+</section>
+<section id="the-coin-flip-classifier" class="level4" data-number="5.2.3.2">
+<h4 data-number="5.2.3.2" class="anchored" data-anchor-id="the-coin-flip-classifier"><span class="header-section-number">5.2.3.2</span> The coin-flip classifier</h4>
+<p>An alternative to the no-skill classifier is the coin-flip classifier, in which classes have their correct prevalence <span class="math inline">\(b\)</span>, but the model picks at random with probability <span class="math inline">\(1/2\)</span> within these classes. This differs from the no-skill classifier by adopting a different random chance of picking a class while still respecting the prevalence of the positive class.</p>
+<p>The confusion matrix of the coin-flip classifier is:</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+\frac{b}{2} &amp; \frac{1-b}{2}\\
+\frac{b}{2} &amp; \frac{1-b}{2}
+\end{pmatrix} \,.
+\]</span></p>
+</section>
+<section id="the-constant-classifier" class="level4" data-number="5.2.3.3">
+<h4 data-number="5.2.3.3" class="anchored" data-anchor-id="the-constant-classifier"><span class="header-section-number">5.2.3.3</span> The constant classifier</h4>
+<p>The last null classifier we can use is the constant classifier, in which we assume that the model will <em>always</em> return some specific class. This is useful to anticipate what the model performance would look like if, for example, the model always predicted the negative outcome (which is a notion we will return to in <a href="#sec-classification-accuracy" class="quarto-xref"><span>Section 5.2.4</span></a>).</p>
+<p>This classifier has the confusion matrix</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+b &amp; 1-b\\
+0 &amp; 0
+\end{pmatrix}
+\]</span></p>
+<p>if it always predicts the positive class, and</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+0 &amp; 0\\
+b &amp; 1-b
+\end{pmatrix}
+\]</span></p>
+<p>if it always predicts the negative class.</p>
+</section>
+</section>
+<section id="sec-classification-accuracy" class="level3 page-columns page-full" data-number="5.2.4">
+<h3 data-number="5.2.4" class="anchored" data-anchor-id="sec-classification-accuracy"><span class="header-section-number">5.2.4</span> A note on accuracy</h3>
+<p>It is tempting to use accuracy to measure how good a classifier is, because it makes sense: it quantifies how many predictions are correct. But a good accuracy can hide a very poor performance. Let’s think about an extreme case, in which we want to detect an event that happens with prevalence <span class="math inline">\(0.05\)</span>. Out of 100 predictions, the confusion matrix of this model would be</p>
+<p><span class="math display">\[
+\begin{pmatrix}
+0 &amp; 0 \\ 5 &amp; 95
+\end{pmatrix} \,.
+\]</span></p>
+<p>The accuracy of this classifier would be <span class="math inline">\(0.95\)</span>, which seems extremely high! This is because prevalence is extremely low, and so most of the predictions are about the negative class: the model is <em>on average</em> really good, but is completely missing the point when it comes to making interesting predictions.</p>
+<p>In fact, even a classifier that would not be that extreme would be mis-represented if all we cared about was the accuracy. If we take the case of the no-skill classifier, the accuracy is given by <span class="math inline">\(b^2 + (1-b)^2\)</span>, which is an inverted parabola that is <em>maximized</em> for <span class="math inline">\(b \approx 0\)</span> – a model guessing at random will appear better when the problem we want to solve gets more difficult.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Whenever possible, avoid using accuracy except to communicate the skill of the model in easy to understand terms.</p>
+</div></div><p>This is an issue inherent to accuracy: it can tell you that a classifier is bad (when it is low), but it cannot really tell you when a classifier is <em>good</em>, as no-skill (or worse-than-no-skill) classifiers can have very high values. It remains informative as an <em>a posteriori</em> measure of performance, but only after using reliable measures to ensure that the model means something.</p>
+<p>More generally, this also illustrates why relying on null classifiers is a good idea: we want to make sure that we are making better predictions than an heavily biased, uninformative model would.</p>
+</section>
+</section>
+<section id="the-naive-bayes-classifier" class="level2 page-columns page-full" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="the-naive-bayes-classifier"><span class="header-section-number">5.3</span> The Naive Bayes Classifier</h2>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>In practice, we do not use the Naive Bayes Classifier for SDMs. There are far more powerful alternatives based on boosting, like boosted regression trees, or Bayesian additive regression trees. But NBC makes for an easy to follow example across many chapters.</p>
+</div></div><p>The Naive Bayes Classifier (NBC) is my all-time favorite classifier. It is built on a very simple intuition, works with almost no data, and more importantly, often provides an annoyingly good baseline for other, more complex classifiers to meet. That NBC works <em>at all</em> is counter-intuitive <span class="citation" data-cites="hand2001">(<a href="#ref-hand2001" role="doc-biblioref">Hand &amp; Yu 2001</a>)</span>. It assumes that all variables are independent, it works when reducing the data to a simpler distribution, and although the numerical estimate of the class probability can be somewhat unstable, it generally gives good predictions. NBC is the data science equivalent of saying “eh, I reckon it’s probably <em>this</em> class” and somehow getting it right 95% of the time. There are, in fact, several papers questioning <em>why</em> NBC works <em>at all</em> <span class="citation" data-cites="kupervasser2014">(see <em>e.g.</em> <a href="#ref-kupervasser2014" role="doc-biblioref">Kupervasser 2014</a>)</span>.</p>
+<section id="how-the-nbc-works" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="how-the-nbc-works"><span class="header-section-number">5.3.1</span> How the NBC works</h3>
+<p>In <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>, what is the most likely class if the temperature is 8°C?</p>
+<p>We can look at the density traces on top, and say that because the one for presences is higher, we would be justified in guessing that the species is present. Of course, this is equivalent to saying that <span class="math inline">\(P(8^\circ C | +) &gt; P(8^\circ C | -)\)</span>. It would appear that we are looking at the problem in the wrong way, because we are really interested in <span class="math inline">\(P(+ | 8^\circ C)\)</span>, the probability that the species is present knowing that the temperature is 8°C.</p>
+<p>Using Baye’s theorem, we can re-write our goal as</p>
+<p><span id="eq-nbc-onevar"><span class="math display">\[
+P(+|x) = \frac{P(+)}{P(x)}P(x|+) \,,
+\tag{5.4}\]</span></span></p>
+<p>where <span class="math inline">\(x\)</span> is one value of one feature, <span class="math inline">\(P(x)\)</span> is the probability of this observation (the evidence, in Bayesian parlance), and <span class="math inline">\(P(+)\)</span> is the probability of the positive class (in other words, the prior). So, this is where the “Bayes” part comes from.</p>
+<p>But why is NBC naive?</p>
+<p>In <a href="#eq-nbc-onevar" class="quarto-xref">Equation&nbsp;<span>5.4</span></a>, we have used a single feature <span class="math inline">\(x\)</span>, but the problem we want to solve uses a vector of features, <span class="math inline">\(\mathbf{x}\)</span>. These features, statisticians will say, will have covariance, and a joint distribution, and many things that will challenge the simplicity of what we have written so far. These details, NBC says, are meaningless.</p>
+<p>NBC is naive because it makes the assumptions that the features are all independent. This is actually the foundation upon which the NBC is built. To express the assumption of features independence, we simply need to write that <span class="math inline">\(P(+|\mathbf{x}) \propto P(+)\prod_i P(\mathbf{x}_i|+)\)</span> (by the chain rule). Note that this is not a strict equality: to get the actual value of <span class="math inline">\(P(+|\mathbf{x})\)</span> we need to divide by the evidence, and so we need to find the expression of the evidence. But instead of doing this, we simply have to note that the evidence is constant across all classes, and so we do not need to measure it to get an estimate of the score for a class. We can think of this assumption in a problem-specific way: if we walk across a landscape at random with regard to our response variable, <em>i.e.</em> we do not know whether the species will be present or not, there is (i) no reason to assume that the probability of measuring a specific temperature (or other feature) will be linked to the response in any way, and (ii) no reason to assume that a third, mysterious value that is neither presence nor absence could ever be measured; therefore, <span class="math inline">\(P(\mathbf{x})\)</span> is a constant for our model.</p>
+<p>To generalize our notation, the score for a class <span class="math inline">\(\mathbf{c}_j\)</span> is <span class="math inline">\(P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j)\)</span>. In order to decide on a class, we apply the following rule:</p>
+<p><span id="eq-nbc-decision"><span class="math display">\[
+\hat y = \text{argmax}_j \, P(\mathbf{c}_j)\prod_i P(\mathbf{x}_i|\mathbf{c}_j) \,.
+\tag{5.5}\]</span></span></p>
+<p>In other words, whichever class gives the higher score, is what the NBC will recommend for this instance <span class="math inline">\(\mathbf{x}\)</span>. In <a href="learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>, we will improve upon this model by thinking about (and eventually calculating) the evidence <span class="math inline">\(P(\mathbf{x})\)</span> in order to estimate the actual probability, but as you will see, this simple formulation will already prove frightfully effective.</p>
+</section>
+<section id="how-the-nbc-learns" class="level3 page-columns page-full" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="how-the-nbc-learns"><span class="header-section-number">5.3.2</span> How the NBC learns</h3>
+<p>There are two unknown quantities at this point. The first is the value of <span class="math inline">\(P(+)\)</span> and <span class="math inline">\(P(-)\)</span>. These are priors, and are presumably important to pick correctly. In the spirit of iterating rapidly on a model, we can use two starting points: either we assume that the classes have the same probability, or we assume that the representation of the classes (the balance of the problem) <em>is</em> their prior. It now helps to think about the no-skill and coin-flip classifier we introduced earlier in the chapter. Assume that we do not use <span class="math inline">\(P(x|c)\)</span> when making our prediction: the baseline against which we compare the model will therefore be entire determined by <span class="math inline">\(P(+)\)</span>. Picking a prior of one half is making the predictions at random (like coin-flip), and picking a prior equal to the prevalence is making the predictions at random (like no-skill). Understanding how we set the prior for the NBC is important, as it can ensure that we use a fair baseline to compare it against. Throughout this book, we will let our prior be the prevalence in the training data (and therefore our first task will be to beat the no-skill classifier). Finally, note that we do not need to think about <span class="math inline">\(P(-)\)</span> too much, as it is simply <span class="math inline">\(1-P(+)\)</span>: the “state” of every single observation of the presence or absence of the species under a set of measured environmental variables is either <span class="math inline">\(+\)</span> or <span class="math inline">\(-\)</span>.</p>
+<p>The most delicate problem is to figure out <span class="math inline">\(P(x|c)\)</span>, the probability of the observation of the variable when the class is known. There are variants here that will depend on the type of data that is in <span class="math inline">\(x\)</span>; as we work with continuous variables, we will rely on Gaussian NBC. In Gaussian NBC, we will consider that <span class="math inline">\(x\)</span> comes from a normal distribution <span class="math inline">\(\mathcal{N}(\mu_{x,c},\sigma_{x,c})\)</span>, and therefore we simply need to evaluate the probability density function of this distribution at the point <span class="math inline">\(x\)</span>. Other types of data are handled in the same way, with the difference that they use a different set of distributions; for example, categorical variables can be represented using multinomial distributions <span class="citation" data-cites="abbood2020">(<a href="#ref-abbood2020" role="doc-biblioref">Abbood <em>et al.</em> 2020</a>)</span>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>We could use different approaches to NBC, by using (for example) the empirical CDF function of the training data for each class. We will revisit this idea in chapter <a href="squint.html" class="quarto-xref"><span>Chapter 11</span></a>, as it establishes an interesting parallel between different methods.</p>
+</div></div><p>Therefore, the learning stage of NBC is extremely quick: we take the mean and standard deviation of the values, split by predictor and by class, and these are the parameters of our classifier. By contrast to the linear regression approach we worked with in <a href="gradientdescent.html" class="quarto-xref"><span>Chapter 3</span></a>, the learning phase only involves a single epoch: measuring the mean and standard deviation. This yields a Gaussian NBC with the assumption that variables are normally distributed, because the normal distribution is the maximal entropy distribution when we know these two moments. This also reveals an interesting feature of NBC: it can work when we do not have access to the underlying training data. Imagine a situation where we only have access to published summary statistics about the environmental variables for which the species was observed / not observed: we can use these to establish the Normal distributions for each feature for each class, and use the NBC. Its ability to work under extreme data scarcity (assuming we are comfortable with the assumptions about the shape of the distribution) makes NBC a surprisingly versatile classifier.</p>
+</section>
+</section>
+<section id="application-a-baseline-model-of-the-corsican-nuthatch" class="level2 page-columns page-full" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="application-a-baseline-model-of-the-corsican-nuthatch"><span class="header-section-number">5.4</span> Application: a baseline model of the Corsican nuthatch</h2>
+<p>In this section, we will have a look at the temperature and precipitation data from <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>, and come up with a first version of our classifier, which is to say: we will train our first attempt at an ecological niche model for the Corsican nuthatch.</p>
+<section id="training-and-validation-strategy" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="training-and-validation-strategy"><span class="header-section-number">5.4.1</span> Training and validation strategy</h3>
+<p>To evaluate our model, as we discussed in <a href="crossvalidation.html" class="quarto-xref"><span>Chapter 4</span></a>, we will keep a holdout testing set, that will be composed of 20% of the observations. In this chapter, we will not be using these data, because in order to use them as a stand-in for future predictions, it is important that the model only sees them once (this will happen at the end of <a href="learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>). Therefore, for the next chapters, we will limit ourselves to an evaluation of the model performance based on the average values of the performance measure we picked as the most informative, calculated on the validation datasets. When, based on this criteria, we have identified and validated the best model, we will evaluate it on the testing data.</p>
+<p>In this chapter, we will rely on Monte-Carlo cross validation (MCCV; see <a href="crossvalidation.html#sec-crossvalidation-montecarlo" class="quarto-xref"><span>Section 4.3.5</span></a>), using 100 replicates. In the following chapters, we will revert to using k-folds cross-validation, but using MCCV here is a good enough starting point.</p>
+<p>In order to see how good our model really is, we will also compare its performances to the no-skill classifier. This is almost never a difficult classifier to outperform, but this nevertheless provides a good indication of whether our model works <em>at all</em>. In <a href="squint.html" class="quarto-xref"><span>Chapter 11</span></a>, we will introduce a slightly more domain-specific model to provide a baseline that would look like an actual model we would like to out-perform (but mostly to make the general point that any problem can be approached like a machine learning problem).</p>
+</section>
+<section id="performance-evaluation-of-the-model" class="level3 page-columns page-full" data-number="5.4.2">
+<h3 data-number="5.4.2" class="anchored" data-anchor-id="performance-evaluation-of-the-model"><span class="header-section-number">5.4.2</span> Performance evaluation of the model</h3>
+<p>In order to get a sense of the performance of our model, we will need to decide on a performance measure. This is an important step, as we will use the average value of this measure on the validation data to decide on the best model <em>before</em> reporting the expected performance. If we pick a measure that is biased, we will therefore use a model that is biased. Following <span class="citation" data-cites="chicco2020">Chicco &amp; Jurman (<a href="#ref-chicco2020" role="doc-biblioref">2020</a>)</span> and <span class="citation" data-cites="Jurman2012">Jurman <em>et al.</em> (<a href="#ref-Jurman2012" role="doc-biblioref">2012</a>)</span>, we will use the Matthew’s Correlation Coefficient (MCC) as the “main” measure to evaluate the performance of a model (we will return to other alternative measures in <a href="learningcurves.html" class="quarto-xref"><span>Chapter 7</span></a>, and eventually explain why MCC is the most appropriate for classification evaluation).</p>
+<p>The MCC is defined as</p>
+<p><span class="math display">\[
+\frac{\text{TP}\times \text{TN} - \text{FP}\times \text{FN}}{\sqrt{(\text{TP}+\text{FP})\times (\text{TP}+\text{FN})\times (\text{TN}+\text{FP})\times (\text{TN}+\text{FN})}} \,.
+\]</span></p>
+<p>The MCC is a correlation coefficient. Specifically, it is the Pearson product-moment correlation on a contingency table, where the contingency table is the confusion matrix <span class="citation" data-cites="powers2020">(<a href="#ref-powers2020" role="doc-biblioref">Powers 2020</a>)</span>. Therefore, it returns values in <span class="math inline">\([-1, 1]\)</span>, which can be interpreted as every other correlation value. A negative value indicates perfectly wrong predictions, a value of 0 indicates no-skill, and a value of 1 indicates perfect predictions. By picking the model with the highest MCC on the validation data, we are likely to pick the best possible model (after controlling for over-fitting).</p>
+<p>In addition to reporting the MCC, we will also look at values that inform us on the type of biases in the model, namely the positive and negative predictive values. These values, respectively <span class="math inline">\(\text{TP}/(\text{TP}+\text{FP})\)</span> and <span class="math inline">\(\text{TN}/(\text{TN}+\text{FN})\)</span>, measure how likely a prediction of, respectively, presence and absence, are. To put it in other words, they measure how much the “true” events are represented in all of the predictions for a given even type: a PPV value of 0.7 means that 7 out of 10 positive predictions were true positives. These range in <span class="math inline">\([0,1]\)</span>, and values of one indicate a better performance of the model. It may help to sometimes talk about the falses predictions, in which case the false omission rate (1 - NPV) and false discovery rate (1 - PPV) can be used: they quantify the <em>risk</em> we take when acting on a positive or negative recommendation from the model.</p>
+<p>Why not pick one of these instead of the MCC? Because all modeling is compromise; we don’t want a model to become too good at predicting absences, to the point where prediction about presences would become meaningless. Selecting models on the basis of a measure that only emphasizes one outcome is a risk that we shouldn’t be willing to take. For this reason, measures that are good at optimizing the value of a negative and a positive prediction are far better representations of the performance of a model. The MCC does just this.</p>
+<div id="cell-fig-classification-crossvalidation" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-classification-crossvalidation" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-crossvalidation-output-1.png" width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: Overview of the scores for the Matthew’s correlation coefficient, as well as the positive and negative predictive values.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The output of cross-validation is given in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a> (and compared to the no-skill classifier in <a href="#tbl-classification-crossvalidation" class="quarto-xref">Table&nbsp;<span>5.1</span></a>). As we are satisfied with the model performance, we can re-train it using all the data (<em>but not the part used for testing</em>) in order to make our first series of predictions.</p>
+<div id="tbl-classification-crossvalidation" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="1">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: Overview of the data presented in <a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>, compared to the null classifiers from <a href="#sec-classification-null" class="quarto-xref"><span>Section 5.2.3</span></a>. Note that the MCC gives values of 0 for <em>most</em> null classifiers, which is not the case with other measures of performance. Missing values cannot be calculated as they involved a denominator of 0.
+</figcaption>
+<div aria-describedby="tbl-classification-crossvalidation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 14%">
+<col style="width: 16%">
+<col style="width: 14%">
+<col style="width: 15%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><strong>Measure</strong></th>
+<th style="text-align: left;"><strong>Training</strong></th>
+<th style="text-align: left;"><strong>Validation</strong></th>
+<th style="text-align: left;"><strong>No-skill</strong></th>
+<th style="text-align: left;"><strong>Coin-flip</strong></th>
+<th style="text-align: left;"><strong>Positive</strong></th>
+<th style="text-align: left;"><strong>Negative</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Accuracy</td>
+<td style="text-align: left;">0.88</td>
+<td style="text-align: left;">0.87</td>
+<td style="text-align: left;">0.53</td>
+<td style="text-align: left;">0.63</td>
+<td style="text-align: left;">0.63</td>
+<td style="text-align: left;">0.37</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">NPV</td>
+<td style="text-align: left;">0.83</td>
+<td style="text-align: left;">0.83</td>
+<td style="text-align: left;">0.37</td>
+<td style="text-align: left;">0.63</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">0.37</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">PPV</td>
+<td style="text-align: left;">0.90</td>
+<td style="text-align: left;">0.90</td>
+<td style="text-align: left;">0.63</td>
+<td style="text-align: left;">0.63</td>
+<td style="text-align: left;">0.63</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">MCC</td>
+<td style="text-align: left;">0.73</td>
+<td style="text-align: left;">0.73</td>
+<td style="text-align: left;">-0.00</td>
+<td style="text-align: left;">0.25</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">0.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="the-decision-boundary" class="level3 page-columns page-full" data-number="5.4.3">
+<h3 data-number="5.4.3" class="anchored" data-anchor-id="the-decision-boundary"><span class="header-section-number">5.4.3</span> The decision boundary</h3>
+<p>Now that the model is trained, we can take a break in our discussion of its performance, and think about <em>why</em> it makes a specific classification in the first place. Because we are using a model with only two input features, we can generate a grid of variables, and the ask, for every point on this grid, the classification made by our trained model. This will reveal the regions in the space of parameters where the model will conclude that the species is present.</p>
+<div id="cell-fig-classification-decision" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-classification-decision" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-decision-output-1.png" width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-decision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: Overview of the decision boundary between the positive (orange) and negative (grey) classes using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The output of this simulation is given in <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>5.3</span></a>. Of course, in a model with more features, we would need to adapt our visualisations, but because we only use two features here, this image actually gives us a complete understanding of the model decision process. Think of it this way: even if we lose the code of the model, we could use this figure to classify any input made of a temperature and a precipitation, and read what the model decision would have been.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Take a minute to think about which places are more likely to have lower temperatures on an island. Is there an additional layer of geospatial information we could add that would be informative?</p>
+</div></div><p>The line that separates the two classes is usually referred to as the “decision boundary” of the classifier: crossing this line by moving in the space of features will lead the model to predict another class at the output. In this instance, as a consequence of the choice of models and of the distribution of presence and absences in the environmental space, the decision boundary is not linear.</p>
+<p>It is interesting to compare <a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>5.3</span></a> with, for example, the distribution of the raw data presented in <a href="#fig-classification-separability" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>. Although we initially observed that temperature was giving us the best chance to separate the two classes, the shape of the decision boundary suggests that our classifier is considering that Corsican nuthatches enjoy colder climates with more rainfall.</p>
+</section>
+<section id="visualizing-the-trained-model" class="level3 page-columns page-full" data-number="5.4.4">
+<h3 data-number="5.4.4" class="anchored" data-anchor-id="visualizing-the-trained-model"><span class="header-section-number">5.4.4</span> Visualizing the trained model</h3>
+<p>We can now go through all of the pixels in the island of Corsica, and apply the model to predict the presence of <em>Sitta whiteheadi</em>. This result is reported in <a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>. Because we have used training data for which we know the labels, we can also map the <em>outcome</em> of applying the model, which is to say: where are the false/true negative/positive predictions. The model seems to be making a series of false positive predictions in the northernmost part of Corsica, which may suggest that we are missing predictors relevant to this area that would refine the prediction of the suitability of the habitat.</p>
+<div id="cell-fig-classification-range" class="cell page-columns page-full" data-execution_count="1">
+<div class="cell-output cell-output-display page-columns page-full" data-execution_count="1">
+<div id="fig-classification-range" class="quarto-float quarto-figure quarto-figure-center anchored page-columns page-full">
+<figure class="quarto-float quarto-float-fig figure page-columns page-full">
+<div aria-describedby="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="classification_files/figure-html/fig-classification-range-output-1.png" width="4800" height="3600" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-margin quarto-float-caption quarto-float-fig margin-caption" id="fig-classification-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.4: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of <em>Sitta whiteheadi</em>, but would definitely stand to be improved, possibly by accounting for more features.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-an-acceptable-model" class="level3" data-number="5.4.5">
+<h3 data-number="5.4.5" class="anchored" data-anchor-id="what-is-an-acceptable-model"><span class="header-section-number">5.4.5</span> What is an acceptable model?</h3>
+<p>When comparing the prediction to the spatial distribution of occurrences (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>), it appears that the model identifies an area in the northeast where the species is likely to be present, despite limited observations. This might result in more false positives, but this is the <em>purpose</em> of running this model – if the point data were to provide us with a full knowledge of the range, there would be no point in running the model. For this reason, it is very important to nuance our interpretation of what a false-positive prediction really is. We will get back to this discussion in the next chapters, when adding more complexity to the model. For now, we have established a basic training routine for our model, and have started thinking spatially about <em>where</em> it is making errors (in space).</p>
+<p>Note that by visualizing the type of mis-classification from our training set, we gain a better understanding of <em>how</em> the model is wrong. False positives, for example, tends to be clustered either at the western margin of the main patch of the predicted range, and in a small number of clusters in the North. False negatives are also fairly close to the edge of the predicted range, but clustered towards the center of the island. This is a good sign! The errors that our model is making appear to be mostly at the margin of the habitat of the species, which we know (ecologically) is more difficult to properly map out.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5.5</span> Conclusion</h2>
+<p>In this chapter, we introduced the Naive Bayes Classifier as a model for classification, and applied it to a data of species occurrence, in which we predicted the potential presence of the species using temperature and precipitation. Through cross-validation, we confirmed that this model gave a good enough performance (<a href="#fig-classification-crossvalidation" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>), looked at the decisions that were being made by the trained model (<a href="#fig-classification-decision" class="quarto-xref">Figure&nbsp;<span>5.3</span></a>), and finally mapped the prediction and their associated errors in space (<a href="#fig-classification-range" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>). Based on this information, we concluded that the model was a reasonable first approximation of where <em>Sitta whiteheadi</em> can be present. In the next chapter, we will improve upon this model by looking at techniques to select and transform variables.</p>
+
+
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden">
+
+</div>
+</section>
+<section id="bibliography" class="level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-abbood2020" class="csl-entry" role="listitem">
+Abbood, A., Ullrich, A., Busche, R. &amp; Ghozzi, S. (2020). <a href="https://doi.org/10.1371/journal.pcbi.1008277">EventEpi<span></span>A natural language processing framework for event-based surveillance</a>. <em>PLOS Computational Biology</em>, 16, e1008277.
+</div>
+<div id="ref-barbet-massin2011" class="csl-entry" role="listitem">
+Barbet-Massin, M. &amp; Jiguet, F. (2011). <a href="https://doi.org/10.1371/journal.pone.0018228">Back from a Predicted Climatic Extinction of an Island Endemic: A Future for the Corsican Nuthatch</a>. <em>PLoS ONE</em>, 6, e18228.
+</div>
+<div id="ref-barbet-massin2012" class="csl-entry" role="listitem">
+Barbet-Massin, M., Jiguet, F., Albert, C.H. &amp; Thuiller, W. (2012). <a href="https://doi.org/10.1111/j.2041-210x.2011.00172.x">Selecting pseudo-absences for species distribution models: how, where and how many?</a> <em>Methods in Ecology and Evolution</em>, 3, 327–338.
+</div>
+<div id="ref-beery2021" class="csl-entry" role="listitem">
+Beery, S., Cole, E., Parker, J., Perona, P. &amp; Winner, K. (2021). <a href="https://doi.org/10.1145/3460112.3471966">Species distribution modeling for machine learning practitioners: A review</a>. <em>ACM SIGCAS Conference on Computing and Sustainable Societies (COMPASS)</em>.
+</div>
+<div id="ref-berteaux2014" class="csl-entry" role="listitem">
+Berteaux, D. (2014). <em><a href="https://doi.org/10.1353/book35753">Changements climatiques et biodiversité du québec</a></em>. Presses de l’Université du Québec.
+</div>
+<div id="ref-chicco2020" class="csl-entry" role="listitem">
+Chicco, D. &amp; Jurman, G. (2020). <a href="https://doi.org/10.1186/s12864-019-6413-7">The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation</a>. <em>BMC Genomics</em>, 21.
+</div>
+<div id="ref-cholletramampiandra2023" class="csl-entry" role="listitem">
+Chollet Ramampiandra, E., Scheidegger, A., Wydler, J. &amp; Schuwirth, N. (2023). <a href="https://doi.org/10.1016/j.ecolmodel.2023.110353">A comparison of machine learning and statistical species distribution models: Quantifying overfitting supports model interpretation</a>. <em>Ecological Modelling</em>, 481, 110353.
+</div>
+<div id="ref-clapham1935" class="csl-entry" role="listitem">
+Clapham, A.R., Raunkiaer, C., Gilbert-Carter, H., Tansley, A.G. &amp; Fausboll. (1935). <a href="https://doi.org/10.2307/2256153">The life forms of plants and statistical plant geography.</a> <em>The Journal of Ecology</em>, 23, 247.
+</div>
+<div id="ref-elith2009" class="csl-entry" role="listitem">
+Elith, J. &amp; Leathwick, J.R. (2009). <a href="https://doi.org/10.1146/annurev.ecolsys.110308.120159">Species Distribution Models: Ecological Explanation and Prediction Across Space and Time</a>. <em>Annual Review of Ecology, Evolution, and Systematics</em>, 40, 677–697.
+</div>
+<div id="ref-fick2017" class="csl-entry" role="listitem">
+Fick, S.E. &amp; Hijmans, R.J. (2017). <a href="https://doi.org/10.1002/joc.5086">WorldClim 2: new 1<span>-</span>km spatial resolution climate surfaces for global land areas</a>. <em>International Journal of Climatology</em>, 37, 4302–4315.
+</div>
+<div id="ref-guillera-arroita2015" class="csl-entry" role="listitem">
+Guillera-Arroita, G., Lahoz-Monfort, J.J., Elith, J., Gordon, A., Kujala, H., Lentini, P.E., <em>et al.</em> (2015). <a href="https://doi.org/10.1111/geb.12268">Is my species distribution model fit for purpose? Matching data and models to applications</a>. <em>Global Ecology and Biogeography</em>, 24, 276–292.
+</div>
+<div id="ref-hanberry2012" class="csl-entry" role="listitem">
+Hanberry, B.B., He, H.S. &amp; Palik, B.J. (2012). <a href="https://doi.org/10.1371/journal.pone.0044486">Pseudoabsence Generation Strategies for Species Distribution Models</a>. <em>PLoS ONE</em>, 7, e44486.
+</div>
+<div id="ref-hand2001" class="csl-entry" role="listitem">
+Hand, D.J. &amp; Yu, K. (2001). <a href="https://doi.org/10.2307/1403452">Idiot’s bayes: Not so stupid after all?</a> <em>International Statistical Review / Revue Internationale de Statistique</em>, 69, 385.
+</div>
+<div id="ref-Jurman2012" class="csl-entry" role="listitem">
+Jurman, G., Riccadonna, S. &amp; Furlanello, C. (2012). <a href="https://doi.org/10.1371/journal.pone.0041882">A Comparison of MCC and CEN Error Measures in Multi-Class Prediction</a>. <em>PLoS ONE</em>, 7, e41882.
+</div>
+<div id="ref-karger2017" class="csl-entry" role="listitem">
+Karger, D.N., Conrad, O., Böhner, J., Kawohl, T., Kreft, H., Soria-Auza, R.W., <em>et al.</em> (2017). <a href="https://doi.org/10.1038/sdata.2017.122">Climatologies at high resolution for the earth<span>’</span>s land surface areas</a>. <em>Scientific Data</em>, 4.
+</div>
+<div id="ref-kupervasser2014" class="csl-entry" role="listitem">
+Kupervasser, O. (2014). <a href="https://doi.org/10.1134/s1054661814010088">The mysterious optimality of Naive Bayes: Estimation of the probability in the system of <span>“</span>classifiers<span>”</span></a>. <em>Pattern Recognition and Image Analysis</em>, 24, 1–10.
+</div>
+<div id="ref-perl2022" class="csl-entry" role="listitem">
+Perl, R.G.B., Avidor, E., Roll, U., Malka, Y., Geffen, E. &amp; Gafny, S. (2022). <a href="https://doi.org/10.1002/edn3.276">Using eDNA presence/non<span>-</span>detection data to characterize the abiotic and biotic habitat requirements of a rare, elusive amphibian</a>. <em>Environmental DNA</em>, 4, 642–653.
+</div>
+<div id="ref-powers2020" class="csl-entry" role="listitem">
+Powers, D.M.W. (2020). <a href="https://doi.org/10.48550/ARXIV.2010.16061">Evaluation: From precision, recall and f-measure to ROC, informedness, markedness and correlation</a>. <em>arXiv</em>.
+</div>
+<div id="ref-whittaker1962" class="csl-entry" role="listitem">
+Whittaker, R.H. (1962). <a href="https://doi.org/10.1007/bf02860872">Classification of natural communities</a>. <em>The Botanical Review</em>, 28, 1–239.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>This work is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0 International License</a></p>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/tpoisot/MLBS/blob/main/chapters/classification.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/tpoisot/MLBS/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
