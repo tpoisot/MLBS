@@ -120,7 +120,7 @@ Long-term time series of the date of first bloom in Japan reveal that in the las
 #| echo: false
 #| fig-scap: Relationship between temperature in March and day of blooming.
 #| fig-cap: The raw data show a negative relationship between the temperature in March, and the bloom time. This suggests that when the trees have accumulated enough temperature, they can bloom early. In a context of warming, we should therefore see earlier blooms with rising temperatures.
-f = Figure(; size=(7, 4).*(600/6))
+f = Figure(; size=(5, 5).*(600/6))
 ax = Axis(f[1,1]; xlabel="March temperature (°C)", ylabel="Bloom time (day of year)")
 scatter!(ax, sakura.temperature, sakura.flowering, color=:lightgrey)
 current_figure()
@@ -188,7 +188,7 @@ When the data have some specific structure, it can be a good thing to manipulate
 #| echo: false
 #| fig-scap: Illustration of different folds on a timeseries.
 #| fig-cap: An illustration of a series of folds on a timeseries. The grey data are used for training, the green data for validation, and the purple data are kept for testing. Note that in this context, we sometimes use the future to validate on the past (look at the first fold!), but this is acceptable for reasons explained in the text.
-f = Figure(; size=(7, 5).*(600/6))
+f = Figure(; size=(5, 5).*(600/6))
 s1 = Axis(f[1,1])
 s2 = Axis(f[2,1])
 s3 = Axis(f[3,1])
@@ -288,7 +288,7 @@ sort!(summary_table, [:Measure, :Dataset])
 #| fig-scap: Model performance according to three loss functions.
 #| fig-cap: Visualisation of the model performance for three loss functions (MA, RMSE, MBE, as defined in @tbl-gradientdescent-regressionloss). The colors are the same as in @fig-splits-illustration, *i.e.* grey for the training data, green for the validation data, and purple for the testing data.
 #| echo: false
-f = Figure(; size=(7, 5).*(600/6))
+f = Figure(; size=(5, 5).*(600/6))
 model_results = copy(test_results)
 for (i,m) in enumerate([:MAE, :RMSE, :MBE])
     ax = Axis(f[i,1]; ylabel=String(m))
@@ -331,7 +331,7 @@ The predictions of our model are presented in @fig-splits-prediction; these are 
 #| echo: false
 #| fig-scap: Fit of the final model, after training on all instances.
 #| fig-cap: Overview of the fit of the final model (trained on all the training examples), visualized as the time series. Note that the year was not used as a variable in the model. The purple part of the prediction corresponds to the prediction of the model for the testing data, which are zoomed-in on in @fig-splits-detail. Although the model captures the cycles reasonably well, it tends to smooth out a lot of extreme events.
-f = Figure(; size=(7, 5).*(600/6))
+f = Figure(; size=(5, 5).*(600/6))
 ax = Axis(f[1,1]; xlabel="Year", ylabel="Day of bloom")
 scatter!(ax, sakura.year, sakura.flowavg, color=:lightgrey, markersize=6)
 lines!(ax, sakuratrain.year, convert(Vector{Float64}, predict(model, sakuratrain)), color=:black, linewidth=1)
@@ -362,7 +362,7 @@ We will often be confronted to this question when working with prediction. There
 #| echo: false
 #| fig-scap: Model predictions on the testing data.
 #| fig-cap: Overview of the model predictions on the testing data. Note that the model still smoothes out some of the extreme values. More importantly, it seems that it is under-estimating the sharp decline in the day of first bloom that happens starting in 1950; this suggests that the model is not adequately capturing important processes shaping the data.
-f = Figure(; size=(7, 5).*(600/6))
+f = Figure(; size=(5, 5).*(600/6))
 ax = Axis(f[1,1])
 scatter!(ax, sakuratest.year, sakuratest.flowavg, color=:lightgrey)
 lines!(ax, sakuratest.year, convert(Vector{Float64}, predict(model, sakuratest)), color=:red)
