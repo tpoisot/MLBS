@@ -403,7 +403,7 @@ pretty_table(
 
 ### Variable importance
 
-Before moving on, it is worth taking a moment to think about what we have done so far. We have optimized two components of our model: the transformation of the raw data before they are fed to the classifier (we use a PCA for this step), and then (or simultaneously) the list of variables which we put into the model. In @sec-classification, we had assumed that temperature and precipitation were important variables based on decades of ecological folklore (or, as we say, "expert knowledge"). But what about the list of variables currently retained in this model? Althought it may be tempting to come up with *ad hoc* explanations for why they matter, we can rather ask the question of "how much do these variables actually matter?".
+Before moving on, it is worth taking a moment to think about what we have done so far. We have optimized two components of our model: the transformation of the raw data before they are fed to the classifier (we use a PCA for this step), and then (or simultaneously) the list of variables which we put into the model. In @sec-classification, we had assumed that temperature and precipitation were important variables based on decades of ecological folklore (or, as we say, "expert knowledge"). But what about the list of variables currently retained in this model? Although it may be tempting to come up with *ad hoc* explanations for why they matter, we can rather ask the question of "how much do these variables actually matter?".
 
 some specific methods for classifiers e.g. tree or boosting or BART
 
@@ -426,7 +426,7 @@ model = deepcopy(current_best_model)
 
 Vm = zeros(Float64, length(model.v))
 for (i,v) in enumerate(model.v)
-    R = variableimportance(model, folds, v; threshold=false, reps=50)
+    R = variableimportance(model, folds, v; threshold=false, reps=20)
     Vm[i] = mean(R)
 end
 
