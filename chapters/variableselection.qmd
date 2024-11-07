@@ -29,7 +29,8 @@ The definitions of the 19 BioClim variables are given in @tbl-predictors-bioclim
 #| label: tbl-predictors-bioclim
 #| tbl-cap: List of the 19 BioClim variables, including indications of their calculation. The model we used in @sec-classification used BIO1 and BIO12.
 content = Matrix{String}(undef, 19, 3)
-ldesc = JSON.parsefile("data/occurrences/layers.json")
+_path = joinpath(_data_path, "occurrences")
+ldesc = JSON.parsefile(joinpath(_path, "layers.json"))
 
 for i in 1:length(ldesc)
     content[i,1] = ldesc["BIO$(i)"]["code"]
