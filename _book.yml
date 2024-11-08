@@ -35,8 +35,8 @@ book:
     # - chapters/clustering.qmd
     # - chapters/gradientdescent.qmd
     # - chapters/crossvalidation.qmd
-    - chapters/classification.qmd
-    # - chapters/variableselection.qmd
+    # - chapters/classification.qmd
+    - chapters/variableselection.qmd
     # - chapters/learningcurves.qmd
     # - chapters/bagging.qmd
     # - chapters/explanations.qmd

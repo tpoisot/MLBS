@@ -94,10 +94,6 @@ If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X
 
 **ARGUMENT** do at the global scale – but then question: is the structure of data outside of the study area relevant? This way to introduce data leakage is extremely common in the species distribution literature [see e.g. @demarco2018]. suggest reasons for/against
 
-![Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.]
-
-  [Overview of a data transformation pipeline that introduces data leakage (left), or that does not introduce data leakage (right). In both cases, a transformation such as a PCA is applied to the data; in the example on the right, it is applied as part of the model, and can therefore be applied without breaking the train/predict separation. The pipeline on the left introduces data leakage, as the training data will be changed by information contained in the validation data.]: ../diagrams/data-leakage.png {#fig-predictors-leakage}
-
 The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$. This is illustrated in @fig-predictors-leakage.
 
 ### How to work in practice?
@@ -199,10 +195,6 @@ In @sec-tuning, we will revisit the question of how the MCC is "better", and spe
 :::
 
 To prevent the risk of interpreting the list of variables that have been retained by the model, we will *not* make a list of which they are (yet). This is because, in order to discuss the relative importance of variables, we need to introduce a few more concepts and techniques, which will not happen until @sec-explanations; at this point, we will revisit the list of variables identified during this chapter, and compare their impact on model performance to their actual importance in explaining predictions.
-
-![Overview of the variable selection workflow; starting from a list of variables and a routine to select them, we will perform cross-validation and measure whether the model performance increases.]
-
-  [Overview of the variable selection workflow; starting from a list of variables and a routine to select them, we will perform cross-validation and measure whether the model performance increases.]: /diagrams/variable-selection.png {#fig-predictors-workflow fig-align="center"}
 
 ### Variable selection
 
