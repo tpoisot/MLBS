@@ -6,7 +6,7 @@ engine: julia
 
 In @sec-classification, we introduced a simple classifier trained on a dataset of presence and pseudo-absences of a species (*Sitta whiteheadi*), which we predicted using the mean annual temperature as well as the annual total precipitation. This choice of variables was motivated by our knowledge of the fact that most species tend to have some temperature and precipitation they are best suited to. But we can approach the exercise of selecting predictive variables in a far more formal way, and this will form the core of this chapter. Specifically, we will examine two related techniques: variable selection, and feature engineering.
 
-There are two reasons to think about variable selection and feature engineering -- first, the variables we have may not all be predictive for the specific problem we are trying to solve; second, the variables may not be expressed in the correct "way" to solve our problem. This calls for a joint approach of selecting and transforming features. Before we do anything to our features (transformation or selection), we need to talk about data leakage.
+There are two reasons to think about variable selection and feature engineering -- first, the variables we have may not all be predictive for the specific problem we are trying to solve; second, the variables may not be expressed in the correct "way" to solve our problem. This calls for a joint approach of selecting and transforming features. Before we do anything to our features (transformation or selection), we will discuss the important problem of data leakage, and use this discussion to establish a framework to pick hyper-parameters of the model.
 
 ## The problem: optimal set of BioClim variables for the Corsican nuthatch
 
@@ -21,7 +21,7 @@ include(joinpath(_code_path, "minisdm/varimp.jl"))
 
 The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction [@booth2022]; this is particularly true when working from the WorldClim version [@fick2017], and not as problematic when using other data products like CHELSA [@karger2017].
 
-The definitions of the 19 BioClim variables are given in @tbl-predictors-bioclim. As we can see from this table, a number of variables are either derived from the same months, or direct (even sometimes additive) combinations of one another. For this reason, and because there are 19 variables, this is a good dataset to evaluate the use of variable selection and transformation.
+The definitions of the 19 BioClim variables are given in @tbl-predictors-bioclim. As we can see from this table, a number of variables are either derived from the same months, or calculated through direct (sometimes linear) combinations of one another. For this reason, and because there are 19 variables, this is a good dataset to evaluate the use of variable selection and transformation.
 
 ```{julia}
 #| echo: false
@@ -46,39 +46,27 @@ pretty_table(
 )
 ```
 
-In this chapter, we will try to improve the model introduced in @sec-classification, by evaluating different methods to prepare our predictor variables.
+::: column-margin
+This is true even when we are not transforming the variables! The identity function $f(x) = x$ is a transformation step that we can "train" (pretty easily, it turns out, as it has no parameters).
+:::
 
-emphasize that the model is two functions, a transformer and the classifier
-
-yes even when not trasnforming, this is $f(x) = x$ which is a function
-
-## A digression: what is a variable?
-
-measurement with unit
-
-compare with clustering chapter
-
-derived variables v. transformations
-
-exploratory data analysis
-
-feature engineering
+In this chapter, we will try to improve the model introduced in @sec-classification, by evaluating different methods to prepare our predictor variables. At this point, it is important to shift the way we think about the model: it is not *just* the classifier that turns the features into the prediction, but it is in fact **the entire process of transforming raw data into predictions**. This includes the transformation of these raw data, and as we will illustrate throughout this chapter, this must come with changes in the way we think about what "training" means.
 
 ## What is data leakage? {#sec-leakage}
 
 Data leakage is a concept that is, if you can believe it, grosser than it sounds.
 
-The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models, which is to say (as we discussed in @sec-gradientdescent-trainedmodel), models that do not adequately represent the underlying data, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
+The purpose of this section is to put the fear of data leakage in you, because it can, and most assuredly *will*, lead to bad models. This is to say, as we discussed in @sec-gradientdescent-trainedmodel, models that do not adequately represent the underlying data or the relationships that exists within it, in part because we have built-in some biases into them. In turn, this can eventually lead to decreased explainability of the models, which erodes trust in their predictions [@amarasinghe2023]. As illustrated by @stock2023, a large number of ecological applications of machine learning are particularly susceptible to data leakage, meaning that this should be a core point of concern for us.
 
 ### Consequences of data leakage {#sec-leakage-consequences}
 
 We take data leakage so seriously because it is one of the top ten mistakes in applied machine learning [@nisbet2018]. Data leakage happens information "leaks" from the training conditions to the evaluation conditions; in other words, when the model is evaluated after mistakenly being fed information that would not be available in real-life situations. Note that this definition of leakage is different from another notion, namely the loss of data availability over time [@Peterson2018].
 
-It is worth stopping for a moment to consider what these "real-life situations" are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are *applying* a model, we can start from the model *only*. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data. We have discussed this situation in @sec-crossvalidation-testing: the test of a model is conducted on data that have never been used for training, because we want to evaluate its performance in the conditions where it will be applied.
+It is worth stopping for a moment to consider what these "real-life situations" are, and how they differ from the training of the model. Most of this difference can be summarized by the fact that when we are *applying* a model, we can start from the model *only*. Which is to say, the data that have been used for the training and validation of the model may have been lost, without changing the applicability of the model: it works on entirely new data, and on new data only. The legacy of the training and validation data is only found in the parameters of the trained model. We have discussed this situation in @sec-crossvalidation-testing: the test of a model is conducted on data that have never been used for training, because we want to evaluate its performance in the conditions where it will be applied.
 
 Because this is the behavior we want to simulate with a validation dataset, it is very important to fully disconnect the testing data from the rest of the data. We can illustrate this with an example. Let's say we want to work on a time series of population size, such as provided by the *BioTIME* project [@dornelas2018]. One naïve approach would be to split this the time series at random into three datasets. We can use one to train the models, one to validate these models, and a last one for testing.
 
-Congratulations! We have created data leakage! Because we are splitting our time series at random, the model will likely have been trained using data that date from *after* the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the laws of physics. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.
+Congratulations! We have created data leakage! Because we are splitting our time series at random, the model will likely have been trained using data that date from *after* the start of the validation dataset. In other words: our model can peek into the future. This is highly unlikely to happen in practice, due to the ways the laws of physics work. A strategy that would prevent leakage would have been to pick a cut-off date to define the validation dataset, and then to decide how to deal with the training and testing sets.
 
 ### Avoiding data leakage {#sec-leakage-avoid}
 
@@ -88,23 +76,27 @@ The most common advice given in order to prevent data leakage is the "learn/pred
 A counter-example where performing the transformation *before* the analysis is when the transformation is explicitly sought out as an embedding, where we want to predict the position of instances in the embedded space, as in *.e.g.* @runghen2022.
 :::
 
-Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can derive, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection of the training data.
+Assume that we want to transform our data using a Principal Component Analysis (PCA; @pearson1901). Ecologists often think of PCA as a technique to explore data [@legendre2012], but it is so much more than that! PCA is a model, because we can learn, from the data, a series of weights (in the transformation matrix), which we can then apply to other datasets in order to project them in the space of the projection learned from the training data.
 
-If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that are already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation.
+If we have a dataset $\mathbf{X}$, which we split into two components $\mathbf{X}_0$ for training ,and $\mathbf{X}_1$ for validation, there are two ways to use a PCA to transform these data. The first is $\mathbf{T} = \mathbf{X}\mathbf{W}$, which uses the full dataset. When we predict the position of the validation data, we could use the transformation $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}$, but this would introduce data leakage: we have trained the transformation we apply to $\mathbf{X}_1$ using data that is already in $\mathbf{X}_1$, and therefore we have not respected the learn/predict separation.
 
-**ARGUMENT** do at the global scale – but then question: is the structure of data outside of the study area relevant? This way to introduce data leakage is extremely common in the species distribution literature [see e.g. @demarco2018]. suggest reasons for/against
+::: column-margin
+There are a *lot* of peer-reviewed articles that introduce data leakage by applying PCA on bioclimatic data layers. Remember, common practices and good practices are not the same thing!
+:::
 
-The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$. This is illustrated in @fig-predictors-leakage.
+There is a biological argument against using all the data to learn transformations anyways. Assume that we are working on a specific area in space, but want to project our bioclimatic variables using a PCA before we do this. If we work in the high arctic, is the relationship between temperature and precipitation in the Amazonian rain forest, the Serengeti desert, and the Voses mountain relevant to our problem? Surely not! For this reason, it makes sense to limit the data we use to train the transformation to the data we would have used to train the model.
+
+The second (correct) way to handle this situation is to perform our PCA using $\mathbf{T}_0 = \mathbf{X}_0\mathbf{W}_0$, which is to say, the weights of our PCA are derived *only* from the training data. In this situation, whenever we project the data in the validation set using $\mathbf{T}_1 = \mathbf{X}_1\mathbf{W}_0$, we respect the learn/predict separation: the transformation of $\mathbf{X}_1$ is entirely independent from the data contained in $\mathbf{X}_1$.
 
 ### How to work in practice?
 
 Although avoiding data leakage is a tricky problem, there is a very specific mindset we can adopt that goes a long way towards not introducing it in our analyses, and it is as follows: *every data transformation step is a modeling step that is part of the learning process*. We do not, for example, apply a PCA and train the model on the projected variables -- we feed raw data into a model, the first step of which is to perform this PCA for us.
 
-This approach works because everything that can be represented as numbers is a model that can be trained.
+This approach works because **everything that can be represented as numbers is a model that can be trained**.
 
-If you want to transform a variable using the z-score, this is a model! It has two parameters that you can learn from the data, $\mu$ (the average of the variable) and $\sigma$ (its standard deviation). You can apply it to a data point $y$ with $\hat y = (y - \mu)\sigma^{-1}$. Because this is a model, we need a dataset to learn these parameters from, and because we want to maintain the learn/predict separation, we will use the train dataset to get the values of $\mu_0$ and $\sigma_0$. This way, when we want to get the z-score of a new observation, for example from the testing dataset, we can get it using $\hat y_1 = (y_1 - \mu_0)\sigma_0^{-1}$. The data transformation is entirely coming from information that was part of the training set.
+If you want to transform a variable using the z-score, this is a model! It has two parameters that you can learn from the data, $\mu$ (the average of the variable) and $\sigma$ (its standard deviation). You can apply it to a data point $y$ with $\hat y = (y - \mu)\sigma^{-1}$. Because this is a model, we need a dataset to learn these parameters from, and because we want to maintain the learn/predict separation, we will use the training dataset to get the values of $\mu_0$ and $\sigma_0$. This way, when we want to get the z-score of a new observation, for example from the testing dataset, we can get it using $\hat y_1 = (y_1 - \mu_0)\sigma_0^{-1}$. The data transformation is entirely coming from information that was part of the training set.
 
-One way to get the learn/predict transformation stupendously wrong is to transform our validation, testing, or prediction data using $\hat y_1 = (y_1 - \mu_1)\sigma_1^{-1}$. This can be easily understood with an example. Assume that the variable $y_0$ is the temperature in our training dataset. We are interested in making a prediction in a world that is 2 degrees hotter, uniformly, which is to say that for whatever value of $y_0$, the corresponding data point we use for prediction is $y_1 = y_0 + 2$. If we take the z-score of this new value based on its own average and standard deviation, a temperature two degrees warmer in the prediction data will have the same z-score as its original value, or in other words, we have hidden the fact that there is a change in our predictors!
+One way to get the learn/predict transformation stupendously wrong is to transform our validation, testing, or prediction data using $\hat y_1 = (y_1 - \mu_1)\sigma_1^{-1}$. This can be easily understood with an example. Assume that the variable $y_0$ is the temperature in our training dataset. We are interested in making a prediction in a world that is 2 degrees hotter, uniformly, which is to say that for whatever value of $y_0$, the corresponding data point we use for prediction is $y_1 = y_0 + 2$. If we take the z-score of this new value based on its own average and standard deviation, a temperature two degrees warmer in the prediction data will have the same z-score as its original value, or in other words, we have hidden the fact that there is a change in our predictors! Because we learn the correct prediction from the training data, we can only apply this prediction with the parameters derived from the training data.
 
 Treating the data preparation step as a part of the learning process, which is to say that we learn every transformation on the training set, and retain this transformation as part of the prediction process, we are protecting ourselves against both data leakage *and* the hiding of relevant changes in our predictors.
 
@@ -112,7 +104,9 @@ Treating the data preparation step as a part of the learning process, which is t
 
 ### The curse of dimensionality {#sec-predictors-curse}
 
-The number of variables we use for prediction is the number of dimensions of a problem. It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable. If only!
+The number of variables we use for prediction is the number of dimensions of a problem. It would be tempting to say that adding dimensions should improve our chances to find a feature alongside which the classes become linearly separable.
+
+Alas.
 
 The "curse of dimensionality" is the common term of everything breaking down when the dimensions of a problem increase. In our perspective, where we rely on the resemblance between features to make a prediction, increasing the dimensions of a problem means adding features, and it has important consequences on the distance between observations. Picture two points positioned at random on the unit interval: the average distance between them is 1/3. If we add one dimension, keeping two points but turning this line into a cube, the average distance would be about 1/2. For a cube, about 2/3. For $n$ dimensions, we can figure out that the average distance grows like $\sqrt{n/6 + c}$, which is to say that when we add more dimensions, we make the average distance between two points go to infinity. This effect is also affecting ecological studies [*e.g.* @smith2017].
 
@@ -126,13 +120,13 @@ Why, so, should we select the variables we put in our models?
 
 The answer is simple: we seek to solve a specific problem in an optimal way, where "optimal" refers to the maximization of a performance measure we decided upon *a priori*. In our case, this is the MCC. Therefore, an ideal set of predictors is the one that, given our cross-validation strategy, maximizes our measure of performance.
 
-### Forward selection
+#### Forward selection
 
 In forward selection, assuming that we have $f$ features, we start by building $f$ models, each using one feature. For example, using the BioClim variables, $m_1$ would be attempting to predict presences and absences based only on temperature. Out of these models, we retain the variable given by $\text{argmax}_f \text{MCC}(m_f)$, where $\text{MCC}(m_f)$ is the average value of MCC for the $f$-th model on the validation datasets. This is the first variable we add to our set of selected variables. We then train $f-1$ models, and then again add the variable that leads to the best possible *increase* in the average value of the MCC. When we cannot find a remaining variable that would increase the performance of the model, we stop the process, and return the optimal set of variables. Forward selection can be constrained by, instead of starting from variables one by one, starting from a pre-selected set of variables that will always be included in the model.
 
 There are two important things to consider here. First, the set of variables is only optimal under the assumptions of the stepwise selection process: the first variable is the one that boosts the predictive value of the model the most *on its own*, and the next variables *in the context of already selected variables*. Second, the variables are evaluated on the basis of their ability to *improve the performance of the model*; this does not imply that they are relevant to the ecological processes happening in the dataset. Infering mechanisms on the basis of variable selection is foolish [@tredennick2021].
 
-### Backward selection
+#### Backward selection
 
 The opposite of forward selection is backward selection, in which we start from a complete set of variables, then remove the one with the *worst* impact on model performance, and keep proceeding until we cannot remove a variable without making the model worse. The set of variables that remain will be the optimal set of variables. In almost no cases will forward and backward selection agree on which set of variables is the best -- we have to settle this debate by either picking the model with the least parameters (the most parsimonious), or the one with the best performance.
 
@@ -142,9 +136,9 @@ Keep in mind that we do not know the number of variables we should use; therefor
 
 ### Removal of colinear variables
 
-Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables. In the BioClim variables, there **THIS PARAGRAPH IS NOT FINISHED**
+Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables.
 
-## Univariate transformations
+**THIS PARAGRAPH IS NOT FINISHED**
 
 ## Multivariate transformations
 
@@ -397,12 +391,6 @@ pretty_table(
 
 Before moving on, it is worth taking a moment to think about what we have done so far. We have optimized two components of our model: the transformation of the raw data before they are fed to the classifier (we use a PCA for this step), and then (or simultaneously) the list of variables which we put into the model. In @sec-classification, we had assumed that temperature and precipitation were important variables based on decades of ecological folklore (or, as we say, "expert knowledge"). But what about the list of variables currently retained in this model? Although it may be tempting to come up with *ad hoc* explanations for why they matter, we can rather ask the question of "how much do these variables actually matter?".
 
-some specific methods for classifiers e.g. tree or boosting or BART
-
-TODO refs
-
-cannot retrain the model (ideally)
-
 The process we will adopt is simple: we train a model on a training set $\mathbf{X}_t$, and measure its performance on a validation set $\mathbf{X}_v$. The performance of the model on the validation we note $p_v$. Because we want to avoid re-training our model (because we may not have access to the training data, in practice), the only thing we can act on is the validation set. The process we will use is to identify a feature $j$, and then across the entire validation set, shuffle its $j$-th column. At this point, we can re-apply our model to this shuffled validation set (let's note it $\mathbf{X}^{(j)}_v$), and measure the performance of the model on this perturbed dataset as $p_v^{(j)}$. The impact of shuffling the variable $j$ is given as $m_j = \|p_v - p_v^{(j)}\|$.
 
 We can repeat this process a number of times (because we are relying on a shuffle, so it is better to perform this process many times over), and report the importance of variable $j$ as $\bar{m _j}$. This importance is expressed on the scale of the measure of performance we use. When it is large, it means that shuffling the variable $j$ has a very large impact on the performance of the model: it is important to know the correct value of this feature to make the "right" prediction. Because the absolute score $\bar{m_j}$ is not very informative, we can instead report a *relative* importance of a variable, which is simply $\bar{m_j}/\sum_{i \in \text{var.}}{\bar m_i}$. These will sum to one, and can interpreted as the proportional importance of the selected variables.
@@ -453,8 +441,6 @@ opr = predict(origmodel, bio)
 vpr = predict(model, bio)
 ```
 
-show the difference of two predictors v. two PCs
-
 ```{julia}
 #| echo: false
 #| label: fig-predictors-projection
@@ -472,7 +458,7 @@ hidedecorations!(ax2, label=false)
 current_figure()
 ```
 
-These results are presented in @fig-predictors-rangediff.
+In @fig-predictors-projection, we see how the use of a PCA turns co-linear variables into a much more manageable set of points. Although we can still think of our model in terms of the untransformed predictors we feed it, the classifier will only attempt to learn parameters from the projected data. These results are presented in @fig-predictors-rangediff.
 
 ```{julia}
 #| label: fig-predictors-rangediff
