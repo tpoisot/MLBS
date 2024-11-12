@@ -348,28 +348,6 @@ if mean(mcc.(Csv)) > current_best_mcc
     current_best_model = deepcopy(mod)
 end
 
-# VIF
-mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
-stepwisevif!(mod, 50.0; threshold=false)
-vs = predictors(mod)
-Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["VIF", "", length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
-if mean(mcc.(Csv)) > current_best_mcc
-    current_best_mcc = mean(mcc.(Csv))
-    current_best_model = deepcopy(mod)
-end
-
-# VIF + PCA
-mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
-stepwisevif!(mod, 50.0; threshold=false)
-vs = predictors(mod)
-Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
-if mean(mcc.(Csv)) > current_best_mcc
-    current_best_mcc = mean(mcc.(Csv))
-    current_best_model = deepcopy(mod)
-end
-
 D = permutedims(hcat(tbl...))
 
 hl_maxval = MarkdownHighlighter(
