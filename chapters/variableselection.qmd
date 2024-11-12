@@ -254,7 +254,7 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 #| echo: false
 #| output: asis
 #| label: tbl-predictors-transformation
-#| tbl-cap: Model performance when coupling variable selection with variable transformation. The measures of performance are given as in @tbl-predictors-selection, and as we use the same folds for validation, can be directly compared.
+#| tbl-cap: Model performance when coupling variable selection with variable transformation.
 tbl = []
 
 current_best_mcc = -Inf
@@ -463,8 +463,8 @@ In @fig-predictors-projection, we see how the use of a PCA turns co-linear varia
 ```{julia}
 #| label: fig-predictors-rangediff
 #| echo: false
-#| fig-scap: Updated range map for *Sitta whiteheadi* after variable selection.
-#| fig-cap: Consequences of different variable transformations on the predicted range of *Sitta whiteheadi*, as introduced in @fig-classification-range. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
+#| fig-scap: Updated range map for Sitta whiteheadi after variable selection.
+#| fig-cap: Consequences of different variable transformations on the predicted range of Sitta whiteheadi. Note that the small area of predicted presence in the Cap Corse (the Northern tip) has disappeared with the new set of variables and their optimal transformation.
 final_range = vpr .> 0.5
 old_range = opr .> 0.5
 
