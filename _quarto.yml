@@ -9,6 +9,7 @@ metadata-files:
 
 execute:
   freeze: true
+  keep-ipynb: true
 
 filters:
   - section-bibliographies
