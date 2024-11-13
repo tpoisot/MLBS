@@ -138,7 +138,19 @@ Keep in mind that we do not know the number of variables we should use; therefor
 
 Co-linearity of variables is challenging for all types of ecological models [@graham2003]. In the case of species distribution models [@demarco2018], the variables are expected to be strongly auto-correlated, both because they have innate spatial auto-correlation, and because they are derived from a smaller set of raw data [@dormann2012]. For this reason, it is a good idea to limit the number of colinear variables.
 
-**THIS PARAGRAPH IS NOT FINISHED**
+One way to accomplish this is to rely on the variance inflation factor, which we achieve by working on the features *only*. This is not, strictly speaking, a variable selection process, as it is done outside of the context of the model -- this is closer to a data preparation step.
+
+The variance inflation factor for a given variable is defined as 
+
+$$
+\frac{1}{1-R^2}\,,
+$$
+
+where $R^2$ is the coefficient of determination of the linear regression of this variable against *all other variables excluding itself*. When the variable under investigation can be predicted from the combination of all other variables, the $R^2$ of this regression is close to one, and the variance inflation factor climbs up to very large value.
+
+We can turn this fact into a method of variable selection, by iteratively removing the variable with the largest impact on multi-colinearity (highest variance inflation factor), until all the variance inflation factors are under a specific threshold. If this threshold is set to $10$ (a common value), this is equivalent to saying that we only use variables as long the $R^2$ of their linear relationship to other variables is no larger than $0.9$.
+
+In practice, we do not need to perform many linear regressions to figure out the variance inflation factors. They can be calculated for all variables by first de-meaning the variables (they are centered on zero), and then taking the diagonal of the inverse of their correlation matrix. This is usually much faster, and works as long as there are no variables with perfect correlation.
 
 ## Multivariate transformations
 
