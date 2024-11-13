@@ -32,15 +32,15 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
-    # - chapters/clustering.qmd
-    # - chapters/gradientdescent.qmd
-    # - chapters/crossvalidation.qmd
-    # - chapters/classification.qmd
+    - chapters/clustering.qmd
+    - chapters/gradientdescent.qmd
+    - chapters/crossvalidation.qmd
+    - chapters/classification.qmd
     - chapters/variableselection.qmd
-    # - chapters/learningcurves.qmd
-    # - chapters/bagging.qmd
-    # - chapters/explanations.qmd
-    # - chapters/counterfactuals.qmd
-    # - chapters/squint.qmd
+    - chapters/learningcurves.qmd
+    - chapters/bagging.qmd
+    - chapters/explanations.qmd
+    - chapters/counterfactuals.qmd
+    - chapters/squint.qmd
   appendices:
     - appendices/instructornotes.qmd
