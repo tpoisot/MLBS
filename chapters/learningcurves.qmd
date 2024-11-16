@@ -13,7 +13,6 @@ We will illustrate this using an approach called moving-threshold classification
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/pipelines.jl"))
 ```
 
 ## Classification based on probabilities {#sec-learningcurves-threshold}
@@ -62,6 +61,7 @@ folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
 # Load the model
 modelpath = joinpath(_models_path, "sdm-variables.json")
 model = loadsdm(modelpath; threshold=false)
+train!(model)
 ```
 
 In @sec-gradientdescent, we used loss functions to measure the progress of our learning algorithm. Unsurprisingly, loss functions exist for classification tasks too. One of the most common is the cross-entropy (or log-loss), which is defined at the scale of each prediction as
@@ -77,10 +77,12 @@ In this chapter, we use measures like the MCC that describe the performance of a
 ```{julia}
 #| echo: false
 #| output: false
-_repls = 100
+_repls = 20
 _prop = LinRange(0.025, 0.975, 25)
 vall = zeros(length(_prop), _repls)
 trnl = zeros(length(_prop), _repls)
+
+crossentropyloss(y, p) = mean(.-(y .* log.(p) .+ (1.0 .- y) .* log.( 1.0 .- p)))
 
 for (i,p) in enumerate(_prop)
     for j in Base.oneto(_repls)
@@ -102,7 +104,7 @@ Specifically, we compare the cross-entropy loss estimated from 100 replicated at
 #| label: fig-tuning-holdout
 #| fig-scap: Learning curve for the proportion of data used in cross-validation.
 #| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 100 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
-fig = Figure(; size=(5, 3).*(600/6))
+fig = Figure(; size=(500, 300))
 ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="Cross-entropy loss")
 
 μ = vec(mean(vall; dims=2))
@@ -173,8 +175,8 @@ Note that we can see that using the approximate version we used so far (the pred
 ```{julia}
 #| echo: false
 #| output: false
-T = LinRange(0.0, 1.0, 120)
-CT = threshold!(model, folds; endpoints=T)
+thresholds = LinRange(0.01, 0.99, 40)
+CT = [crossvalidate(model, folds; thr = t).validation for t in thresholds];
 ```
 
 In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1 on the value of the MCC. This figure reveals that the value of the threshold that maximizes the average MCC across folds is $\tau \approx `{julia} round(model.τ; digits=3)`$. But more importantly, it seems that the "landscape" of the MCC around this value is relatively flat – in other words, as long as we do not pick a threshold that is too outlandishly low (or high!), the model would have a good performance. It is worth pausing for a minute and questioning *why* that is.
@@ -184,11 +186,11 @@ In @fig-tuning-threshold, we show the effect of moving the threshold from 0 to 1
 #| label: fig-tuning-threshold
 #| fig-scap: Learning curve for the threshold of the NBC model.
 #| fig-cap: Learning curve for the threshold of the NBC model. Note that the profile of the MCC with regards to the threshold is relatively flat. In other words, even picking a non-optimal value of the threshold would not necessarilly lead to a very bad model. Each grey line corresponds to a fold, and the blue line is the average.
-fig = Figure(; size=(6, 5).*(600/6))
+fig = Figure(; size=(600, 500))
 ax = Axis(fig[1,1]; xlabel="Threshold", ylabel="MCC")
-series!(ax, T, mcc.(CT), solid_color=(bkcol.cv.training, 0.8), linestyle=:dash)
-lines!(ax, T, vec(mean(mcc.(CT); dims=1)), color=bkcol.cv.validation, linewidth=3)
-scatter!(ax, model.τ, maximum(vec(mean(mcc.(CT); dims=1))), strokecolor=bkcol.cv.validation, color=:white, strokewidth=2, markersize=20)
+#series!(ax, T, mcc.(CT), solid_color=(bkcol.cv.training, 0.8), linestyle=:dash)
+lines!(ax, thresholds, mcc.(CT), color=bkcol.cv.validation, linewidth=3)
+scatter!(ax, threshold(model), maximum(mcc.(CT)), strokecolor=bkcol.cv.validation, color=:white, strokewidth=2, markersize=20)
 xlims!(ax, (0., 1.))
 ylims!(ax, (0., 1.))
 current_figure()
@@ -202,7 +204,7 @@ To do so, we can look at the distribution of probabilities returned by the NBC, 
 #| fig-scap: Probabilities assigned to each pixel and position of the threshold.
 #| fig-cap: Probabilities assigned to each pixel (bottom), color-coded by their value in the validation set (top scatterplots). The NBC is making a lot of recommendations very close to 0 or very close to 1, and for this reason, positioning the threshold anywhere in the middle of the range would give almost similar results in terms of the MCC.
 P = predict(model; threshold=false)
-f = Figure(; size=(7, 5).*(600/6))
+f = Figure(; size=(700, 500))
 
 ax = Axis(f[2,1]; xlabel="Probability of presence")
 xlims!(ax, (0, 1))
@@ -211,8 +213,8 @@ hist!(ax, P, strokecolor=bkcol.generic, strokewidth=1, color=:white, bins=50)
 
 rg = Axis(f[1,1])
 
-poly!(rg, Point2f[(0, -0.05), (model.τ, -0.05), (model.τ, 0.6), (0, 0.6)], color=bkcol.sdm.absentbg)
-poly!(rg, Point2f[(model.τ, -0.05), (1, -0.05), (1, 0.6), (model.τ, 0.6)], color=bkcol.sdm.presentbg)
+poly!(rg, Point2f[(0, -0.05), (threshold(model), -0.05), (threshold(model), 0.6), (0, 0.6)], color=bkcol.sdm.absentbg)
+poly!(rg, Point2f[(threshold(model), -0.05), (1, -0.05), (1, 0.6), (threshold(model), 0.6)], color=bkcol.sdm.presentbg)
 
 xlims!(rg, (0, 1))
 ylims!(rg, (-0.05, 0.6))
@@ -224,8 +226,8 @@ cl = [i ? bkcol.sdm.present : bkcol.sdm.absent for i in y]
 
 scatter!(rg, P, Ys, color=cl)
 
-vlines!(ax, [model.τ], color=:black, linestyle=:dash)
-vlines!(rg, [model.τ], color=:black, linestyle=:dash)
+vlines!(ax, [threshold(model)], color=:black, linestyle=:dash)
+vlines!(rg, [threshold(model)], color=:black, linestyle=:dash)
 
 hideydecorations!(ax)
 hidedecorations!(rg)
@@ -245,11 +247,11 @@ fig = Figure(; size=(7, 3.5).*(600/6))
 ax1 = Axis(fig[1,1]; xlabel="Threshold", ylabel="Positive Predictive value", aspect=1)
 ax2 = Axis(fig[1,2]; xlabel="Threshold", ylabel="Negative Predictive value", aspect=1)
 
-errorbars!(ax1, T, vec(mean(ppv.(CT); dims=1)), vec(std(ppv.(CT); dims=1)), color=bkcol.nodata)
-lines!(ax1, T, vec(mean(ppv.(CT); dims=1)), color=bkcol.generic, linewidth=2, linestyle=:solid)
+errorbars!(ax1, thresholds, ppv.(CT), vec(std(ppv.(CT); dims=1)), color=bkcol.nodata)
+lines!(ax1, thresholds, ppv.(CT), color=bkcol.generic, linewidth=2, linestyle=:solid)
 
-errorbars!(ax2, T, vec(mean(npv.(CT); dims=1)), vec(std(npv.(CT); dims=1)), color=bkcol.nodata)
-lines!(ax2, T, vec(mean(npv.(CT); dims=1)), color=bkcol.generic, linewidth=2, linestyle=:solid)
+errorbars!(ax2, thresholds, npv.(CT), vec(std(npv.(CT); dims=1)), color=bkcol.nodata)
+lines!(ax2, thresholds, npv.(CT), color=bkcol.generic, linewidth=2, linestyle=:solid)
 
 for ax in [ax1, ax2]
     xlims!(ax, (0., 1.))
@@ -268,7 +270,7 @@ After picking a threshold and seeing how it relates to the distribution of proba
 #| label: fig-tuning-roc-pr
 #| fig-scap: ROC and PR curve for the trained classifier.
 #| fig-cap: ROC and PR curve for each fold, calculated on the validation datasets. The area highlighted in green corresponds to perfect classifiers, and the dashed line is the no-skill classifier. The solid arrow shows direction alongside which model performance increases in both cases.
-f = Figure(; size=(7, 3.5).*(600/6))
+f = Figure(; size=(700, 350))
 
 roc = Axis(f[1,1], xlabel="False Positive Rate", ylabel="True Positive Rate", aspect=1)
 pr = Axis(f[1,2], xlabel="True Positive Rate", ylabel="Positive Pred. Value", aspect=1)
@@ -286,8 +288,8 @@ arrows!(pr, [0.5], [0.5], [0.2], [0.2], color=bkcol.sdm.gain, linewidth=4)
 arrows!(pr, [0.5], [0.5], [-0.2], [-0.2], color=bkcol.sdm.loss, linewidth=2, linestyle=:dash)
 
 for i in axes(CT, 1)
-    lines!(roc, fpr.(CT[i,:]), tpr.(CT[i,:]), color=(bkcol.generic, 0.6))
-    lines!(pr, tpr.(CT[i,:]), ppv.(CT[i,:]), color=(bkcol.generic, 0.6))
+    lines!(roc, fpr.(CT[i]), tpr.(CT[i]), color=(bkcol.generic, 0.6))
+    lines!(pr, tpr.(CT[i]), ppv.(CT[i]), color=(bkcol.generic, 0.6))
 end
 
 for ax in [pr, roc]
@@ -341,8 +343,8 @@ for (i, Pi) in enumerate(P0)
     Ms[i] = std(M)
 end
 
-f = Figure(; size=(6, 3).*(600/6))
-ax = Axis(f[1,1], xlabel="Prior", ylabel="MCC", aspect=1)
+f = Figure(; size=(600, 300))
+ax = Axis(f[1,1], xlabel="Prior", ylabel="MCC")
 band!(ax, P0, Mm .- Ms, Mm .+ Ms, color=bkcol.nodata)
 lines!(ax, P0, Mm, color=bkcol.generic)
 bst = findmax(Mm)
@@ -363,13 +365,13 @@ As we are now considering that our model is adequately trained, we can apply it 
 #| echo: false
 #| output: false
 _layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+bio = [SimpleSDMLayers._read_geotiff(_layer_path; bandnumber=i) for i in 1:19]
 
-origmodel = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+origmodel = SDM(RawData(), NaiveBayes(), 0.5, X, y, [1,12])
 train!(origmodel; threshold=false)
 
-old_range = convert(Bool, predict(origmodel, bio; threshold=true))
-final_range = convert(Bool, predict(model, bio; threshold=true))
+old_range = convert(SDMLayer{Bool}, predict(origmodel, bio; threshold=true))
+final_range = convert(SDMLayer{Bool}, predict(model, bio; threshold=true))
 final_proba = predict(model, bio; threshold=false)
 ```
 
@@ -402,7 +404,7 @@ The final predictions are shown in @fig-tuning-map. Although the range map is ve
 #| label: fig-tuning-map
 #| fig-scap: Update range map for *Sitta whiteheadi* after thresholding.
 #| fig-cap: Predicted range of *Sitta whiteheadi* (left) and associated bootstrap uncertainty (right; see @sec-classification). This prediction was made using the final trained model, including variable selection, transformations, and thresholding of the probability.
-f = Figure(; size=(6, 5).*(600/6))
+f = Figure(; size=(600, 500))
 
 gl = f[1, 1] = GridLayout()
 
@@ -444,7 +446,7 @@ ax5 = Axis(
 
 rm_pal = cgrad([bkcol.sdm.loss, bkcol.sdm.nochange, bkcol.sdm.gain], 3, categorical=true)
 heatmap!(ax0, final_range, colormap=[bkcol.nodata, bkcol.nodata], alpha=0.7)
-heatmap!(ax0, rangediff(final_range, old_range); colormap = rm_pal)
+heatmap!(ax0, gainloss(final_range, old_range); colormap = rm_pal)
 
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]

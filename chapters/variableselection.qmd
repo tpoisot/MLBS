@@ -15,8 +15,6 @@ There are two reasons to think about variable selection and feature engineering 
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/pipelines.jl"))
-include(joinpath(_code_path, "minisdm/varimp.jl"))
 ```
 
 The BioClim suite of environmental variables are 19 measurements derived from monthly recordings of temperature and precipitation. They are widely used in species distribution modeling, despite some spatial discontinuities due to the methodology of their reconstruction [@booth2022]; this is particularly true when working from the WorldClim version [@fick2017], and not as problematic when using other data products like CHELSA [@karger2017].
@@ -210,19 +208,19 @@ We will perform four different versions of stepwise variable selection. Forward,
 #| echo: false
 #| output: false
 reset!(model)
-b0 = predictors(backwardselection!(model, folds; threshold=false))
+b0 = variables(backwardselection!(model, folds; threshold=false))
 Cb0v, Cb0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-f0 = predictors(forwardselection!(model, folds; threshold=false))
+f0 = variables(forwardselection!(model, folds; threshold=false))
 Cf0v, Cf0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-c0 = predictors(constrainedselection!(model, folds, [1,12]; threshold=false))
+c0 = variables(forwardselection!(model, folds, [1,12]; threshold=false))
 Cc0v, Cc0t = crossvalidate(model, folds; threshold=false)
 
 reset!(model)
-i0 = predictors(stepwisevif!(model, 50.0; threshold=false))
+i0 = variables(stepwisevif!(model, 10.0; threshold=false))
 Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 ```
 
@@ -232,12 +230,12 @@ Ci0v, Ci0t = crossvalidate(model, folds; threshold=false)
 #| label: tbl-predictors-selection
 #| tbl-cap: Consequences of different variable selection approaches on the performance of the model, as evaluated by the MCC averaged over the validation datasets. The highest MCC value, corresponding to the best model, is in bold.
 tbl = []
-push!(tbl, ["@sec-classification baseline", "1,12", mean(mcc.(C0v))])
-push!(tbl, ["All variables", " ", mean(mcc.(CXv))])
-push!(tbl, ["Fwd. sel.", join(f0, ","), mean(mcc.(Cf0v))])
-push!(tbl, ["Constr. sel.", join(c0, ","), mean(mcc.(Cc0v))])
-push!(tbl, ["Backw. sel.", join(b0, ","), mean(mcc.(Cb0v))])
-push!(tbl, ["Var. infl. fac.", join(i0, ","), mean(mcc.(Ci0v))])
+push!(tbl, ["@sec-classification baseline", "1,12", mcc(C0v), mcc(C0t)])
+push!(tbl, ["All variables", " ", mcc(CXv), mcc(CXt)])
+push!(tbl, ["Fwd. sel.", join(f0, ","), mcc(Cf0v), mcc(Cf0t)])
+push!(tbl, ["Constr. sel.", join(c0, ","), mcc(Cc0v), mcc(Cc0t)])
+push!(tbl, ["Backw. sel.", join(b0, ","), mcc(Cb0v), mcc(Cb0t)])
+push!(tbl, ["Var. infl. fac.", join(i0, ","), mcc(Ci0v), mcc(Ci0t)])
 
 D = permutedims(hcat(tbl...))
 
@@ -249,9 +247,9 @@ hl_maxval = MarkdownHighlighter(
 pretty_table(
     D;
     backend = Val(:markdown),
-    header = ["Model", "Variables", "MCC"],
-    alignment = [:l, :l, :l],
-    formatters = ft_printf("%4.3f", 3),
+    header = ["Model", "Variables", "MCC (val.)", "MCC (train.)"],
+    alignment = [:l, :l, :l, :l],
+    formatters = ft_printf("%4.3f", [3,4]),
     highlighters = hl_maxval
 )
 ```
@@ -270,91 +268,91 @@ Based on the results from @tbl-predictors-selection, we retain forward and backw
 tbl = []
 
 current_best_mcc = -Inf
-current_best_model = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+current_best_model = SDM(RawData(), NaiveBayes(), 0.5, X, y, [1,12])
 
 # Baseline
-mod = SDM(RawData(), NBC(), 0.5, X, y, [1,12])
+mod = SDM(RawData(), NaiveBayes(), 0.5, X, y, [1,12])
 train!(mod; threshold=false)
-vs = predictors(mod)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["@sec-classification baseline", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["@sec-classification baseline", " ",length(variables(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Baseline + PCA
-mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, [1,12])
+mod = SDM(MultivariateTransform{PCA}(), NaiveBayes(), 0.5, X, y, [1,12])
 train!(mod; threshold=false)
-vs = predictors(mod)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(variables(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Forward
-mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+mod = SDM(RawData(), NaiveBayes(), 0.5, X, y, collect(1:19))
 forwardselection!(mod, folds; threshold=false)
-vs = predictors(mod)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["Fwd. sel.", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["Fwd. sel.", " ",length(variables(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Forward + PCA
-mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+mod = SDM(MultivariateTransform{PCA}(), NaiveBayes(), 0.5, X, y, collect(1:19))
 forwardselection!(mod, folds; threshold=false)
-vs = predictors(mod)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(variables(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Backward
-mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
+mod = SDM(RawData(), NaiveBayes(), 0.5, X, y, collect(1:19))
 backwardselection!(mod, folds; threshold=false)
-vs = predictors(mod)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["Backw. sel.", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["Backw. sel.", " ",length(variables(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Backward + PCA
-mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
+mod = SDM(MultivariateTransform{PCA}(), NaiveBayes(), 0.5, X, y, collect(1:19))
 backwardselection!(mod, folds; threshold=false)
-vs = predictors(mod)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(variables(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Constrained
-mod = SDM(RawData(), NBC(), 0.5, X, y, collect(1:19))
-constrainedselection!(mod, folds, [1, 12]; threshold=false)
-vs = predictors(mod)
+mod = SDM(RawData(), NaiveBayes(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds, [1, 12]; threshold=false)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["Constr. sel.", " ",length(predictors(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["Constr. sel.", " ",length(variables(mod)), "", "", mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
 end
 
 # Constrained + PCA
-mod = SDM(MultivariateTransform{PCA}(), NBC(), 0.5, X, y, collect(1:19))
-constrainedselection!(mod, folds, [1, 12]; threshold=false)
-vs = predictors(mod)
+mod = SDM(MultivariateTransform{PCA}(), NaiveBayes(), 0.5, X, y, collect(1:19))
+forwardselection!(mod, folds, [1, 12]; threshold=false)
+vs = variables(mod)
 Csv, Cst = crossvalidate(mod, folds; threshold=false)
-push!(tbl, ["", "PCA", length(predictors(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
+push!(tbl, ["", "PCA", length(variables(mod)), size(mod.transformer.trf, 2), mod.transformer.trf.tprinvar/mod.transformer.trf.tvar, mean(mcc.(Csv)), mean(mcc.(Cst))])
 if mean(mcc.(Csv)) > current_best_mcc
     current_best_mcc = mean(mcc.(Csv))
     current_best_model = deepcopy(mod)
@@ -396,7 +394,7 @@ model = deepcopy(current_best_model)
 
 Vm = zeros(Float64, length(model.v))
 for (i,v) in enumerate(model.v)
-    R = variableimportance(model, folds, v; threshold=false, reps=20)
+    R = variableimportance(model, folds, v; threshold=false, samples=20)
     Vm[i] = mean(R)
 end
 
@@ -422,11 +420,11 @@ In @tbl-predictors-selection and @tbl-predictors-transformation, we have evaluat
 ```{julia}
 #| output: false
 #| echo: false
-origmodel = SDM(RawData(), NBC(), 0.5, model.X, model.y, [1,12])
+origmodel = SDM(RawData(), NaiveBayes(), 0.5, model.X, model.y, [1,12])
 train!(origmodel; threshold=false)
 
 _layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+bio = [SimpleSDMLayers._read_geotiff(_layer_path; bandnumber=i) for i in 1:19]
 opr = predict(origmodel, bio)
 vpr = predict(model, bio)
 ```
@@ -436,7 +434,7 @@ vpr = predict(model, bio)
 #| label: fig-predictors-projection
 #| fig-scap: TODO
 #| fig-cap: orig var vs. their transformation
-f = Figure(; size=(6, 3).*(600/6))
+f = Figure(; size=(600, 300))
 cpal = [bkcol.sdm.absent, bkcol.sdm.present]
 ax1 = Axis(f[1,1], xlabel="BIO$(model.v[1])", ylabel="BIO$(model.v[2])")
 scatter!(ax1, model.X[model.v[1],:], model.X[model.v[2],:], color=model.y, colormap=cpal)
@@ -458,7 +456,7 @@ In @fig-predictors-projection, we see how the use of a PCA turns co-linear varia
 final_range = vpr .> 0.5
 old_range = opr .> 0.5
 
-f = Figure(; size=(6, 4).*(600/6))
+f = Figure(; size=(600, 400))
 
 gl = f[1, 1] = GridLayout()
 
@@ -500,8 +498,7 @@ ax5 = Axis(
 
 rm_pal = cgrad([bkcol.sdm.loss, bkcol.sdm.nochange, bkcol.sdm.gain], 3, categorical=true)
 heatmap!(ax0, final_range, colormap=[bkcol.nodata, bkcol.nodata], alpha=0.7)
-heatmap!(ax0, rangediff(final_range, old_range); colormap = rm_pal)
-
+heatmap!(ax0, gainloss(final_range, old_range); colormap = rm_pal)
 
 cleg = [PolyElement(color = c, strokecolor = :transparent) for c in rm_pal]
 clab = ["Loss", "No change", "Gain"]

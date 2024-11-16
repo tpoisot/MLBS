@@ -267,7 +267,7 @@ Cpos = constantpositive(y)
 Cneg = constantnegative(y)
 folds = montecarlo(y, X; n=100)
 model = SDM(RawData(), NaiveBayes(), 0.5, X, y, [1, 12])
-Cv, Ct = crossvalidate(model, folds; threshold=true)
+Cv, Ct = crossvalidate(model, folds; threshold=false)
 ```
 
 ### Performance evaluation of the model
@@ -291,7 +291,7 @@ Why not pick one of these instead of the MCC? Because all modeling is compromise
 #| echo: false
 #| fig-cap: Overview of the scores for the Matthew's correlation coefficient, as well as the positive and negative predictive values.
 fmat = [(mcc, "Matthew's corr. coeff.") (ppv, "Positive pred. val.") (npv, "Negative pred. val.")]
-f = Figure(; size=(7, 4).*(600/6))
+f = Figure(; size=(700, 400))
 
 for ci in CartesianIndices(fmat)
     cfunc, lab = fmat[ci]
@@ -422,7 +422,7 @@ It is interesting to compare @fig-classification-decision with, for example, the
 #| echo: false
 #| output: false
 _layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+bio = [SimpleSDMLayers._read_geotiff(_layer_path; bandnumber=i) for i in 1:19]
 pr = predict(model, bio; threshold=true)
 ```
 
@@ -433,7 +433,7 @@ We can now go through all of the pixels in the island of Corsica, and apply the 
 #| echo: false
 #| fig-scap: TODO
 #| fig-cap: Occurence data (left; presences are in orange and pseudo-absences in black), prediction of presences in space under the two-variables model (middle), with the four blocks of the confusion matrix also mapped. As we could have anticipated from the high values of the MCC, even this simple model does an adequate job at predicting the presence of *Sitta whiteheadi*, but would definitely stand to be improved, possibly by accounting for more features.
-f = Figure(; size=(6, 5).*(600/6))
+f = Figure(; size=(600, 500))
 
 gl = f[1, 1] = GridLayout()
 

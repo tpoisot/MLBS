@@ -11,8 +11,6 @@ In this chapter, we will
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/pipelines.jl"))
-include(joinpath(_code_path, "minisdm/shapley.jl"))
 ```
 
 navigate the accuracy-explainability for public policy @bell2022
@@ -44,15 +42,15 @@ folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
 
 # Load the model
 modelpath = joinpath(_models_path, "sdm-threshold.json")
-model = loadsdm(modelpath; threshold=false)
+model = loadsdm(modelpath; threshold=true)
 ```
 
 ```{julia}
-S = zeros(Float64, (length(model.v), length(y)))
-for (vidx, vpos) in enumerate(model.v)
+S = zeros(Float64, (length(variables(model)), length(labels(model))))
+for (vidx, vpos) in enumerate(variables(model))
     S[vidx,:] = explain(model, vpos; threshold=false, samples=200)
 end
-P = X[model.v,:]
+P = features(model, variables(model))
 ```
 
 TODO redraw the stemplot from the variable selection chapter to compare prediction v. explanation
@@ -93,10 +91,10 @@ pretty_table(
 #| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
 shaps = S[:,2][varord]
 
-f = Figure(; size=(4, 6).*(600/6))
+f = Figure(; size=(400, 600))
 
 ax = Axis(f[1,1], yticks = (reverse(collect(1:length(model.v))), ["BIO$(v)" for v in model.v[varord]]))
-xlims!(ax, low=-0.6, high=0.6)
+xlims!(ax, low=-0.8, high=0.8)
 
 vlines!([0.0], color=:black, linestyle=:dash)
 
@@ -105,8 +103,8 @@ elev = reverse(collect(axes(shaps, 1)))
 ydir = zeros(length(shaps))
 
 arrows!(ax, starts, elev, shaps, ydir, align=:tailhead)
-scatter!(ax, [P[1]-mean(P)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=25)
-
+#prds = predict(model; threshold=false)
+#scatter!(ax, [prds[2]-mean(prds)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=25)
 current_figure()
 ```
 
@@ -115,7 +113,7 @@ current_figure()
 #| label: fig-explanation-effects
 #| fig-scap: Distribution of the effects on the average prediction for the three most important variables.
 #| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
-f = Figure(; size=(7, 6).*(600/6))
+f = Figure(; size=(700, 600))
 gl = f[1,1] = GridLayout()
 
 xmin, xmax = extrema(S)
@@ -143,7 +141,7 @@ current_figure()
 ```
 
 ```{julia}
-f = Figure()
+f = Figure(; size=(600, 400))
 args = (color=predict(model), markersize=5, colorrange=(0., 1.))
 
 ax1 = Axis(f[1,1]; xlabel="BIO $(model.v[varord[1]])")
@@ -165,17 +163,11 @@ current_figure()
 
 ```{julia}
 _layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+bio = [SimpleSDMLayers._read_geotiff(_layer_path; bandnumber=i) for i in 1:19]
 ```
 
 ```{julia}
-V = [convert(Float32, similar(bio[1])) for i in axes(model.v, 1)]
-
-B = Float64.(permutedims(hcat(values.(bio)...)))
-for i in axes(model.v, 1)
-    A = explain(model, model.v[i]; instances=B, threshold=false)
-    V[i].grid[findall(!isnothing, V[i].grid)] .= A
-end
+V = explain(model, bio; threshold=false, samples=30)
 ```
 
 ```{julia}
@@ -193,7 +185,7 @@ nvars = 3
 cmap = [bkcol.cat[1:nvars]..., bkcol.nodata]
 clab = push!("BIO" .* string.(model.v[varord][1:nvars]), "other")
 
-f = Figure(; size=(7, 5).*(600/6))
+f = Figure(; size=(700, 500))
 ax = Axis(f[1,1], aspect=DataAspect())
 
 mvar = similar(mostimp)

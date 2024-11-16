@@ -31166,13 +31166,14 @@
         ]
     ],
     "variables": [
-        11,
         8,
+        6,
         3,
+        11,
         14
     ],
-    "classifier": "NBC",
-    "threshold": 0.3865546218487395,
+    "classifier": "NaiveBayes",
+    "threshold": 0.6582864113307237,
     "transformer": "MultivariateTransform{PCA}",
     "labels": [
         true,
