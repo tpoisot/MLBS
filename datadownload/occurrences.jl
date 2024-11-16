@@ -9,9 +9,6 @@ dataprovider = RasterData(CHELSA2, BioClim)
 
 COR = SpeciesDistributionToolkit.gadm("FRA", "Corse")
 
-temperature = SDMLayer(dataprovider; layer = "BIO1", spatial_extent...)
-heatmap(SpeciesDistributionToolkit)
-
 # Data
 BIOX = convert.(SDMLayer{Float32}, [SDMLayer(dataprovider; layer = l, spatial_extent...) for l in layers(dataprovider)])
 
@@ -55,23 +52,23 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-bgpoints = backgroundpoints((x -> x^0.7).(background), round(Int, 1.35sum(presencelayer)); replace=false)
-nodata!(bgpoints, false)
+absencelayer = backgroundpoints(background, round(Int, 2sum(presencelayer)); replace=false)
+nodata!(absencelayer, false)
 nodata!(presencelayer, false)
 
 heatmap(
     BIOX[1];
-    colormap = :deep,
+    colormap = :Greys,
     axis = (; aspect = DataAspect()),
     figure = (; size = (800, 500)),
 )
-scatter!(presencelayer; color = :black, markersize=6)
-scatter!(bgpoints; color = :red, markersize=4)
+scatter!(presencelayer; color = :orange, markersize=6)
+scatter!(absencelayer; color = :red, markersize=4)
 current_figure()
 
 # Get the data
 pr = transpose(SimpleSDMLayers._centers(presencelayer))
-ab = transpose(SimpleSDMLayers._centers(bgpoints))
+ab = transpose(SimpleSDMLayers._centers(absencelayer))
 
 lonlat = vcat(pr, ab)
 pre = vcat([true for p in axes(pr, 1)], [false for p in axes(ab, 1)])
@@ -102,7 +99,7 @@ tX = X[:,tst]
 y = y[trn]
 X = X[:,trn]
 
-folds = kfold(y, X; k=20)
+folds = kfold(y, X; k=10)
 bags = bootstrap(y, X; n=64)
 
 latlon=Matrix(coordinates[trn,[3,2]])

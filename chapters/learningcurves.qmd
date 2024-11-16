@@ -288,8 +288,8 @@ arrows!(pr, [0.5], [0.5], [0.2], [0.2], color=bkcol.sdm.gain, linewidth=4)
 arrows!(pr, [0.5], [0.5], [-0.2], [-0.2], color=bkcol.sdm.loss, linewidth=2, linestyle=:dash)
 
 for i in axes(CT, 1)
-    lines!(roc, fpr.(CT[i]), tpr.(CT[i]), color=(bkcol.generic, 0.6))
-    lines!(pr, tpr.(CT[i]), ppv.(CT[i]), color=(bkcol.generic, 0.6))
+    scatter!(roc, fpr.(CT[i]), tpr.(CT[i]), color=(bkcol.generic, 0.6))
+    scatter!(pr, tpr.(CT[i]), ppv.(CT[i]), color=(bkcol.generic, 0.6))
 end
 
 for ax in [pr, roc]

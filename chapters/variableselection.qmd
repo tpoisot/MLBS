@@ -258,7 +258,7 @@ The best model is given by forward selection, although backwards selection also 
 
 ### Variable transformation
 
-Based on the results from @tbl-predictors-selection, we retain forward and backwards selection as our two stepwise selection methods, and now apply an additional transformation (as in @fig-predictors-workflow) to the subset of the variables. The results are presented in @tbl-predictors-transformation. Based on these results, and using the MCC as the criteria for the "best" model, we see that combining forward selection with a whitening transform gives the best predictive performance. Note that the application of a transformation *does* change the result of variable selection, as evidences by the fact that the number of retained variables changes when we apply a transformation.
+Based on the results from @tbl-predictors-selection, we retain forward and backwards selection as our two stepwise selection methods, and now apply an additional transformation (as in @fig-predictors-workflow) to the subset of the variables. The results are presented in @tbl-predictors-transformation. Based on these results, and using the MCC as the criteria for the "best" model, we see that combining forward selection with a whitening transform gives the best predictive performance. Note that the application of a transformation *does* change the result of variable selection, as evidenced by the fact that the number of retained variables changes when we apply a transformation. **TODO** THIS PARAGRAPH NEED TO CHANGE
 
 ```{julia}
 #| echo: false
@@ -375,6 +375,14 @@ pretty_table(
 )
 ```
 
+```{julia}
+#| echo: false
+#| output: false
+model = SDM(MultivariateTransform{PCA}(), NaiveBayes(), 0.5, X, y, collect(1:19))
+forwardselection!(model, folds; threshold=false)
+```
+
+
 ### Variable importance
 
 Before moving on, it is worth taking a moment to think about what we have done so far. We have optimized two components of our model: the transformation of the raw data before they are fed to the classifier (we use a PCA for this step), and then (or simultaneously) the list of variables which we put into the model. In @sec-classification, we had assumed that temperature and precipitation were important variables based on decades of ecological folklore (or, as we say, "expert knowledge"). But what about the list of variables currently retained in this model? Although it may be tempting to come up with *ad hoc* explanations for why they matter, we can rather ask the question of "how much do these variables actually matter?".
@@ -390,8 +398,6 @@ But what does the process of shuffling simulate? Low quality data, sampling, wro
 #| echo: false
 #| fig-scap: Importance of variables selected as part of the best model
 #| fig-cap: Relative importance of the variables selected as part of the best model. The importance of the variables has been measured by comparing their performance on validation sets before and after shuffling the column of the feature matrix corresponding to the variable to test.
-model = deepcopy(current_best_model)
-
 Vm = zeros(Float64, length(model.v))
 for (i,v) in enumerate(model.v)
     R = variableimportance(model, folds, v; threshold=false, samples=20)

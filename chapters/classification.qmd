@@ -321,10 +321,13 @@ The output of cross-validation is given in @fig-classification-crossvalidation (
 #| tbl-cap: Overview of the data presented in @fig-classification-crossvalidation, compared to the null classifiers from @sec-classification-null. Note that the MCC gives values of 0 for *most* null classifiers, which is not the case with other measures of performance. Missing values cannot be calculated as they involved a denominator of 0.
 measures = [
     "Accuracy" => accuracy,
+    "TPR" => tpr,
+    "TNR" => tnr,
+    "FPR" => fpr,
+    "FNR" => fnr,
     "NPV" => npv,
     "PPV" => ppv,
     "MCC" => mcc,
-    "DOR" => dor,
     ]
 
 content = Vector[]
