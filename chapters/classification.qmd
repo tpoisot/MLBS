@@ -17,9 +17,9 @@ include(joinpath(_code_path, "pkg.jl"))
 
 Throughout these chapters, we will be working on a single problem, which is to predict the distribution of the Corsican nuthatch, *Sitta whiteheadi*. The Corsican nuthatch is endemic to Corsica, and its range has been steadily shrinking over time due to loss of habitat through human activity, including fire, leading to it being classified as "vulnerable to extinction" by the International Union for the Conservation of Nature. @barbet-massin2011 nevertheless show that the future of this species is not necessarily all gloom and doom, as climate change is not expected to massively affect its distribution.
 
-Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as a data science problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious about our data science practices when training a species distribution model is important: @cholletramampiandra2023 make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.\index{Over-fitting}
+Species Distribution Modeling (SDM; @elith2009), also known as Ecological Niche Modeling (ENM), is an excellent instance of ecologists doing applied machine learning already, as @beery2021 rightfully pointed out. In fact, the question of fitness-for-purpose, which we discussed in previous chapters (for example in @sec-crossvalidation-fitness), has been covered in the SDM literature [@guillera-arroita2015]. In these chapters, we will fully embrace this idea, and look at the problem of predicting where species can be as an applied machine learning problem. In the next chapters, we will converge again on this problem as an ecological one. Being serious about our data science practices when training a species distribution model is important: @cholletramampiandra2023 make the important point that it is easy to overfit more complex models, at which point they cease outperforming simple statistical models.\index{Over-fitting}
 
-Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles. This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process, and so we will start with a very simple model and training strategy, and refine it over time. In this chapter, the purpose is less to have a very good training process; it is to familiarize ourselves with the task of classification.
+Because this chapter is the first of a series, we will start by building a bare-bones model on ecological first principles (what this means is: wild, mostly unsubstantiated guesses about how nature workd). This is an important step. The rough outline of a model is often indicative of how difficult the process of training a really good model will be. But building a good model is an iterative process! We will start with a very simple model and training strategy, and refine it over time, by quantifying the improvement of performance due to any additional methodological change. In this chapter, the purpose is not to have a very good training process; it is to familiarize ourselves with the task of classification, by producing a first draft of the model.
 
 We will therefore start with a blanket assumption: the distribution of species is something we can predict based on temperature and precipitation. We know this to be important for plants and animals [@clapham1935; @whittaker1962], to the point where the relationship between mean temperature and annual precipitation is how we find delimitations between biomes. If you need to train a lot of models on a lot of species, temperature and precipitation are not the worst place to start [@berteaux2014].\index{Feature selection}
 
@@ -266,7 +266,7 @@ Cflip = coinflip(y)
 Cpos = constantpositive(y)
 Cneg = constantnegative(y)
 folds = montecarlo(y, X; n=100)
-model = SDM(RawData(), NBC(), 0.5, X, y, [1, 12])
+model = SDM(RawData(), NaiveBayes(), 0.5, X, y, [1, 12])
 Cv, Ct = crossvalidate(model, folds; threshold=true)
 ```
 
@@ -323,7 +323,8 @@ measures = [
     "Accuracy" => accuracy,
     "NPV" => npv,
     "PPV" => ppv,
-    "MCC" => mcc
+    "MCC" => mcc,
+    "DOR" => dor,
     ]
 
 content = Vector[]
@@ -331,7 +332,7 @@ for (k, v) in measures
     push!(content,
     [
         k,
-        mean(v.(Ct)), mean(v.(Cv)),
+        v(Ct), v(Cv),
         v(Cnoskill), v(Cflip), v(Cpos), v(Cneg)
     ])
 end
@@ -373,7 +374,7 @@ Now that the model is trained, we can take a break in our discussion of its perf
 #| label: fig-classification-decision
 #| echo: false
 #| fig-cap: Overview of the decision boundary between the positive (orange) and negative (grey) classes using the NBC with two variables. Note that, as expected with a Gaussian distribution, the limit between the two classes looks circular. The assumption of statistical independance between the features means that we would not see, for example, an ellipse.
-f = Figure(; size=(5, 5).*(600/6))
+f = Figure(; size=(500, 500))
 
 gl = f[1,1] = GridLayout()
 
