@@ -11,7 +11,6 @@ In the previous chapters, we have focused our efforts on regression models, whic
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/pipelines.jl"))
 ```
 
 ## The problem: distribution of an endemic species
@@ -55,14 +54,14 @@ In short, our response variable has levels $\{+, -\}$: the species is there, or 
 
 A very important feature of the relationship between the features and the classes is that, broadly speaking, classification is much easier when the classes are separable. Separability (often linear separability) is achieved when, if looking at some projection of the data on two dimensions, you can draw a line that separates the classes (a point in a single dimension, a plane in three dimension, and so on and so forth). For reasons that will become clear in @sec-predictors-curse, simply adding more predictors is not the right thing to do.\index{Separability}
 
-In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore one in @sec-predictors), but there are still some values at which our guess for a class changes. For example, at a location with a temperature colder than 10°C, presences are far more likely. For a location with a temperature warmer than 15°C, absences become overwhelmingly more likely. The locations with a temperature between 10°C and 15°C can go either way.
+In @fig-classification-separability, we can see the temperature (in degrees) for locations with recorded presences of Corsican nuthatches, and for locations with assumed absences. These two classes are not quite linearly separable alongside this single dimension (maybe there is a different projection of the data that would change this; we will explore several such projections in @sec-predictors), but there are still some values at which our best guess for a class changes. For example, at a location with a temperature colder than 10°C, presences are far more likely. For a location with a temperature warmer than 15°C, absences become overwhelmingly more likely. The locations with a temperature between 10°C and 15°C can go either way (and this ambiguity is precisely why we rely on species distribution models).
 
 ```{julia}
 #| label: fig-classification-separability
 #| echo: false
 #| fig-scap: Separability of presences and absences in the two-variables classifier.
 #| fig-cap: This figures show the separability of the presences and pseudo-absences on the temperature and precipitation dimensions.
-f = Figure(; size=(5, 5).*(600/6))
+f = Figure(; size=(500, 500))
 
 gl = f[1,1] = GridLayout()
 
@@ -115,7 +114,7 @@ $$
 \end{pmatrix} \,.
 $$ {#eq-classification-explain}
 
-The four components of the confusion table are the true positives (TP; correct prediction of $+$), the true negatives (TN; correct prediction of $-$), the false positives (FP; incorrect prediction of $+$), and the false negatives (FN; incorrect prediction of $-$). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most elements on the diagonal, and off-diagonal elements as close to zero as possible (the proportion of predictions on the diagonal is called the accuracy, and we will spend @sec-classification-accuracy discussing why it is not such a great measure).
+The four components of the confusion table are the true positives (TP; $\hat +$ is the correct prediction of $+$), the true negatives (TN; $\hat -$ is th ecorrect prediction of $-$), the false positives (FP; $\hat -$ is the incorrect prediction of $+$), and the false negatives (FN; $\hat -$ is the incorrect prediction of $-$). Quite intuitively, we would like our classifier to return mostly elements in TP and TN: a good classifier has most element on the diagonal, and off-diagonal elements as close to zero as possible (the proportion of predictions on the diagonal is called the accuracy, and we will spend @sec-classification-accuracy discussing why it is not such a great measure).
 
 As there are many different possible measures on this matrix, we will introduce them as we go. In this section, it it more important to understand how the matrix responds to two important features of the data and the model: balance and bias.
 

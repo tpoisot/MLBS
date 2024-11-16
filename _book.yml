@@ -38,8 +38,8 @@ book:
     - chapters/classification.qmd
     - chapters/variableselection.qmd
     - chapters/learningcurves.qmd
+    - chapters/explanations.qmd
     # - chapters/bagging.qmd
-    # - chapters/explanations.qmd
     # - chapters/counterfactuals.qmd
     # - chapters/squint.qmd
   appendices:
