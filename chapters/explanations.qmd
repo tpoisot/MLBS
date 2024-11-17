@@ -184,7 +184,7 @@ layernames = "BIO" .* string.(model.v[varord])
 
 f = Figure(; size = (800, 400))
 ax = Axis(f[1, 1]; aspect = DataAspect())
-var_colors = cgrad(:diverging_rainbow_bgymr_45_85_c67_n256, length(variables(model)), categorical=true)
+var_colors = cgrad(bkcol.cat, length(variables(model)), categorical=true)
 hm = heatmap!(ax, mostimp; colormap = var_colors, colorrange=(1, length(variables(model))))
 contour!(ax, predict(model, bio; threshold=true); color = :black, linewidth = 0.5)
 hidedecorations!(ax)
