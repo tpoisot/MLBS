@@ -399,8 +399,7 @@ But what does the process of shuffling simulate? Low quality data, sampling, wro
 #| fig-cap: Relative importance of the variables selected as part of the best model. The importance of the variables has been measured by comparing their performance on validation sets before and after shuffling the column of the feature matrix corresponding to the variable to test.
 Vm = zeros(Float64, length(model.v))
 for (i,v) in enumerate(model.v)
-    R = variableimportance(model, folds, v; threshold=false, samples=20)
-    Vm[i] = mean(R)
+    Vm[i] = variableimportance(model, folds, v; threshold=false, samples=20)
 end
 
 model.v = model.v[sortperm(Vm; rev=true)]
@@ -518,23 +517,23 @@ FP = findall(prd .& (.!grd))
 FN = findall((.!prd) .& grd)
 
 heatmap!(ax1, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
-scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 3, color = bkcol.sdm.present)
+scatter!(ax1, coordinates[TP, 2], coordinates[TP, 1]; markersize = 2, color = bkcol.sdm.present)
 
 heatmap!(ax2, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
-scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 5, color = bkcol.sdm.absent, marker = :cross)
+scatter!(ax2, coordinates[FP, 2], coordinates[FP, 1]; markersize = 3, color = bkcol.sdm.absent, marker = :cross)
 
 heatmap!(ax4, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
 scatter!(
     ax4,
     coordinates[FN, 2],
     coordinates[FN, 1];
-    markersize = 5,
+    markersize = 3,
     color = bkcol.sdm.present,
     marker = :cross,
 )
 
 heatmap!(ax5, final_range; colormap = [bkcol.sdm.absentbg, bkcol.sdm.presentbg])
-scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 3, color = bkcol.sdm.absent)
+scatter!(ax5, coordinates[TN, 2], coordinates[TN, 1]; markersize = 2, color = bkcol.sdm.absent)
 
 for ax in [ax0, ax1, ax2, ax4, ax5]
     ax.xticklabelpad = 0

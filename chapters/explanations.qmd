@@ -103,8 +103,8 @@ elev = reverse(collect(axes(shaps, 1)))
 ydir = zeros(length(shaps))
 
 arrows!(ax, starts, elev, shaps, ydir, align=:tailhead)
-#prds = predict(model; threshold=false)
-#scatter!(ax, [prds[2]-mean(prds)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=25)
+prds = predict(model; threshold=false)
+scatter!(ax, [prds[2]-mean(prds)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=15)
 current_figure()
 ```
 
@@ -180,28 +180,22 @@ heatmap(V[varord[1]], colormap=bkcol.div, colorrange=(-0.5,0.5))
 #| fig-scap: Mosaic of the most important variable for each pixel
 #| fig-cap: TODO
 mostimp = mosaic(x -> argmax(abs.(x)), V)
+layernames = "BIO" .* string.(model.v[varord])
 
-nvars = 3
-cmap = [bkcol.cat[1:nvars]..., bkcol.nodata]
-clab = push!("BIO" .* string.(model.v[varord][1:nvars]), "other")
-
-f = Figure(; size=(700, 500))
-ax = Axis(f[1,1], aspect=DataAspect())
-
-mvar = similar(mostimp)
-mvar.grid[findall(!isnothing, mvar.grid)] .= nvars+1
-for i in 1:nvars
-    mvar.grid[findall(isequal(varord[i]), mostimp.grid)] .= i
-end
-
-heatmap!(ax, mvar, colormap=cmap)
+f = Figure(; size = (800, 400))
+ax = Axis(f[1, 1]; aspect = DataAspect())
+var_colors = cgrad(:diverging_rainbow_bgymr_45_85_c67_n256, length(variables(model)), categorical=true)
+hm = heatmap!(ax, mostimp; colormap = var_colors, colorrange=(1, length(variables(model))))
+contour!(ax, predict(model, bio; threshold=true); color = :black, linewidth = 0.5)
+hidedecorations!(ax)
 hidespines!(ax)
-hidexdecorations!(ax)
-hideydecorations!(ax)
-
-cleg = [PolyElement(color = c, strokecolor = :transparent) for c in cmap]
-Legend(f[1,1], cleg, clab; tellheight=false, tellwidth=false, halign=:left, valign=:top, margin=(10, 10, 10, 10), nbanks=2)
-
+Legend(
+    f[2, 1],
+    [PolyElement(; color = var_colors[i]) for i in 1:length(variables(model))],
+    layernames;
+    orientation = :horizontal,
+    nbanks = 1,
+)
 current_figure()
 ```
 

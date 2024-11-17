@@ -17,9 +17,12 @@ for i in eachindex(BIOX)
     BIOX[i] = SpeciesDistributionToolkit.trim(mask!(BIOX[i], COR))
 end
 
-# Temperature correction
-for i in 1:11
+# Offset and scale for the CHELSA v2.1 variables
+for i in 1:19
     BIOX[i] = 0.1f0 .* BIOX[i]
+    if i in [1,5,6,8,9,10,11]
+        BIOX[i] = BIOX[i] .+ -273.15f0
+    end
 end
 
 # Save the layers
@@ -40,7 +43,7 @@ presencelayer = SpeciesDistributionToolkit.mask(BIOX[1], presences)
 heatmap(presencelayer)
 
 background = pseudoabsencemask(DistanceToEvent, presencelayer)
-nodata!(background, v -> v <= 2.1)
+nodata!(background, v -> v <= 1.9)
 heatmap(background)
 
 heatmap(
@@ -52,18 +55,18 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-absencelayer = backgroundpoints(background.^0.7, round(Int, 1.3sum(presencelayer)); replace=false)
+absencelayer = backgroundpoints(background.^0.7, round(Int, 2.5sum(presencelayer)); replace=false)
 nodata!(absencelayer, false)
 nodata!(presencelayer, false)
 
 heatmap(
     BIOX[1];
-    colormap = :Greys,
+    colormap = [:lightgrey, :lightgrey],
     axis = (; aspect = DataAspect()),
     figure = (; size = (800, 500)),
 )
-scatter!(presencelayer; color = :orange, markersize=6)
-scatter!(absencelayer; color = :red, markersize=4)
+scatter!(presencelayer; color = :black, markersize=6)
+scatter!(absencelayer; color = :darkgrey, markersize=4)
 current_figure()
 
 # Get the data

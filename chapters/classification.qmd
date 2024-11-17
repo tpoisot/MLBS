@@ -290,10 +290,10 @@ Why not pick one of these instead of the MCC? Because all modeling is compromise
 #| label: fig-classification-crossvalidation
 #| echo: false
 #| fig-cap: Overview of the scores for the Matthew's correlation coefficient, as well as the positive and negative predictive values.
-fmat = [(mcc, "Matthew's corr. coeff."), (ppv, "Positive pred. val."), (npv, "Negative pred. val."), (tpr, "True pos. rate"), (tpr, "True neg. rate"), (balancedaccuracy, "Bal. acc."), (accuracy, "Accuracy")]
-fig = Figure(; size=(700, 300))
+fmat = [(mcc, "Matthew's corr."), (ppv, "Pos. pred. val."), (npv, "Neg. pred. val."), (tpr, "True pos. rate"), (tpr, "True neg. rate"), (balancedaccuracy, "Bal. acc."), (accuracy, "Accuracy")]
+fig = Figure(; size=(600, 300))
 
-ax = Axis(fig[1,1], xlabel="Measure")
+ax = Axis(fig[1,1], xticks = (1:length(fmat), last.(fmat)), xticklabelrotation=45.0)
 
 for i in axes(fmat, 1)
     f, fn = fmat[i]
@@ -303,7 +303,7 @@ for i in axes(fmat, 1)
     scatter!(ax, [i+0.05], [f(Ct)], color=bkcol.cv.training, label="Training")
 end
 
-fig[1,2] = Legend(fig, ax, merge=true, unique=true)
+fig[1,2] = Legend(fig, ax, merge=true, unique=true, nbanks=1)
 
 current_figure()
 ```

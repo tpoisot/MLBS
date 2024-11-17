@@ -175,7 +175,7 @@ Note that we can see that using the approximate version we used so far (the pred
 ```{julia}
 #| echo: false
 #| output: false
-thresholds = LinRange(0.01, 0.99, 40)
+thresholds = LinRange(0.0, 1.0, 40)
 CT = [crossvalidate(model, folds; thr = t).validation for t in thresholds];
 ```
 
