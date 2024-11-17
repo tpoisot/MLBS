@@ -33,7 +33,11 @@ There are two important values for the threshold, at which we know the behavior 
 
 This is a behavior we can exploit, as increasing the threshold away from the minimum will lower the false negatives rate and increase the true positive rate, while decreasing the threshold away from the maximum will lower the false positives rate and increase the true negative rate. If we cross our fingers and knock on wood, there will be a point where the false events rates have decreased as much as possible, and the true events rates have increased as much as possible, and this corresponds to the optimal value of $\tau$ for our problem.
 
-We have just described the Receiver Operating Characteristic (ROC; @fawcett2006) curve! The ROC curve visualizes the false positive rate on the $x$ axis, and the true positive rate on the $y$ axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier [@hanley1982]; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance.The ROC curve is a description of the model performance across all of the possible threshold values we investigated!
+::: column-margin
+The ROC curve can be used to rule out a model that performs worse than the no-skill classifier.
+:::
+
+We have just described the Receiver Operating Characteristic (ROC; @fawcett2006) curve! The ROC curve visualizes the false positive rate on the $x$ axis, and the true positive rate on the $y$ axis. The area under the curve (the ROC-AUC) is a measure of the overall performance of the classifier [@hanley1982]; a model with ROC-AUC of 0.5 performs at random, and values moving away from 0.5 indicate better (close to 1) or worse (close to 0) performance. The ROC curve is a description of the model performance across all of the possible threshold values we investigated!
 
 ### The PR curve
 
@@ -77,8 +81,8 @@ In this chapter, we use measures like the MCC that describe the performance of a
 ```{julia}
 #| echo: false
 #| output: false
-_repls = 20
-_prop = LinRange(0.025, 0.975, 25)
+_repls = 100
+_prop = LinRange(0.02, 0.3, 25)
 vall = zeros(length(_prop), _repls)
 trnl = zeros(length(_prop), _repls)
 
@@ -97,7 +101,7 @@ end
 
 As a gentle introduction to what's next in this chapter, we can start using the loss to optimize the training process. Most things related to cross-validation *are* hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to adverse outcomes. In @fig-tuning-holdout, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation [see @sec-crossvalidation-holdout] can change our ability to produce a good model.
 
-Specifically, we compare the cross-entropy loss estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.\index{Over-fitting}\index{Cross-validation!Holdout}
+Specifically, we compare the cross-entropy loss estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.\index{Over-fitting}\index{Cross-validation!Holdout} **TODO** CHANGE THIS PARAGRAPH NOT MCC
 
 ```{julia}
 #| echo: false
@@ -121,7 +125,7 @@ scatterlines!(ax1, _prop, μ, color = bkcol.cv.training, markersize=4, linewidth
 
 axislegend(ax1, merge = true, unique = true)
 
-xlims!(ax1, (0., 1.))
+xlims!(ax1, (0., 0.3))
 ylims!(ax1, (0., 0.5))
 current_figure()
 ```
@@ -175,7 +179,7 @@ Note that we can see that using the approximate version we used so far (the pred
 ```{julia}
 #| echo: false
 #| output: false
-thresholds = LinRange(0.0, 1.0, 40)
+thresholds = LinRange(0.0, 1.0, 100)
 CT = [crossvalidate(model, folds; thr = t).validation for t in thresholds];
 ```
 
@@ -242,7 +246,7 @@ Looking at @fig-tuning-probabilities, it appears that changing the threshold is 
 #| label: fig-tuning-ppvnpv
 #| fig-scap: Changes in PPV and NPV with increasing threshold values.
 #| fig-cap: Learning curve for the threshold of the NBC model, showing the PPV (solid line) and the NPV (dashed line). This figure shows how increasing the threshold leads to a better positive predictive value (we are more confident in the predicti class) at the cost of a loss in the negative predictive value (the pixels classified as negative are not meaningful). Essentially, moving the threshold (and indeed, tuning any other hyper-parameter) is a way to find a position in this space where the balance between errors maximizes the skill of our classifier.
-fig = Figure(; size=(7, 3.5).*(600/6))
+fig = Figure(; size=(600, 300))
 
 ax1 = Axis(fig[1,1]; xlabel="Threshold", ylabel="Positive Predictive value", aspect=1)
 ax2 = Axis(fig[1,2]; xlabel="Threshold", ylabel="Negative Predictive value", aspect=1)

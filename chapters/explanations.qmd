@@ -65,6 +65,49 @@ modelpath = joinpath(_models_path, "sdm-threshold.json")
 model = loadsdm(modelpath; threshold=true)
 ```
 
+### Partial responses
+
+```{julia}
+#| echo: false
+#| label: fig-explanation-partial
+#| fig-scap: TODO
+#| fig-cap: TODO
+f = Figure()
+ax = Axis(f[1,1])
+lines!(ax, partialresponse(model, first(variables(model)); threshold=false)...)
+current_figure()
+```
+
+
+```{julia}
+#| echo: false
+#| label: fig-explanation-inflatedpartial
+#| fig-scap: TODO
+#| fig-cap: TODO
+f = Figure()
+ax = Axis(f[1,1])
+for i in 1:200
+    lines!(ax, partialresponse(model, first(variables(model)); threshold=false, inflated=true)...,  linewidth=1, color=:grey, alpha=0.2)
+end
+lines!(ax, partialresponse(model, first(variables(model)); threshold=false)..., linewidth=4, color=:black)
+current_figure()
+```
+
+
+```{julia}
+#| echo: false
+#| label: fig-explanation-partialsurface
+#| fig-scap: TODO
+#| fig-cap: TODO
+f = Figure()
+ax = Axis(f[1,1])
+heatmap!(ax, partialresponse(model, variables(model)[[1,2]]...; threshold=false)...)
+scatter!(ax, features(model, 8), features(model, 7), color=labels(model))
+current_figure()
+```
+
+### Shapley values
+
 ```{julia}
 S = zeros(Float64, (length(variables(model)), length(labels(model))))
 for (vidx, vpos) in enumerate(variables(model))
@@ -188,6 +231,8 @@ end
 current_figure()
 ```
 
+### Spatial partial effects
+
 ```{julia}
 _layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
 bio = [SimpleSDMLayers._read_geotiff(_layer_path; bandnumber=i) for i in 1:19]
@@ -198,8 +243,15 @@ V = explain(model, bio; threshold=false, samples=30)
 ```
 
 ```{julia}
-heatmap(V[varord[1]], colormap=bkcol.div, colorrange=(-0.5,0.5))
+f = Figure()
+a1 = Axis(f[1,1])
+a2 = Axis(f[1,2])
+heatmap!(a1, V[varord[1]], colormap=bkcol.div, colorrange=(-0.5,0.5))
+heatmap!(a2, partialresponse(model, bio, variables(model)[varord[1]]; threshold=false))
+current_figure()
 ```
+
+### Most important variable locally
 
 ```{julia}
 #| echo: false
@@ -226,6 +278,7 @@ Legend(
 current_figure()
 ```
 
+## Conclusion
 
 ```{julia}
 #| output: false
