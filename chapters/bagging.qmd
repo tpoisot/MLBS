@@ -80,7 +80,9 @@ Z = (X0 - μ)/σ
 ```{julia}
 #| echo: false
 #| output: false
-heatmap(IQR)
+heatmap(IQR, colormap=:navia)
+contour!(CON, color=:black)
+current_figure()
 ```
 
 tpr ppv
