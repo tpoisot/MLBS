@@ -19,6 +19,23 @@ what is explainable differs between stakeholders @amarasinghe2023
 
 biodiversity need sustained model uptake @weiskopf2022
 
+### Partial responses
+
+values of variable against mean of all others
+
+### Inflated partial responses
+
+sample background variables
+
+still a measure of global model response because the values are kept but the structure is lost
+
+gives a better sense of potentially divergent responses
+
+
+### Shapley values
+
+LOCAL (prediction-scale) importance
+
 @strumbelj2013 monte carlo approximation of shapley values
 
 @wadoux2023 mapping of shapley values
@@ -26,6 +43,10 @@ biodiversity need sustained model uptake @weiskopf2022
 @mesgaran2014 mapping of most important covariates
 
 @lundberg2017 SHAP
+
+important properties + interpretation
+
+### Importance of transfo as part of model
 
 transfo in model = we can still apply these techniques instead of asking "what does PC1 = 0.4 mean"
 
