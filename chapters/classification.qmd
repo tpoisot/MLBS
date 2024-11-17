@@ -36,6 +36,7 @@ _path = joinpath(_data_path, "occurrences")
 y = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "training-labels.csv"))))
 X = readdlm(joinpath(_path, "training-features.csv"))
 coordinates = readdlm(joinpath(_path, "coordinates.csv"))
+folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
 ```
 
 The predictive task we want to complete is to get a predicted presence or absence $\hat y = \{+,-\}$, from a vector $\mathbf{x}^\top = [\text{temp.} \quad \text{precip.}]$. This specific task is called classification, and we will now introduce some elements of theory.
@@ -265,7 +266,6 @@ Cnoskill = noskill(y)
 Cflip = coinflip(y)
 Cpos = constantpositive(y)
 Cneg = constantnegative(y)
-folds = montecarlo(y, X; n=100)
 model = SDM(RawData(), NaiveBayes(), 0.5, X, y, [1, 12])
 Cv, Ct = crossvalidate(model, folds; threshold=false)
 ```
@@ -290,24 +290,20 @@ Why not pick one of these instead of the MCC? Because all modeling is compromise
 #| label: fig-classification-crossvalidation
 #| echo: false
 #| fig-cap: Overview of the scores for the Matthew's correlation coefficient, as well as the positive and negative predictive values.
-fmat = [(mcc, "Matthew's corr. coeff.") (ppv, "Positive pred. val.") (npv, "Negative pred. val.")]
-f = Figure(; size=(700, 400))
+fmat = [(mcc, "Matthew's corr. coeff."), (ppv, "Positive pred. val."), (npv, "Negative pred. val."), (tpr, "True pos. rate"), (tpr, "True neg. rate"), (balancedaccuracy, "Bal. acc."), (accuracy, "Accuracy")]
+fig = Figure(; size=(700, 300))
 
-for ci in CartesianIndices(fmat)
-    cfunc, lab = fmat[ci]
-    ax = Axis(f[ci.I...]; xlabel=lab)
-    trv = cfunc.(Ct)
-    vav = cfunc.(Cv)
-    cx = vcat(fill(0, length(trv)), fill(1, length(vav)))
-    cy = vcat(trv, vav)
-    violin!(ax, cx, cy; orientation=:vertical, color = map(d->d==1 ? bkcol.cv.validation : bkcol.cv.training, cx))
-    hidexdecorations!(ax, label=false)
-    ylims!(ax, 0.6, 1.0)
+ax = Axis(fig[1,1], xlabel="Measure")
+
+for i in axes(fmat, 1)
+    f, fn = fmat[i]
+    errorbars!(ax, [i-0.05], [f(Cv)], [ci(Cv, f)], whiskerwidth=6, color=bkcol.cv.validation, label="Validation")
+    scatter!(ax, [i-0.05], [f(Cv)], color=bkcol.cv.validation, label="Validation")
+    errorbars!(ax, [i+0.05], [f(Ct)], [ci(Ct, f)], whiskerwidth=6, color=bkcol.cv.training, label="Training")
+    scatter!(ax, [i+0.05], [f(Ct)], color=bkcol.cv.training, label="Training")
 end
 
-group_color = [PolyElement(color = color, strokecolor = :transparent)
-    for color in [bkcol.cv.training, bkcol.cv.validation]]
-Legend(f[2,:], group_color, ["Training", "Validation"]; orientation=:horizontal)
+fig[1,2] = Legend(fig, ax, merge=true, unique=true)
 
 current_figure()
 ```
@@ -321,6 +317,7 @@ The output of cross-validation is given in @fig-classification-crossvalidation (
 #| tbl-cap: Overview of the data presented in @fig-classification-crossvalidation, compared to the null classifiers from @sec-classification-null. Note that the MCC gives values of 0 for *most* null classifiers, which is not the case with other measures of performance. Missing values cannot be calculated as they involved a denominator of 0.
 measures = [
     "Accuracy" => accuracy,
+    "Balanced accuracy" => balancedaccuracy,
     "TPR" => tpr,
     "TNR" => tnr,
     "FPR" => fpr,

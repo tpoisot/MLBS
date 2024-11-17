@@ -52,7 +52,7 @@ heatmap(
 scatter!(presences; color = :black)
 current_figure()
 
-absencelayer = backgroundpoints(background.^0.85, round(Int, 2sum(presencelayer)); replace=false)
+absencelayer = backgroundpoints(background.^0.7, round(Int, 1.3sum(presencelayer)); replace=false)
 nodata!(absencelayer, false)
 nodata!(presencelayer, false)
 
