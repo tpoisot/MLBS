@@ -31,7 +31,6 @@ still a measure of global model response because the values are kept but the str
 
 gives a better sense of potentially divergent responses
 
-
 ### Shapley values
 
 LOCAL (prediction-scale) importance
@@ -85,12 +84,14 @@ varimp = vec(mean(abs.(S); dims=2))
 varimp ./= sum(varimp)
 varord = sortperm(varimp; rev=true)
 
+selimp = variableimportance(model, folds)
+
 content = Vector{Any}[]
 for v in varord
     vname = model.v[v]
     vctr = round(Int, varimp[v]*100)
     push!(content, [
-        vname, 100varimp[v], minimum(S[v,:]), median(S[v,:]), maximum(S[v,:])
+        vname, 100varimp[v], 100selimp[v], minimum(S[v,:]), median(S[v,:]), maximum(S[v,:])
     ])
 end
 
@@ -99,9 +100,9 @@ D = permutedims(hcat(content...))
 pretty_table(
     D;
     backend = Val(:markdown),
-    header = ["Variable", "Importance", "Min.", "Med.", "Max."],
-    alignment = [:c, :l, :l, :l, :l, :l],
-    formatters = (ft_printf("%1i", 1), ft_printf("%5.2f%%", 2), ft_printf("%5.2f", [3,4,5])),
+    header = ["Variable", "Imp. (Shapley)", "Imp. (bootstrap)", "Min.", "Med.", "Max."],
+    alignment = [:l, :l, :l, :l, :l, :l, :l],
+    formatters = (ft_printf("BIO %1i", 1), ft_printf("%5.2f%%", [2,3]), ft_printf("%5.2f", [4,5,6])),
 )
 ```
 
@@ -110,22 +111,27 @@ pretty_table(
 #| label: fig-explanation-waterfall
 #| fig-scap: Waterfall diagram for a single prediction.
 #| fig-cap: Effect of each variable (sorted by importance as in @tbl-explanations-importance) on the change of the score for a single prediction. Recall that this is expressed as the change from the *average* prediction made by the model.
-shaps = S[:,2][varord]
+f = Figure(; size=(400, 200))
+ax = Axis(f[1,1], ylabel="P(presence)")
 
-f = Figure(; size=(400, 600))
+# tick variables(model)[varord] - add this
 
-ax = Axis(f[1,1], yticks = (reverse(collect(1:length(model.v))), ["BIO$(v)" for v in model.v[varord]]))
-xlims!(ax, low=-0.8, high=0.8)
+pri = 1
 
-vlines!([0.0], color=:black, linestyle=:dash)
+shaps = S[:,pri][varord]
+cshaps = cumsum(shaps)
+prepend!(cshaps, 0)
+cshaps .+= mean(predict(model; threshold=false))
 
-starts = cumsum(shaps) .- shaps
-elev = reverse(collect(axes(shaps, 1)))
-ydir = zeros(length(shaps))
+for i in axes(shaps, 1)
+    scatter!(ax, [i], [cshaps[i]], color=:black)
+    scatter!(ax, [i], [cshaps[i+1]], color=:black)
+    if i < length(shaps)
+        lines!(ax, [i, i+1], [cshaps[i+1], cshaps[i+1]], color=:grey, linestyle=:dash)
+    end
+    arrows!(ax, [i], [cshaps[i]], [0], [shaps[i]], linewidth=5)
+end
 
-arrows!(ax, starts, elev, shaps, ydir, align=:tailhead)
-prds = predict(model; threshold=false)
-scatter!(ax, [prds[2]-mean(prds)], [1], color=:transparent, strokecolor=:red, strokewidth=3, markersize=15)
 current_figure()
 ```
 
