@@ -46,24 +46,29 @@ X = readdlm(joinpath(_path, "training-features.csv"))
 coordinates = readdlm(joinpath(_path, "coordinates.csv"))
 folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
 bags = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["bags"]
+for i in eachindex(bags)
+    bags[i] = tuple(convert.(Vector{Int64}, bags[i])...)
+end
 
 # Load the model and select variables
 model = SDM(ZScore, DecisionTree, X, y)
 forwardselection!(model, folds)
 
 ensemble = Bagging(model, bags)
+bagfeatures!(ensemble)
 train!(ensemble)
 ```
 
 ```{julia}
 #| echo: false
 #| output: false
-_layer_path = joinpath(dirname(Base.active_project()), "data", "general", "layers.tiff")
-bio = [SpeciesDistributionToolkit._read_geotiff(_layer_path, SimpleSDMResponse; bandnumber=i) for i in 1:19]
+_layer_path = joinpath(dirname(Base.active_project()), "data", "occurrences", "layers.tiff")
+bio = [SimpleSDMLayers._read_geotiff(_layer_path; bandnumber=i) for i in 1:19]
 X0 = predict(ensemble.model, bio; threshold=false)
 μ = predict(ensemble, bio; threshold=false, consensus=mean)
 σ = predict(ensemble, bio; threshold=false, consensus=std)
-IQR = predict(ensemble, bio; threshold=false, consensus=iqr)
+IQR = predict(ensemble, bio; threshold=false, consensus=SDeMo.iqr)
+CON = predict(ensemble, bio; threshold=true, consensus=majority)
 ```
 
 ```{julia}
@@ -95,7 +100,7 @@ scatter!(ax1, (fpr(OOB), tpr(OOB)), color=:blue)
 
 scatter!(ax2, tpr.(E), ppv.(E), color=:red, marker=:cross)
 scatter!(ax2, (tpr(C), ppv(C)), color=:black)
-scatter!(ax2, (tpr(OOB), ppv(OOB)), color=:orange)
+scatter!(ax2, (tpr(OOB), ppv(OOB)), color=:blue)
 
 current_figure()
 ```
