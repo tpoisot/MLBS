@@ -40,19 +40,19 @@ presencelayer = SpeciesDistributionToolkit.mask(BIOX[1], presences)
 heatmap(presencelayer)
 
 background = pseudoabsencemask(DistanceToEvent, presencelayer)
-nodata!(background, v -> v <= 2.0)
+nodata!(background, v -> v <= 2.1)
 heatmap(background)
 
 heatmap(
     BIOX[1];
     colormap = :deep,
     axis = (; aspect = DataAspect()),
-    figure = (; resolution = (800, 500)),
+    figure = (; size = (800, 500)),
 )
 scatter!(presences; color = :black)
 current_figure()
 
-absencelayer = backgroundpoints(background, round(Int, 2sum(presencelayer)); replace=false)
+absencelayer = backgroundpoints(background.^0.85, round(Int, 2sum(presencelayer)); replace=false)
 nodata!(absencelayer, false)
 nodata!(presencelayer, false)
 

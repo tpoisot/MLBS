@@ -378,8 +378,8 @@ pretty_table(
 ```{julia}
 #| echo: false
 #| output: false
-model = SDM(MultivariateTransform{PCA}(), NaiveBayes(), 0.5, X, y, collect(1:19))
-forwardselection!(model, folds; threshold=false)
+model = SDM(RawData(), NaiveBayes(), 0.5, X, y, collect(1:19))
+backwardselection!(model, folds; threshold=false)
 ```
 
 
@@ -407,7 +407,7 @@ end
 model.v = model.v[sortperm(Vm; rev=true)]
 train!(model; threshold=false)
 
-f = Figure(; size=(6, 3).*(600/6))
+f = Figure(; size=(600, 300))
 ax = Axis(f[1,1], xticks = (1:length(model.v), ["BIO$(v)" for v in model.v]), xticklabelrotation=45.0)
 
 stem!(ax, Vm[sortperm(Vm; rev=true)] ./ sum(Vm), strokecolor=bkcol.generic, color=:white, strokewidth=1, trunkcolor=:transparent, stemcolor=bkcol.nodata, markersize=18)
