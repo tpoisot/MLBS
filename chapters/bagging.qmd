@@ -11,7 +11,6 @@ In @sec-tuning, we have established a good (as evaluated on the testing data) mo
 #| output: false
 _code_path = joinpath(dirname(Base.active_project()), "code")
 include(joinpath(_code_path, "pkg.jl"))
-include(joinpath(_code_path, "minisdm/pipelines.jl"))
 ```
 
 The bias-variance trade off - equation for decomposition
@@ -41,17 +40,16 @@ In order for the bagging procedure to make sense, the component of the homogeneo
 ```{julia}
 #| echo: false
 #| output: false
-JLD2.jldopen(joinpath(_models_path, "sdm-training-data.jld2"), "r") do file
-    global X = file["X"]
-    global y = file["y"]
-    global folds = file["folds"]
-    global bags = file["bags"]
-end;
+_path = joinpath(_data_path, "occurrences")
+y = convert(Vector{Bool}, vec(readdlm(joinpath(_path, "training-labels.csv"))))
+X = readdlm(joinpath(_path, "training-features.csv"))
+coordinates = readdlm(joinpath(_path, "coordinates.csv"))
+folds = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["folds"]
+bags = JSON.parsefile(joinpath(_path, "crossvalidation.json"))["bags"]
 
-
-# Load the model
-modelpath = joinpath(_models_path, "sdm-threshold.json")
-model = loadsdm(modelpath)
+# Load the model and select variables
+model = SDM(ZScore, DecisionTree, X, y)
+forwardselection!(model, folds)
 
 ensemble = Bagging(model, bags)
 train!(ensemble)
