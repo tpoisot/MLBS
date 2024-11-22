@@ -35,10 +35,10 @@ book:
     # - chapters/clustering.qmd
     # - chapters/gradientdescent.qmd
     # - chapters/crossvalidation.qmd
-    - chapters/classification.qmd
-    - chapters/variableselection.qmd
-    - chapters/learningcurves.qmd
-    # - chapters/explanations.qmd
+    # - chapters/classification.qmd
+    # - chapters/variableselection.qmd
+    # - chapters/learningcurves.qmd
+    - chapters/explanations.qmd
     # - chapters/bagging.qmd
     # - chapters/counterfactuals.qmd
     # - chapters/squint.qmd

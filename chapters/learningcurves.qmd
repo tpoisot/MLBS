@@ -101,13 +101,13 @@ end
 
 As a gentle introduction to what's next in this chapter, we can start using the loss to optimize the training process. Most things related to cross-validation *are* hyper-parameters, in that they will regulate our ability to conduct the training process under the best possible conditions. In this section, we will revisit the cross-validation of the model, by investigating how the choice of cross-validation can lead to adverse outcomes. In @fig-tuning-holdout, we show how increasing the proportion of datasets retained for model evaluations using holdout cross-validation [see @sec-crossvalidation-holdout] can change our ability to produce a good model.
 
-Specifically, we compare the cross-entropy loss estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data increases, which is to say that we train the model with fewer and fewer data points, notice that the MCC on the training data *increases*, but the MCC on the validation data *decreases*. This is a sign of overfitting, as the model trained with too much validation data is not seeing enough examples to infer a general enough distribution of the conditions leading to a correct classification of presence/absence observations.\index{Over-fitting}\index{Cross-validation!Holdout} **TODO** CHANGE THIS PARAGRAPH NOT MCC
+Specifically, we compare the cross-entropy loss estimated from 100 replicated attempts at training the model for the training and validation data. As the proportion of holdout data decreases, notice that the cross-entropy loss on the training data *decreases*, but the cross-entropy loss on the validation data *increases*. This is a sign of overfitting!\index{Over-fitting}\index{Cross-validation!Holdout}
 
 ```{julia}
 #| echo: false
 #| label: fig-tuning-holdout
 #| fig-scap: Learning curve for the proportion of data used in cross-validation.
-#| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average MCC, as well as the 95% confidence interval around the MCC, are shown for 100 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
+#| fig-cap: Learning curve for the proportion of data used in hypotethical holdout cross-validation. The average cross-entropy loss, as well as the 95% confidence interval around the cross-entropy loss, are shown for 100 replicates. A higher holdout proportion indicates that fewer data are available for training. In practice, treating the cross-validation strategy as an hyper-parameter is an important step in obtaining a fair evaluation of the model performance.
 fig = Figure(; size=(500, 300))
 ax1 = Axis(fig[1,1]; xlabel="Holdout proportion", ylabel="Cross-entropy loss")
 
@@ -320,11 +320,7 @@ for (i, P) in enumerate(Pi)
 end
 ```
 
-update on NBC prior
-
-how to update? also threshold
-
-illustration of result
+The same process can be used to update the prior of the NBC, which corresponds to $P(+)$, the *a priori* expectation of the presence of the species. We can similarly update it by moving its value, and picking the one that leads to the maximal value of the MCC. This process is illustrated in @fig-tuning-prior. Again, the response of the MCC with regards to this parameter is almost flat for realistic values of the prior. Based on this result, we will set the prior to the value of the prevalence. This is an easily justifiable assumption (the prior information represents the bias known to be in the training data), and one that doesn't lead to a significant change in model performance.
 
 ```{julia}
 #| echo: false

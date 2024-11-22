@@ -137,20 +137,8 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./chapters/classification.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Supervised classification</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./chapters/variableselection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Preparing features</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./chapters/learningcurves.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Tuning hyper-parameters</span></span></a>
+  <a href="./chapters/explanations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Explaining predictions</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -413,10 +401,10 @@ Flowchart&nbsp;1.1: An overview of the process of coming up with a usable model.
 <p>In <span class="quarto-unresolved-ref">?sec-clustering</span>, we introduce some fundamental questions in data science, by working on the clustering of pixels in Landsat data. The point of this chapter is to question the way we think about data, and to start a discussion about an “optimal” model, hyper-parameters, and what a “good” model is.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-gradientdescent</span>, we revisit well-trodden statistical ground, by fitting a linear model to linear data, but uisng gradient descent. This provides us with an opportunity to think about what a “fitted” model is, whether it is possible to learn too much from data, and why being able to think about predictions in the unit of our problem helps.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-crossvalidation</span>, we start introducing one of the most important bit element of data science practice, in the form of cross-validation. We apply this technique to the prediction of plant phenology over a millenia, and think about the central question of “what kind of decision-making can we justify with a model”.</p>
-<p>In <a href="chapters/classification.html" class="quarto-xref"><span>Chapter 2</span></a>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
-<p>In <a href="chapters/variableselection.html" class="quarto-xref"><span>Chapter 3</span></a>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. In <a href="chapters/variableselection.html#sec-leakage" class="quarto-xref"><span>Section 3.2</span></a>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
-<p>In <a href="chapters/learningcurves.html" class="quarto-xref"><span>Chapter 4</span></a>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
-<p>In <span class="quarto-unresolved-ref">?sec-explanations</span>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-classification</span>, we introduce the task of classification, and spend a lot of time thinking about biases in predictions, which are acceptable, and which are not. We start building a model for the distribution of the Reindeer, which we will improve over a few chapters.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-predictors</span>, we explore ways to perform variable selection, think of this task as being part of the training process, and introduce ideas related to dimensionality reduction. In <span class="quarto-unresolved-ref">?sec-leakage</span>, we discuss data leakage, where it comes from, and how to prevent it. This leads us to introducing the concept of data transformations as a model, which will establish some best practices we will keep on using throughout this book.</p>
+<p>In <span class="quarto-unresolved-ref">?sec-tuning</span>, we conclude story arcs that had been initiated in a few previous chapters, and explore training curves, the tuning of hyper-parameters, and moving-threshold classification. We provide the final refinements to out model of the Reindeer distribution.</p>
+<p>In <a href="chapters/explanations.html" class="quarto-xref"><span>Chapter 2</span></a>, we will shift our attention from prediction to understanding, and explore techniques to quantify the importance of variables, as well as ways to visualize their contribution to the predictions. In doing so, we will introduce concepts of model interpretation and explainability.</p>
 <p>In <span class="quarto-unresolved-ref">?sec-bagging</span>, …</p>
 </section>
 <section id="sec-introduction-colors" class="level2" data-number="1.3">
